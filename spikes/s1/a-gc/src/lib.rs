@@ -130,5 +130,5 @@ mod raw;
 
 pub use arena::{Arena, Pacing, Rootable};
 pub use metrics::Metrics;
-pub use raw::{Gc, GcWeak, Lock, Mutation, RefLock, Trace, Tracer, Write};
+pub use raw::{BOX_HEADER_BYTES, Gc, GcWeak, Lock, Mutation, RefLock, Trace, Tracer, Write};
 pub use s1_a_gc_derive::Trace;

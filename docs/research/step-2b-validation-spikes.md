@@ -165,7 +165,7 @@ tools/check-unsafe-policy.sh
 | **CP1** | Foundation: workspace, toolchain pin, lints, policy checker, build-measurement tooling, scenario model types and RNG | ✅ 2026-10-16 (§8) |
 | CP2 | Workload generators and reference-interpreter oracle | ✅ 2026-10-16 (§8) |
 | CP3 | Pattern A heap and derive; Miri | ✅ 2026-10-16 (§8) |
-| CP4 | Pattern A DOM and driver; oracle equality; Miri on small scenarios | ⬜ |
+| CP4 | Pattern A DOM and driver; oracle equality; Miri on small scenarios | ✅ 2026-10-16 (§8) |
 | CP5 | Pattern B heap; Miri | ⬜ |
 | CP6 | Pattern B DOM and driver; oracle equality; A ≡ B differential | ⬜ |
 | CP7 | S1 measurements (runtime, ceremony, build) and S1 results note | ⬜ |
@@ -502,3 +502,57 @@ Macro-emitted `unsafe` (rule 7) comes from exactly two audited templates:
 3. **Barrier discipline is enforced by types.** `Cell` and `RefCell` are `Trace` only for `'static` contents, so a `Gc` can live only in `Lock`/`RefLock`, and those are writable only through `Gc::write`. This is checked by a compile-fail test. The cost is ceremony: `unlock!(Gc::write(mc, node), Node, field).set(..)`. CP4 measures it.
 4. **The sweep is panic-safe.** A box is marked dead *before* its value is dropped, so a panicking `Drop` can never cause a double drop.
 5. **The pressure bound's budget.** Pattern A's *B* is the `Pacing` budget: by default the larger of 256 KiB and the bytes that survived the last collection. Each box costs 24 bytes of header plus its value, before allocator rounding.
+
+### CP4 — completed 2026-10-16
+
+**Delivered**
+- **`s1-a-dom`** (`#![forbid(unsafe_code)]`):
+  - the DOM model: nodes with intrusive parent and sibling links in `Lock`s; attributes in a plain `RefCell`, since they hold no `Gc`; listeners; closures capturing their node (node ⇄ closure cycles);
+  - DOM pre-insert and remove;
+  - **dispatch as a resumable state machine stored in the arena root**;
+  - a script driver that gives each op its own mutation scope and calls `collect_debt` between scopes. A dispatch yields whenever `Mutation::wants_collection()` says so.
+- **`s1_scenarios::edge_cases`:** a corpus of 10 scripts, one per rarely hit semantic path. It mirrors the golden tests, and lets every pattern be compared on exactly those paths.
+
+**Verification (all green)**
+- **Outcome equals the reference** (log, digests, live node and closure counts after each full collection, weak liveness) on:
+  - the 10 edge cases;
+  - 100 seeds × 4 workloads (Small);
+  - 3 seeds × 4 workloads (Medium).
+
+  Each set passes both at default pacing and in **collect-always mode**. Collect-always is a 1-byte budget that forces a collection at nearly every op and listener boundary; the Medium set is run at default pacing.
+- **Pressure bound** (Medium, seed 1): peak live nodes **2,211 ≤ bound 2,314** (L + B + s). Without mid-dispatch collection the peak would be about 131,491. The run made 73 dispatch yields and 75 collections, with a maximum pause of 145 µs.
+- **The yield path is exercised.** In collect-always mode the pressure scripts must yield, and the test asserts it, under Miri too.
+- **Miri**, Small sizes plus the edge cases (a shallower chain under Miri), at both pacings:
+  - Stacked Borrows with strict provenance: no undefined behaviour;
+  - Tree Borrows with strict provenance: no undefined behaviour.
+
+  So the unsafe core is checked while it serves real DOM workloads, with collections during dispatch. The Medium and pressure tests are skipped under Miri for time, since the Small tests cover the same paths.
+- **Policy:** `s1-a-dom` is `forbid` with zero `unsafe`.
+- **Workspace:** 60 tests pass; clippy (pedantic), rustfmt and the policy check are green.
+
+**S1-Q1 for Pattern A: answered yes, with one qualification.**
+- **Yes:** a complete DOM with cycles, weak references, tree surgery and collection mid-dispatch compiles under `#![forbid(unsafe_code)]` with no hand-written `unsafe`. Its correctness is checked against the oracle and under Miri.
+- **The qualification (rule 7):** its *expanded* code contains `unsafe` from exactly two audited templates in the GC boundary:
+  - `#[derive(Trace)]`'s `unsafe impl`;
+  - `unlock!`/`field!`'s `Write::assume`.
+
+**Preliminary ceremony inventory** (`s1-a-dom/src`, 503 non-blank, non-comment lines; CP7 formalizes it):
+
+| Ceremony item | Count |
+|---|---|
+| `Gc::write(...)` barrier calls | 12 |
+| `unlock!(...)` projections | 16 |
+| `#[trace(require_static)]` attributes, needed for foreign `'static` types (orphan rule) | 9 |
+| `mc: &Mutation` parameters threaded through | 8 |
+| Mutation scopes in the driver | 5 |
+| Yield-protocol handling sites | 4 |
+
+Beyond those counts, the whole dispatch state machine (`dispatch.rs`) exists only because collection cannot happen inside a call. Listener *code* written in this style would have to be stackless as well.
+
+**Findings**
+1. **The stackless requirement is the dominant cost.**
+   - **What it costs:** dispatch had to become an explicit state machine: a flattened visit sequence, a cursor, a snapshot and a stop flag, all stored in the root.
+   - **Why:** listener behaviours are atomic here. A real JS interpreter would have to be stackless too (as in piccolo) for an allocating loop to be collectible.
+2. **Plain `Cell`/`RefCell` for `Gc`-free data avoids barrier ceremony.** That applies to attributes and flags. The barrier tax falls only on fields that hold `Gc` pointers.
+3. **The orphan rule adds friction.** Types from other crates cannot implement `Trace`, so every `'static` foreign field needs `#[trace(require_static)]` (9 here). A real engine would want a `Static<T>` wrapper, or would co-locate its DOM data types with the GC traits.
+4. **Edge cases caught an authoring mistake immediately.** An edge-case script that removed a node after forgetting its id was rejected by the reference oracle, which is the validation layering working as intended.

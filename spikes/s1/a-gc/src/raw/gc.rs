@@ -22,6 +22,10 @@ pub(super) enum Color {
     Black,
 }
 
+/// Bytes of header in front of every value: `size_of::<GcBox<T>>()` equals this
+/// plus `size_of::<T>()`, for any 8-byte-aligned `T`.
+pub const BOX_HEADER_BYTES: usize = size_of::<GcHeader>();
+
 /// The per-object header, first in every box (I5).
 pub(super) struct GcHeader {
     /// The next box in the heap's list of every allocation.

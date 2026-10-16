@@ -14,6 +14,7 @@
 
 pub mod counters;
 pub mod digest;
+pub mod edge_cases;
 pub mod generate;
 pub mod outcome;
 pub mod reference;

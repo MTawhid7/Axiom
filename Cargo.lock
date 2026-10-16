@@ -21,6 +21,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "s1-a-dom"
+version = "0.0.0"
+dependencies = [
+ "s1-a-gc",
+ "s1-scenarios",
+]
+
+[[package]]
 name = "s1-a-gc"
 version = "0.0.0"
 dependencies = [

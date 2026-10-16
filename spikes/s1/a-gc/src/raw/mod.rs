@@ -54,7 +54,7 @@ mod heap;
 mod lock;
 mod trace;
 
-pub use gc::{Gc, GcWeak};
+pub use gc::{BOX_HEADER_BYTES, Gc, GcWeak};
 pub(crate) use heap::Heap;
 pub use heap::Mutation;
 pub use lock::{Lock, RefLock, Write};
