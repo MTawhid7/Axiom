@@ -27,8 +27,8 @@ X  Cross-cutting    standards baseline · conformance testing · fuzzing · perf
 | R2 | JavaScript engine: our own | **Accepted** | ADR-0001 |
 | R3 | Security posture: sensitive logins (gated) | **Accepted** | ADR-0001 |
 | R4 | Constraints: skills, time, hardware | Partly known | Charter §7; [OQ-1, OQ-6, OQ-9](open-questions.md) |
-| F1 | Implementation language | **Proposed**: Rust | [ADR-0002](adr/0002-implementation-language.md), [evaluation](technology/language-evaluation.md) |
-| F2 | GC and DOM memory model | Unified heap Accepted in principle (R2); handle/rooting pattern open | Spike S1 → future ADR |
+| F1 | Implementation language | **Provisionally accepted**: Rust (final acceptance after Step 2b) | [ADR-0002](adr/0002-implementation-language.md), [evaluation](technology/language-evaluation.md) |
+| F2 | GC and DOM memory model | Unified heap Accepted in principle (R2); handle/rooting pattern under test in S1 | [Step 2b](research/step-2b-validation-spikes.md) → ADR-0003 |
 | F3 | Trust boundaries, process model, sandbox | Open | Step 3 |
 | F4 | Engine/embedder API | Open | Step 4 |
 | P1 | Event loop and threading model | Open | Step 4 |
@@ -95,8 +95,8 @@ These are recorded in ADR-0001.
 |---|---|---|
 | 0 | Decision landscape | Done (2026-10-16) |
 | 1 | Requirements: target, JavaScript, posture, defaults | Done: ADR-0001 Accepted |
-| 2a | Implementation language evaluation | **In review**: ADR-0002 Proposed |
-| 2b | Validation spikes: S1 GC heap, S2 platform and build, S3 dispatch | Proposed; needs authorization |
+| 2a | Implementation language evaluation | Done: reviewed; ADR-0002 provisionally accepted |
+| 2b | Validation spikes: S1 GC heap and DOM, S2 platform and build | **In progress** on branch `step-2b` ([plan and tracker](research/step-2b-validation-spikes.md)). S3 (dispatch micro-benchmark) is deferred |
 | 3 | Threat model, trust boundaries, process and sandbox model on macOS | Not started |
 | 4 | Event loop, threading, pipeline data model, invalidation, embedder API | Not started; produces architecture proposal v0 |
 | 5 | Subsystems: text & fonts → rendering/compositing → networking/TLS → style → layout | Not started |

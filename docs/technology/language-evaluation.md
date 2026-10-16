@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | Draft for review |
-| **Decision record** | [ADR-0002](../adr/0002-implementation-language.md), Proposed |
+| **Status** | Reviewed by the owner (2026-10-16); §15.3 amended with rule 7 |
+| **Decision record** | [ADR-0002](../adr/0002-implementation-language.md), Provisionally accepted |
 | **Phase** | Phase Zero, Step 2a |
 | **Inputs** | [ADR-0001](../adr/0001-scope-and-target.md) (scope and target), [decision map](../decision-map.md) |
 | **Last updated** | 2026-10-16 |
@@ -551,6 +551,10 @@ The nightly toolchain is allowed only for development tools (fuzzing, Miri, sani
    - IPC message decoding;
    - image and font parsing wrappers.
 6. Each unsafe crate exposes a safe API. A soundness bug in an unsafe crate is treated as a security bug.
+7. **Macro-generated `unsafe` is part of the unsafe boundary** (added 2026-10-16).
+   - **The gap:** `#![forbid(unsafe_code)]` does not fire on `unsafe` produced by *external* macros, whether a proc-macro derive or a `macro_rules!` from another crate. It does reject hand-written `unsafe`. This was verified on rustc 1.94.1 with a minimal three-crate experiment ([Step 2b plan §4.5](../research/step-2b-validation-spikes.md#45-finding-recorded-before-implementation-2026-10-16)).
+   - **What `forbid` proves:** that a crate has no *hand-written* `unsafe`. It does not prove the expanded code has none.
+   - **The rule:** any macro that can emit `unsafe` (for example `#[derive(Trace)]`) must live in a designated crate, be audited like the `unsafe` code it generates, and be registered in `tools/unsafe-policy.txt`.
 
 ### 15.4 Toolchain and dependencies (draft)
 

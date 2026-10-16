@@ -2,9 +2,17 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** — not accepted |
+| **Status** | **Provisionally accepted** (2026-10-16). Final acceptance follows the Step 2b spikes S1 and S2 |
 | **Date** | 2026-10-16 |
-| **Deciders** | Project owner. Acceptance requires the owner's explicit confirmation, which should follow validation spike S1 |
+| **Deciders** | Project owner. Final acceptance requires the owner's explicit confirmation after the [Step 2b spikes](../research/step-2b-validation-spikes.md) |
+
+## Decision history
+
+| Date | Event |
+|---|---|
+| 2026-10-16 | Proposed: Rust, with `unsafe` confined by policy |
+| 2026-10-16 | Owner **provisionally accepts** Rust (stable toolchain, 2024 edition) under the unsafe-code policy in evaluation §15.3. Step 2b (spikes S1 and S2) is authorized to validate it before final acceptance and before any production engine code |
+| 2026-10-16 | Policy refinement (evaluation §15.3, rule 7): `#![forbid(unsafe_code)]` does not catch macro-generated `unsafe`, so macros that emit `unsafe` belong to the unsafe boundary |
 | **Related** | [Language evaluation](../technology/language-evaluation.md) (full analysis and sources), [ADR-0001](0001-scope-and-target.md) |
 
 ## Question
