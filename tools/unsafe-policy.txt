@@ -1,0 +1,23 @@
+# Unsafe-code allowlist, enforced by tools/check-unsafe-policy.sh.
+# Policy: docs/technology/language-evaluation.md §15.3.
+#
+# A crate not listed here must declare #![forbid(unsafe_code)] in every target
+# root (src/lib.rs, src/main.rs, src/bin/*.rs, tests/*.rs, benches/*.rs,
+# examples/*.rs).
+#
+# Entry formats (paths relative to the repository root; one entry per line):
+#
+#   allow <crate-dir> <path-prefix>[,<path-prefix>...]
+#       The crate's src/lib.rs or src/main.rs declares #![deny(unsafe_code)].
+#       `allow(unsafe_code)` may appear only in files under the listed prefixes,
+#       which are relative to the crate directory (for example src/raw/).
+#       Its other target roots still declare #![forbid(unsafe_code)].
+#
+#   emits-unsafe <crate-dir>
+#       A macro crate whose expansions contain `unsafe` (rule 7: #![forbid(unsafe_code)]
+#       in the *using* crate does not see macro-generated unsafe). It is audited as
+#       part of the unsafe boundary.
+#
+# Every entry needs a one-line justification comment directly above it.
+
+# (CP1: no entries yet. CP3 adds Pattern A's GC crate and its derive.)

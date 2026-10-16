@@ -162,7 +162,7 @@ tools/check-unsafe-policy.sh
 
 | CP | Scope | Status |
 |---|---|---|
-| **CP1** | Foundation: workspace, toolchain pin, lints, policy checker, build-measurement tooling, scenario model types and RNG | 🔄 In progress |
+| **CP1** | Foundation: workspace, toolchain pin, lints, policy checker, build-measurement tooling, scenario model types and RNG | ✅ 2026-10-16 (§8) |
 | CP2 | Workload generators and reference-interpreter oracle | ⬜ |
 | CP3 | Pattern A heap and derive; Miri | ⬜ |
 | CP4 | Pattern A DOM and driver; oracle equality; Miri on small scenarios | ⬜ |
@@ -339,6 +339,27 @@ tools/check-unsafe-policy.sh
 
 ## 8. Results log
 
-### CP1
+### CP1 — completed 2026-10-16
 
-Pending verification.
+**Verification (all green)**
+- `cargo fmt --all --check` passes.
+- `cargo clippy --workspace --all-targets -- -D warnings` passes (pedantic enabled).
+- `cargo test --workspace`: 17/17 tests pass. They include:
+  - the SplitMix64 reference vector;
+  - the FNV-1a 64 reference vectors;
+  - a deterministic uniformity check for bounded sampling;
+  - per-thread counter isolation.
+- `tools/check-unsafe-policy.sh`: OK. The only crate (`s1-scenarios`) is `forbid`, with zero `unsafe`.
+- `tools/check-unsafe-policy.sh --self-test`: accepts a compliant tree and reports all 5 seeded violations (R1 ×3, R2 ×2) plus the `emits-unsafe` registration.
+
+**Baseline build cost.** Command: `tools/measure-build.sh -p s1-scenarios --runs 3 -- --all-targets`. Conditions: rustc 1.94.1, M1, 8 GB; load average about 3 with an editor running; no thermal warning recorded.
+
+| Phase | Wall time, median (n=3) | rustc compilations | Max rustc RSS | Max linker RSS | Aggregate peak RSS |
+|---|---|---|---|---|---|
+| Clean | 0.96 s (range 0.80–2.47; the first run was a cold cache) | 3 | ~157–163 MiB | ~63 MiB | ~171–222 MiB |
+| No-op | 0.05 s | 0 | — | — | — |
+| Incremental (touch `lib.rs`) | 0.45 s | 2 | ~106 MiB | ~63 MiB | ~95–101 MiB |
+
+**Notes**
+- **The tools are validated.** The `rustc` and linker wrappers record per-process peaks, and the `ps` sampler records the aggregate. Interpreting the numbers waits until there is real code (CP3 onward).
+- **The baseline is floor overhead.** These numbers are the fixed cost of the toolchain plus a small dependency-free crate. They are the reference point for every later measurement.
