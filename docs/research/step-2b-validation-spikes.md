@@ -166,7 +166,7 @@ tools/check-unsafe-policy.sh
 | CP2 | Workload generators and reference-interpreter oracle | ✅ 2026-10-16 (§8) |
 | CP3 | Pattern A heap and derive; Miri | ✅ 2026-10-16 (§8) |
 | CP4 | Pattern A DOM and driver; oracle equality; Miri on small scenarios | ✅ 2026-10-16 (§8) |
-| CP5 | Pattern B heap; Miri | ⬜ |
+| CP5 | Pattern B heap; Miri | ✅ 2026-10-16 (§8) |
 | CP6 | Pattern B DOM and driver; oracle equality; A ≡ B differential | ⬜ |
 | CP7 | S1 measurements (runtime, ceremony, build) and S1 results note | ⬜ |
 | CP8 | S2 platform spike, measurements, and S2 results note | ⬜ |
@@ -556,3 +556,55 @@ Beyond those counts, the whole dispatch state machine (`dispatch.rs`) exists onl
 2. **Plain `Cell`/`RefCell` for `Gc`-free data avoids barrier ceremony.** That applies to attributes and flags. The barrier tax falls only on fields that hold `Gc` pointers.
 3. **The orphan rule adds friction.** Types from other crates cannot implement `Trace`, so every `'static` foreign field needs `#[trace(require_static)]` (9 here). A real engine would want a `Static<T>` wrapper, or would co-locate its DOM data types with the GC traits.
 4. **Edge cases caught an authoring mistake immediately.** An edge-case script that removed a node after forgetting its id was rejected by the reference oracle, which is the validation layering working as intended.
+
+### CP5 — completed 2026-10-16
+
+**Delivered: `s1-b-gc`, a canonical Nova design, `#![forbid(unsafe_code)]`**
+- **Handles.** `Handle<'a, T>` is a typed index, stored plus one in a `NonZeroU32`: 4 bytes, and `Option<Handle>` is 4 bytes too. Debug builds add the collection epoch.
+- **Scope tokens.** `GcScope`, `NoGcScope` and `GcToken`, with `bind`, `unbind`, `reborrow`, `nogc` and `into_nogc`.
+- **Explicit root context.** `RootStack` (`Rc<RefCell<…>>`) with RAII `RootFrame`s and `Scoped<'f, T>`.
+- **Arenas.** `Arena<T>`, indexed by handle, bounds-checked, with epoch checks in debug builds.
+- **Tracing.** A *safe* `Trace` trait (`mark` and `relocate`, hand-written as in Nova), plus `Roots` for globals and `WeakHandle`.
+- **Collector.** Mark–compact: a worklist mark; survivor ranks from per-word prefix popcounts (4 bytes per 64 slots, no table per object); order-preserving compaction with `retain`; relocation of every handle in heap data, globals and root slots.
+- **`heap!`,** a `macro_rules!` that expands to safe code only: arenas, `Allocated`, `Store` and `HeapLayout` impls, `new`, `alloc` and `collect`.
+- **`Pacing` and `Metrics`,** with the same policy as Pattern A, so the two are comparable.
+
+**Verification (all green)**
+- **9 heap tests:**
+  - cycles collected and their `Drop` run;
+  - compaction that *moves* every survivor, with every handle verified afterwards;
+  - weak handles cleared or relocated;
+  - scoped roots surviving a collection relocated, and released when the frame drops;
+  - pacing;
+  - a 200,000-node chain;
+  - the randomized reachability-oracle test (15 rounds × 400 nodes, with edges verified by id after compaction).
+- **Two debug-build detection tests, both passing as designed:**
+  - using a stale handle panics with "stale handle";
+  - a `Trace` impl that forgets to mark panics with "some Trace::mark missed it" when the collector relocates the dead target.
+- **Doctests:** one runnable example, plus 2 compile-fail tests with pinned codes:
+  - a handle bound to `gc.nogc()` and used after `gc.reborrow()` is passed to a collecting call: **E0502**;
+  - a `Scoped` that outlives its frame: **E0597**.
+- **Miri**, under Stacked Borrows and Tree Borrows with strict provenance: no undefined behaviour. This is expected, with zero `unsafe`, but it was run, not assumed.
+- **Policy:** `s1-b-gc` is `forbid` with 0 `unsafe`, and the macro emits none.
+
+**Build cost.** Command: `tools/measure-build.sh -p s1-b-gc --runs 3 -- --all-targets`. There are no proc-macro dependencies.
+
+| Phase | Median wall | rustc compilations | Max rustc RSS | Max linker RSS | Aggregate peak |
+|---|---|---|---|---|---|
+| Clean | 1.13 s | 5 | 167–170 MiB | 65 MiB | 192–223 MiB |
+| No-op | 0.05 s | 0 | — | — | — |
+| Incremental | 0.45 s | 3 | 95 MiB | 65 MiB | 40–61 MiB |
+
+**Size:** 708 non-blank, non-comment lines in `src`, 322 in tests.
+
+**Findings**
+1. **Pattern B needs no `unsafe` anywhere:** not in the GC, not in its macro, not in clients.
+   - Bounds-checked indices turn every memory-safety question into a logic question.
+   - The scope discipline and the debug epoch checks then catch the logic errors, at compile time and run time respectively.
+   - Pattern A's soundness, by contrast, rests on branding (I2) and on complete tracing (I3).
+2. **Its `Trace` is safe and hand-written, but mistakes are caught.** As in Nova, `mark` and `relocate` are hand-written. A missed `mark` is not undefined behaviour, and debug builds detect it at the next collection; the test proves it. A missed `relocate` trips the epoch check.
+3. **There are two runtime costs to measure in CP7:**
+   - the bounds and epoch checks on every access;
+   - moving objects during compaction.
+
+   They buy contiguous, dense arenas and 4-byte handles, which should show up in memory per node.

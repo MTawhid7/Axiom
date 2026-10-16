@@ -46,6 +46,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "s1-b-gc"
+version = "0.0.0"
+dependencies = [
+ "s1-scenarios",
+]
+
+[[package]]
 name = "s1-scenarios"
 version = "0.0.0"
 
