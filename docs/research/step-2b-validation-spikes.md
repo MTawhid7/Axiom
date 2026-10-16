@@ -167,7 +167,7 @@ tools/check-unsafe-policy.sh
 | CP3 | Pattern A heap and derive; Miri | ✅ 2026-10-16 (§8) |
 | CP4 | Pattern A DOM and driver; oracle equality; Miri on small scenarios | ✅ 2026-10-16 (§8) |
 | CP5 | Pattern B heap; Miri | ✅ 2026-10-16 (§8) |
-| CP6 | Pattern B DOM and driver; oracle equality; A ≡ B differential | ⬜ |
+| CP6 | Pattern B DOM and driver; oracle equality; A ≡ B differential | ✅ 2026-10-16 (§8) |
 | CP7 | S1 measurements (runtime, ceremony, build) and S1 results note | ⬜ |
 | CP8 | S2 platform spike, measurements, and S2 results note | ⬜ |
 | CP9 | Synthesis: ADR-0002 final recommendation; ADR-0003 (GC pattern) proposed; docs | ⬜ |
@@ -608,3 +608,52 @@ Beyond those counts, the whole dispatch state machine (`dispatch.rs`) exists onl
    - moving objects during compaction.
 
    They buy contiguous, dense arenas and 4-byte handles, which should show up in memory per node.
+
+### CP6 — completed 2026-10-16
+
+**Delivered: `s1-b-dom`, the same DOM in authentic Nova style, `#![forbid(unsafe_code)]`**
+- **Data.** `NodeData`, `ListenerData` and `ClosureData` live in a `heap!`-declared `DomHeap`, with hand-written `Trace` impls.
+- **Mutation.** Writes are plain field assignments (`heap.nodes[n].parent = …`), with no barriers.
+- **Scopes.** Non-allocating operations take `&mut DomHeap` and no scope; they cannot collect. Allocating ones take `&mut Agent` plus a `GcScope`.
+- **Safepoints.** `Agent::safepoint`, then GC-free allocation batches. `create_node` hits a safepoint per node.
+- **Dispatch is an ordinary function.** It roots the event path and each listener snapshot in `RootFrame`s, and re-reads handles after every listener call.
+
+**Verification (all green)**
+- **Outcome equals the reference** on the 10 edge cases, 100 Small seeds × 4 workloads, and Medium seeds × 3. The edge cases and the Small seeds pass both at default pacing and with **collect-always** pacing, which collects at every allocation safepoint.
+- **A ≡ B:** the outcomes of both patterns are equal on every workload, at Small and Medium.
+- **Debug run with every handle access epoch-checked.** Under collect-always, every safepoint moves the whole heap, so any stale handle would panic. None did on any tested path.
+- **Pressure bound** (Medium, seed 1): peak live nodes **2,940 ≤ bound 2,940** (L + B + 1). It is tight by construction: safepoints at every allocation overshoot by one node at most. Without mid-dispatch collection the peak would be about 131,491. The run made 53 collections, with a maximum pause of 71 µs.
+- **Miri**, Small sizes plus the edge cases at both pacings, Stacked Borrows with strict provenance: no undefined behaviour. It took 356 s, against 99 s for Pattern A: under collect-always, Pattern B compacts the whole heap at every allocation, and Miri magnifies that cost. This says nothing about native speed.
+- **Policy:** `s1-b-dom` is `forbid` with 0 `unsafe`. Its whole dependency chain (`s1-b-gc`, `s1-scenarios`) also has 0 `unsafe`, including macro expansions.
+
+**S1-Q1 for Pattern B: answered yes, unconditionally.** There is no `unsafe` anywhere, in hand-written or generated code, in the GC or the DOM.
+
+**Preliminary ceremony comparison** (DOM crates only; CP7 formalizes it):
+
+| | Pattern A (`s1-a-dom`) | Pattern B (`s1-b-dom`) |
+|---|---|---|
+| Size (non-blank, non-comment lines) | 503 | 554 |
+| Writes | 12 `Gc::write` + 16 `unlock!` | plain assignments |
+| Tracing | derived (+9 `require_static`) | 31 hand-written `mark`/`relocate` lines |
+| Collection-safety ceremony | 8 `mc` params, 5 mutation scopes, a resumable dispatch state machine | 9 `unbind`, 8 `reborrow`, 6 `GcScope` params, 5 `bind`, 5 `scope`, 5 `get`, 4 frames |
+| Where collection can happen | only between mutation scopes (code must yield) | at any allocation safepoint |
+
+**Build cost of each DOM stack** (library plus dependencies, `--runs 3`)
+
+| Stack | Clean (median) | Incremental (touch DOM `lib.rs`) | rustc compilations (clean) | Max rustc RSS |
+|---|---|---|---|---|
+| A: `s1-a-dom` → `s1-a-gc` → derive → `syn`… | 2.41 s | 0.13 s | 11 | 251 MiB (`syn`) |
+| B: `s1-b-dom` → `s1-b-gc` | 0.58 s | 0.13 s | 4 | 170 MiB |
+
+- **Incremental rebuilds are identical.** The clean-build gap is the one-time proc-macro toolchain.
+- **Sampler limitation.** The 200 ms aggregate-RSS sampler misses builds shorter than about 0.2 s, so the incremental aggregate peaks read 0. The per-process `rustc` peaks still capture them.
+
+**Findings**
+1. **Both patterns pass S1-Q1, with a structural difference.**
+   - **Pattern A** confines *substantial* `unsafe` (24 blocks plus 2 macro templates) behind a sound, well-tested boundary.
+   - **Pattern B** needs none at all, at the price of bounds and epoch checks plus hand-written tracing.
+2. **The ceremony is of different kinds.**
+   - **Pattern A's cost is architectural:** code that runs long must become a resumable state machine, because collection waits for the stack to unwind.
+   - **Pattern B's cost is lexical:** `bind`/`unbind`/`scope` noise, the "soup" the Nova author describes. Local code stays structured normally.
+   - For a JS engine (ADR-0001 R2), Pattern A would force a stackless interpreter. Pattern B allows a conventional recursive interpreter with rooting.
+3. **Pattern B's bound is tighter (overshoot ≤ 1 node), and its pauses were shorter in this run** (71 µs vs 145 µs). Peaks are not comparable in node counts, because the node sizes differ; CP7 compares bytes, throughput, and pauses against live-set size.
