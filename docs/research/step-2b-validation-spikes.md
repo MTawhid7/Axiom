@@ -164,7 +164,7 @@ tools/check-unsafe-policy.sh
 |---|---|---|
 | **CP1** | Foundation: workspace, toolchain pin, lints, policy checker, build-measurement tooling, scenario model types and RNG | ✅ 2026-10-16 (§8) |
 | CP2 | Workload generators and reference-interpreter oracle | ✅ 2026-10-16 (§8) |
-| CP3 | Pattern A heap and derive; Miri | ⬜ |
+| CP3 | Pattern A heap and derive; Miri | ✅ 2026-10-16 (§8) |
 | CP4 | Pattern A DOM and driver; oracle equality; Miri on small scenarios | ⬜ |
 | CP5 | Pattern B heap; Miri | ⬜ |
 | CP6 | Pattern B DOM and driver; oracle equality; A ≡ B differential | ⬜ |
@@ -426,3 +426,79 @@ A pattern that can collect during a dispatch must satisfy **peak live nodes ≤ 
   - generators create "removal pairs" with it.
 - **Generator bug caught by its own guard.** The model's `child_ids()` and `parent()` queries returned ids the driver had already forgotten, which scripts can no longer name. They now return live ids only. The panic-on-invalid-op guard caught this on the first run.
 - **Realism fix.** Five percent of listeners on the document made `listeners` Large generate 11.7M invocations, almost all of them document listeners, since every path ends at the document. The share is now a parameter (`ListenerMix`): 5% / 1% / 0.2% for Small / Medium / Large. Large dropped to 708k invocations.
+
+### CP3 — completed 2026-10-16
+
+**Delivered**
+- **`s1-a-gc`, a canonical gc-arena design:**
+  - `Arena<R: Rootable>` with `mutate` and `mutate_root`, using higher-ranked closures branded by `'gc`;
+  - `Gc` (pointer-sized and `Copy`) and `GcWeak`;
+  - `Mutation` (allocation, plus `wants_collection` for cooperative yielding);
+  - `unsafe trait Trace` and `Tracer`;
+  - `Lock` and `RefLock`, writable only through `Gc::write` and the `Write` proof, via the `field!` and `unlock!` projection macros;
+  - a non-moving, stop-the-world mark–sweep: tri-colour marks, an iterative gray stack, and per-type vtables built by const promotion;
+  - weak references whose dead boxes keep their memory while still weakly referenced;
+  - `Pacing` (allocation debt) and `Metrics`.
+- **`s1-a-gc-derive`:** `#[derive(Trace)]` for structs, tuple structs, unit structs and enums, with type parameters and `#[trace(require_static)]`. Every derived type also gets a compile-time proof that it has no `Drop` impl.
+- **Invariants I1–I6** are documented in `src/raw/mod.rs`, and every `SAFETY:` comment cites them.
+
+**Verification (all green)**
+- **Tests:**
+  - 2 unit tests: pacing arithmetic, and the header size (pinned at 24 bytes).
+  - Compile-time `NEEDS_TRACE` assertions.
+  - 2 derive tests.
+  - 9 heap tests. They cover cycle collection with `Drop` running, data integrity across collections, dead weak targets keeping their memory, weak upgrades, pacing, barrier conveniences and accounting, a 200,000-node chain (no stack overflow and no leak), and teardown.
+  - A randomized oracle test: 15 rounds × 400 new nodes, plus random strong edges, weak edges and roots, checked against an independent reachability model. It checks live values, live boxes, edge integrity, and weak upgrades.
+- **Doctests:** one runnable example, plus **6 compile-fail tests**:
+
+  | Rule the compiler enforces | Error |
+  |---|---|
+  | No escaping a `Gc` from its scope | "lifetime may not live long enough" |
+  | No mixing pointers from two arenas | E0521 |
+  | No collection inside a mutation scope | E0502 |
+  | No `Drop` on a derived type | E0119 |
+  | No `Gc` hidden in a `require_static` field | E0521 |
+  | No `Gc` in a plain `Cell`, which would bypass the barrier | E0521 |
+
+  Each snippet was compiled on its own and confirmed to fail for its intended reason, and the codes are pinned in the doctests.
+- **Miri** (nightly 2026-04-08), on the whole suite, two ways:
+  - Stacked Borrows with `-Zmiri-strict-provenance`: **no undefined behaviour**;
+  - Tree Borrows with `-Zmiri-strict-provenance`: **no undefined behaviour**.
+
+  Miri's leak checker is on by default (confirmed by a deliberately leaking program), so every test path also frees all memory.
+- Clippy (pedantic, `-D warnings`), rustfmt, and the policy check all pass.
+
+**Unsafe inventory.** Everything sits under `src/raw/`; the arena, metrics and crate root have none.
+
+| File | `unsafe {}` | `unsafe fn` (incl. fn-pointer types) | `unsafe impl` lines | `SAFETY:` comments |
+|---|---|---|---|---|
+| `raw/gc.rs` | 8 | 4 | 2 | 10 |
+| `raw/heap.rs` | 10 | 0 | 0 | 10 |
+| `raw/lock.rs` | 4 (one inside `field!`) | 1 | 2 | 6 |
+| `raw/trace.rs` | 2 | 2 | 12 (macros generate the rest) | 14 |
+
+Macro-emitted `unsafe` (rule 7) comes from exactly two audited templates:
+- the derive's `unsafe impl Trace`;
+- `field!`'s `Write::assume`.
+
+**Build cost.** Command: `tools/measure-build.sh -p s1-a-gc --runs 3 -- --all-targets`. This includes `syn`, `quote` and `proc-macro2`, plus all test targets.
+
+| Phase | Median wall (n=3) | rustc compilations | Max rustc RSS | Max linker RSS | Aggregate peak RSS |
+|---|---|---|---|---|---|
+| Clean | 2.57 s (2.57–3.38) | 13 | 252 MiB (`syn`, 0.78 s) | 69 MiB | 239–290 MiB |
+| No-op | 0.04 s | 0 | — | — | — |
+| Incremental (touch `s1-a-gc/src/lib.rs`) | 0.33 s | 4 | 95 MiB | 64 MiB | 155–170 MiB |
+
+**Size:** 812 non-blank, non-comment lines in `s1-a-gc/src`, 144 in the derive, 395 in tests.
+
+**Findings**
+1. **The arena layer needs no `unsafe` at all.** The mutation closures are higher-ranked over `'gc`, so `Arena::new`, `mutate` and `mutate_root` can instantiate `'gc = 'static` with no lifetime transmutes. All the unsafety is concentrated in five concerns:
+   - allocation and freeing;
+   - dereferencing pointers;
+   - sweeping;
+   - vtable dispatch;
+   - the `Write` projection and the `Trace` impls.
+2. **`Drop` is a real soundness hazard in this design.** The sweep drops values in arbitrary order. The derive therefore *proves* that the deriving type has no `Drop` impl, and the compile-fail test confirms it. Fields such as `Live` counters may still have `Drop`, since they cannot reach a `Gc`.
+3. **Barrier discipline is enforced by types.** `Cell` and `RefCell` are `Trace` only for `'static` contents, so a `Gc` can live only in `Lock`/`RefLock`, and those are writable only through `Gc::write`. This is checked by a compile-fail test. The cost is ceremony: `unlock!(Gc::write(mc, node), Node, field).set(..)`. CP4 measures it.
+4. **The sweep is panic-safe.** A box is marked dead *before* its value is dropped, so a panicking `Drop` can never cause a double drop.
+5. **The pressure bound's budget.** Pattern A's *B* is the `Pacing` budget: by default the larger of 256 KiB and the bytes that survived the last collection. Each box costs 24 bytes of header plus its value, before allocator rounding.

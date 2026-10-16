@@ -20,4 +20,10 @@
 #
 # Every entry needs a one-line justification comment directly above it.
 
-# (CP1: no entries yet. CP3 adds Pattern A's GC crate and its derive.)
+# Spike S1, Pattern A: the GC core (allocation, pointer dereference, sweep, std Trace impls),
+# under invariants I1–I6 (spikes/s1/a-gc/src/raw/mod.rs).
+allow spikes/s1/a-gc src/raw/
+# Pattern A's field!/unlock! macros expand to an `unsafe` Write projection in the calling crate.
+emits-unsafe spikes/s1/a-gc
+# Pattern A's #[derive(Trace)] expands to `unsafe impl Trace` in the deriving crate.
+emits-unsafe spikes/s1/a-gc-derive
