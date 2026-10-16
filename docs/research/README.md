@@ -1,0 +1,58 @@
+# Research Notes: Conventions
+
+| | |
+|---|---|
+| **Status** | Living document |
+| **Last updated** | 2026-10-16 |
+
+This folder holds research notes on design history, modern alternatives, and experimental results. They feed the ADRs and the architecture documents.
+
+## Sourcing rules
+
+1. **Prefer primary sources:**
+   - specifications;
+   - standards documents;
+   - engineering posts from browser and language vendors;
+   - source code;
+   - research papers;
+   - security advisories;
+   - reproducible benchmarks.
+2. **Label secondary sources** (news coverage, third-party summaries) as *secondary*. Don't let a secondary source carry a decision on its own.
+3. **Date everything.** Record when a source was published and when it was checked. Browser and language facts change quickly.
+4. **Never invent history.** If the reason behind a past design isn't documented, say so.
+
+## Evidence labels
+
+| Label | Meaning |
+|---|---|
+| Sourced fact | A claim with a link to its source |
+| **Inference** | Reasoning from sourced facts; open to challenge |
+| **Hypothesis** | A claim that needs validation, with the validation step named |
+| **Background** | Well-established and not re-verified in this document; re-check before relying on it for a decision |
+
+## Note template
+
+```markdown
+# <Topic>
+
+| | |
+|---|---|
+| **Status** | Draft / Reviewed |
+| **Question** | What this note answers |
+| **Feeds** | ADR-NNNN / architecture section |
+| **Last updated** | YYYY-MM-DD |
+
+## Summary
+## Background and history
+## Current state (with dates)
+## Analysis (labelled fact / inference / hypothesis)
+## Implications for Arbor
+## Open questions
+## Sources
+```
+
+## Index
+
+| Note | Topic | Status |
+|---|---|---|
+| [Language evaluation](../technology/language-evaluation.md) | Implementation language. Kept under `technology/` because it is a technology evaluation; §7 doubles as the research note on GC and DOM memory models | Draft for review |

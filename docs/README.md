@@ -1,0 +1,59 @@
+# Arbor — Design Documentation
+
+Arbor is a from-first-principles browser engine for personal use on macOS. **The project is in Phase Zero: research, requirements and architecture only.** No implementation is authorized yet.
+
+These documents are the project's source of truth. Conversation history is not.
+
+## Start here
+
+1. [status.md](status.md): current state, next steps, and the session handoff log
+2. [charter.md](charter.md): vision, goals, environment, non-goals, constraints
+3. [decision-map.md](decision-map.md): every major decision, its status, and how the decisions constrain each other
+
+## Index
+
+| Document | Purpose | Status |
+|---|---|---|
+| [charter.md](charter.md) | Goals, users, environment, scope, non-goals, success criteria | Draft (scope sections Accepted) |
+| [decision-map.md](decision-map.md) | Decision layers, couplings, Phase Zero sequence | Living |
+| [open-questions.md](open-questions.md) | Unresolved questions and the evidence each needs | Living |
+| [status.md](status.md) | Current state and session handoffs | Living |
+| [adr/](adr/) | Architecture Decision Records | See each ADR |
+| ↳ [0000-template.md](adr/0000-template.md) | ADR template | — |
+| ↳ [0001-scope-and-target.md](adr/0001-scope-and-target.md) | Target, JavaScript strategy, security posture, defaults | **Accepted** |
+| ↳ [0002-implementation-language.md](adr/0002-implementation-language.md) | Implementation language (Rust) | **Proposed** |
+| [technology/language-evaluation.md](technology/language-evaluation.md) | Detailed language comparison and recommendation | Draft for review |
+| [research/](research/README.md) | Research conventions and notes | Living |
+
+**Planned documents**, each created when its Phase Zero step begins:
+
+| Document | Step |
+|---|---|
+| `requirements.md` | Steps 1→6 |
+| `security/threat-model.md` | Step 3 |
+| `security/boundaries.md` | Step 3 |
+| `architecture/overview.md`, plus one file per subsystem | Steps 4–5 |
+| `standards.md` | Step 6 |
+| `performance.md` | Step 6 |
+| `testing.md` | Step 6 |
+| `roadmap.md` | Step 6 |
+
+## Document status legend
+
+| Status | Meaning |
+|---|---|
+| **Draft** | Work in progress; may change freely |
+| **Proposed** | Complete recommendation awaiting the owner's decision |
+| **Accepted** | Confirmed explicitly by the owner; change it only through a new ADR |
+| **Superseded** | Replaced; links to its successor |
+| **Living** | Continuously updated tracking document |
+
+## Conventions
+
+- Dates are absolute (YYYY-MM-DD).
+- Claims are labelled as sourced fact, inference, hypothesis or background ([research conventions](research/README.md)).
+- Implemented behaviour is kept distinct from planned behaviour, and standards compliance from approximation.
+- Every dependency carries a justification and is classed as one of:
+  - a required platform facility;
+  - a replaceable implementation detail;
+  - a foundational dependency.
