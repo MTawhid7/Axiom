@@ -163,7 +163,7 @@ tools/check-unsafe-policy.sh
 | CP | Scope | Status |
 |---|---|---|
 | **CP1** | Foundation: workspace, toolchain pin, lints, policy checker, build-measurement tooling, scenario model types and RNG | ✅ 2026-10-16 (§8) |
-| CP2 | Workload generators and reference-interpreter oracle | ⬜ |
+| CP2 | Workload generators and reference-interpreter oracle | ✅ 2026-10-16 (§8) |
 | CP3 | Pattern A heap and derive; Miri | ⬜ |
 | CP4 | Pattern A DOM and driver; oracle equality; Miri on small scenarios | ⬜ |
 | CP5 | Pattern B heap; Miri | ⬜ |
@@ -363,3 +363,66 @@ tools/check-unsafe-policy.sh
 **Notes**
 - **The tools are validated.** The `rustc` and linker wrappers record per-process peaks, and the `ps` sampler records the aggregate. Interpreting the numbers waits until there is real code (CP3 onward).
 - **The baseline is floor overhead.** These numbers are the fixed cost of the toolchain plus a small dependency-free crate. They are the reference point for every later measurement.
+
+### CP2 — completed 2026-10-16
+
+**Delivered** (`s1-scenarios`, still `forbid(unsafe_code)` and dependency-free)
+- `reference`: the oracle interpreter, with an incremental API.
+  - Its live counts come from a graph search over the documented roots and edges.
+  - It validates scripts and rejects invalid ops with a position and a reason (11 error kinds).
+- `generate`: the four workloads (`tree`, `listeners`, `churn`, `pressure`) at sizes Small, Medium and Large.
+  - Generators drive the reference model while they record, so scripts are valid by construction and come with their expected outcome.
+- `examples/workload_stats.rs` prints the volume of each workload.
+
+**Verification (all green)**
+- **Golden tests:** 10 hand-checked scripts covering:
+  - all three phases, and `bubbles = false`;
+  - `stopPropagation`, both mid-path and during capture at the target;
+  - the snapshot's *removed* flag;
+  - a self-capturing cycle that lives while rooted and dies when not;
+  - an extra capture keeping a forgotten, detached node alive;
+  - the event path staying fixed after the target detaches itself;
+  - fresh children joining the tree;
+  - garbage that is counted but never observable;
+  - DOM insertion edge cases (insert before itself; appending moves the node);
+  - error reporting.
+- **100 seeds × 4 workloads (Small):** every generated script is valid, and re-running it reproduces the expected outcome and statistics.
+- **Determinism:** the same seed gives an identical script and outcome digest; a different seed gives a different script.
+- **Medium sizes** are valid too.
+- **Coverage gate** across 100 Listeners and Churn seeds. Each of these occurs, so outcome equality is a strong oracle:
+  - stopped dispatches;
+  - removed-flag skips;
+  - all three phases;
+  - weak references that both survive and die;
+  - reclaimed garbage.
+- **Tree shape:** element count is exact, and depth sits within its bounds and is not unrealistically shallow.
+- **Pressure invariant:** the two checkpoints are identical, and garbage equals `dispatches × path_depth × listeners_per_node × garbage_per_invocation`.
+- The four standard checks pass (34 tests).
+
+**Workload volumes** (seed 1; `cargo run --release -p s1-scenarios --example workload_stats`)
+
+| Workload | Size | Ops | Nodes allocated | of which garbage | Listeners | Invocations | Max live nodes | Generation |
+|---|---|---|---|---|---|---|---|---|
+| tree | Medium | 23,662 | 5,218 | 0 | 0 | 0 | 5,218 | 7.5 ms |
+| listeners | Medium | 11,236 | 5,486 | 3,090 | 3,000 | 8,859 | 2,376 | 8.7 ms |
+| churn | Medium | 30,431 | 5,956 | 227 | 1,862 | 596 | 4,237 | 9.0 ms |
+| pressure | Medium | 1,334 | 131,491 | 131,072 | 64 | 512 | 419 | 0.4 ms |
+| tree | Large | 590,151 | 129,839 | 0 | 0 | 0 | 129,839 | 97 ms |
+| listeners | Large | 214,158 | 196,128 | 147,952 | 60,000 | 707,719 | 47,741 | 205 ms |
+| churn | Large | 452,979 | 90,738 | 5,369 | 28,100 | 15,544 | 61,360 | 119 ms |
+| pressure | Large | 12,312 | 2,101,187 | 2,097,152 | 256 | 4,096 | 4,035 | 2.6 ms |
+
+**Pressure bound (checked in CP4 and CP6).** Let:
+- *L* be the live-node count at the pressure checkpoints (Medium: 419);
+- *B* be the pattern's allocation budget between collection opportunities (set in CP3 and CP5);
+- *s* be `garbage_per_invocation`.
+
+A pattern that can collect during a dispatch must satisfy **peak live nodes ≤ L + B + s**. One that cannot collect mid-dispatch peaks near **L + total garbage** (Medium: about 131k; Large: about 2.1M). The workload is sized so that the two outcomes are far apart.
+
+**Changes and findings during CP2**
+- **Coverage gap closed.** No op or behaviour could exercise the snapshot's *removed* flag, because that needs an *earlier* listener to remove a *later* one mid-dispatch. Fixes:
+  - added `Behavior::RemoveListener`;
+  - added `ScriptBuilder::peek_next_listener`;
+  - generators create "removal pairs" with it.
+- **Generator bug caught by its own guard.** The model's `child_ids()` and `parent()` queries returned ids the driver had already forgotten, which scripts can no longer name. They now return live ids only. The panic-on-invalid-op guard caught this on the first run.
+- **Realism fix.** Five percent of listeners on the document made `listeners` Large generate 11.7M invocations, almost all of them document listeners, since every path ends at the document. The share is now a parameter (`ListenerMix`): 5% / 1% / 0.2% for Small / Medium / Large. Large dropped to 708k invocations.

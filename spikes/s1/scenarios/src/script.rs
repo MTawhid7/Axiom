@@ -199,6 +199,17 @@ pub enum Behavior {
     /// Detach the own node from its parent (a no-op if it has none). The event
     /// path does not change, because it was computed when the dispatch began.
     RemoveSelf,
+    /// Remove `listener` from the own node's listener list, if it is there, and
+    /// set its *removed* flag, as `Op::RemoveListener` does.
+    ///
+    /// When an earlier listener removes a later one from the same node during
+    /// a dispatch, the later one is skipped even though it is in the snapshot.
+    /// That is the snapshot semantics this behaviour exists to exercise.
+    ///
+    /// A no-op if the listener is not on the own node. That includes a listener
+    /// whose id has not been created yet: generators may name the next id,
+    /// because the victim is added right after the remover.
+    RemoveListener { listener: ListenerId },
     /// Set the event's stop-propagation flag.
     StopPropagation,
 }
@@ -261,6 +272,9 @@ pub enum Op {
     },
     /// Remove `listener` from `node`'s list and set its *removed* flag. A dispatch
     /// in progress that has it in a snapshot skips it from then on.
+    ///
+    /// `listener` must have been created by an earlier op. If it is not on
+    /// `node`'s list, this is a no-op.
     RemoveListener { node: NodeId, listener: ListenerId },
     /// Dispatch an event at `target`.
     ///
@@ -345,6 +359,18 @@ impl ScriptBuilder {
     #[must_use]
     pub fn is_empty(&self) -> bool {
         self.ops.is_empty()
+    }
+
+    /// The most recently recorded op.
+    #[must_use]
+    pub fn last_op(&self) -> Option<&Op> {
+        self.ops.last()
+    }
+
+    /// The id the next [`add_listener`](Self::add_listener) call will assign.
+    #[must_use]
+    pub const fn peek_next_listener(&self) -> ListenerId {
+        ListenerId(self.next_listener)
     }
 
     fn fresh_node(&mut self) -> NodeId {

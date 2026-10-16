@@ -2,7 +2,8 @@
 //!
 //! A [`Script`] is a deterministic sequence of DOM operations ([`Op`]). Pattern A
 //! (gc-arena style) and Pattern B (Nova style) both execute it natively, and each
-//! must reproduce the reference interpreter's [`Outcome`] (added in CP2) exactly.
+//! must reproduce the [`reference`] interpreter's [`Outcome`] exactly.
+//! [`generate`] produces seeded workloads together with their expected outcomes.
 //!
 //! [`Op::Checkpoint`] always performs a full collection before it records
 //! anything. That makes the live-object counts deterministic, and turns them into
@@ -13,12 +14,16 @@
 
 pub mod counters;
 pub mod digest;
+pub mod generate;
 pub mod outcome;
+pub mod reference;
 pub mod rng;
 pub mod script;
 
 pub use digest::{Fnv1a, TreeDigest};
+pub use generate::{Generated, Size, Workload};
 pub use outcome::{CheckpointRecord, LogEntry, Outcome, Phase};
+pub use reference::{Reference, ScriptError, Stats};
 pub use rng::Rng;
 pub use script::{
     AttrName, Behavior, EventType, ListenerId, ListenerSpec, NodeId, Op, Script, ScriptBuilder,

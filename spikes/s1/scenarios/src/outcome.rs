@@ -29,8 +29,13 @@ pub struct CheckpointRecord {
     pub live_nodes: usize,
     /// Live closures after the collection (one per live listener).
     pub live_closures: usize,
-    /// For each weak slot: `None` if not yet created, otherwise whether its
-    /// target is still alive.
+    /// Weak-reference liveness, indexed by [`WeakId`](crate::WeakId).
+    ///
+    /// - Each entry is `None` if that slot has not been created, otherwise
+    ///   whether its target is still alive.
+    /// - The length is one more than the largest weak id created so far, or 0
+    ///   if none has been created. It does not depend on the script's total
+    ///   slot count.
     pub weak_alive: Vec<Option<bool>>,
 }
 
