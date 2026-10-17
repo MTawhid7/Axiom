@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-17) |
+| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Event loop and threading](../architecture/event-loop-and-threading.md) (the full design, EL1–EL24); [macOS runtime note](../research/macos-runtime-facilities.md); [process model](../security/process-model.md) (PM6, PM8, SI7, IR5, IR6); [ADR-0003](0003-gc-handle-and-rooting-pattern.md); [Step 4 tracker](../research/step-4-architecture-proposal.md); decision-map item P1 |
@@ -12,6 +12,7 @@
 | Date | Event |
 |---|---|
 | 2026-10-17 | Proposed at Step 4, CP12 |
+| 2026-10-17 | **Accepted** by the owner at Gate B: "ADR-0006 (Event Loop & Threading): Accepted." The same decisions amend rule EL11 (OQ-19): "Amend criterion AC5 and rule EL11 to allow read-only scoped lending of DOM arenas to helper threads during borrow-checker-frozen rendering stages. Keep the actual parallel style/layout implementation deferred until profiling benchmarks justify it." Decision 4 records the amendment |
 
 ## Question
 
@@ -53,12 +54,12 @@ See [event loop and threading](../architecture/event-loop-and-threading.md) §4 
 
 [Event loop and threading](../architecture/event-loop-and-threading.md) Sources: the WHATWG HTML and ECMA-262 texts of October 2026; Apple's run-loop and QoS documentation; XNU's scheduler notes; Chromium, Firefox, WebKit, Ladybird and Servo.
 
-## Decision (proposed)
+## Decision
 
 1. **One wait per thread** (EL1–EL3): kqueue for helper threads; run loops for AppKit's main thread and the compositor, with engine sources in the common modes on the main thread.
 2. **Endpoints are bound to the thread that handles them,** with no intermediate I/O thread (EL4).
 3. **Browser threads:** main (AppKit only), **core** (the engine's authority), compositor, and a worker pool. **Renderer threads:** one per event loop, a control thread, and a helper pool that never touches a heap. **Network threads:** I/O, storage, workers (EL5–EL9).
-4. **GC heaps never cross threads.** Other threads see owned messages, immutable snapshots, or data lent for a bounded scope (EL10–EL13).
+4. **GC heaps never cross threads.** Other threads see owned messages, immutable snapshots, or data lent for a bounded scope (EL10–EL13). **As amended at Gate B** (OQ-19), the only GC-managed data that may be lent is a DOM arena, read-only, for a rendering stage during which the borrow checker freezes the heap. Parallel style and layout are built only when profiling justifies them.
 5. **One event loop per agent, and one thread per event loop** (EL14–EL15). Tasks are chosen in this order: discrete input, a due rendering update, other tasks oldest first, then idle work. Continuous input is coalesced per frame. There are no nested event loops (EL16–EL17).
 6. **Timers are aligned and throttled** from Chrome's tested levels, per agent cluster (EL18, §4.8).
 7. **The browser's compositor owns a display link per window,** paused when unneeded. It offers frames only to subscribed event loops, one outstanding each, and never waits for a renderer (EL19–EL22).

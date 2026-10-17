@@ -6,36 +6,43 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero, Step 4 at Gate B:** the [architecture proposal v0](architecture/overview.md) and ADRs 0005–0009 await the owner. Production engine code is **not** authorized |
+| Phase | **Phase Zero, Step 4: Gate B passed; spike S3 in progress.** The decisions of the [architecture proposal v0](architecture/overview.md) are made: ADRs 0005–0007 and 0009 accepted, ADR-0008 pre-approved pending S3. Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 3** (merged with `--no-ff`) and is pushed, at `da79e69` (2026-10-17). Step 4 runs on branch `step-4`, pushed to `origin` |
-| Current checkpoint | **Step 4: CP1–CP12 ✅; Gate B** ([tracker](research/step-4-architecture-proposal.md)). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
-| Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3). S1 stays as the baseline for spike S3. Tooling under `tools/` |
+| Current checkpoint | **Step 4: CP1–CP12 ✅; Gate B passed; CP13 (spike S3a) next** ([tracker](research/step-4-architecture-proposal.md)). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
+| Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B. S1 stays as the baseline for S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final**, with build thresholds T1–T4 |
 | | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 |
 | | [ADR-0004](adr/0004-process-model-and-sandbox.md): process model, sandbox and JIT policy (2026-10-17), validated by spike S4. The owner confirmed S4's refinements |
 | | [Threat model](security/threat-model.md) (2026-10-17), amended: out-of-process iframes are required for L3 |
+| | [ADR-0005](adr/0005-ipc-transport-and-interfaces.md): IPC, Mach transport, capabilities, IDL, `Untrusted<T>` (2026-10-17, Gate B) |
+| | [ADR-0006](adr/0006-event-loop-and-threading.md): event loop and threading, with EL11 amended for read-only lending of DOM arenas (2026-10-17, Gate B) |
+| | [ADR-0007](adr/0007-frame-tree-pipeline-and-input.md): frame tree, rendering pipeline, invalidation and input across frames (2026-10-17, Gate B) |
+| | [ADR-0009](adr/0009-embedder-api-and-shell.md): engine/embedder API and the pure-Rust shell (2026-10-17, Gate B) |
+| Pre-approved | [ADR-0008](adr/0008-script-agents-and-heap.md): script, agents and heap. It moves to Accepted once spike S3-Q1 and S3-Q2 pass |
 
-## Next steps: Gate B (Step 4)
+## Next steps: spike S3 (Step 4, CP13–CP15)
 
-**Step 4's design is complete** ([tracker](research/step-4-architecture-proposal.md), CP1–CP12). The [architecture proposal v0](architecture/overview.md) and five ADRs await the owner. Each decision below carries a recommendation and its reason (CLAUDE.md):
+Spike S3 is authorized for S3-Q1 to S3-Q5 ([tracker](research/step-4-architecture-proposal.md) §10), and runs without pausing until Gate C:
+1. **CP13 (S3a):** the crates `s3-gc`, `s3-vm` and `s3-bench` in `spikes/s3/`; the reference-evaluator oracle; Miri on the root stack's module.
+2. **CP14 (S3b):** formal measurements, from a clean tree.
+3. **CP15 (S3c):** `docs/research/s3-results.md`. ADR-0008 moves to Accepted if S3-Q1 and S3-Q2 pass. Docs synthesis.
 
-1. **[ADR-0005](adr/0005-ipc-transport-and-interfaces.md), IPC (Mach, capabilities, IDL, `Untrusted<T>`). Recommend: accept.** Mach is the only transport that carries every handle Axiom needs, IOSurfaces included, and identifies the sender of every message. S4 measured it fastest for small messages, and Chromium, Servo and Ladybird use it on macOS.
-2. **[ADR-0006](adr/0006-event-loop-and-threading.md), event loop and threading. Recommend: accept.**
-   - One wait per thread makes idle free.
-   - The core thread frees the engine from AppKit's nested loops.
-   - One thread per agent is the simplest model the specifications allow that keeps each heap on one thread.
-3. **[ADR-0007](adr/0007-frame-tree-pipeline-and-input.md), frame tree, pipeline, invalidation and input (SI4). Recommend: accept.** It implements your direction to build the frame tree, per-frame display lists and input routing from the first line of code. Out-of-process iframes then change only process selection.
-4. **[ADR-0008](adr/0008-script-agents-and-heap.md), script, agents and heap. Recommend: pre-approve acceptance once S3-Q1 and S3-Q2 pass,** as you did for ADR-0004 with S4. Only C1 needs measurement; everything else is settled by design.
-5. **[ADR-0009](adr/0009-embedder-api-and-shell.md), embedder API and a pure-Rust shell (OQ-11). Recommend: accept,** with objc2 class definitions validated first at the shell milestone. The message boundary means a Swift fallback wouldn't touch the engine.
-6. **Spike S3's code** (design: tracker §10). **Recommend: authorize S3-Q1–Q3, and the optional S3-Q4 (C2) and S3-Q5 (C3).** ADR-0003 asked for C1–C3 to be settled before the JavaScript object model is fixed, and both optional parts reuse S3's crates.
-7. **S3-Q2's threshold: rooting at most 10% of run time. Recommend: confirm 10%.** It is strict enough to show that rooting doesn't dominate, and loose enough not to fail on noise.
-8. **OQ-19: amend AC5 and EL11 to allow read-only lending of DOM arenas during a rendering stage frozen by the borrow checker. Recommend: amend now, but build parallel style and layout only when measurements justify it.** The compiler enforces the frozen stage, it avoids a DOM mirror's memory cost, and deciding now finalizes the DOM arena design (PL2).
-
-**After Gate B:** CP13–CP15 (spike S3, if authorized), then **Gate C**: ADR-0008, and the merge of `step-4` into `main`. `step-4` stays pushed to `origin`.
+**Then Gate C:** the owner reviews S3's results and ADR-0008, and decides on merging `step-4` into `main` (CP16). `step-4` stays pushed to `origin`.
 
 ## Session log
+
+### 2026-10-17 — Session 7 (Gate B; spike S3)
+
+**Gate B, the owner's decisions** (each as recommended):
+1. ADR-0005 (IPC), ADR-0006 (event loop and threading), ADR-0007 (frame tree, pipeline, input) and ADR-0009 (embedder API and pure-Rust shell): **accepted**. OQ-11 and OQ-17 are resolved.
+2. ADR-0008 (script, agents, heap): "Pre-approved; will move to Accepted upon S3-Q1 and S3-Q2 passing."
+3. **Spike S3** is "Authorized for the full scope (questions S3-Q1 through S3-Q5 under spikes/s3/)". S3-Q2's threshold is "Confirmed at ≤10% of runtime spent rooting".
+4. **OQ-19:** "Amend criterion AC5 and rule EL11 to allow read-only scoped lending of DOM arenas to helper threads during borrow-checker-frozen rendering stages. Keep the actual parallel style/layout implementation deferred until profiling benchmarks justify it."
+5. The S4 test fix from Session 6 is approved.
+
+**Recorded** in the ADRs' decision histories, the design documents (now binding where their ADR is accepted), AC5 in the tracker, EL11, PL10, the decision map, the open questions, the indexes and this status.
 
 ### 2026-10-17 — Session 6 (Step 4 kickoff)
 

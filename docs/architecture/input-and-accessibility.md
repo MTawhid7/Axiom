@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 4, CP8). Decided in ADR-0007 at Gate B |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP8 |
 | **Question** | How does the browser route pointer, wheel, keyboard, IME and gesture input to frames that may live in different processes? How are focus, scrolling, user activation and accessibility handled, when AppKit asks synchronous questions and the browser may never block on a renderer? |
 | **Answers** | Step 4 question Q13 ([tracker](../research/step-4-architecture-proposal.md) §3); the input-routing part of SI4 |
 | **Feeds** | ADR-0007; CP9 (embedder API: input and accessibility at the shell boundary); Step 5 (the accessibility bridge, I5) |

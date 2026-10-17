@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-17). Recommended for acceptance once spike S3's required questions are answered, as ADR-0004 waited for S4 |
+| **Status** | **Proposed** (2026-10-17). **Acceptance pre-approved** by the owner at Gate B, effective once spike S3-Q1 and S3-Q2 pass, as ADR-0004 waited for S4 |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Script and heap](../architecture/script-and-heap.md) (SH1–SH14); [ADR-0003](0003-gc-handle-and-rooting-pattern.md) (C1–C5); [ADR-0004](0004-process-model-and-sandbox.md) (J1–J7); [S1 results](../research/s1-results.md); [Step 4 tracker](../research/step-4-architecture-proposal.md) §10 (spike S3's design); OQ-5, OQ-13, OQ-14 |
@@ -12,6 +12,7 @@
 | Date | Event |
 |---|---|
 | 2026-10-17 | Proposed at Step 4, CP12, with spike S3's design for the owner's authorization |
+| 2026-10-17 | **Owner's Gate B decision:** "Pre-approved; will move to Accepted upon S3-Q1 and S3-Q2 passing." Spike S3 is "Authorized for the full scope (questions S3-Q1 through S3-Q5 under spikes/s3/)", and S3-Q2's threshold is "Confirmed at ≤10% of runtime spent rooting" |
 
 ## Question
 
@@ -88,6 +89,6 @@ See [script and heap](../architecture/script-and-heap.md) §3. **C1 is the one o
 
 ## Consequences
 
-- **Acceptance waits for S3** (CP13–CP15), if the owner authorizes it at Gate B.
+- **Acceptance waits for S3-Q1 and S3-Q2** (CP13–CP15), as the owner pre-approved at Gate B.
 - The `gc` crate's only `unsafe` is the root stack, and only if C1 needs it.
 - OQ-5 resolves with this ADR, and OQ-14 with S3. OQ-13's design part resolves here; its budget is set in Step 6.

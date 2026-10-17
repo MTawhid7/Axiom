@@ -1,7 +1,7 @@
 # Axiom — Design Documentation
 
 Axiom is a from-first-principles browser engine for personal use on macOS. **The project is in Phase Zero: research, requirements and architecture.**
-- **Authorized:** design documents, now Step 4's (2026-10-17). The spikes of Steps 2b and 3 (S1, S2, S4; all complete) remain in `spikes/` as throwaway code.
+- **Authorized:** design documents, now Step 4's (2026-10-17), and spike S3, authorized at Step 4's Gate B (2026-10-17). The spikes of Steps 2b and 3 (S1, S2, S4; all complete) remain in `spikes/` as throwaway code.
 - **Not yet authorized:** production engine code.
 
 These documents are the project's source of truth. Conversation history is not.
@@ -26,11 +26,11 @@ These documents are the project's source of truth. Conversation history is not.
 | ↳ [0002-implementation-language.md](adr/0002-implementation-language.md) | Implementation language (Rust) | **Accepted** (final, 2026-10-17) |
 | ↳ [0003-gc-handle-and-rooting-pattern.md](adr/0003-gc-handle-and-rooting-pattern.md) | GC handle and rooting pattern (Pattern B, Nova style; obligations C1–C5) | **Accepted** (2026-10-17) |
 | ↳ [0004-process-model-and-sandbox.md](adr/0004-process-model-and-sandbox.md) | Process model, sandbox and JIT policy | **Accepted** (2026-10-17), after spike S4 |
-| ↳ [0005-ipc-transport-and-interfaces.md](adr/0005-ipc-transport-and-interfaces.md) | IPC: Mach transport, capabilities, IDL and generated decoders, `Untrusted<T>` | **Proposed** (2026-10-17) |
-| ↳ [0006-event-loop-and-threading.md](adr/0006-event-loop-and-threading.md) | Event loop and threading model | **Proposed** (2026-10-17) |
-| ↳ [0007-frame-tree-pipeline-and-input.md](adr/0007-frame-tree-pipeline-and-input.md) | Frame tree, rendering pipeline, invalidation and input across frames (SI4) | **Proposed** (2026-10-17) |
-| ↳ [0008-script-agents-and-heap.md](adr/0008-script-agents-and-heap.md) | Script, agents and the heap; ADR-0003's C1–C5 | **Proposed** (2026-10-17); acceptance after spike S3 |
-| ↳ [0009-embedder-api-and-shell.md](adr/0009-embedder-api-and-shell.md) | Engine/embedder API and the shell (OQ-11) | **Proposed** (2026-10-17) |
+| ↳ [0005-ipc-transport-and-interfaces.md](adr/0005-ipc-transport-and-interfaces.md) | IPC: Mach transport, capabilities, IDL and generated decoders, `Untrusted<T>` | **Accepted** (2026-10-17, Gate B) |
+| ↳ [0006-event-loop-and-threading.md](adr/0006-event-loop-and-threading.md) | Event loop and threading model | **Accepted** (2026-10-17, Gate B) |
+| ↳ [0007-frame-tree-pipeline-and-input.md](adr/0007-frame-tree-pipeline-and-input.md) | Frame tree, rendering pipeline, invalidation and input across frames (SI4) | **Accepted** (2026-10-17, Gate B) |
+| ↳ [0008-script-agents-and-heap.md](adr/0008-script-agents-and-heap.md) | Script, agents and the heap; ADR-0003's C1–C5 | **Proposed** (2026-10-17); acceptance pre-approved, effective once spike S3-Q1 and S3-Q2 pass |
+| ↳ [0009-embedder-api-and-shell.md](adr/0009-embedder-api-and-shell.md) | Engine/embedder API and the shell (OQ-11) | **Accepted** (2026-10-17, Gate B) |
 | [security/threat-model.md](security/threat-model.md) | Assets, adversaries, attack surfaces, trust boundaries, security goals, security levels L0–L3 | **Accepted** (2026-10-17), amended: out-of-process iframes required for L3 |
 | [security/process-model.md](security/process-model.md) | Process types and privileges, site isolation, IPC trust rules, memory budgets | Binding (ADR-0004 accepted, 2026-10-17) |
 | [technology/language-evaluation.md](technology/language-evaluation.md) | Detailed language comparison and recommendation | Reviewed |
@@ -41,16 +41,16 @@ These documents are the project's source of truth. Conversation history is not.
 | [research/macos-process-confinement.md](research/macos-process-confinement.md) | Process confinement on macOS: Seatbelt, App Sandbox, hardened runtime, JIT, launch and IPC options; browser precedent; spike S4 design | Reviewed (2026-10-17) |
 | [research/s4-results.md](research/s4-results.md) | S4 results: custom Seatbelt profiles on macOS 27; probes; start-up, footprint and IPC cost; the JIT matrix; CoreText in a sandbox | Complete (2026-10-17) |
 | [research/macos-runtime-facilities.md](research/macos-runtime-facilities.md) | macOS facilities for the runtime: run loops, frame timing, QoS, surfaces, IME and accessibility; browser precedent | Complete (Step 4, CP2) |
-| [research/step-4-architecture-proposal.md](research/step-4-architecture-proposal.md) | Step 4 plan and checkpoint tracker: the architecture proposal v0, including spike S3's design | At Gate B (CP1–CP12 done) |
-| [architecture/overview.md](architecture/overview.md) | **Architecture proposal v0:** the system on one page, crates and `unsafe` map, end-to-end scenarios, criteria check, staging | **Proposed** (Step 4, CP11) |
-| [architecture/event-loop-and-threading.md](architecture/event-loop-and-threading.md) | Event loop and threading model: thread loops, the threads of each process, the HTML event loop, frame scheduling, agents and workers | **Proposed** (Step 4, CP3) |
-| [architecture/ipc.md](architecture/ipc.md) | IPC: Mach transport, channels and capabilities, the IDL and generated decoders, `Untrusted<T>` validation, synchronous requests, bulk data, backpressure | **Proposed** (Step 4, CP4) |
-| [architecture/frame-tree-and-navigation.md](architecture/frame-tree-and-navigation.md) | Frame tree, navigation and loading: the browser's records, skeleton replicas, remote window proxies, browser-routed operations, browser-driven navigation, bound loader and storage endpoints | **Proposed** (Step 4, CP5) |
-| [architecture/rendering-pipeline.md](architecture/rendering-pipeline.md) | Rendering pipeline: DOM, style, box tree, immutable fragments, per-frame display lists over property trees, validation and compositing, strings and atoms | **Proposed** (Step 4, CP6) |
-| [architecture/invalidation.md](architecture/invalidation.md) | Invalidation and incremental updates: the lifecycle, entry points, reuse at each stage, compositor-driven scrolling and animation, late and hidden content | **Proposed** (Step 4, CP7) |
-| [architecture/input-and-accessibility.md](architecture/input-and-accessibility.md) | Input routing, gesture latching, scrolling, focus, IME mirror, user activation, accessibility cache, mediation | **Proposed** (Step 4, CP8) |
-| [architecture/embedder-api.md](architecture/embedder-api.md) | Engine/embedder API and the shell: the message boundary, commands, events, decisions, hosted objects, the headless embedder, the shell's language (OQ-11) | **Proposed** (Step 4, CP9) |
-| [architecture/script-and-heap.md](architecture/script-and-heap.md) | Script, agents and the heap: agents and realms, messages and transfers, `SharedArrayBuffer`, the root set, ADR-0003's obligations C1–C5, bindings, room for a JIT | **Proposed** (Step 4, CP10) |
+| [research/step-4-architecture-proposal.md](research/step-4-architecture-proposal.md) | Step 4 plan and checkpoint tracker: the architecture proposal v0, including spike S3's design | Gate B passed; spike S3 in progress (CP13–CP15) |
+| [architecture/overview.md](architecture/overview.md) | **Architecture proposal v0:** the system on one page, crates and `unsafe` map, end-to-end scenarios, criteria check, staging | **Proposed** (Step 4, CP11); its ADRs decided at Gate B |
+| [architecture/event-loop-and-threading.md](architecture/event-loop-and-threading.md) | Event loop and threading model: thread loops, the threads of each process, the HTML event loop, frame scheduling, agents and workers | Binding (ADR-0006 accepted, 2026-10-17) |
+| [architecture/ipc.md](architecture/ipc.md) | IPC: Mach transport, channels and capabilities, the IDL and generated decoders, `Untrusted<T>` validation, synchronous requests, bulk data, backpressure | Binding (ADR-0005 accepted, 2026-10-17) |
+| [architecture/frame-tree-and-navigation.md](architecture/frame-tree-and-navigation.md) | Frame tree, navigation and loading: the browser's records, skeleton replicas, remote window proxies, browser-routed operations, browser-driven navigation, bound loader and storage endpoints | Binding (ADR-0007 accepted, 2026-10-17) |
+| [architecture/rendering-pipeline.md](architecture/rendering-pipeline.md) | Rendering pipeline: DOM, style, box tree, immutable fragments, per-frame display lists over property trees, validation and compositing, strings and atoms | Binding (ADR-0007 accepted, 2026-10-17) |
+| [architecture/invalidation.md](architecture/invalidation.md) | Invalidation and incremental updates: the lifecycle, entry points, reuse at each stage, compositor-driven scrolling and animation, late and hidden content | Binding (ADR-0007 accepted, 2026-10-17) |
+| [architecture/input-and-accessibility.md](architecture/input-and-accessibility.md) | Input routing, gesture latching, scrolling, focus, IME mirror, user activation, accessibility cache, mediation | Binding (ADR-0007 accepted, 2026-10-17) |
+| [architecture/embedder-api.md](architecture/embedder-api.md) | Engine/embedder API and the shell: the message boundary, commands, events, decisions, hosted objects, the headless embedder, the shell's language (OQ-11) | Binding (ADR-0009 accepted, 2026-10-17) |
+| [architecture/script-and-heap.md](architecture/script-and-heap.md) | Script, agents and the heap: agents and realms, messages and transfers, `SharedArrayBuffer`, the root set, ADR-0003's obligations C1–C5, bindings, room for a JIT | **Proposed** (Step 4, CP10); ADR-0008 pre-approved pending spike S3 |
 | [research/](research/README.md) | Research conventions and notes | Living |
 
 **Planned documents**, each created when its Phase Zero step begins:
@@ -58,7 +58,7 @@ These documents are the project's source of truth. Conversation history is not.
 | Document | Step |
 |---|---|
 | `requirements.md` | Steps 1→6 |
-| `architecture/overview.md`, plus one file per subsystem | Steps 4–5 |
+| One file per subsystem under `architecture/` | Step 5 |
 | `standards.md` | Step 6 |
 | `performance.md` | Step 6 |
 | `testing.md` | Step 6 |

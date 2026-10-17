@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 4, CP7). Decided in ADR-0007 at Gate B |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP7 |
 | **Question** | What is the rendering lifecycle? How does a change propagate from a DOM mutation through style, layout, paint and compositing, reusing work at each stage? How are synchronous queries such as `offsetWidth` bounded? Which updates bypass the renderer's main thread, and how does that work across processes? |
 | **Answers** | Step 4 questions Q3, Q11 and Q12 ([tracker](../research/step-4-architecture-proposal.md) §3): P3 |
 | **Feeds** | ADR-0007; CP8 (input routing for scrolling); Step 5 (style, layout and graphics algorithms); Step 6 (budgets) |

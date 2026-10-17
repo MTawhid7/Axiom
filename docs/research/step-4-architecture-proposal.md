@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | **At Gate B** (2026-10-17). CP1–CP12 ✅. The owner decides on ADRs 0005–0009, spike S3's code and OQ-19 (status, "Next steps"). Gate A passed on 2026-10-17 |
-| **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only. Spike S3's code needs a separate go-ahead once its design is ready (§2) |
+| **Status** | **Gate B passed** (2026-10-17). CP1–CP12 ✅. ADRs 0005–0007 and 0009 accepted; ADR-0008 pre-approved, pending S3-Q1 and S3-Q2; AC5 amended (OQ-19). **Spike S3 authorized:** CP13–CP15 run next, then Gate C |
+| **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only, until Gate B. **Spike S3's code was authorized at Gate B** (2026-10-17): "Authorized for the full scope (questions S3-Q1 through S3-Q5 under spikes/s3/)" (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
 | **Last updated** | 2026-10-17 |
@@ -38,6 +38,12 @@ The proposal must carry the complete model that Step 3 fixed from the first line
 | "Request separate go-ahead for Spike S3's code when its design is ready" | S3 is designed at CP10 and put to the owner at Gate B. No S3 code is written before then |
 | **Gate A (2026-10-17):** the plan is "approved as written": its scope, the criteria AC1–AC10 and the 16 checkpoints. Step 5's list gains "HTML parsing and DOM" and "JavaScript engine and bindings". The cadence is approved: "pause at Gate B (after CP12) to review proposed ADRs 0005–0009 and authorize Spike S3 code concurrently" | [Decision map](../decision-map.md) §5 updated. CP2–CP12 run without pausing |
 | Push `step-4`: authorized | Pushed to `origin` on 2026-10-17, and kept pushed as checkpoints land, for off-site backup |
+| **Gate B (2026-10-17):** "ADR-0005 (Mach IPC): Accepted." "ADR-0006 (Event Loop & Threading): Accepted." "ADR-0007 (Frame Tree, Pipeline, Input): Accepted." "ADR-0009 (Embedder API & Pure-Rust Shell): Accepted." | Recorded in each ADR's decision history. OQ-11 and OQ-17 are resolved, and the design documents behind the four ADRs are binding |
+| ADR-0008: "Pre-approved; will move to Accepted upon S3-Q1 and S3-Q2 passing." | Recorded in ADR-0008's decision history. CP15 moves it to Accepted if both pass |
+| Spike S3: "Authorized for the full scope (questions S3-Q1 through S3-Q5 under spikes/s3/)". S3-Q2's threshold: "Confirmed at ≤10% of runtime spent rooting" | §10 updated. CP13–CP15 run without pausing until Gate C |
+| OQ-19 and AC5: "Approved." "Amend criterion AC5 and rule EL11 to allow read-only scoped lending of DOM arenas to helper threads during borrow-checker-frozen rendering stages. Keep the actual parallel style/layout implementation deferred until profiling benchmarks justify it." | AC5 amended (§5); EL11, PL10 and ADRs 0006 and 0007 updated; OQ-19 resolved |
+| The S4 test fix (§11, CP3): "Approved" | No further change |
+| "Proceed with Spike S3." | CP13 starts |
 
 **Binding inputs** (decision map §4; ADR-0003; ADR-0004):
 - Every future process boundary is a message interface from the start, and it also works in-process (PM6, R6).
@@ -143,7 +149,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | AC2 | **The browser is the authority.** It owns the frame tree, navigation and process assignment, and it routes input. Renderers request; the browser decides from its own records | PM3, IR2 |
 | AC3 | **Idle costs nothing.** No timer, poll or frame callback runs in any process while nothing changes | PM8. S2's idle window: 0.0% CPU, no wakeups |
 | AC4 | **The browser never decodes images or parses web fonts.** Display lists carry validated primitives | PM2 (Rule of 2) |
-| AC5 | **One single-threaded heap per agent.** Nothing GC-managed crosses a thread or a process. Data moves between agents by structured clone or transfer | ADR-0003, SI7 |
+| AC5 | **One single-threaded heap per agent.** Nothing GC-managed crosses a process, or a thread with one exception, **amended at Gate B (2026-10-17, OQ-19):** an event-loop thread may lend its DOM arenas read-only to helper threads for one rendering stage, during which the borrow checker freezes the heap, so nothing mutates or collects it until the stage ends. Data moves between agents by structured clone or transfer. Parallel style and layout are built only when profiling justifies them. (As approved at Gate A, AC5 read: "Nothing GC-managed crosses a thread or a process.") | ADR-0003, SI7; the owner at Gate B |
 | AC6 | **A deterministic, testable core.** Every stage can run headless and in one process, with virtual time and deterministic scheduling for tests | R6; decision map §2, item 8 |
 | AC7 | **Memory is designed.** Each long-lived structure has an owner and a size estimate, consistent with B1–B7 | PM7 |
 | AC8 | **The complete model fits.** For each app-web capability, the proposal names where it lives and shows that it needs no architectural change: dedicated, shared and service workers; `SharedArrayBuffer` and Wasm threads; WebGL and WebGPU; media; accessibility; IME | ADR-0001 R1, charter principle 7 |
@@ -170,8 +176,8 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | CP9 | Engine/embedder API and shell (F4, OQ-11) | ✅ 2026-10-17 (§11; [document](../architecture/embedder-api.md)) |
 | CP10 | Script, agents and heap (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5); spike S3's design | ✅ 2026-10-17 (§11; [document](../architecture/script-and-heap.md); S3 design §10) |
 | CP11 | Architecture overview v0, and the criteria check (§5) | ✅ 2026-10-17 (§11; [overview](../architecture/overview.md)) |
-| CP12 | Synthesis: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-17 (§11). **Gate B:** the owner decides |
-| CP13 | **S3a**, if authorized: implementation and correctness | |
+| CP12 | Synthesis: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-17 (§11). **Gate B passed** 2026-10-17 |
+| CP13 | **S3a** (authorized at Gate B): implementation and correctness | |
 | CP14 | **S3b:** measurements | |
 | CP15 | **S3c:** `docs/research/s3-results.md`; ADR-0008 updated; docs synthesis. **Gate C** | |
 | CP16 | Merge `step-4` into `main` (`--no-ff`), on the owner's instruction | |
@@ -274,7 +280,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
   - open questions, indexes and status.
 - **Gate B** (§7).
 
-**CP13–CP15. Spike S3**, if authorized:
+**CP13–CP15. Spike S3**, authorized at Gate B:
 - It follows S1's methods: `s1-probe roots`, the dispatch suite, three process runs, and a clean tree for formal runs.
 - CP15 writes the results and updates ADR-0008.
 - **Gate C** (§7).
@@ -288,7 +294,7 @@ Between gates, checkpoints run without pausing, as in Steps 2b and 3.
 | Gate | After | The owner decides |
 |---|---|---|
 | A | CP1 | This plan, including its scope (§2). **Passed 2026-10-17:** approved as written |
-| B | CP12 | ADRs 0005–0009 (Proposed). ADR-0008's acceptance may wait for S3, as ADR-0004's waited for S4. Also: authorizing spike S3's code |
+| B | CP12 | ADRs 0005–0009 (Proposed). ADR-0008's acceptance may wait for S3, as ADR-0004's waited for S4. Also: authorizing spike S3's code. **Passed 2026-10-17:** ADRs 0005–0007 and 0009 accepted; ADR-0008 pre-approved, pending S3-Q1 and S3-Q2; S3 authorized (Q1–Q5); AC5 amended |
 | C | CP15 | ADR-0008, in the light of S3; merging `step-4` into `main` |
 
 ## 8. Method
@@ -318,7 +324,7 @@ Between gates, checkpoints run without pausing, as in Steps 2b and 3.
 
 ## 10. Spike S3 design
 
-Written at CP10, for the owner's authorization at Gate B. No S3 code exists before then. **Purpose:** test ADR-0003's obligation C1, and its assumption about where rooting traffic comes from, in an interpreter-shaped workload; and measure how stable Rust can dispatch bytecode on the M1, as evidence for J1. The design is in [script and heap](../architecture/script-and-heap.md) SH6–SH7.
+Written at CP10. At Gate B (2026-10-17) the owner authorized S3's code: "Authorized for the full scope (questions S3-Q1 through S3-Q5 under spikes/s3/)". **Purpose:** test ADR-0003's obligation C1, and its assumption about where rooting traffic comes from, in an interpreter-shaped workload; and measure how stable Rust can dispatch bytecode on the M1, as evidence for J1. The design is in [script and heap](../architecture/script-and-heap.md) SH6–SH7.
 
 ### 10.1 Questions
 
@@ -327,8 +333,8 @@ Written at CP10, for the owner's authorization at Gate B. No S3 code exists befo
 | S3-Q1 | **C1:** can a root stack with 8-byte slots and no `RefCell` borrow tracking (an `UnsafeCell`-based stack in one allowlisted module, Miri-clean) cost **at most 1.0 ns per root and per read**, hot, on a performance core? It is measured the way `s1-probe roots` measured S1's stack: 4.08 ns per frame, 2.05 ns per root, 1.58 ns per read. How much does it cut S1's `dispatch` case (Pattern B: 1,073 ns per dispatch, 2.06× Pattern A)? | Yes |
 | S3-Q2 | **Rooting traffic:** in a register-based bytecode interpreter over Pattern B arenas, with registers traced as whole regions and builtins that call back into bytecode while holding values, how many root operations, and what share of time, does each workload spend on rooting? Does ADR-0003's assumption hold that rooting comes from builtins, not from executing bytecode? | Yes |
 | S3-Q3 | **Dispatch:** what does an executed operation cost under a `match` loop, a table of function pointers, and handlers that return the next handler, on stable Rust 1.94.1? Explicit tail calls (`become`) are measured on the pinned nightly as a reference, if available there. This is the language evaluation's original S3 | Yes |
-| S3-Q4 | **C2:** on S1's `traverse` suite, do power-of-two strides or struct-of-arrays link columns remove the index arithmetic from the dependent chain, and by how much? | Optional; separate authorization |
-| S3-Q5 | **C3:** with generated setters for handle-valued fields, how does S1-Q2's ceremony count change, and what does a write cost with a no-op barrier and with a card-marking barrier? | Optional; separate authorization |
+| S3-Q4 | **C2:** on S1's `traverse` suite, do power-of-two strides or struct-of-arrays link columns remove the index arithmetic from the dependent chain, and by how much? | Optional; authorized at Gate B |
+| S3-Q5 | **C3:** with generated setters for handle-valued fields, how does S1-Q2's ceremony count change, and what does a write cost with a no-op barrier and with a card-marking barrier? | Optional; authorized at Gate B |
 
 ### 10.2 What gets built
 
@@ -362,7 +368,7 @@ No dependencies beyond the standard library. Results are written under `target/s
 | Question | Passes if |
 |---|---|
 | S3-Q1 | The C1 stack measures ≤ 1.0 ns per root and ≤ 1.0 ns per read, hot, and its module is Miri-clean |
-| S3-Q2 | Executing bytecode performs no per-value root operations, and with the C1 stack rooting takes ≤ 10% of run time in each of W1–W4. The 10% threshold is proposed here for the owner to confirm or change |
+| S3-Q2 | Executing bytecode performs no per-value root operations, and with the C1 stack rooting takes ≤ 10% of run time in each of W1–W4. The owner confirmed the 10% threshold at Gate B |
 | S3-Q3 | Report only: the costs, and a recommended technique for Step 5 |
 
 **If S3-Q1 fails,** ADR-0003's first revisit condition applies, and the owner decides. **Outputs:** `docs/research/s3-results.md`; ADR-0008 updated (C1 settled, the dispatch technique recorded as input to J1); OQ-14 resolved.
@@ -547,3 +553,14 @@ Every relative link resolves; the four standard checks pass.
 Every relative link resolves; the four standard checks pass.
 
 **Gate B.** The owner decides, as listed with recommendations in [status](../status.md), "Next steps": the five ADRs; spike S3's code, with its optional parts and threshold; and OQ-19.
+
+### Gate B — passed 2026-10-17
+
+The owner's decisions, each as recommended:
+- **Accepted:** ADR-0005 (IPC), ADR-0006 (event loop and threading), ADR-0007 (frame tree, pipeline, invalidation and input) and ADR-0009 (embedder API and the pure-Rust shell). OQ-11 and OQ-17 are resolved.
+- **ADR-0008:** "Pre-approved; will move to Accepted upon S3-Q1 and S3-Q2 passing."
+- **Spike S3:** "Authorized for the full scope (questions S3-Q1 through S3-Q5 under spikes/s3/)". S3-Q2's threshold is "Confirmed at ≤10% of runtime spent rooting".
+- **OQ-19:** "Amend criterion AC5 and rule EL11 to allow read-only scoped lending of DOM arenas to helper threads during borrow-checker-frozen rendering stages. Keep the actual parallel style/layout implementation deferred until profiling benchmarks justify it." AC5 (§5), EL11 and PL10 are amended, and ADRs 0006 and 0007 record the amendment.
+- **The S4 test fix** (CP3's housekeeping) is approved.
+
+Recorded in the ADRs, the design documents, the decision map, the open questions, the indexes and [status](../status.md). CP13 starts.

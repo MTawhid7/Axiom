@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 4, CP3). Decided in ADR-0006 at Gate B |
+| **Status** | **Binding** since ADR-0006's acceptance (2026-10-17, Gate B). Written at Step 4, CP3. EL11 amended at Gate B (OQ-19) |
 | **Question** | How does each Axiom process run its work? Which threads exist, how does each one wait, how is the HTML event loop implemented and scheduled, what drives frame production, and how do agents and workers map onto threads and heaps? |
 | **Answers** | Step 4 questions Q1–Q3 and the first half of Q4 ([tracker](../research/step-4-architecture-proposal.md) §3); OQ-5 in part |
 | **Feeds** | ADR-0006; CP4 (IPC), CP5 (frame tree), CP6 (pipeline), CP7 (invalidation), CP8 (input), CP9 (embedder API), CP10 (script and heap) |
@@ -17,7 +17,7 @@ Everything here is **planned**; nothing is implemented. Rules are numbered EL1�
 - **Messages arrive on the thread that handles them** (EL4). Each IPC endpoint is bound to one thread, so there is no intermediate I/O thread.
 - **The browser runs four kinds of thread** (EL6): AppKit's main thread for the shell only; an engine **core** thread for the frame tree, navigation, process management and policy; a **compositor** thread that owns the display links, schedules frames, composites and presents; and a small worker pool.
 - **Renderers run one thread per event loop** (EL7, EL15). Each window agent and each worker gets its own thread and its own heap. Same-site tabs that share a process don't block each other, and each thread's QoS follows its agent's visibility. A control thread handles interrupts and other out-of-band requests, and a helper pool does work that never touches a heap.
-- **GC heaps never cross threads** (EL10, EL11). Rust's type system enforces it; helper threads see only owned messages, immutable snapshots, or data lent for a bounded scope.
+- **GC heaps never cross threads** (EL10, EL11). Rust's type system enforces it; helper threads see only owned messages, immutable snapshots, or data lent for a bounded scope. The only GC-managed data that may be lent, read-only and for one frozen rendering stage, is a DOM arena (AC5 as the owner amended it at Gate B).
 - **The HTML event loop's task selection is ours to define** (EL16). Discrete input first, then a due rendering update, then other tasks in arrival order, then idle work. Continuous input is coalesced into the next rendering update.
 - **The browser drives frames** (EL19–EL22). The compositor owns one display link per window and pauses it when no one has asked for a frame. Each vsync it offers a frame to the event loops that subscribed. It never waits for a renderer: a late frame is composited at the next vsync, and compositor-driven scrolling continues meanwhile.
 - **Background work is throttled in steps** (EL18, EL23): timer alignment for hidden documents, task roles and darwin-background for hidden renderers, using public interfaces only.
@@ -32,7 +32,7 @@ Everything here is **planned**; nothing is implemented. Rules are numbered EL1�
 | **ADR-0003:** one heap per agent; heaps are single-threaded, and the root stack is deliberately not `Send` | EL10, EL15 |
 | **SI7:** an agent cluster must not be split across processes; cross-origin isolated groups get their own processes | EL15 (and its clarification) |
 | **IR5, IR6:** the browser never blocks on a less privileged process; a child's synchronous calls are bounded and can't re-enter | EL6, EL17, EL21 |
-| **AC5:** nothing GC-managed crosses a thread or a process | EL10, EL11 |
+| **AC5**, as amended at Gate B: nothing GC-managed crosses a process, and across threads only DOM arenas lent read-only for a frozen rendering stage | EL10, EL11 |
 | **AC6:** a deterministic, headless core | EL24 |
 | **B1–B7:** memory targets | §4.10 |
 | **macOS runtime note §11, items 1–9 and 15–16** | Throughout; cited as "macOS note item N" |
@@ -105,7 +105,7 @@ From documentation and source read on 2026-10-17 (Sources). How each engine wait
 | EL6 | **Browser process:** the main thread, the core thread, the compositor thread and a worker pool, as in the table below |
 | EL7 | **Renderer process:** one thread per event loop, a control thread and a helper pool, as in the table below. The process's initial thread is the control thread, because it lives as long as the process while event loops come and go |
 | EL8 | **Network process:** an I/O thread, a storage thread and a worker pool, as in the table below |
-| EL9 | **Every process has at most one helper pool,** bounded by the number of cores. Its threads run leaf jobs (decoding, style and layout stages if CP6 adopts them, disk I/O) at the QoS of the thread that asked for the job, and never touch a GC heap (EL11) |
+| EL9 | **Every process has at most one helper pool,** bounded by the number of cores. Its threads run leaf jobs (decoding, style and layout stages if CP6 adopts them, disk I/O) at the QoS of the thread that asked for the job, and never touch a GC heap, except to read DOM arenas lent for a frozen rendering stage (EL11) |
 
 **Browser process**
 
@@ -146,8 +146,8 @@ Storage runs on its own thread so that a slow network can't delay a synchronous 
 
 | # | Rule |
 |---|---|
-| EL10 | **GC heaps never cross threads.** Heap types are neither `Send` nor `Sync`, and handles are bound to scope tokens (ADR-0003), so the compiler rejects any attempt (AC5) |
-| EL11 | **What other threads may see:** owned messages, moved between threads; immutable snapshots behind `Arc`, whose contents are `Sync`; and data that a thread loop lends for a bounded scope during which it can't mutate that data, which Rust's scoped borrows enforce. A GC heap is never lent: helper threads "never touch the heap", as in Ladybird [L1]. What style and layout read is decided in CP6 |
+| EL10 | **GC heaps never cross threads.** Heap types are neither `Send` nor `Sync`, and handles are bound to scope tokens (ADR-0003), so the compiler rejects any attempt (AC5). EL11 states the one read-only exception |
+| EL11 | **What other threads may see:** owned messages, moved between threads; immutable snapshots behind `Arc`, whose contents are `Sync`; and data that a thread loop lends for a bounded scope during which it can't mutate that data, which Rust's scoped borrows enforce. A GC heap is never lent as a whole, and helper threads never allocate, mutate or collect in one; in Ladybird, stage threads "never touch the heap" [L1]. **The one exception, approved by the owner at Gate B (2026-10-17, OQ-19):** an event-loop thread may lend its DOM arenas read-only to helper threads for one rendering stage. It holds the heap's borrow for the whole stage, so the compiler forbids mutation and collection until every helper's borrow has ended (PL2, PL10). Parallel style and layout are built only when profiling justifies them |
 | EL12 | **Shared mutable memory exists in three places only:** `SharedArrayBuffer` storage, outside every heap (ADR-0003); the infrastructure's own queues; and atomic flags such as the interrupt flag (EL17) |
 | EL13 | **Memory written by different threads is padded to 128 bytes,** the M1's cache line (macOS note item 16) |
 

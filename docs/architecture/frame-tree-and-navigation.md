@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 4, CP5). Decided in ADR-0007 at Gate B |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP5 |
 | **Question** | What is the browser-owned frame tree? How do renderers represent frames held by other processes? How do cross-frame operations, navigation and resource loading work, with every decision taken from the browser's own records? |
 | **Answers** | Step 4 questions Q6 and Q7 ([tracker](../research/step-4-architecture-proposal.md) §3); the frame-tree part of SI4 |
 | **Feeds** | ADR-0007; CP6 (per-frame display lists), CP7 (frame scheduling), CP8 (input routing and focus), CP9 (embedder API), CP10 (agents and messaging) |

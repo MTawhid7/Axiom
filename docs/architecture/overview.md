@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 4, CP11): the architecture proposal v0. Its decisions are put to the owner as ADRs 0005–0009 at Gate B; the proposal as a whole is approved at the end of Phase Zero (Step 6) |
+| **Status** | **Proposed** (Step 4, CP11): the architecture proposal v0. At Gate B (2026-10-17) the owner accepted ADRs 0005–0007 and 0009, and pre-approved ADR-0008 pending spike S3. The proposal as a whole is approved at the end of Phase Zero (Step 6) |
 | **Question** | How do the parts fit together: processes × threads × pipeline; the crate structure and its `unsafe` map; what happens end to end in common scenarios; and how does the system grow from L0 to L3 without a rewrite? |
 | **Answers** | Step 4 question Q16 ([tracker](../research/step-4-architecture-proposal.md) §3), and the check of the architecture criteria AC1–AC10 (tracker §5) |
 | **Builds on** | Step 3: [threat model](../security/threat-model.md), [process model](../security/process-model.md), [ADR-0004](../adr/0004-process-model-and-sandbox.md). Step 4: [macOS runtime note](../research/macos-runtime-facilities.md), [event loop and threading](event-loop-and-threading.md), [IPC](ipc.md), [frame tree and navigation](frame-tree-and-navigation.md), [rendering pipeline](rendering-pipeline.md), [invalidation](invalidation.md), [input and accessibility](input-and-accessibility.md), [embedder API](embedder-api.md), [script and heap](script-and-heap.md) |
@@ -106,7 +106,7 @@ A proposal for the implementation milestones. The final names and splits are set
 | AC2 | The browser is the authority | One authoritative frame tree from the browser's own facts (FT1–FT3). Navigation is browser-driven (FT7). Focus, capture and activation are browser records (IN5–IN8). `Untrusted<T>` is validated against them (IP10) | **Met** |
 | AC3 | Idle costs nothing | One wait per thread, no polling (EL1–EL3). Display links pause when no one needs frames (EL19). Idle documents unsubscribe (IV12). Timers carry leeway, and background timers are throttled (EL18) | **Met** by design; measured when built |
 | AC4 | The browser never decodes images or parses web fonts | Display lists carry validated primitives only: glyph images rasterized in the renderer, decoded pixels, references (PL7–PL9) | **Met** |
-| AC5 | One single-threaded heap per agent; nothing GC-managed crosses a thread | One heap per agent on its thread (SH1, EL15). Only copies, transfers and shared buffers between agents (SH2–SH3). Style and layout stay on the event loop's thread (PL10) | **Met as written.** Gate B decides whether to allow read-only lending of DOM arenas during a frozen rendering stage, for parallel style and layout |
+| AC5 | One single-threaded heap per agent; nothing GC-managed crosses a thread, except DOM arenas lent read-only for a frozen rendering stage (amended at Gate B) | One heap per agent on its thread (SH1, EL15). Only copies, transfers and shared buffers between agents (SH2–SH3). Style and layout stay on the event loop's thread for now; lending is allowed, and built when profiling justifies it (PL10, EL11) | **Met** |
 | AC6 | A deterministic, testable core | Thread loops behind an interface, with a virtual clock (EL24). In-memory channels (IP2). The headless embedder (EM9). Incremental-versus-rebuild oracles (IV14) | **Met** |
 | AC7 | Memory is designed | Each structure has an owner and a lifetime (PL13, SH14, EL §4.10). Bounded queues (IP16). Budgets measured in Step 6 | **Met** by design; budgets in Step 6 |
 | AC8 | The complete model fits | Every capability has a home without architectural change: the table below | **Met** |
@@ -137,7 +137,7 @@ A proposal for the implementation milestones. The final names and splits are set
 
 ## 6. Decisions for Gate B
 
-From the documents above. ADR-0005 to ADR-0009 record them, Proposed:
+From the documents above. ADR-0005 to ADR-0009 record them. **Outcome (the owner, 2026-10-17):** ADRs 0005, 0006, 0007 and 0009 accepted; ADR-0008 pre-approved, moving to Accepted once S3-Q1 and S3-Q2 pass.
 
 | ADR | Decides |
 |---|---|
@@ -148,6 +148,6 @@ From the documents above. ADR-0005 to ADR-0009 record them, Proposed:
 | 0009 | Engine/embedder API and the shell (EM1–EM12, OQ-11) |
 
 Open owner questions raised along the way:
-- authorizing spike S3, with its optional parts and its 10% threshold;
-- amending AC5 for read-only lending during frozen rendering stages (PL10);
-- confirming the pure-Rust shell (EM11).
+- authorizing spike S3, with its optional parts and its 10% threshold: **authorized for S3-Q1–Q5, with 10% confirmed**;
+- amending AC5 for read-only lending during frozen rendering stages (PL10): **amended**, with parallel stages built only when profiling justifies them;
+- confirming the pure-Rust shell (EM11): **confirmed**, with ADR-0009.

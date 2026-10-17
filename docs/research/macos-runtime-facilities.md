@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Complete (2026-10-17, Step 4 CP2), for the owner's review at Gate B |
+| **Status** | Complete (2026-10-17, Step 4 CP2). ADRs 0005–0007 and 0009, which rest on it, were accepted at Gate B (2026-10-17) |
 | **Question** | Which macOS facilities will Axiom's event loops, frame scheduling, threads, compositor, input routing and accessibility rest on, and what do those facilities constrain? |
 | **Feeds** | Step 4 ([tracker](step-4-architecture-proposal.md)): CP3 (event loop and threads), CP4 (IPC), CP6 (pipeline and compositing), CP8 (input and accessibility), CP9 (embedder API and shell) |
 | **Builds on** | [macOS confinement note](macos-process-confinement.md) §2.5–§2.7 (launch, rendezvous, IOSurfaces, memory pressure); [S2 results](s2-results.md) (idle cost of an AppKit window); [S4 results](s4-results.md) (IPC cost) |

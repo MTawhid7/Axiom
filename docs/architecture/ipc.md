@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 4, CP4). Decided in ADR-0005 at Gate B. Proposes the answer to OQ-17 |
+| **Status** | **Binding** since ADR-0005's acceptance (2026-10-17, Gate B). Written at Step 4, CP4. Answers OQ-17 |
 | **Question** | How do Axiom's processes and threads exchange messages? Which transport carries them, how are interfaces defined and checked, how do handles and bulk data move, and how are the IPC trust rules IR1–IR10 enforced by construction rather than by care? |
 | **Answers** | Step 4 question Q5 ([tracker](../research/step-4-architecture-proposal.md) §3); OQ-17 |
 | **Feeds** | ADR-0005; CP5 (frame tree and navigation), CP6 (display lists), CP8 (input and accessibility), CP9 (embedder API), CP10 (agents and messaging) |

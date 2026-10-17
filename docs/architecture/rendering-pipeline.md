@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 4, CP6). Decided in ADR-0007 at Gate B |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP6. PL10 updated for the amendment of AC5 (OQ-19) |
 | **Question** | What data structures make up the pipeline, from the DOM through style, the box tree, the fragment tree and the per-frame display list to the browser's compositor? Who owns each one, on which thread, and what crosses a process boundary? How are strings and atoms represented? |
 | **Answers** | Step 4 questions Q2, Q8, Q9 and Q10 ([tracker](../research/step-4-architecture-proposal.md) §3): P2, and the representation part of P4 |
 | **Feeds** | ADR-0007; CP7 (invalidation), CP8 (hit testing and accessibility), CP10 (the heap's DOM arenas); Step 5 (text, graphics, style, layout) |
@@ -22,7 +22,7 @@ Everything here is **planned**; nothing is implemented. Rules are numbered PL1�
 
   Everything after the DOM lives outside the GC heap.
 - **The DOM's arenas are built to be lendable** (PL2). They hold no interior mutability, which the compiler checks, and style results go in side tables that can be written in disjoint slices. So parallel style and layout can be switched on later without redesign.
-- **Style and layout run on the event loop's thread for now** (PL10), because criterion AC5 forbids GC-managed data crossing threads. Amending AC5, to allow read-only lending during a rendering stage that the borrow checker freezes, is put to the owner at Gate B.
+- **Style and layout run on the event loop's thread for now** (PL10). At Gate B the owner amended criterion AC5 and rule EL11 to allow read-only lending of the DOM arenas during a rendering stage that the borrow checker freezes (OQ-19). Parallel style and layout are built only when profiling justifies them.
 - **Fragments are immutable** (PL5), each with the constraints that produced it, as in LayoutNG, which retired whole classes of invalidation bugs.
 - **Each frame has its own display list** (PL6–PL9). Items carry only validated primitives: geometry, glyph images from an atlas the renderer rasterized, decoded image pixels, references to child frames. They point into property trees (transforms, scrolling, clips, effects) instead of nesting them, so the browser's compositor can scroll and animate without the renderer. **The browser never decodes an image or parses a font** (AC4).
 - **The browser composites** (PL9). It embeds each child frame's latest output where its parent's display list references it, as Chromium's surfaces do.
@@ -35,7 +35,7 @@ Everything here is **planned**; nothing is implemented. Rules are numbered PL1�
 | **Rule of 2 and process model §3, note 1:** the browser composites renderer display lists of simple primitives, and never decodes images or parses fonts | PL6–PL9 |
 | **SI4, FT12:** each frame produces its own display list | PL6, PL9 |
 | **ADR-0003:** one GC heap per agent for JavaScript and the DOM; Pattern B's typed arenas and `u32` handles; obligation C5, that glyph and pixel buffers need not live in the GC heap | PL2, PL7 |
-| **AC5, EL10–EL11:** nothing GC-managed crosses a thread; a GC heap is never lent | PL10 |
+| **AC5, EL10–EL11**, as amended at Gate B (OQ-19): nothing GC-managed crosses a process; a GC heap is never lent as a whole, but DOM arenas may be lent read-only for a rendering stage frozen by the borrow checker | PL2, PL10 |
 | **S4-Q5:** CoreText renders correctly inside the renderer's sandbox | PL7 |
 | **Decision map §2, item 6:** strings, text and accessibility are data-model properties | PL11, PL12 |
 
@@ -107,7 +107,7 @@ From documentation read on 2026-10-17 (Sources).
 
 | # | Rule |
 |---|---|
-| PL10 | **For now, style, layout and paint run on the event loop's thread.** Image decoding and glyph rasterization run on the helper pool: their inputs (response bytes, fonts) and outputs (pixels, atlas entries) are not GC-managed (EL9, ADR-0003 C5). Encoding a finished display list may also use a helper, since it is outside the heap. **Parallel style and layout** over the DOM would lend the DOM arenas read-only to helper threads for one rendering stage. During that stage, the event loop's thread holds the heap's borrow, so the compiler forbids mutation and collection. That is safe Rust, but it contradicts the letter of AC5 and EL11, so it waits for the owner's decision at Gate B. PL2 keeps the option open at no cost |
+| PL10 | **For now, style, layout and paint run on the event loop's thread.** Image decoding and glyph rasterization run on the helper pool: their inputs (response bytes, fonts) and outputs (pixels, atlas entries) are not GC-managed (EL9, ADR-0003 C5). Encoding a finished display list may also use a helper, since it is outside the heap. **Parallel style and layout** over the DOM would lend the DOM arenas read-only to helper threads for one rendering stage. During that stage, the event loop's thread holds the heap's borrow, so the compiler forbids mutation and collection. That is safe Rust, and the owner amended AC5 and EL11 at Gate B (2026-10-17) to allow it (OQ-19). It is built only when profiling shows that style or layout limit frame production; PL2 keeps the option open at no cost |
 
 ### 4.5 Strings, atoms, accessibility and memory
 
@@ -140,7 +140,7 @@ From documentation read on 2026-10-17 (Sources).
 |---|---|---|
 | A | **The renderer rasterizes and sends tiles** | The browser would never see display lists, only pixels. That would be simpler for the browser, but costs memory for tiles of every frame on an 8 GB machine, and loses the compositor's ability to scroll and animate from property trees. Rejected |
 | B | **The browser rasterizes glyphs, as WebRender does** | Putting font parsing in the browser breaks the Rule of 2 (AC4). Rejected |
-| C | **A mirror of the DOM outside the heap**, for parallel style and layout within AC5 | It allows parallel stages without lending, but duplicates DOM data and needs a synchronization path that could diverge. Held in reserve if the owner keeps AC5 strict and parallel stages are later wanted |
+| C | **A mirror of the DOM outside the heap**, for parallel style and layout within AC5 as first written | It allows parallel stages without lending, but duplicates DOM data and needs a synchronization path that could diverge. Not needed since the owner amended AC5 at Gate B to allow lending (OQ-19). Rejected |
 | D | **A mutable layout tree** (pre-LayoutNG) | Chromium's experience is the counter-argument [C2]. Rejected |
 | E | **UTF-8 strings for the DOM** | They would make JavaScript's code-unit indexing slow, or force conversions between JavaScript and the DOM in one heap. Rejected for PL11 |
 
@@ -150,14 +150,14 @@ From documentation read on 2026-10-17 (Sources).
 |---|---|
 | AC1 | Per-frame display lists and token-embedded child frames from L0 (§5) |
 | AC4 | PL7–PL9: only validated primitives; no decoding or font parsing in the browser |
-| AC5 | Met as written: style and layout stay on the event loop's thread (PL10). The amendment is a decision for Gate B |
+| AC5 | Met, as amended at Gate B: style and layout stay on the event loop's thread for now, and may later read DOM arenas lent for a frozen stage (PL10) |
 | AC7 | PL13 |
 
 ## 8. Open questions
 
 | # | Question | Where it is settled |
 |---|---|---|
-| 1 | Amend AC5 and EL11 to allow read-only lending of DOM arenas during a frozen rendering stage, enabling parallel style and layout? | **Gate B** (the owner) |
+| 1 | Amend AC5 and EL11 to allow read-only lending of DOM arenas during a frozen rendering stage, enabling parallel style and layout? | **Resolved at Gate B** (2026-10-17): amended. Parallel stages are built only when profiling justifies them (OQ-19) |
 | 2 | Where glyphs are rasterized long-term: the renderer, or a GPU process | Step 5 (I1, I2) |
 | 3 | The rasterizer and the GPU backend behind the compositor | Step 5 (I2) |
 | 4 | The layout unit, and the cascade's caches | Step 5 (layout, style) |

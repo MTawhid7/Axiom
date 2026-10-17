@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-17) |
+| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Embedder API](../architecture/embedder-api.md) (EM1–EM12); [S2 results](../research/s2-results.md); [event loop and threading](../architecture/event-loop-and-threading.md) (EL6, EL24); [IPC](../architecture/ipc.md); [input and accessibility](../architecture/input-and-accessibility.md); decision-map item F4; OQ-11 |
@@ -12,6 +12,7 @@
 | Date | Event |
 |---|---|
 | 2026-10-17 | Proposed at Step 4, CP12 |
+| 2026-10-17 | **Accepted** by the owner at Gate B: "ADR-0009 (Embedder API & Pure-Rust Shell): Accepted." OQ-11 is resolved, subject to the shell milestone's validation (decision 6) |
 
 ## Question
 
@@ -51,7 +52,7 @@ See [embedder API](../architecture/embedder-api.md) §4. The language question t
 
 [Embedder API](../architecture/embedder-api.md) Sources; [S2 results](../research/s2-results.md) §3, §8.
 
-## Decision (proposed)
+## Decision
 
 1. **The shell is an embedder:** AppKit's main thread, talking to the engine's core through a message API in the IDL. The engine never depends on AppKit or the shell, enforced by the build (EM1–EM3).
 2. **Commands in; events and requests for decisions out.** The engine applies its policy first, and every request has a default (EM4–EM5).
@@ -86,4 +87,4 @@ See [embedder API](../architecture/embedder-api.md) §4. The language question t
 ## Consequences
 
 - The crates `shell` (AppKit, with objc2 in its `platform` module), `embedder-api` and `headless` ([overview](../architecture/overview.md) §2).
-- OQ-11 resolves with this ADR, subject to the shell milestone's validation.
+- OQ-11 is resolved by this ADR's acceptance (2026-10-17), subject to the shell milestone's validation.

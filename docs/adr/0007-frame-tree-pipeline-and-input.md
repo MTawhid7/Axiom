@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-17) |
+| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Frame tree and navigation](../architecture/frame-tree-and-navigation.md) (FT1–FT14); [rendering pipeline](../architecture/rendering-pipeline.md) (PL1–PL16); [invalidation](../architecture/invalidation.md) (IV1–IV14); [input and accessibility](../architecture/input-and-accessibility.md) (IN1–IN12); [process model](../security/process-model.md) §5 (SI1–SI7, SI4); [threat model](../security/threat-model.md) §8 (V9); [overview](../architecture/overview.md); decision-map items P2, P3 and part of P4 |
@@ -12,6 +12,7 @@
 | Date | Event |
 |---|---|
 | 2026-10-17 | Proposed at Step 4, CP12. It decides SI4 as a whole: the browser-owned frame tree, per-frame display lists and browser-routed input that the owner required "from the first line of code" |
+| 2026-10-17 | **Accepted** by the owner at Gate B: "ADR-0007 (Frame Tree, Pipeline, Input): Accepted." The open question in its consequences was decided at the same time (OQ-19): "Amend criterion AC5 and rule EL11 to allow read-only scoped lending of DOM arenas to helper threads during borrow-checker-frozen rendering stages. Keep the actual parallel style/layout implementation deferred until profiling benchmarks justify it." Decision 6 records it |
 
 ## Question
 
@@ -53,14 +54,14 @@ Each alternative's assessment is in the documents' "Alternatives considered" sec
 
 The Sources sections of the four architecture documents: the WHATWG HTML text of October 2026; Chromium's navigation, out-of-process-iframe, RenderingNG, BlinkNG, LayoutNG and style-invalidation documents; Firefox's BrowsingContext, process-model, APZ, rendering-overview and `ContentCache` sources and its accessibility post; WebKit's site-isolation documentation; Servo's constellation; CSS Containment Level 2.
 
-## Decision (proposed)
+## Decision
 
 1. **The browser's core holds the only authoritative frame tree,** built from facts it derived itself, with tokens scoped per process (FT1–FT3).
 2. **Renderers hold skeleton replicas and remote window proxies:** only what synchronous script needs (FT4–FT5).
 3. **Every operation between agents goes through the browser,** even within one process (FT6).
 4. **Navigation is browser-driven, through to an acknowledged commit.** Process and event loop are chosen at the response, and session history lives in the browser (FT7–FT10).
 5. **Loader and storage endpoints are bound at commit;** bodies stream from the network process (FT11).
-6. **The pipeline has five owned stages** (PL1–PL5): the DOM in the heap, then computed styles, the box tree and immutable fragments outside it. DOM arenas are built to be lendable.
+6. **The pipeline has five owned stages** (PL1–PL5): the DOM in the heap, then computed styles, the box tree and immutable fragments outside it. DOM arenas are built to be lendable. **As amended at Gate B** (AC5, EL11, OQ-19), they may be lent read-only to helper threads for a rendering stage frozen by the borrow checker. Parallel style and layout are built only when profiling justifies them (PL10).
 7. **Each frame has a display list of validated primitives over property trees.** Glyphs are rasterized in the renderer. Child frames are embedded by token, and the browser validates every reference (PL6–PL9, PL14–PL16).
 8. **Strings use one 8-bit or 16-bit representation** for JavaScript and the DOM, and names are atoms (PL11).
 9. **An explicit lifecycle checked by the compiler,** with two entry points and no synchronous flush across agents. Reuse at every stage, and compositor-driven scrolling and animation (IV1–IV13). Every incremental update is checked against a rebuild in tests (IV14).
@@ -95,4 +96,4 @@ The Sources sections of the four architecture documents: the WHATWG HTML text of
 - The core, frame-tree, compositor, display-list, style, layout and paint crates follow these rules ([overview](../architecture/overview.md) §2).
 - V9's tests are specified (FT14, IN12).
 - Step 5 designs the algorithms behind the stages, and where glyphs are rasterized in the long run.
-- **An open owner question** ([rendering pipeline](../architecture/rendering-pipeline.md) §8): whether AC5 is amended to allow read-only lending of DOM arenas during frozen rendering stages, for parallel style and layout.
+- **AC5 and EL11 were amended at Gate B** (OQ-19): read-only lending of DOM arenas during frozen rendering stages is allowed, so parallel style and layout need no further architectural decision. They are built only when profiling justifies them ([rendering pipeline](../architecture/rendering-pipeline.md) PL10).

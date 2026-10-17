@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-17) |
+| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [IPC](../architecture/ipc.md) (the full design, IP1–IP22); [process model](../security/process-model.md) §6 (R1–R6, IR1–IR10); [ADR-0004](0004-process-model-and-sandbox.md) D3; [S4 results](../research/s4-results.md); [macOS runtime note](../research/macos-runtime-facilities.md); [Step 4 tracker](../research/step-4-architecture-proposal.md); OQ-17 |
@@ -12,6 +12,7 @@
 | Date | Event |
 |---|---|
 | 2026-10-17 | Proposed at Step 4, CP12 |
+| 2026-10-17 | **Accepted** by the owner at Gate B: "ADR-0005 (Mach IPC): Accepted." OQ-17 is resolved |
 
 ## Question
 
@@ -59,7 +60,7 @@ All sourced in [IPC](../architecture/ipc.md) §3.
 
 [IPC](../architecture/ipc.md) §2–§3 and its Sources; [S4 results](../research/s4-results.md) §4; SDK 27 headers (`mach/port.h`, `mach/message.h`).
 
-## Decision (proposed)
+## Decision
 
 1. **Mach messages carry everything between processes** (IP1). The one exception is the inherited descriptor that delivers a helper's sandbox profile at launch. The same channels run in-process, always encoding and decoding (IP2). This resolves OQ-17.
 2. **Endpoints are capabilities** that only the browser creates and hands out. Each child's audit token is pinned at launch and checked on every message. Ports are guarded and immovable, with queue limits (IP3–IP6, IP19).

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 4, CP10). Decided in ADR-0008 at Gate B; its acceptance waits for spike S3, as ADR-0004's waited for S4 |
+| **Status** | **Proposed** (Step 4, CP10). Decided in ADR-0008, whose acceptance the owner pre-approved at Gate B (2026-10-17), effective once spike S3-Q1 and S3-Q2 pass |
 | **Question** | How do agents, realms and heaps fit together; how do messages, transfers and `SharedArrayBuffer` cross between agents; how does script integrate with the event loop; and how does the engine meet ADR-0003's obligations C1–C5: cheaper rooting, heap layout, a write-barrier API, a plan for incremental or generational collection, and native interop? What must spike S3 measure? |
 | **Answers** | Step 4 questions Q4 (second half) and Q15 ([tracker](../research/step-4-architecture-proposal.md) §3); OQ-5, OQ-13, OQ-14 |
 | **Feeds** | ADR-0008; spike S3 ([tracker](../research/step-4-architecture-proposal.md) §10); Step 5 (the JavaScript engine and bindings, HTML and DOM) |
@@ -122,7 +122,7 @@ From sources read on 2026-10-17 (Sources).
 
 | # | Question | Where it is settled |
 |---|---|---|
-| 1 | C1: does the root stack without borrow tracking reach about 1 ns per root and per read? | **Spike S3** (S3-Q1, S3-Q2), after Gate B |
+| 1 | C1: does the root stack without borrow tracking reach about 1 ns per root and per read? | **Spike S3** (S3-Q1, S3-Q2), authorized at Gate B (2026-10-17) |
 | 2 | Which bytecode dispatch technique the interpreter uses | S3-Q3, then Step 5 |
 | 3 | The pause budget, and the order of incremental and generational collection | Step 6 (budget), then corpus measurements |
 | 4 | Where shared and service workers run when no same-site renderer exists | Step 5 (workers), as frame-tree open question 3 |
