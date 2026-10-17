@@ -22,7 +22,7 @@ This directory holds validation experiments for [ADR-0002](../docs/adr/0002-impl
   ```
 
 - **Build measurements:** `tools/measure-build.sh --help`.
-- **Runtime measurements** (CP7 and CP8). Each script prints its usage with `--help`, and writes its results under `target/s1-results/`.
+- **Runtime measurements** (CP7 and CP8). Each script prints its usage with `--help`, and writes its results under `target/s1-results/` or `target/s2-results/`.
 
   | Script | Measures |
   |---|---|

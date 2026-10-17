@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Phase Zero, Step 2b: validation spikes** (authorized 2026-10-16). Production engine code is **not** authorized |
 | Repository | git. `main` = reviewed baseline (`a223fe2`); work in progress on branch **`step-2b`** |
-| Current checkpoint | CP1–CP7 ✅ done: **S1 is complete**; see the [S1 results](research/s1-results.md). **CP8 in progress**: 8a ✅ (the S2 window draws CoreText through Metal; the smoke oracle passes). **Next: 8b**, the formal measurements, then 8c, the S2 results note; see the [Step 2b tracker](research/step-2b-validation-spikes.md#6-checkpoints) |
+| Current checkpoint | CP1–CP8 ✅ done: **S1 and S2 are complete**; see the [S1 results](research/s1-results.md) and [S2 results](research/s2-results.md). **Next: CP9**, the synthesis: owner decisions, ADR-0002 final, ADR-0003 proposed, merge to `main`; see the [Step 2b tracker](research/step-2b-validation-spikes.md#6-checkpoints) |
 | Code | Spike code only, under `spikes/` (throwaway). Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike verification results are in the tracker's §8. S1's findings and recommendation (Pattern B for ADR-0003, conditionally) are in the [S1 results](research/s1-results.md) |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -56,10 +56,17 @@
 - Six tests run under `cargo test` without a window.
 - The Command Line Tools have no offline Metal compiler.
 
+**CP8b and CP8c completed** (S2 measurements and results):
+- Startup: first frame at 174 ms; idle: 0.0% CPU and no wakeups.
+- Build: 6.0 s clean with trimmed bindings, against 29 s with objc2's defaults; the whole workspace builds clean in 8.1 s.
+- [S2 results](research/s2-results.md) written, with the proposed build thresholds T1–T4 for ADR-0002 revisit condition 3.
+
 **Decisions waiting for the owner** (at CP9):
 - S1-Q2: is the ceremony acceptable?
 - ADR-0003: the GC pattern.
 - OQ-15: should S3 become required?
+- OQ-12: accept thresholds T1–T4?
+- Visual check of the S2 window (`cargo run -p s2-window`).
 
 **Verified**
 - `samply` works on this machine without Xcode, including line-level attribution through `dsymutil` and `atos` (Command Line Tools).

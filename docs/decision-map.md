@@ -96,7 +96,7 @@ These are recorded in ADR-0001.
 | 0 | Decision landscape | Done (2026-10-16) |
 | 1 | Requirements: target, JavaScript, posture, defaults | Done: ADR-0001 Accepted |
 | 2a | Implementation language evaluation | Done: reviewed; ADR-0002 provisionally accepted |
-| 2b | Validation spikes: S1 GC heap and DOM, S2 platform and build | **In progress** on branch `step-2b` ([plan and tracker](research/step-2b-validation-spikes.md)). S1 complete ([results](research/s1-results.md)); S2 next. S3 (interpreter micro-benchmark) is deferred; OQ-15 asks whether it should become required |
+| 2b | Validation spikes: S1 GC heap and DOM, S2 platform and build | **In progress** on branch `step-2b` ([plan and tracker](research/step-2b-validation-spikes.md)). S1 complete ([results](research/s1-results.md)); S2 complete ([results](research/s2-results.md)); CP9, the synthesis, is next. S3 (interpreter micro-benchmark) is deferred; OQ-15 asks whether it should become required |
 | 3 | Threat model, trust boundaries, process and sandbox model on macOS | Not started |
 | 4 | Event loop, threading, pipeline data model, invalidation, embedder API | Not started; produces architecture proposal v0 |
 | 5 | Subsystems: text & fonts → rendering/compositing → networking/TLS → style → layout | Not started |
