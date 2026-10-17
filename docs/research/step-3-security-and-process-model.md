@@ -42,7 +42,7 @@ Nothing was compiled or installed. Each such fact names the command or file it c
 | Q2 | Where are the trust boundaries? | [Threat model](../security/threat-model.md) §6 |
 | Q3 | When may Axiom be used for sensitive logins? | [Threat model](../security/threat-model.md) §8 (security levels and the gate) |
 | Q4 | Which processes exist, and what may each one do? | Process model (`docs/security/process-model.md`) §3–§4 |
-| Q5 | How is each process confined on macOS, with the Command Line Tools only and no paid developer account? | macOS confinement note (`docs/research/macos-process-confinement.md`); ADR-0004 |
+| Q5 | How is each process confined on macOS, with the Command Line Tools only and no paid developer account? | [macOS confinement note](macos-process-confinement.md); ADR-0004 |
 | Q6 | Which rules govern IPC between processes of different trust? | Process model §6 |
 | Q7 | How much memory may each process use on 8 GB, and how many processes may run? | Process model §7 |
 | Q8 | JIT policy (OQ-4): under what conditions may a JIT exist, and where is it off? | ADR-0004 |
@@ -66,7 +66,7 @@ Nothing was compiled or installed. Each such fact names the command or file it c
 |---|---|---|
 | **CP1** | This plan; branch `step-3` | ✅ 2026-10-17 (§7) |
 | CP2 | Threat model: assets, adversaries, attack surfaces, trust boundaries, goals and non-goals, security levels | ✅ 2026-10-17 (§7; [threat model](../security/threat-model.md)) |
-| CP3 | Research note: process confinement on macOS, browser precedents, observations on this machine; spike S4 design | Not started |
+| CP3 | Research note: process confinement on macOS, browser precedents, observations on this machine; spike S4 design | ✅ 2026-10-17 (§7; [note](macos-process-confinement.md)) |
 | CP4 | Process model: process types and privileges, site isolation policy, IPC trust rules, memory budgets, staging | Not started |
 | CP5 | Synthesis: ADR-0004 (Proposed) with the JIT policy; decision map, open questions, indexes, status; branch ready for review | Not started |
 
@@ -95,3 +95,16 @@ Nothing was compiled or installed. Each such fact names the command or file it c
 - security levels L0–L3. The sensitive-use gate (L3) requires checks V1–V8.
 
 New question raised: OQ-16, WebAuthn and passkeys without a paid developer account.
+
+### CP3 — completed 2026-10-17
+
+[macOS confinement note](macos-process-confinement.md) written. Main findings:
+- Chrome, Firefox and WebKit all confine content processes with Seatbelt profiles applied through undocumented libsandbox functions (observed with `nm -u` and in WebKit's shipped profiles).
+- In the macOS 27 SDK, the named sandbox profiles kill the process; custom profiles still work for binaries built with SDK 27 (Chrome Canary 158).
+- App Sandbox's base profile is too broad for a renderer, and can't make a child stricter than its parent.
+- Multiple XPC service instances need WebKit's private `_MultipleInstances` key.
+- BrowserEngineKit is not available to an ad-hoc-signed browser.
+
+Recommendation for ADR-0004: helpers launched with `posix_spawn` that apply their own deny-by-default profile first (option O1); the browser process unsandboxed but hardened. Spike S4 (Q1–Q6) is designed in §7 of the note and needs the owner's authorization.
+
+Correction during review: WebKit's XPC services don't carry the hardened-runtime flag. They are platform binaries with library validation only (`codesign -dv`).
