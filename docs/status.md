@@ -6,39 +6,26 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero. Step 3 is in review**: the threat model, the process model and the macOS confinement note are written, and ADR-0004 is Proposed. Production engine code is **not** authorized |
-| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. `main` includes Step 2b. **Step 3 is on branch `step-3`**, not yet merged or pushed |
-| Current checkpoint | Step 3 CP1–CP5 ✅ ([tracker](research/step-3-security-and-process-model.md)); waiting for the owner's review |
-| Code | Spike code only, under `spikes/`; it stays as the baseline for spike S3. Tooling under `tools/`. Step 3 added no code |
+| Phase | **Phase Zero, Step 3: spike S4 is running.** The threat model is accepted, and the process model and ADR-0004 are reviewed. Production engine code is **not** authorized |
+| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. `main` includes Step 2b. **Step 3 is on branch `step-3`, pushed to `origin`**; it merges into `main` (`--no-ff`) once the S4 results are written and ADR-0004 is Accepted |
+| Current checkpoint | Step 3 CP1–CP5 ✅ and reviewed; **CP6 (S4a)** next ([tracker](research/step-3-security-and-process-model.md) §5) |
+| Code | Spike code only, under `spikes/` (S1, S2, and S4 from CP6). Tooling under `tools/` |
 | Verified capabilities | None at engine level. The spikes' verified results are in the [S1 results](research/s1-results.md) and [S2 results](research/s2-results.md). Step 3's observations of this Mac are in the [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final** (2026-10-17), with build thresholds T1–T4 |
 | | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 (2026-10-17) |
-| Proposed decisions | [ADR-0004](adr/0004-process-model-and-sandbox.md): process model, sandbox and JIT policy (2026-10-17). Acceptance should depend on spike S4 |
+| | [Threat model](security/threat-model.md) (2026-10-17), amended: out-of-process iframes are required for L3 |
+| Proposed decisions | [ADR-0004](adr/0004-process-model-and-sandbox.md): process model, sandbox and JIT policy. The owner reviewed it on 2026-10-17 and accepted its parts with amendments. It becomes **Accepted once S4-Q1 and S4-Q2 pass** |
 
-## Next steps: the owner's review of Step 3
+## Next steps: spike S4 (authorized 2026-10-17)
 
-**What to read:**
-1. [ADR-0004](adr/0004-process-model-and-sandbox.md), the decision in one place.
-2. [Threat model](security/threat-model.md) and [process model](security/process-model.md), the design behind it.
-3. [macOS confinement note](research/macos-process-confinement.md), the evidence, including spike S4's design (§7).
+The design is in the [macOS note](research/macos-process-confinement.md) §7; the checkpoints are CP6–CP9 in the [tracker](research/step-3-security-and-process-model.md) §5.
+1. **CP6, S4a.** Probes for S4-Q1 (does a custom deny-by-default profile apply to an ad-hoc-signed helper built with SDK 27?) and S4-Q2 (are files, network, process launching and the named Mach services denied, and do allocation, threads, IPC and logging still work?). Automated under `cargo test`.
+2. **CP7, S4b.** Measurements: helper start-up and footprint; IPC latency and throughput over Mach messages and socket pairs (S4-Q3); the JIT matrix (S4-Q4); CoreText inside a renderer profile (S4-Q5).
+3. **CP8, S4c.** `docs/research/s4-results.md`. ADR-0004 moves to Accepted if S4-Q1 and S4-Q2 pass, by the owner's instruction.
+4. **CP9.** Merge `step-3` into `main` with `--no-ff`.
 
-**Decisions only the owner can make:**
-1. **Threat model.** Accept the assets, adversaries, goals and non-goals. Notable choices: no Safe Browsing-style reputation service (NG5); no strong anti-fingerprinting (NG3); the compromised renderer treated as an expected case.
-2. **Security levels L0–L3, and the gate's checks V1–V8** for sensitive use (threat model §8). Optionally, set a higher bar for L3.
-3. **Authorize spike S4.** It is throwaway code under `spikes/s4/` plus a signing script in `tools/`, in three checkpoints (S4a probes, S4b measurements, S4c results). It confirms the sandbox mechanism on this Mac and measures what a helper costs.
-4. **ADR-0004.** Recommended: accept it once S4-Q1 and S4-Q2 pass. Alternatively, accept it now with S4 as a revisit condition.
-5. **JIT policy J1–J7** (OQ-4), in particular: no JIT before L2; a JIT in one executable only; sensitive sites always without a JIT.
-6. **Cross-site iframes.** Accept the interim rule SI3, which keeps cross-site iframes in the embedder's process under compensating rules, with out-of-process iframes deferred (OQ-18). The alternative is to plan out-of-process iframes earlier.
-7. **Memory targets B1–B7** as initial targets, to be finalized in Step 6.
-8. **Merge `step-3` into `main`** after the review. Push it to GitHub now or only with the merge?
-
-**After the review:**
-- S4, if authorized;
-- then ADR-0004's acceptance, and the merge;
-- then **Step 4**: event loop, threading, pipeline data model, invalidation, embedder API. Spike S3 is required there (ADR-0003, C1).
-
-Step 3 adds these constraints for Step 4: message-based process boundaries; a browser-owned frame tree; one agent cluster per process; a display list free of image and font decoding ([decision map](decision-map.md) §4).
+**Then Step 4:** event loop, threading, pipeline data model, invalidation, embedder API. Spike S3 is required there (ADR-0003, C1). Step 3's constraints for Step 4 are in the [decision map](decision-map.md) §4. Above all, the frame tree, per-frame display lists and browser-routed input come from the first line of code, because out-of-process iframes are mandatory before L3.
 
 ## Session log
 
@@ -65,6 +52,18 @@ Step 3 adds these constraints for Step 4: message-based process boundaries; a br
 **Corrected during review:** WebKit's XPC services carry no hardened-runtime flag. They are platform binaries with library validation only.
 
 **Verification:** the four standard checks pass, unchanged from Step 2b. Every relative link in `docs/` resolves.
+
+**The owner's review** (2026-10-17), recorded in ADR-0004's decision history:
+- **Guiding principle:** no calendar deadline. No architectural corners are cut and no weaker security boundaries are accepted for convenience; staged features rest on an architecture designed for the complete model from day one. Added to the charter as principle 7.
+- **Accepted:**
+  - the threat model;
+  - levels L0–L3 and checks V1–V8, with **out-of-process iframes mandatory for L3** (new check V9);
+  - the JIT policy J1–J7, with global and per-site switches;
+  - SI1–SI7 as staged, with SI3 only at L1 and non-sensitive L2;
+  - memory targets B1–B7 as initial baselines.
+- **ADR-0004 stays Proposed** until S4-Q1 and S4-Q2 pass, then moves to Accepted.
+- **Spike S4 authorized** (S4a, S4b, S4c).
+- **Git:** `step-3` pushed now; it merges into `main` with `--no-ff` after S4.
 
 ### 2026-10-17 — Session 4 (renamed to Axiom)
 

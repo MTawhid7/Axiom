@@ -1,8 +1,8 @@
 # Axiom — Design Documentation
 
 Axiom is a from-first-principles browser engine for personal use on macOS. **The project is in Phase Zero: research, requirements and architecture.**
-- **Authorized:** design documents. The Step 2b validation spikes (complete) remain in `spikes/` as throwaway code.
-- **Not yet authorized:** production engine code, and spike S4 (proposed in Step 3).
+- **Authorized:** design documents, and spike S4 (Step 3, authorized 2026-10-17), which is throwaway code in `spikes/s4/`. The Step 2b spikes (complete) remain in `spikes/`.
+- **Not yet authorized:** production engine code.
 
 These documents are the project's source of truth. Conversation history is not.
 
@@ -25,15 +25,15 @@ These documents are the project's source of truth. Conversation history is not.
 | ↳ [0001-scope-and-target.md](adr/0001-scope-and-target.md) | Target, JavaScript strategy, security posture, defaults | **Accepted** |
 | ↳ [0002-implementation-language.md](adr/0002-implementation-language.md) | Implementation language (Rust) | **Accepted** (final, 2026-10-17) |
 | ↳ [0003-gc-handle-and-rooting-pattern.md](adr/0003-gc-handle-and-rooting-pattern.md) | GC handle and rooting pattern (Pattern B, Nova style; obligations C1–C5) | **Accepted** (2026-10-17) |
-| ↳ [0004-process-model-and-sandbox.md](adr/0004-process-model-and-sandbox.md) | Process model, sandbox and JIT policy | **Proposed** (2026-10-17) |
-| [security/threat-model.md](security/threat-model.md) | Assets, adversaries, attack surfaces, trust boundaries, security goals, security levels L0–L3 | Draft, for review with ADR-0004 |
-| [security/process-model.md](security/process-model.md) | Process types and privileges, site isolation, IPC trust rules, memory budgets | Draft, for review with ADR-0004 |
+| ↳ [0004-process-model-and-sandbox.md](adr/0004-process-model-and-sandbox.md) | Process model, sandbox and JIT policy | **Proposed** (2026-10-17); reviewed by the owner, and Accepted once spike S4-Q1 and S4-Q2 pass |
+| [security/threat-model.md](security/threat-model.md) | Assets, adversaries, attack surfaces, trust boundaries, security goals, security levels L0–L3 | **Accepted** (2026-10-17), amended: out-of-process iframes required for L3 |
+| [security/process-model.md](security/process-model.md) | Process types and privileges, site isolation, IPC trust rules, memory budgets | Reviewed (2026-10-17); binding with ADR-0004 |
 | [technology/language-evaluation.md](technology/language-evaluation.md) | Detailed language comparison and recommendation | Reviewed |
 | [research/step-2b-validation-spikes.md](research/step-2b-validation-spikes.md) | Step 2b plan and checkpoint tracker (spikes S1 and S2) | Complete (2026-10-17) |
 | [research/s1-results.md](research/s1-results.md) | S1 results: `unsafe` containment, ceremony, runtime, memory and build cost of the two GC patterns; recommendation for ADR-0003 | Reviewed (2026-10-17) |
 | [research/s2-results.md](research/s2-results.md) | S2 results: AppKit, Metal and CoreText through objc2 without Xcode; `unsafe` surface; build and run-time cost; proposed build thresholds for ADR-0002 | Reviewed (2026-10-17) |
-| [research/step-3-security-and-process-model.md](research/step-3-security-and-process-model.md) | Step 3 plan and checkpoint tracker | In review (2026-10-17) |
-| [research/macos-process-confinement.md](research/macos-process-confinement.md) | Process confinement on macOS: Seatbelt, App Sandbox, hardened runtime, JIT, launch and IPC options; browser precedent; spike S4 design | Draft, for review with ADR-0004 |
+| [research/step-3-security-and-process-model.md](research/step-3-security-and-process-model.md) | Step 3 plan and checkpoint tracker, including spike S4 | In progress (S4) |
+| [research/macos-process-confinement.md](research/macos-process-confinement.md) | Process confinement on macOS: Seatbelt, App Sandbox, hardened runtime, JIT, launch and IPC options; browser precedent; spike S4 design | Reviewed (2026-10-17) |
 | [research/](research/README.md) | Research conventions and notes | Living |
 
 **Planned documents**, each created when its Phase Zero step begins:

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft, for review with ADR-0004 |
+| **Status** | **Accepted** by the owner (2026-10-17), with one amendment: out-of-process iframes are a prerequisite for L3 (§8, check V9) |
 | **Question** | What does Axiom protect, from whom, through which entry points, and where does trust change? When may it be used for sensitive logins? |
 | **Feeds** | [Process model](process-model.md), ADR-0004, the security sections of the architecture (Step 4), the testing strategy (Step 6) |
 | **Builds on** | [ADR-0001](../adr/0001-scope-and-target.md) (R3 and the defaults), [ADR-0002](../adr/0002-implementation-language.md) (the `unsafe` policy), [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md) (one heap per agent) |
@@ -17,7 +17,7 @@ Claims follow the [research conventions](../research/README.md): **sourced facts
 - **What we protect, in order:** credentials and logged-in sessions; each site's data, including from other sites; the user's files and the rest of the Mac; the integrity of the browser's own interface.
 - **Who we defend against:** malicious web content; a renderer that such content has compromised; an attacker on the network. A compromised renderer is an expected event, not an exotic one, so the design assumes it.
 - **The central rule:** untrusted input is handled only where a compromise gains little. Code that parses web content runs in sandboxed, site-locked processes. The privileged browser process handles untrusted data only in safe Rust, and never parses web content itself.
-- **Sensitive use is gated.** Security levels L0–L3 (§8) say what Axiom may be used for at each stage. Email, banking and accounts with write access wait for L3, whose checks V1–V8 must pass first.
+- **Sensitive use is gated.** Security levels L0–L3 (§8) say what Axiom may be used for at each stage. Email, banking and accounts with write access wait for L3, whose checks V1–V9 must pass first. L3 also requires out-of-process iframes (the owner's amendment, 2026-10-17).
 
 ## 2. Scope and assumptions
 
@@ -165,7 +165,7 @@ ADR-0001 gates sensitive use "until the isolation milestone is verified". The le
 | **L0** | Prototype | Anything goes, including a single process and no sandbox | Local test pages and public documents. **Never credentials** |
 | **L1** | Sandboxed | Web content is parsed and run only in renderer processes under a deny-by-default sandbox. A separate, sandboxed network process. The browser process parses no web content. IPC follows IR1–IR10. SG1, SG4–SG7, SG9 and SG11 hold | General browsing **without logging in** |
 | **L2** | Site-isolated | Renderers are locked to one site. Credentials and storage are mediated with lock checks. ORB-style response blocking is on. Third-party state is partitioned by top-level site. SG2, SG3 and SG10 hold | Logging in to accounts that are **not** sensitive |
-| **L3** | Sensitive-use gate passed | Checks V1–V8 pass and their evidence is recorded | Email, banking, and accounts with write access |
+| **L3** | Sensitive-use gate passed | **Out-of-process iframes:** every cross-site frame renders in a process locked to its own site (the owner's amendment, 2026-10-17). Checks V1–V9 pass, and their evidence is recorded | Email, banking, and accounts with write access |
 
 **The gate's checks** (evidence for L3):
 
@@ -179,6 +179,7 @@ ADR-0001 gates sensitive use "until the isolation milestone is verified". The le
 | V6 | **A dependency audit:** no open advisories |
 | V7 | **The JIT policy holds:** sensitive sites run without a JIT, and the global switch works |
 | V8 | **A written threat-model review.** This document is re-read against the code as built, and every deviation is recorded |
+| V9 | **Out-of-process iframe tests** (added with the owner's amendment, 2026-10-17). In tests, every cross-site frame runs in a renderer locked to its own site. A renderer that requests another site's frame, or that site's data, is terminated |
 
 **Inference.** L3 is the bar at which a single developer can reasonably trust Axiom with high-value accounts. It is lower than a commercial browser's bar, because it lacks external audits and a vulnerability reward programme. The owner may set a higher bar.
 
@@ -190,7 +191,7 @@ ADR-0001 gates sensitive use "until the isolation milestone is verified". The le
 | **No automatic security updates** | Axiom is built locally. Fixes in dependencies arrive only when the owner rebuilds. A routine of advisory checks and rebuilds is needed (Step 6) |
 | **System parsers inside renderers** | A bug in CoreText or ImageIO compromises a renderer (AD2). A sandbox escape still needs a second bug |
 | **Spectre inside one site's process** | Accepted. Same-site data may share a process |
-| **Cross-site iframes before out-of-process iframes exist** | Until frames can render in separate processes, a cross-site iframe shares its embedder's process. The [process model](process-model.md) §5 limits the exposure: partitioned third-party state, and no sensitive site rendered inside another site's process |
+| **Cross-site iframes before out-of-process iframes exist** | At L1 and non-sensitive L2 only, a cross-site iframe may share its embedder's process. The [process model](process-model.md) §5 limits the exposure: partitioned third-party state, ORB, and no sensitive site rendered inside another site's process. L3 requires out-of-process iframes |
 | **WebAuthn and passkeys** | **Hypothesis:** the platform authenticator needs an Apple entitlement that ad-hoc signing can't claim. Chrome's main executable carries `com.apple.developer.web-browser.public-key-credential` (observed with `codesign -d` on this machine). New open question OQ-16 |
 
 ## 10. Open questions raised

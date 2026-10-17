@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **In review** (2026-10-17): CP1–CP5 complete; waiting for the owner's decisions |
+| **Status** | **In progress:** CP1–CP5 complete and reviewed by the owner (2026-10-17); spike S4 (CP6–CP8) authorized and running |
 | **Authorized** | 2026-10-17, by the owner ("Continue implementation"), as Step 3 design work. Documents only (§2) |
 | **Branch** | `step-3`, to be merged into `main` after the owner's review |
 | **Feeds** | ADR-0004 (process model and sandbox); OQ-4 (JIT policy); the architecture proposal in Step 4 |
@@ -24,7 +24,11 @@ Decide what Axiom protects, from whom, and where the trust boundaries lie. Then 
 | Input | Effect |
 |---|---|
 | "Continue implementation", with [status.md](../status.md) naming Step 3 as next | This plan. Step 3 is design work under the Phase Zero rule |
-| Code, including spikes, needs a specific authorization ([status.md](../status.md), charter §7) | No code is written in Step 3. Spike S4 is designed in CP3 and listed for the owner's decision at the review gate |
+| Code, including spikes, needs a specific authorization ([status.md](../status.md), charter §7) | No code was written in CP1–CP5. Spike S4 was designed in CP3 and put to the owner at the review gate |
+| **The owner's review, 2026-10-17:** threat model accepted; L0–L3 and V1–V8 accepted, with out-of-process iframes mandatory for L3; JIT policy accepted, with global and per-site switches; SI1–SI7 accepted as staged, SI3 only at L1 and non-sensitive L2; memory targets accepted as initial baselines; the guiding principle that no architectural corners are cut for convenience | Recorded in ADR-0004's decision history, the threat model (check V9), the process model, open questions (OQ-4, OQ-18 resolved), the decision map and charter principle 7 |
+| **Spike S4 authorized:** S4a (S4-Q1, Q2), S4b (S4-Q3, Q4, Q5), S4c (results) | CP6–CP8 (§5) |
+| ADR-0004 moves to Accepted once S4-Q1 and S4-Q2 pass | CP8 |
+| Push `step-3` now. Merge it into `main` with `--no-ff` once the S4 results are written and ADR-0004 is Accepted | Pushed 2026-10-17; CP9 |
 
 **Evidence gathering without code.** Some facts about this Mac were read with existing system tools, which change nothing on the machine:
 - SDK headers, `.tbd` export stubs and man pages;
@@ -54,6 +58,7 @@ Nothing was compiled or installed. Each such fact names the command or file it c
 3. [`docs/security/process-model.md`](../security/process-model.md)
 4. [`docs/adr/0004-process-model-and-sandbox.md`](../adr/0004-process-model-and-sandbox.md) (Proposed), including the JIT policy for OQ-4
 5. Updates to the decision map, open questions, indexes and status
+6. Spike S4: code in `spikes/s4/`, scripts in `tools/`, results in `docs/research/s4-results.md`
 
 ## 5. Checkpoints
 
@@ -62,13 +67,19 @@ Nothing was compiled or installed. Each such fact names the command or file it c
 - the four standard checks still green (no code changes, so they must stay green): `cargo fmt --all --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, `tools/check-unsafe-policy.sh`;
 - a commit on `step-3` and an update to this tracker.
 
+From CP6 on, the four standard checks cover real code again. S4-Q6, the fallbacks, runs only if S4-Q1 or S4-Q2 fails: the owner's scope for S4 lists Q1–Q5, and App Sandbox would leave containers under `~/Library/Containers`.
+
 | CP | Scope | Status |
 |---|---|---|
 | **CP1** | This plan; branch `step-3` | ✅ 2026-10-17 (§7) |
 | CP2 | Threat model: assets, adversaries, attack surfaces, trust boundaries, goals and non-goals, security levels | ✅ 2026-10-17 (§7; [threat model](../security/threat-model.md)) |
 | CP3 | Research note: process confinement on macOS, browser precedents, observations on this machine; spike S4 design | ✅ 2026-10-17 (§7; [note](macos-process-confinement.md)) |
 | CP4 | Process model: process types and privileges, site isolation policy, IPC trust rules, memory budgets, staging | ✅ 2026-10-17 (§7; [process model](../security/process-model.md)) |
-| CP5 | Synthesis: ADR-0004 (Proposed) with the JIT policy; decision map, open questions, indexes, status; branch ready for review | ✅ 2026-10-17 (§7; [ADR-0004](../adr/0004-process-model-and-sandbox.md)) |
+| CP5 | Synthesis: ADR-0004 (Proposed) with the JIT policy; decision map, open questions, indexes, status; branch ready for review | ✅ 2026-10-17 (§7; [ADR-0004](../adr/0004-process-model-and-sandbox.md)); reviewed by the owner |
+| CP6 | **S4a:** sandbox entry and denial probes (S4-Q1, S4-Q2), automated under `cargo test`; signing script | Not started |
+| CP7 | **S4b:** measurements: helper start-up and footprint, IPC latency and throughput over Mach messages and socket pairs (S4-Q3); the JIT matrix (S4-Q4); CoreText inside a renderer profile (S4-Q5) | Not started |
+| CP8 | **S4c:** `docs/research/s4-results.md`. ADR-0004 moves to Accepted if S4-Q1 and S4-Q2 pass. Docs synthesis | Not started |
+| CP9 | Merge `step-3` into `main` (`--no-ff`) | Not started |
 
 ## 6. Method
 
@@ -128,3 +139,7 @@ Correction during review: WebKit's XPC services don't carry the hardened-runtime
 - Every relative link in `docs/` resolves, and the four standard checks pass.
 
 **Review gate.** The owner decides on the threat model, the security levels, spike S4, ADR-0004, the JIT policy, SI3, the memory targets, and the merge ([status](../status.md), "Next steps").
+
+### The owner's review — 2026-10-17
+
+Decisions 1–8 are recorded in §2 and in the documents named there. `step-3` was pushed to `origin` for off-site backup. Spike S4 starts at CP6.

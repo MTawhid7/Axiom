@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft, for review with ADR-0004 |
+| **Status** | **Reviewed** by the owner (2026-10-17). Spike S4 (§7) authorized the same day; its results will be in `docs/research/s4-results.md` |
 | **Question** | How can Axiom confine its helper processes on macOS 27, building with the Command Line Tools only and signing ad hoc (no paid developer account)? How do Chromium, WebKit and Firefox do it, and what does that imply for Axiom? |
 | **Feeds** | ADR-0004; [process model](../security/process-model.md); [threat model](../security/threat-model.md) §9; spike S4 (§7) |
 | **Last updated** | 2026-10-17 |

@@ -2,10 +2,17 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-17). Acceptance should depend on spike S4 confirming the sandbox mechanism (D8) |
+| **Status** | **Proposed** (2026-10-17). The owner reviewed it on 2026-10-17 and accepted its parts, with amendments (decision history). By the owner's instruction, it moves to **Accepted** once spike S4-Q1 and S4-Q2 pass on this Mac (D8) |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Threat model](../security/threat-model.md), [process model](../security/process-model.md), [macOS confinement note](../research/macos-process-confinement.md), [Step 3 tracker](../research/step-3-security-and-process-model.md), [ADR-0001](0001-scope-and-target.md) (R3, consequence 4), [ADR-0002](0002-implementation-language.md) (`unsafe` policy), [ADR-0003](0003-gc-handle-and-rooting-pattern.md) (one heap per agent), [S2 results](../research/s2-results.md) |
+
+## Decision history
+
+| Date | Event |
+|---|---|
+| 2026-10-17 | Proposed at the end of Step 3 (CP5) |
+| 2026-10-17 | **Owner's review.** Guiding principle: "we have no calendar deadline or fixed time limit on this project. We will not cut architectural corners or accept weaker security boundaries for convenience. Where we stage features, the underlying architecture must be designed for the complete, uncompromising model from day one." Decisions: the threat model is accepted; security levels L0–L3 and checks V1–V8 are accepted, with **full out-of-process iframes made a mandatory prerequisite for L3** (D4, D5); the JIT policy J1–J7 is accepted, with global and per-site switches (D7); SI1–SI7 are accepted as staged, with SI3 permitted only at L1 and non-sensitive L2 (D4); memory targets B1–B7 are accepted as initial baselines (D6); spike S4 is authorized. **The ADR stays Proposed until S4-Q1 and S4-Q2 pass, then moves to Accepted** |
 
 ## Question
 
@@ -31,7 +38,7 @@ The answer must meet ADR-0001 R3: a compromised renderer must expose neither cre
 | A1 | **One process,** relying on Rust's memory safety | No OS boundary between web content and the user's authority |
 | A2 | **A process per tab,** no site isolation | Chrome before 2018; Safari historically |
 | A3 | **Full site isolation with out-of-process iframes from the start** | Chrome on desktop today |
-| **A4** | **Staged** (recommended): sandboxed renderers and a network process first; then site-locked renderers, with cross-site iframes in their embedder's process under compensating rules; out-of-process iframes later | The [process model](../security/process-model.md) |
+| **A4** | **Staged** (recommended): sandboxed renderers and a network process first; then site-locked renderers, with cross-site iframes in their embedder's process under compensating rules; out-of-process iframes before sensitive use (L3) | The [process model](../security/process-model.md) |
 
 **Confinement mechanism on macOS** ([macOS note](../research/macos-process-confinement.md) §4)
 
@@ -62,7 +69,7 @@ The answer must meet ADR-0001 R3: a compromised renderer must expose neither cre
 | A compromised renderer (threat model AD2) reaches user files | Yes | No | No | No |
 | … reaches other sites' data | Yes | Yes, any site in the same tab | No | No for top-level sites. Embedded cross-site frames carry only partitioned state; sensitive sites are never embedded in another site's process |
 | Spectre-class reads of cross-site data | Yes | Yes | No | As the row above |
-| Implementation cost | Lowest | Moderate | Highest: frame-tree replication, cross-process compositing and input routing | Moderate now; A3's cost deferred, not avoided |
+| Implementation cost | Lowest | Moderate | Highest: frame-tree replication, cross-process compositing and input routing | A3's full cost, paid before L3; the architecture carries it from the start (SI4) |
 | Memory | Lowest | Low | +9–13% over A2 in Chrome [3] | Between A2 and A3 |
 | Path to A3 | Rewrite | Hard | — | Designed in (SI4) |
 
@@ -99,11 +106,13 @@ The full capability matrix is in the [process model](../security/process-model.m
 - The transport (Mach messages or socket pairs) is chosen in Step 4 from S4-Q3's measurements (OQ-17).
 
 **D4. Site isolation.**
-- Rules SI1–SI7 ([process model](../security/process-model.md) §5): site locks from L2; cross-site iframes in the embedder's process under three compensating rules (partitioned third-party state, ORB, no sensitive site in another site's process); out-of-process iframes as a designed-in target (OQ-18); process limits never merge sites.
+- Rules SI1–SI7 ([process model](../security/process-model.md) §5): site locks from L2; process limits never merge sites.
+- **Cross-site iframes.** At L1 and non-sensitive L2 only, a cross-site iframe may render in its embedder's process under three compensating rules (SI3): partitioned third-party state, ORB, and no sensitive site in another site's process.
+- **Out-of-process iframes are mandatory before L3** (owner, 2026-10-17; OQ-18 resolved). From its first line of code, the Step 4 data model has a browser-owned frame tree, per-frame display lists and browser-routed input (SI4), so that moving to out-of-process iframes needs no architectural rewrite.
 - **Sensitive sites** are the owner's list plus Chromium's heuristics for sites likely to hold user data: password entry, OAuth login, COOP.
 
 **D5. Security levels and the gate.**
-- Levels L0–L3, and the checks V1–V8 that gate sensitive use ([threat model](../security/threat-model.md) §8).
+- Levels L0–L3, and the checks V1–V9 that gate sensitive use ([threat model](../security/threat-model.md) §8). V9, added by the owner's amendment, verifies out-of-process iframes.
 - Email, banking and accounts with write access wait for L3.
 
 **D6. Memory.**
@@ -117,7 +126,7 @@ The full capability matrix is in the [process model](../security/process-model.m
 | J1 | **Interpreter first. Whether to build a JIT is decided by evidence:** spike S3 in Step 4, and target-corpus measurements once OQ-2 is answered |
 | J2 | **No JIT before L2,** and not before the JIT renderer variant passes the sandbox escape tests (V1) |
 | J3 | **Only one executable, `renderer-jit`, carries `com.apple.security.cs.allow-jit`.** Every other Axiom executable runs under the hardened runtime without it, so the kernel refuses to give it executable memory. Every profile except `renderer-jit`'s also contains `(deny dynamic-code-generation)` |
-| J4 | **Sensitive sites, and every document rendered in a sensitive site's process, run in the no-JIT renderer.** A global switch moves every site to the no-JIT renderer, like Lockdown Mode, whose WebKit content process has no JIT entitlement (observed). A mode that disables the JIT on unfamiliar sites, like Edge's "balanced" mode, can be added later as a setting |
+| J4 | **Sensitive sites, and every document rendered in a sensitive site's process, run in the no-JIT renderer.** A **global switch** moves every site to the no-JIT renderer, like Lockdown Mode, whose WebKit content process has no JIT entitlement (observed). A **per-site switch** does the same for any site the owner chooses. A mode that disables the JIT on unfamiliar sites, like Edge's "balanced" mode, can be added later as a setting |
 | J5 | **Generated code is written only through statically allowlisted callbacks** (`pthread_jit_write_with_callback_np` with `jit-write-allowlist`), as in every WebKit process. Code is flushed with `sys_icache_invalidate` and lives in the single `MAP_JIT` region |
 | J6 | **A WebAssembly compiler counts as a JIT** and follows J1–J5. An interpreter keeps WebAssembly working in no-JIT renderers, as in Edge's enhanced security mode [6] |
 | J7 | **Before a JIT ships,** it needs: differential testing against the interpreter (test262 and fuzzing); a design for containing memory corruption within the JS heap; and a tested global switch (V7). JIT bugs are typically logic bugs that become memory corruption [5]. **Hypothesis:** Pattern B's 32-bit handles into arenas (ADR-0003) are a natural basis for that containment design, to be examined if J1 leads to a JIT |
@@ -136,7 +145,7 @@ The full capability matrix is in the [process model](../security/process-model.m
 2. **Staging (A4) puts each cost where it buys the most.**
    - Sandboxed renderers and a network process protect files and credentials early (L1).
    - Site locks for top-level sites cost about a tenth more memory [3] and protect sites from one another (L2).
-   - Out-of-process iframes, the most expensive part, come last. Meanwhile partitioned third-party state limits what an embedded frame exposes, and sensitive sites are never embedded in another site's process.
+   - Out-of-process iframes, the most expensive part, come last, but before sensitive use (L3). Until then, partitioned third-party state limits what an embedded frame exposes, and sensitive sites are never embedded in another site's process.
 3. **O1 is the only option that gives renderers a WebKit-class sandbox** without Apple's approval. Chrome and Firefox show it works for third-party browsers on macOS 27; WebKit's profiles show what it can express.
 4. **IR1–IR10 turn ADR-0002's "no `unsafe` in IPC decoding" into a complete trust model.** Decoding, deciding and failing closed are each specified.
 5. **The JIT policy enforces ADR-0001's intent with mechanisms rather than conventions.** Entitlements are per executable and the kernel enforces them; profiles deny code generation as well. The data supports the trade-off. In V8's 2019 measurements, the JIT-less slowdown was large on compute-heavy benchmarks but small in a browsing session [7], and sensitive sites are mostly of the browsing kind (inference).
@@ -154,7 +163,7 @@ The full capability matrix is in the [process model](../security/process-model.m
 |---|---|---|---|
 | Apple removes or restricts custom Seatbelt profiles | Low to medium; the macOS 27 SDK already kills processes that use named profiles | High | Fallback O2. Chrome and Firefox would break too, so a change would be visible in betas (inference). Run the sandbox test suite (V1) on every macOS update |
 | Profiles break when macOS frameworks change what they access | Medium | Medium | Minimal profiles grown by evidence; V1 tests; logging of sandbox denials in development |
-| Cross-site iframes in the embedder's process leak more than partitioning suggests | Medium | Medium | SI3's sensitive-site rule; out-of-process iframes as the target (OQ-18) |
+| Cross-site iframes in the embedder's process leak more than partitioning suggests | Medium | Medium, limited to L1 and non-sensitive L2 | SI3's sensitive-site rule. Out-of-process iframes are mandatory before L3 |
 | Memory targets prove too tight | Medium | Medium | Measure in S4 and Step 6. Same-site reuse and tab discarding. Revisit B5 rather than merge sites |
 | IPC decoders become the main attack surface of the browser | High (by design) | High | Generated safe Rust decoders; fuzzing (V2); IR2 and IR3 |
 | No WebAuthn platform authenticator without a restricted entitlement | Medium | Medium | OQ-16 |
@@ -164,13 +173,13 @@ The full capability matrix is in the [process model](../security/process-model.m
 - **S4-Q1 or S4-Q2 fails,** or a later macOS release stops custom profiles: switch D2 to O2 and restate the guarantees.
 - **A public route to strict, multi-instance helper sandboxes appears,** such as Enhanced Security helper extensions (S4-Q6) or public multiple XPC instances. Re-evaluate D2, including sandboxing the browser process.
 - **Memory measurements show B5 or B6 can't be met without merging sites.** Re-decide SI6 with the owner.
-- **Evidence shows SI3's compensating rules are insufficient** for a site class the owner uses. Bring out-of-process iframes forward.
+- **Evidence shows SI3's compensating rules are insufficient** even at L1 or non-sensitive L2. Bring out-of-process iframes forward.
 
 ## Consequences
 
 **Step 4 must design:**
 - message-based interfaces at every future process boundary (PM6);
-- a frame tree owned by the browser, with per-frame display lists and input routed by the browser (SI4);
+- a frame tree owned by the browser, with per-frame display lists and input routed by the browser, from the first line of code (SI4), so that out-of-process iframes need no architectural rewrite;
 - one agent cluster per process (SI7);
 - a display list that never requires the browser to decode images or parse fonts.
 

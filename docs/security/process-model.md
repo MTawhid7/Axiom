@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft, for review with ADR-0004 |
+| **Status** | **Reviewed** by the owner (2026-10-17). Accepted: SI1–SI7 as staged, with SI3 limited to L1 and non-sensitive L2 and out-of-process iframes required for L3; B1–B7 as initial baselines. Becomes binding with ADR-0004 |
 | **Question** | Into which processes is Axiom split? What may each one do, how are sites assigned to processes, which rules govern IPC, and how much memory may each process use on the 8 GB M1? |
 | **Feeds** | ADR-0004; the architecture proposal (Step 4): event loop, pipeline, embedder API; Step 5 subsystems; Step 6 budgets and roadmap |
 | **Builds on** | [Threat model](threat-model.md); [macOS confinement note](../research/macos-process-confinement.md); [ADR-0001](../adr/0001-scope-and-target.md); [ADR-0002](../adr/0002-implementation-language.md); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [S2 results](../research/s2-results.md) |
@@ -21,7 +21,7 @@ Everything here is **planned**; nothing is implemented. Claims about other brows
   - a **GPU** process, once web content can send work to the GPU;
   - **utility** processes for isolated jobs such as media decoding.
 - **Confinement on macOS.** Every helper is a separate executable that applies its own deny-by-default Seatbelt profile before it touches input (option O1 in the [macOS note](../research/macos-process-confinement.md)). The browser process is unsandboxed but hardened, and it never parses web content.
-- **Cross-site iframes stay in their embedder's process until out-of-process iframes exist,** under three compensating rules: third-party state partitioned by top-level site, ORB-style response blocking, and no sensitive site ever rendered inside another site's process (§5).
+- **Cross-site iframes may stay in their embedder's process only at L1 and non-sensitive L2,** under three compensating rules: third-party state partitioned by top-level site, ORB-style response blocking, and no sensitive site ever rendered inside another site's process. **Out-of-process iframes are mandatory before L3** (§5; the owner's decision, 2026-10-17).
 - **IPC rules IR1–IR10** make every message from a less privileged process untrusted input. Decoding is safe Rust, decisions come from the receiver's own records, and any violation kills the sender (§6).
 - **Initial memory targets:** about 1 GB for a typical session of 10 tabs, with a soft limit of 16 renderers on 8 GB, same-site process reuse, and tab discarding under memory pressure. These targets are not measurements (§7).
 
@@ -105,8 +105,8 @@ Everything here is **planned**; nothing is implemented. Claims about other brows
 |---|---|---|
 | SI1 | Every renderer is locked to one site before it receives content. The lock never changes | L2 |
 | SI2 | A top-level document of site X runs only in a renderer locked to X. Cross-site navigations switch processes, and the browser alone decides when | L2 |
-| SI3 | **Cross-site iframes, until out-of-process iframes exist,** render in the embedder's process, under three compensating rules: (a) **partitioned third-party state:** a cross-site frame's cookies and storage are keyed by the top-level site and the frame's site, so it gets no unpartitioned credentials; third-party cookies are blocked by default; (b) **response blocking:** the network process applies ORB, so cross-site no-CORS HTML, JSON and XML never reach a renderer [7]; (c) **no sensitive site inside another site's process:** as a cross-site subframe, a sensitive site (SI5) is either loaded out of process, once that exists, or replaced by a placeholder that opens it in its own tab | L2 |
-| SI4 | **Out-of-process iframes are the target,** and the architecture must not preclude them. The browser owns the frame tree, each frame produces its own display list for the compositor, and the browser routes input to frames. These are constraints on Step 4 | Design: Step 4 |
+| SI3 | **Cross-site iframes, at L1 and non-sensitive L2 only** (the owner's decision, 2026-10-17), render in the embedder's process, under three compensating rules: (a) **partitioned third-party state:** a cross-site frame's cookies and storage are keyed by the top-level site and the frame's site, so it gets no unpartitioned credentials; third-party cookies are blocked by default; (b) **response blocking:** the network process applies ORB, so cross-site no-CORS HTML, JSON and XML never reach a renderer [7]; (c) **no sensitive site inside another site's process:** as a cross-site subframe, a sensitive site (SI5) is either loaded out of process, once that exists, or replaced by a placeholder that opens it in its own tab | L2 |
+| SI4 | **Out-of-process iframes are mandatory before L3** (the owner's decision, 2026-10-17). From the first line of code, the browser owns the frame tree, each frame produces its own display list for the compositor, and the browser routes input to frames, so that moving to out-of-process iframes needs no architectural rewrite. These are constraints on Step 4 | Design: Step 4. Required: L3 |
 | SI5 | **Sensitive sites** are the owner's explicit list plus heuristics that Chromium uses on memory-constrained devices: sites where the user entered a password, logged in through OAuth, or met a COOP header [2]. A sensitive site always gets a dedicated process, runs without a JIT (ADR-0004), and is never embedded in another site's process | L2 |
 | SI6 | **Process limits never merge sites.** Above the soft limit (§7, B5), same-site processes are reused, but different sites never share a renderer. Memory pressure is handled by discarding background tabs. Chromium's desktop limit is likewise soft [2] | L2 |
 | SI7 | **Workers and agent clusters.** A dedicated worker runs in its document's process. Shared and service workers run in a renderer locked to their site. A cross-origin isolated browsing context group (COOP plus COEP) gets its own processes, because `SharedArrayBuffer` can't leave its agent cluster [6]. Input to OQ-5 | L2 |
@@ -115,7 +115,7 @@ Everything here is **planned**; nothing is implemented. Claims about other brows
 - **Full out-of-process iframes are expensive.** Every process must hold a representation of the whole frame tree [9]. Chromium needed proxies and replicated frame state [3]. WebKit was still at "step 2" of its plan in January 2025 [9], and in July 2025 it added a shared process for cross-site iframes "for performance reasons" [9].
 - **Partitioning limits what an iframe exposes.** With third-party state partitioned, a cross-site iframe in the embedder's process carries only data that its site associates with the embedder's top-level site. A Spectre read or a compromised renderer there gains little that the embedder couldn't already obtain through that partition.
 - **The residual exposure** is the embedded site's public content, unpartitioned state the user explicitly grants (a Storage Access API grant must then require a separate process, or be refused), and timing side channels.
-- **Rule (c) covers the most valuable targets.** Clearing L3 (threat model §8) requires SI3 to hold, or out-of-process iframes to exist.
+- **Rule (c) covers the most valuable targets** during prototyping. SI3 is not enough for sensitive use: L3 requires out-of-process iframes (threat model §8, check V9).
 
 **Memory evidence.** Chrome with Site Isolation, measured on desktop in 2018 [3]:
 - the median number of renderer processes rose from 4.4 to 6.2, with 6.0 unique sites open;
@@ -203,7 +203,7 @@ The levels are defined in the [threat model](threat-model.md) §8.
 | L0 | Browser. The renderer and network work may run inside it, through the message interfaces (PM6) | Earliest milestones: local test pages and public documents; never credentials |
 | L1 | Browser, renderers (one per tab, not locked), network process. All helpers sandboxed (O1); the browser composites | Browsing without logging in |
 | L2 | L1 plus site locks and SI1–SI7, partitioned third-party state, ORB. A GPU process arrives with the first web-supplied GPU work | Logins to accounts that aren't sensitive |
-| L3 | The gate's checks V1–V8 pass. A JIT renderer variant may exist under the JIT policy. Out-of-process iframes when built | Sensitive accounts |
+| L3 | **Out-of-process iframes in place.** The gate's checks V1–V9 pass. A JIT renderer variant may exist under the JIT policy | Sensitive accounts |
 
 **Recommendation** (inference). The renderer becomes a separate process no later than the first milestone that loads pages from the network beyond public documents.
 - Retrofitting a process boundary is what made Firefox's Electrolysis and Fission take years (decision map §2, item 3).
