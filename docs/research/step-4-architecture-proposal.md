@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **In progress.** CP1–CP9 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP10–CP12 run without pausing, and the next stop is Gate B, after CP12 |
+| **Status** | **In progress.** CP1–CP10 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP11–CP12 run without pausing, and the next stop is Gate B, after CP12 |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only. Spike S3's code needs a separate go-ahead once its design is ready (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
@@ -109,7 +109,7 @@ Nothing is compiled or installed before Gate B. Each such fact names the command
 | 7 | [`docs/architecture/invalidation.md`](../architecture/invalidation.md) (P3) | CP7 |
 | 8 | [`docs/architecture/input-and-accessibility.md`](../architecture/input-and-accessibility.md) (SI4) | CP8 |
 | 9 | [`docs/architecture/embedder-api.md`](../architecture/embedder-api.md) (F4, OQ-11) | CP9 |
-| 10 | `docs/architecture/script-and-heap.md` (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5), and spike S3's design in this tracker (§10) | CP10 |
+| 10 | [`docs/architecture/script-and-heap.md`](../architecture/script-and-heap.md) (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5), and spike S3's design in this tracker (§10) | CP10 |
 | 11 | `docs/architecture/overview.md`: the architecture proposal v0 | CP11 |
 | 12 | ADRs, Proposed. Provisional set: 0005, IPC transport and interfaces; 0006, event loop and threading; 0007, frame tree, pipeline and invalidation; 0008, script, agents and heap (accepted after S3); 0009, engine/embedder API and shell. CP12 may regroup them, and Gate B reports any change | CP12 |
 | 13 | Updates to the decision map, open questions, indexes, status and spikes README | CP12, CP15 |
@@ -168,7 +168,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | CP7 | Invalidation and incremental updates (P3) | ✅ 2026-10-17 (§11; [document](../architecture/invalidation.md)) |
 | CP8 | Input, focus, hit testing, scrolling and accessibility across frames (SI4) | ✅ 2026-10-17 (§11; [document](../architecture/input-and-accessibility.md)) |
 | CP9 | Engine/embedder API and shell (F4, OQ-11) | ✅ 2026-10-17 (§11; [document](../architecture/embedder-api.md)) |
-| CP10 | Script, agents and heap (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5); spike S3's design | |
+| CP10 | Script, agents and heap (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5); spike S3's design | ✅ 2026-10-17 (§11; [document](../architecture/script-and-heap.md); S3 design §10) |
 | CP11 | Architecture overview v0, and the criteria check (§5) | |
 | CP12 | Synthesis: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | |
 | CP13 | **S3a**, if authorized: implementation and correctness | |
@@ -318,7 +318,58 @@ Between gates, checkpoints run without pausing, as in Steps 2b and 3.
 
 ## 10. Spike S3 design
 
-Written at CP10 (§6.1).
+Written at CP10, for the owner's authorization at Gate B. No S3 code exists before then. **Purpose:** test ADR-0003's obligation C1, and its assumption about where rooting traffic comes from, in an interpreter-shaped workload; and measure how stable Rust can dispatch bytecode on the M1, as evidence for J1. The design is in [script and heap](../architecture/script-and-heap.md) SH6–SH7.
+
+### 10.1 Questions
+
+| ID | Question | Required? |
+|---|---|---|
+| S3-Q1 | **C1:** can a root stack with 8-byte slots and no `RefCell` borrow tracking (an `UnsafeCell`-based stack in one allowlisted module, Miri-clean) cost **at most 1.0 ns per root and per read**, hot, on a performance core? It is measured the way `s1-probe roots` measured S1's stack: 4.08 ns per frame, 2.05 ns per root, 1.58 ns per read. How much does it cut S1's `dispatch` case (Pattern B: 1,073 ns per dispatch, 2.06× Pattern A)? | Yes |
+| S3-Q2 | **Rooting traffic:** in a register-based bytecode interpreter over Pattern B arenas, with registers traced as whole regions and builtins that call back into bytecode while holding values, how many root operations, and what share of time, does each workload spend on rooting? Does ADR-0003's assumption hold that rooting comes from builtins, not from executing bytecode? | Yes |
+| S3-Q3 | **Dispatch:** what does an executed operation cost under a `match` loop, a table of function pointers, and handlers that return the next handler, on stable Rust 1.94.1? Explicit tail calls (`become`) are measured on the pinned nightly as a reference, if available there. This is the language evaluation's original S3 | Yes |
+| S3-Q4 | **C2:** on S1's `traverse` suite, do power-of-two strides or struct-of-arrays link columns remove the index arithmetic from the dependent chain, and by how much? | Optional; separate authorization |
+| S3-Q5 | **C3:** with generated setters for handle-valued fields, how does S1-Q2's ceremony count change, and what does a write cost with a no-op barrier and with a card-marking barrier? | Optional; separate authorization |
+
+### 10.2 What gets built
+
+| Crate | Contents | `unsafe` |
+|---|---|---|
+| `spikes/s3/gc` (`s3-gc`) | A copy of S1's Pattern B heap (`s1-b-gc` stays untouched, as the baseline). It has two root stacks behind one interface: S1's `RefCell` stack, and the C1 stack in `src/raw/` | Only `src/raw/`, allowlisted in `tools/unsafe-policy.txt` with numbered invariants, and run under Miri (Stacked and Tree Borrows, strict provenance), as S1's Pattern A heap was |
+| `spikes/s3/vm` (`s3-vm`) | Tagged 64-bit values with `u32` handles inside; about 20 register-machine operations (constants, moves, arithmetic, comparisons, jumps, objects with fixed slots, arrays, calls, returns, closures); builtins that call back into bytecode (`forEach`, `map` with allocation, `sortBy` with a comparator, a `valueOf`-style coercion hook); and a reference evaluator that serves as the oracle. The interpreter's dispatch technique is selectable | None (`forbid`) |
+| `spikes/s3/bench` (`s3-bench`) | The harness and an `s3-probe` binary for unit costs; a port of S1's `dispatch` case onto `s3-gc` | None |
+| `tools/s3-bench.sh`, `tools/s3-profile.sh` | Formal runs and `samply` profiles, on the model of S1's scripts | — |
+
+No dependencies beyond the standard library. Results are written under `target/s3-results/`, and nothing outside the repository is touched.
+
+### 10.3 Workloads and correctness
+
+| Workload | Exercises |
+|---|---|
+| W1, arithmetic loop | Dispatch only; no allocation |
+| W2, object churn | Allocation, slot access, frequent collection |
+| W3, callback-heavy builtins | `forEach`, `map` and `sortBy` with closures, re-entering from Rust while values are held (rooting in builtins) |
+| W4, tree traversal and mutation | Shapes from S1's scenarios, in bytecode |
+
+**Correctness first:** every program's result must equal the reference evaluator's at normal collection pacing, and when collecting at every allocation (stress). Pattern B's debug epochs run throughout, as in S1, to catch stale handles. Miri covers `src/raw/`.
+
+### 10.4 Measurements and pass criteria
+
+- **Unit costs** (`s3-probe roots`): frame, root and read, for both root stacks.
+- **Dispatch suite:** S1's case on both root stacks.
+- **Per workload:** nanoseconds per executed operation; root operations per executed operation, from counters in a counting build; and the share of time spent rooting, from `samply` profiles, for each root stack and each dispatch technique.
+- **Method:** release builds; three process runs with cool-downs; user-interactive QoS; formal runs from a clean tree, as in S1.
+
+| Question | Passes if |
+|---|---|
+| S3-Q1 | The C1 stack measures ≤ 1.0 ns per root and ≤ 1.0 ns per read, hot, and its module is Miri-clean |
+| S3-Q2 | Executing bytecode performs no per-value root operations, and with the C1 stack rooting takes ≤ 10% of run time in each of W1–W4. The 10% threshold is proposed here for the owner to confirm or change |
+| S3-Q3 | Report only: the costs, and a recommended technique for Step 5 |
+
+**If S3-Q1 fails,** ADR-0003's first revisit condition applies, and the owner decides. **Outputs:** `docs/research/s3-results.md`; ADR-0008 updated (C1 settled, the dispatch technique recorded as input to J1); OQ-14 resolved.
+
+### 10.5 Checkpoints
+
+CP13 builds the crates, the oracle and the Miri runs (S3a). CP14 measures (S3b). CP15 writes the results (S3c).
 
 ## 11. Results log
 
@@ -445,5 +496,22 @@ Every relative link resolves; the four standard checks pass.
 - **The browser's own UI is native,** so there is no privileged web UI.
 - **A headless embedder** with offscreen surfaces, synthetic input and virtual time, for WPT and reference tests.
 - **OQ-11: pure Rust with objc2.** The shell milestone first validates an objc2-defined view class for text input and accessibility, which S2 never tried. A Swift shell can sit behind the same API if needed.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP10 — completed 2026-10-17
+
+[Script, agents and the heap](../architecture/script-and-heap.md) written (**Proposed**; rules SH1–SH14), from ADR-0003 and S1's measurements, V8's Orinoco, SpiderMonkey's collector, and the SDK's wait-on-address header. Spike S3's design is written in §10. Main proposals:
+- **One heap per agent,** on its event loop's thread. DOM objects are the JavaScript objects, with no wrappers and no cross-heap references.
+- **Between agents, only copies, transfers and shared buffers.** Backing stores live outside the heap. `Atomics.wait` uses the public `os_sync_wait_on_address` (macOS 14.4 or later).
+- **Script runs only in tasks and microtasks.** An atomic interrupt flag stops runaway scripts.
+- **The root set:** the interpreter's registers and frames traced as whole regions, the root stack for native code, and the agent's own roots.
+- **C1–C5:**
+  - **C1:** a root stack without borrow tracking, targeting about 1 ns; **spike S3 tests it**.
+  - **C2:** struct-of-arrays columns or power-of-two strides for hot link fields.
+  - **C3:** generated setters as the single place for a future barrier.
+  - **C4:** stop-the-world now; incremental marking in idle periods and a generational nursery later, ordered by corpus measurements.
+  - **C5:** memory that reaches platform APIs lives outside the heap and never moves.
+- **Spike S3 design (§10):** three required questions (C1's root stack; rooting traffic in an interpreter; dispatch on stable Rust) and two optional ones (C2 layout; C3 barrier ceremony). It has `s3-gc` (a copy of S1's heap with an allowlisted `src/raw/` checked by Miri), `s3-vm` with a reference-evaluator oracle, and `s3-bench`. Pass criteria: ≤ 1.0 ns per root and per read, and rooting ≤ 10% of run time (a threshold for the owner to confirm).
 
 Every relative link resolves; the four standard checks pass.

@@ -180,7 +180,7 @@ From source and documentation read on 2026-10-17 (Sources).
 |---|---|---|
 | 1 | The exact fields of the skeleton replica, and how each synchronous `Window` property is answered | The implementation milestone for frames |
 | 2 | The back-forward cache, and how it fits the memory budgets | Step 6, then a later milestone |
-| 3 | Where shared and service workers run when no same-site renderer exists | CP10 |
+| 3 | Where shared and service workers run when no same-site renderer exists | Step 5 (workers); [script and heap](script-and-heap.md) §7 |
 | 4 | How `beforeunload` across many processes is bounded, and what the prompt shows | Step 6 |
 
 ## Sources

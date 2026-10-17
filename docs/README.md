@@ -44,6 +44,7 @@ These documents are the project's source of truth. Conversation history is not.
 | [architecture/invalidation.md](architecture/invalidation.md) | Invalidation and incremental updates: the lifecycle, entry points, reuse at each stage, compositor-driven scrolling and animation, late and hidden content | **Proposed** (Step 4, CP7) |
 | [architecture/input-and-accessibility.md](architecture/input-and-accessibility.md) | Input routing, gesture latching, scrolling, focus, IME mirror, user activation, accessibility cache, mediation | **Proposed** (Step 4, CP8) |
 | [architecture/embedder-api.md](architecture/embedder-api.md) | Engine/embedder API and the shell: the message boundary, commands, events, decisions, hosted objects, the headless embedder, the shell's language (OQ-11) | **Proposed** (Step 4, CP9) |
+| [architecture/script-and-heap.md](architecture/script-and-heap.md) | Script, agents and the heap: agents and realms, messages and transfers, `SharedArrayBuffer`, the root set, ADR-0003's obligations C1–C5, bindings, room for a JIT | **Proposed** (Step 4, CP10) |
 | [research/](research/README.md) | Research conventions and notes | Living |
 
 **Planned documents**, each created when its Phase Zero step begins:
