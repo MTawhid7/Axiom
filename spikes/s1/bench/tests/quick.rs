@@ -54,3 +54,11 @@ fn profile_loops_reject_unknown_cases() {
     assert!(suites::profile::<PatternB>("scenario-nonsense", 0.0).is_err());
     assert_eq!(PatternA::PATTERN, Pattern::A);
 }
+
+#[test]
+fn root_costs_are_measured() {
+    let costs = s1_bench::roots::measure(std::time::Duration::ZERO, 1);
+    for ns in [costs.frame_ns, costs.push_ns, costs.get_ns] {
+        assert!(ns.is_finite() && ns > 0.0, "{costs:?}");
+    }
+}

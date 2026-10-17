@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | Living document |
-| **Last updated** | 2026-10-16 |
+| **Last updated** | 2026-10-17 |
 
 Each question records why it matters, what evidence or input would resolve it, and when it must be decided.
 
@@ -18,6 +18,9 @@ Each question records why it matters, what evidence or input would resolve it, a
 | OQ-7 | When should full Xcode be installed (Instruments, Metal tooling)? | Serious profiling; Metal debugging | Owner preference | Before the first performance-critical milestone | Open |
 | OQ-8 | Version control: initialize a git repository for `docs/` now? | ADR history and diffs; continuity across sessions | Owner authorization | Now (recommended) | **Resolved 2026-10-16:** repository initialized; baseline `a223fe2` on `main`. Step 2b work is on branch `step-2b` |
 | OQ-9 | Is the owner the only human developer? | Roadmap, review process, workload | Owner input | Step 6 | Assumed yes |
-| OQ-10 | Which GC handle/rooting pattern: gc-arena-style, Nova-style scoped handles, or an unsafe core with a precise shadow stack? | Decides whether `unsafe` stays contained (the key ADR-0002 hypothesis) | Spike S1 | Before ADR-0002 is accepted | **In progress:** S1 authorized 2026-10-16, comparing Pattern A (gc-arena style) with Pattern B (Nova style) |
+| OQ-10 | Which GC handle/rooting pattern: gc-arena-style, Nova-style scoped handles, or an unsafe core with a precise shadow stack? | Decides whether `unsafe` stays contained (the key ADR-0002 hypothesis) | Spike S1 | Before ADR-0002 is accepted | **S1 complete 2026-10-17.** Recommendation: Pattern B (Nova style), with five conditions ([S1 results](research/s1-results.md) §9). Decided in ADR-0003 at CP9 |
 | OQ-11 | Platform shell: pure Rust (objc2) or a thin Swift layer? | Ergonomics against the cost of two toolchains | S2; Step 4 | Step 4 | Leaning pure Rust (evaluation §13) |
-| OQ-12 | What are the build-time and memory thresholds on the 8 GB M1? | Revisit condition 3 for ADR-0002 | `tools/measure-build.sh` (from CP1); S1 and S2 measurements | Thresholds set in CP7 and CP8 | **In progress** |
+| OQ-12 | What are the build-time and memory thresholds on the 8 GB M1? | Revisit condition 3 for ADR-0002 | `tools/measure-build.sh` (from CP1); S1 and S2 measurements | Thresholds set in CP8 (evaluation §15.6 assigns them to S2) | **In progress:** S1 data recorded ([S1 results](research/s1-results.md) §7): S1 workspace clean in 4.2 s, every `rustc` under 255 MiB; a 281-crate release build (samply) took 83 s, with a 2.0 GiB aggregate compiler peak |
+| OQ-13 | Incremental or generational collection, and a write-barrier API, for the chosen GC pattern | S1's Pattern B pauses are stop-the-world: about 4 ms at 130k live nodes and 15 ms at 333k objects. Its plain field writes cannot support incremental marking (S1 conditions C3, C4) | ADR-0003; a pause budget (Step 6 performance section); a barrier prototype, with S1-Q2's ceremony recounted | Step 4, before the JS object model is fixed | Open (raised by S1) |
+| OQ-14 | Root-stack design for Pattern B: can rooting cost at most 1 ns per root and per read? | Rooting dominates B's overhead in code that holds many handles across possible collections: dispatch takes 2.06× A's time. Measured unit costs are 2.05 ns per root and 1.58 ns per read (S1 condition C1) | A prototype measured with `s1-probe roots` and the dispatch suite; an interpreter-shaped benchmark | Step 4 | Open (raised by S1) |
+| OQ-15 | Should S3, an interpreter micro-benchmark, become required rather than optional? | It would measure rooting traffic inside an interpreter loop, the main unmeasured input to ADR-0003 | Owner decision | CP9 | Open (raised by S1) |

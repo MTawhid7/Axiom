@@ -8,9 +8,9 @@
 |---|---|
 | Phase | **Phase Zero, Step 2b: validation spikes** (authorized 2026-10-16). Production engine code is **not** authorized |
 | Repository | git. `main` = reviewed baseline (`a223fe2`); work in progress on branch **`step-2b`** |
-| Current checkpoint | CP1–CP6 ✅ done. **CP7 in progress**: 7a ✅ (verified benchmark suites, probes, measurement scripts). **Next: 7b**, the formal measurement runs, then 7c, the S1 results note; see the [Step 2b tracker](research/step-2b-validation-spikes.md#6-checkpoints) |
+| Current checkpoint | CP1–CP7 ✅ done: **S1 is complete**; see the [S1 results](research/s1-results.md). **Next: CP8**, the S2 platform spike (objc2 AppKit + Metal + CoreText); see the [Step 2b tracker](research/step-2b-validation-spikes.md#6-checkpoints) |
 | Code | Spike code only, under `spikes/` (throwaway). Tooling under `tools/` |
-| Verified capabilities | None at engine level. Spike verification results are in the tracker's §8 |
+| Verified capabilities | None at engine level. Spike verification results are in the tracker's §8. S1's findings and recommendation (Pattern B for ADR-0003, conditionally) are in the [S1 results](research/s1-results.md) |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | Provisionally accepted | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), pending S1 and S2 |
 
@@ -37,6 +37,22 @@
   - samply's line attribution;
   - profile scoping.
 - Profiles also showed incidental allocations in both patterns' dispatch. A symmetric fix went into both DOM crates; the oracle tests and Miri (`s1-a-dom`) were re-run green; before and after numbers are in the tracker's §8.
+
+**CP7b and CP7c completed** (measurements and results):
+- Formal runs, at commit `d5d8272` with a clean tree:
+  - runtime suites, 3 runs;
+  - memory and instructions, 3 runs;
+  - profiles;
+  - builds (dev and release).
+- Rooting unit costs measured with the new `s1-probe roots`.
+- [S1 results](research/s1-results.md) written. Its recommendation for ADR-0003 is Pattern B (Nova style), conditional on C1–C5, with medium confidence.
+- New open questions OQ-13 to OQ-15.
+- Design facts checked against current sources: gc-arena (intrusive list, incremental, barriers), piccolo (stackless because of gc-arena) and Nova (`stack_refs` is a `RefCell<Vec>`).
+
+**Decisions waiting for the owner** (at CP9):
+- S1-Q2: is the ceremony acceptable?
+- ADR-0003: the GC pattern.
+- OQ-15: should S3 become required?
 
 **Verified**
 - `samply` works on this machine without Xcode, including line-level attribution through `dsymutil` and `atos` (Command Line Tools).

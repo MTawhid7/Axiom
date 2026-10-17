@@ -173,7 +173,7 @@ tools/check-unsafe-policy.sh
 | CP4 | Pattern A DOM and driver; oracle equality; Miri on small scenarios | ✅ 2026-10-16 (§8) |
 | CP5 | Pattern B heap; Miri | ✅ 2026-10-16 (§8) |
 | CP6 | Pattern B DOM and driver; oracle equality; A ≡ B differential | ✅ 2026-10-16 (§8) |
-| CP7 | S1 measurements (runtime, ceremony, build) and S1 results note | 🔄 7a ✅ (harness, probes, scripts); 7b measurements; 7c results note |
+| CP7 | S1 measurements (runtime, ceremony, build) and S1 results note | ✅ 2026-10-17 (§8; [S1 results](s1-results.md)) |
 | CP8 | S2 platform spike, measurements, and S2 results note | ⬜ |
 | CP9 | Synthesis: ADR-0002 final recommendation; ADR-0003 (GC pattern) proposed; docs | ⬜ |
 
@@ -300,8 +300,8 @@ tools/check-unsafe-policy.sh
 | Step | Content | Status |
 |---|---|---|
 | 7a | `s1-bench` crate and `s1-probe` binary; reference-validated inputs (`plan`); measurement scripts; shakedown and methodology fixes | ✅ |
-| 7b | Formal runs: `tools/s1-bench.sh`, `tools/s1-memory.sh`, `tools/s1-profile.sh`, `tools/s1-ceremony.sh`, `tools/measure-build.sh` (dev and release) | ⬜ |
-| 7c | `docs/research/s1-results.md`: results, attribution, recommendation | ⬜ |
+| 7b | Formal runs: `tools/s1-bench.sh`, `tools/s1-memory.sh`, `tools/s1-profile.sh`, `tools/s1-ceremony.sh`, `tools/measure-build.sh` (dev and release) | ✅ |
+| 7c | `docs/research/s1-results.md`: results, attribution, recommendation | ✅ |
 
 ### CP8 — S2 platform spike
 
@@ -675,7 +675,7 @@ Beyond those counts, the whole dispatch state machine (`dispatch.rs`) exists onl
    - For a JS engine (ADR-0001 R2), Pattern A would force a stackless interpreter. Pattern B allows a conventional recursive interpreter with rooting.
 3. **Pattern B's bound is tighter (overshoot ≤ 1 node), and its pauses were shorter in this run** (71 µs vs 145 µs). Peaks are not comparable in node counts, because the node sizes differ; CP7 compares bytes, throughput, and pauses against live-set size.
 
-### CP7 — in progress (7a completed 2026-10-17)
+### CP7 — completed 2026-10-17
 
 **7a delivered**
 - **`s1-bench`** (`#![forbid(unsafe_code)]`):
@@ -717,3 +717,23 @@ Beyond those counts, the whole dispatch state machine (`dispatch.rs`) exists onl
 | `scenario/churn` | 158.4 ms | 161.8 ms | 181.3 ms | 181.2 ms | 1.14 → 1.12 |
 
 Line-level profiles attribute B's remaining dispatch gap to root-stack traffic: `RootFrame::push` and `Scoped::get` on a `Rc<RefCell<Vec<RootSlot>>>`. Without it, B's dispatch costs about what A's does. 7c analyses this.
+
+**7b: formal runs** (commit `d5d8272`, clean tree, AC power, no thermal warnings)
+- **Runtime suites:** `tools/s1-bench.sh`, 3 process runs with 60 s cool-downs (`target/s1-results/bench-20261017-070142`). Background load reached about 8 during run 2, and A's scenario timings in that run were up to about 50% slower (B's up to 13%); the median of the run medians absorbs one disturbed run.
+- **Memory and instructions:** `tools/s1-memory.sh`, 3 runs (`memory-20261017-070549`). Run-to-run spread was at most 1.3%.
+- **Profiles:** `tools/s1-profile.sh`, 7 cases × 2 patterns, 5 s each (`profiles-20261017-070732`).
+- **Builds:** `tools/measure-build.sh --runs 3` on the A and B stacks (dev and release), on `s1-bench` (release), and on the workspace (dev, all targets).
+- **Rooting unit costs:** `s1-probe roots` (added in 7c), 3 runs. Frame open and close 4.08 ns, root 2.05 ns, read 1.58 ns, identical across runs.
+- **Ceremony:** `tools/s1-ceremony.sh`.
+
+**7c: results note.** [S1 results](s1-results.md) holds every table, the attribution of each difference to rooting discipline, representation or collector (§4.4), the threats to validity, and the recommendation.
+
+| Question | Result |
+|---|---|
+| S1-Q1 | Yes for both. A: 24 blocks in one module plus 2 macro templates. B: no `unsafe` anywhere |
+| S1-Q2 | Similar volume, different kind: architectural (A) against lexical (B). Owner judgment at CP9 |
+| S1-Q3 | Mixed. B: collections 1.3–2.8× faster from 64k elements, allocation-heavy work takes 30% less time, lower maximum pauses, 13% less memory per live node. A: cache-friendly traversal 18–22% faster, dispatch 2.06× faster (B's root-stack traffic) |
+| S1-Q4 | Small for both: the S1 workspace builds clean in 4.2 s, every `rustc` under 255 MiB. B's stack builds clean 4× faster (no `syn`) |
+| Recommendation | Pattern B for ADR-0003, conditionally (C1–C5), medium confidence. New open questions OQ-13 to OQ-15 |
+
+**Verification:** the four standard checks are green (§6). `s1-bench` gained the `roots` module and a test for it.

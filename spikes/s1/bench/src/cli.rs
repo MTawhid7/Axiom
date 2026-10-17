@@ -10,6 +10,7 @@
 //! s1-probe gen tree-keep <elements>
 //! s1-probe run <a|b|none> <script file>
 //! s1-probe profile <a|b> <case> <seconds>
+//! s1-probe roots
 //! s1-probe sizes
 //! ```
 //!
@@ -21,6 +22,8 @@
 //!   baseline to subtract when the process is measured by `/usr/bin/time -l`.
 //! - `profile` loops one case (see [`suites::PROFILE_CASES`]) for a sampling
 //!   profiler.
+//! - `roots` measures the unit costs of Pattern B's rooting primitives
+//!   ([`roots`](crate::roots)).
 
 use std::fs::File;
 use std::io::{self, BufReader, BufWriter, Write as _};
@@ -67,6 +70,14 @@ pub fn probe_main() -> ExitCode {
         "gen" => gen_script(rest),
         "run" => run_script(rest),
         "profile" => profile(rest),
+        "roots" => {
+            let costs = crate::roots::measure(std::time::Duration::from_millis(300), 11);
+            println!(
+                "frame open+close {:.2} ns\tscope (push) {:.2} ns\tScoped::get {:.2} ns",
+                costs.frame_ns, costs.push_ns, costs.get_ns
+            );
+            Ok(())
+        }
         "sizes" => {
             sizes();
             Ok(())
@@ -76,7 +87,7 @@ pub fn probe_main() -> ExitCode {
 }
 
 fn usage() -> String {
-    "usage: s1-probe <bench|aggregate|gen|run|profile|sizes> … (see the s1_bench::cli docs)"
+    "usage: s1-probe <bench|aggregate|gen|run|profile|roots|sizes> … (see the s1_bench::cli docs)"
         .to_owned()
 }
 

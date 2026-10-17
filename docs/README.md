@@ -26,6 +26,7 @@ These documents are the project's source of truth. Conversation history is not.
 | ↳ [0002-implementation-language.md](adr/0002-implementation-language.md) | Implementation language (Rust) | **Provisionally accepted** |
 | [technology/language-evaluation.md](technology/language-evaluation.md) | Detailed language comparison and recommendation | Reviewed |
 | [research/step-2b-validation-spikes.md](research/step-2b-validation-spikes.md) | Step 2b plan and checkpoint tracker (spikes S1 and S2) | **In progress** |
+| [research/s1-results.md](research/s1-results.md) | S1 results: `unsafe` containment, ceremony, runtime, memory and build cost of the two GC patterns; recommendation for ADR-0003 | Draft (owner review at CP9) |
 | [research/](research/README.md) | Research conventions and notes | Living |
 
 **Planned documents**, each created when its Phase Zero step begins:

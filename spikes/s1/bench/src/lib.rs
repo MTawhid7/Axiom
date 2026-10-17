@@ -40,6 +40,7 @@ pub mod harness;
 pub mod pattern_a;
 pub mod pattern_b;
 pub mod plan;
+pub mod roots;
 pub mod script_io;
 pub mod suites;
 
