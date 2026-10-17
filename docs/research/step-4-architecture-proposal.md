@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **In progress.** CP1–CP6 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP7–CP12 run without pausing, and the next stop is Gate B, after CP12 |
+| **Status** | **In progress.** CP1–CP7 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP8–CP12 run without pausing, and the next stop is Gate B, after CP12 |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only. Spike S3's code needs a separate go-ahead once its design is ready (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
@@ -106,7 +106,7 @@ Nothing is compiled or installed before Gate B. Each such fact names the command
 | 4 | [`docs/architecture/ipc.md`](../architecture/ipc.md) (OQ-17) | CP4 |
 | 5 | [`docs/architecture/frame-tree-and-navigation.md`](../architecture/frame-tree-and-navigation.md) (SI4) | CP5 |
 | 6 | [`docs/architecture/rendering-pipeline.md`](../architecture/rendering-pipeline.md) (P2, part of P4) | CP6 |
-| 7 | `docs/architecture/invalidation.md` (P3) | CP7 |
+| 7 | [`docs/architecture/invalidation.md`](../architecture/invalidation.md) (P3) | CP7 |
 | 8 | `docs/architecture/input-and-accessibility.md` (SI4) | CP8 |
 | 9 | `docs/architecture/embedder-api.md` (F4, OQ-11) | CP9 |
 | 10 | `docs/architecture/script-and-heap.md` (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5), and spike S3's design in this tracker (§10) | CP10 |
@@ -165,7 +165,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | CP4 | IPC: transport and interface definitions (OQ-17) | ✅ 2026-10-17 (§11; [document](../architecture/ipc.md)) |
 | CP5 | Frame tree, navigation and loading (SI4) | ✅ 2026-10-17 (§11; [document](../architecture/frame-tree-and-navigation.md)) |
 | CP6 | Rendering pipeline: data model, per-frame display lists, compositing, strings (P2, part of P4) | ✅ 2026-10-17 (§11; [document](../architecture/rendering-pipeline.md)) |
-| CP7 | Invalidation and incremental updates (P3) | |
+| CP7 | Invalidation and incremental updates (P3) | ✅ 2026-10-17 (§11; [document](../architecture/invalidation.md)) |
 | CP8 | Input, focus, hit testing, scrolling and accessibility across frames (SI4) | |
 | CP9 | Engine/embedder API and shell (F4, OQ-11) | |
 | CP10 | Script, agents and heap (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5); spike S3's design | |
@@ -408,5 +408,17 @@ Every relative link resolves; the four standard checks pass.
 - **Strings:** one 8-bit or 16-bit representation for JavaScript and the DOM. Atoms are static plus process-wide dynamic, comparable from any thread.
 - **Style and layout run on the event loop's thread,** within AC5 as approved. The DOM arenas are built to be lendable: no interior mutability (checked by the compiler), and side tables for results.
 - **For Gate B:** whether to amend AC5 and EL11 to allow read-only lending of the DOM arenas during a rendering stage frozen by the borrow checker, which would enable parallel style and layout without a second copy of the DOM.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP7 — completed 2026-10-17
+
+[Invalidation and incremental updates](../architecture/invalidation.md) written (**Proposed**; rules IV1–IV14), from Chromium (BlinkNG, style invalidation sets, LayoutNG), Firefox (APZ) and CSS Containment Level 2. Main proposals:
+- **An explicit lifecycle per document,** whose phases are functions with immutable outputs. Phase order is checked by the compiler, through tokens that only completing a phase produces.
+- **Two entry points:** the rendering update, and synchronous queries that run only the phases they need. **No synchronous flush crosses an agent,** so out-of-process frames behave like in-process cross-site frames.
+- **Reuse at every stage:** pending, selector-driven style invalidation that over-invalidates rather than miss; box rebuilds only where needed; fragments reused by constraints, with containment as a boundary; display items reused by ID; damage-limited compositing.
+- **The compositor scrolls and animates** from its property trees and display ports. Scroll offsets are reconciled by sequence numbers; listeners that may block scrolling are asked with a deadline; transform and opacity animations run on the compositor.
+- **Late, hidden and dependent content:** parser yields; targeted invalidation for images, fonts and resizes; no frames for hidden or offscreen frames; one frame in flight; cross-frame sizes through the browser.
+- **IV14:** a test mode compares every incremental update against a rebuild from scratch.
 
 Every relative link resolves; the four standard checks pass.
