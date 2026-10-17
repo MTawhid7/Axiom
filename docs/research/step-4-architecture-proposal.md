@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **In progress.** CP1–CP5 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP6–CP12 run without pausing, and the next stop is Gate B, after CP12 |
+| **Status** | **In progress.** CP1–CP6 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP7–CP12 run without pausing, and the next stop is Gate B, after CP12 |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only. Spike S3's code needs a separate go-ahead once its design is ready (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
@@ -105,7 +105,7 @@ Nothing is compiled or installed before Gate B. Each such fact names the command
 | 3 | [`docs/architecture/event-loop-and-threading.md`](../architecture/event-loop-and-threading.md) (P1) | CP3 |
 | 4 | [`docs/architecture/ipc.md`](../architecture/ipc.md) (OQ-17) | CP4 |
 | 5 | [`docs/architecture/frame-tree-and-navigation.md`](../architecture/frame-tree-and-navigation.md) (SI4) | CP5 |
-| 6 | `docs/architecture/rendering-pipeline.md` (P2, part of P4) | CP6 |
+| 6 | [`docs/architecture/rendering-pipeline.md`](../architecture/rendering-pipeline.md) (P2, part of P4) | CP6 |
 | 7 | `docs/architecture/invalidation.md` (P3) | CP7 |
 | 8 | `docs/architecture/input-and-accessibility.md` (SI4) | CP8 |
 | 9 | `docs/architecture/embedder-api.md` (F4, OQ-11) | CP9 |
@@ -164,7 +164,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | CP3 | Event loop and threading model (P1) | ✅ 2026-10-17 (§11; [document](../architecture/event-loop-and-threading.md)) |
 | CP4 | IPC: transport and interface definitions (OQ-17) | ✅ 2026-10-17 (§11; [document](../architecture/ipc.md)) |
 | CP5 | Frame tree, navigation and loading (SI4) | ✅ 2026-10-17 (§11; [document](../architecture/frame-tree-and-navigation.md)) |
-| CP6 | Rendering pipeline: data model, per-frame display lists, compositing, strings (P2, part of P4) | |
+| CP6 | Rendering pipeline: data model, per-frame display lists, compositing, strings (P2, part of P4) | ✅ 2026-10-17 (§11; [document](../architecture/rendering-pipeline.md)) |
 | CP7 | Invalidation and incremental updates (P3) | |
 | CP8 | Input, focus, hit testing, scrolling and accessibility across frames (SI4) | |
 | CP9 | Engine/embedder API and shell (F4, OQ-11) | |
@@ -397,5 +397,16 @@ Every relative link resolves; the four standard checks pass.
 - **Navigation is browser-driven,** from request to acknowledged commit, with process and event-loop selection at the response (SI1–SI7). Session history lives in the browser, and same-document navigations stay synchronous and are validated afterwards.
 - **Loader and storage endpoints are bound at commit** to the document's facts. Bodies stream from the network process to the renderer.
 - **V9's lying-renderer tests** are specified (FT14).
+
+Every relative link resolves; the four standard checks pass.
+
+### CP6 — completed 2026-10-17
+
+[Rendering pipeline](../architecture/rendering-pipeline.md) written (**Proposed**; rules PL1–PL16), from Chromium (RenderingNG data structures, LayoutNG), Firefox (WebRender, APZ), Stylo, and SpiderMonkey's Latin-1 strings. Main proposals:
+- **Five stages, five owned structures:** the DOM in the GC heap; computed styles in a side table; the box tree; immutable fragments with their constraints, as in LayoutNG; a display list per frame. Everything after the DOM lives outside the heap.
+- **Display lists** separate property trees (spatial, clip, effect) from items, and carry only validated primitives. Glyph images come from an atlas rasterized in the renderer with CoreText (S4-Q5), and images as decoded pixels. Child frames are embedded by token, and hit-test regions ride along. The browser never decodes or parses (AC4); its compositor validates every reference against its records.
+- **Strings:** one 8-bit or 16-bit representation for JavaScript and the DOM. Atoms are static plus process-wide dynamic, comparable from any thread.
+- **Style and layout run on the event loop's thread,** within AC5 as approved. The DOM arenas are built to be lendable: no interior mutability (checked by the compiler), and side tables for results.
+- **For Gate B:** whether to amend AC5 and EL11 to allow read-only lending of the DOM arenas during a rendering stage frozen by the borrow checker, which would enable parallel style and layout without a second copy of the DOM.
 
 Every relative link resolves; the four standard checks pass.
