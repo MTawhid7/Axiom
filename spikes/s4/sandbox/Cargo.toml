@@ -1,0 +1,22 @@
+[package]
+name = "s4-sandbox"
+description = "Spike S4: helper processes that enter a custom deny-by-default Seatbelt profile, probes of what the profile denies, and IPC between a broker and sandboxed helpers. unsafe only in src/platform/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+# No dependencies beyond std: libsandbox, Mach, posix_spawn and libbsm are
+# reached through hand-written declarations in src/platform/, checked against
+# the SDK 27.0 headers.
+
+[[bin]]
+name = "s4-helper"
+path = "src/bin/s4-helper.rs"
+
+[[bin]]
+name = "s4-broker"
+path = "src/bin/s4-broker.rs"
+
+[lints]
+workspace = true

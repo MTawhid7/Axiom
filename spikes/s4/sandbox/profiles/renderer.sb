@@ -1,0 +1,15 @@
+;; Spike S4: a renderer-like Seatbelt profile.
+;;
+;; Everything is denied, then the profile allows only what a sandboxed
+;; renderer needs once it is running: the broker's rendezvous service, named
+;; by the RENDEZVOUS parameter. Anything else a helper uses must already be
+;; open when the profile is applied (sandbox(7): restrictions apply when a
+;; resource is acquired), such as its inherited socket and standard output.
+(version 1)
+(deny default)
+
+(allow mach-lookup (global-name (param "RENDEZVOUS")))
+
+;; (deny default) does not cover dynamic code generation (S4-Q4, bare.sb), so
+;; it is denied explicitly, as in WebKit's no-JIT content profiles (JIT rule J3).
+(deny dynamic-code-generation)

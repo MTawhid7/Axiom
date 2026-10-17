@@ -1,7 +1,7 @@
 # Axiom — Design Documentation
 
 Axiom is a from-first-principles browser engine for personal use on macOS. **The project is in Phase Zero: research, requirements and architecture.**
-- **Authorized:** the Step 2b validation spikes in `spikes/`, which are throwaway code.
+- **Authorized:** design documents. The spikes of Steps 2b and 3 (S1, S2, S4; all complete) remain in `spikes/` as throwaway code.
 - **Not yet authorized:** production engine code.
 
 These documents are the project's source of truth. Conversation history is not.
@@ -25,10 +25,16 @@ These documents are the project's source of truth. Conversation history is not.
 | ↳ [0001-scope-and-target.md](adr/0001-scope-and-target.md) | Target, JavaScript strategy, security posture, defaults | **Accepted** |
 | ↳ [0002-implementation-language.md](adr/0002-implementation-language.md) | Implementation language (Rust) | **Accepted** (final, 2026-10-17) |
 | ↳ [0003-gc-handle-and-rooting-pattern.md](adr/0003-gc-handle-and-rooting-pattern.md) | GC handle and rooting pattern (Pattern B, Nova style; obligations C1–C5) | **Accepted** (2026-10-17) |
+| ↳ [0004-process-model-and-sandbox.md](adr/0004-process-model-and-sandbox.md) | Process model, sandbox and JIT policy | **Accepted** (2026-10-17), after spike S4 |
+| [security/threat-model.md](security/threat-model.md) | Assets, adversaries, attack surfaces, trust boundaries, security goals, security levels L0–L3 | **Accepted** (2026-10-17), amended: out-of-process iframes required for L3 |
+| [security/process-model.md](security/process-model.md) | Process types and privileges, site isolation, IPC trust rules, memory budgets | Binding (ADR-0004 accepted, 2026-10-17) |
 | [technology/language-evaluation.md](technology/language-evaluation.md) | Detailed language comparison and recommendation | Reviewed |
 | [research/step-2b-validation-spikes.md](research/step-2b-validation-spikes.md) | Step 2b plan and checkpoint tracker (spikes S1 and S2) | Complete (2026-10-17) |
 | [research/s1-results.md](research/s1-results.md) | S1 results: `unsafe` containment, ceremony, runtime, memory and build cost of the two GC patterns; recommendation for ADR-0003 | Reviewed (2026-10-17) |
 | [research/s2-results.md](research/s2-results.md) | S2 results: AppKit, Metal and CoreText through objc2 without Xcode; `unsafe` surface; build and run-time cost; proposed build thresholds for ADR-0002 | Reviewed (2026-10-17) |
+| [research/step-3-security-and-process-model.md](research/step-3-security-and-process-model.md) | Step 3 plan and checkpoint tracker, including spike S4 | Complete (2026-10-17) |
+| [research/macos-process-confinement.md](research/macos-process-confinement.md) | Process confinement on macOS: Seatbelt, App Sandbox, hardened runtime, JIT, launch and IPC options; browser precedent; spike S4 design | Reviewed (2026-10-17) |
+| [research/s4-results.md](research/s4-results.md) | S4 results: custom Seatbelt profiles on macOS 27; probes; start-up, footprint and IPC cost; the JIT matrix; CoreText in a sandbox | Complete (2026-10-17) |
 | [research/](research/README.md) | Research conventions and notes | Living |
 
 **Planned documents**, each created when its Phase Zero step begins:
@@ -36,8 +42,6 @@ These documents are the project's source of truth. Conversation history is not.
 | Document | Step |
 |---|---|
 | `requirements.md` | Steps 1→6 |
-| `security/threat-model.md` | Step 3 |
-| `security/boundaries.md` | Step 3 |
 | `architecture/overview.md`, plus one file per subsystem | Steps 4–5 |
 | `standards.md` | Step 6 |
 | `performance.md` | Step 6 |

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | Draft. Sections marked *Accepted* are confirmed in [ADR-0001](adr/0001-scope-and-target.md) |
-| **Last updated** | 2026-10-16 |
+| **Last updated** | 2026-10-17 |
 
 ## 1. Vision
 
@@ -111,6 +111,7 @@ This machine is also the **performance floor**: budgets are set and measured her
    - implemented and planned;
    - standards-compliant and approximate.
 6. Identify technical debt openly. Avoid both premature generalization and shortcuts that make later security work disproportionately hard.
+7. **No architectural corners cut for convenience** (owner direction, 2026-10-17). The project has no calendar deadline, so weaker security boundaries are never accepted to save time. Where a feature is staged, the architecture beneath it is designed for the complete model from day one.
 
 ## 10. Governance
 

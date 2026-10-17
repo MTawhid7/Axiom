@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Spike S4: allow-jit plus single-jit, which WebKit's content process also
+     carries (observed on macOS 27.2). Tests whether single-jit is what limits a
+     process to one MAP_JIT region (S4-Q4). -->
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.cs.allow-jit</key>
+	<true/>
+	<key>com.apple.security.cs.single-jit</key>
+	<true/>
+</dict>
+</plist>
