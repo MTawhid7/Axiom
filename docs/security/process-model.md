@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Reviewed** by the owner (2026-10-17). Accepted: SI1–SI7 as staged, with SI3 limited to L1 and non-sensitive L2 and out-of-process iframes required for L3; B1–B7 as initial baselines. Becomes binding with ADR-0004 |
+| **Status** | **Binding** since ADR-0004's acceptance (2026-10-17). The owner accepted SI1–SI7 as staged (SI3 limited to L1 and non-sensitive L2; out-of-process iframes required for L3) and B1–B7 as initial baselines. Spike S4 measurements are folded in ([S4 results](../research/s4-results.md)) |
 | **Question** | Into which processes is Axiom split? What may each one do, how are sites assigned to processes, which rules govern IPC, and how much memory may each process use on the 8 GB M1? |
 | **Feeds** | ADR-0004; the architecture proposal (Step 4): event loop, pipeline, embedder API; Step 5 subsystems; Step 6 budgets and roadmap |
 | **Builds on** | [Threat model](threat-model.md); [macOS confinement note](../research/macos-process-confinement.md); [ADR-0001](../adr/0001-scope-and-target.md); [ADR-0002](../adr/0002-implementation-language.md); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [S2 results](../research/s2-results.md) |
@@ -76,7 +76,7 @@ Everything here is **planned**; nothing is implemented. Claims about other brows
 | Network sockets | Not used | **No** | Outbound TCP and UDP; the system DNS and certificate-trust services | **No** | **No** |
 | Window server, AppKit | Yes | **No** | **No** | **No** | **No** |
 | GPU (Metal, IOKit) | Yes, until a GPU process exists | IOSurface allocation only, if needed (rules from S4) | **No** | Yes | Hardware decode only |
-| System fonts | Yes | Read-only (rules from S4-Q5) | **No** | Only if it rasterizes text | **No** |
+| System fonts | Yes | Read-only: `/System/Library/Fonts` and ICU's data in `/usr/share/icu` (S4-Q5) | **No** | Only if it rasterizes text | **No** |
 | Pasteboard; camera, microphone, location, screen | Yes, mediated and prompted | **No** | **No** | **No** | **No** |
 | Launch processes | Yes, its own helpers only | **No** | **No** | **No** | **No** |
 | Executable memory (JIT) | **No** | **No**. Only the JIT renderer variant, under the JIT policy in ADR-0004 | **No** | **No** | **No** |
@@ -173,7 +173,7 @@ The transport itself (Mach messages, or Unix-domain socket pairs) is chosen in S
 | # | Budget | Target | Basis |
 |---|---|---|---|
 | B1 | Browser process, idle, one window | ≤ 60 MB | S2's 20 MB, plus browser UI, profile and compositor |
-| B2 | Renderer, sandboxed and ready, empty document | ≤ 10 MB | A 1 MB floor, plus engine state and an empty heap. S4-Q3 measures the helper floor |
+| B2 | Renderer, sandboxed and ready, empty document | ≤ 10 MB | S4 measured a sandboxed helper at 1.14 MiB, and 4.05 MiB once CoreText has drawn text. Engine state and an empty heap come on top |
 | B3 | Renderer, typical page (median) | ≤ 50 MB | Chrome's 42 MB median, for comparable content in 2018 |
 | B4 | Network process, idle | ≤ 25 MB | Excludes the disk cache's mapped files |
 | B5 | Renderer soft limit on 8 GB | 16 processes | 16 × B3 = 800 MB at typical pages. A soft limit, as in Chromium [2] |
@@ -188,7 +188,7 @@ Sensitive sites are not exempt from discarding. Discarding only ends a process; 
 
 ## 8. Lifecycle
 
-- **Launch.** The browser spawns a helper with `POSIX_SPAWN_CLOEXEC_DEFAULT`, a minimal environment, and only its IPC bootstrap handle and a log descriptor. The helper applies its profile at once, then connects. The browser knows the helper from launch (R3).
+- **Launch.** The browser spawns a helper with `POSIX_SPAWN_CLOEXEC_DEFAULT`, a minimal environment, and only its IPC bootstrap handle and a log descriptor. The helper applies its profile at once, from bytecode the browser compiled, then connects. The browser knows the helper from launch (R3). S4 measured about 2 ms from launch to ready for a bare helper.
 - **A spare renderer.** To hide launch latency, the browser keeps one pre-launched, sandboxed but not yet locked renderer, and locks it on first use. Chrome's spare process masks start-up cost this way [3]. It costs B2, and is dropped under memory pressure.
 - **Crash.** Affected tabs show a crash page and reload on request. After repeated crashes from the same site, automatic reloads stop.
 - **Hang.** If a renderer stops answering input, the browser offers to end it. The browser itself never waits (IR5).
@@ -216,9 +216,9 @@ From the [macOS confinement note](../research/macos-process-confinement.md):
 
 - **Executables.**
   - The browser executable has the hardened runtime and no sandbox. Later it gains the hardened runtime's resource-access entitlements for the camera and microphone. By TN3125's categories these are unrestricted (inference).
-  - One helper executable per privilege set: `renderer`, `renderer-jit` (later), `network`, `gpu` (later) and `utility`. Each is signed ad hoc with the hardened runtime and its own entitlements. Only `renderer-jit` carries `allow-jit`.
+  - One helper executable per privilege set: `renderer`, `renderer-jit` (later), `network`, `gpu` (later) and `utility`. Each is signed ad hoc with the hardened runtime and its own entitlements. Only `renderer-jit` carries `allow-jit`, together with `single-jit`.
   - Whether helpers must be `.app` bundles is settled by S4.
-- **Profiles.** Each helper applies a deny-by-default Seatbelt profile from the repository at the top of `main`. Every profile except `renderer-jit`'s contains `(deny dynamic-code-generation)`.
+- **Profiles.** The browser compiles each profile once, from the repository, and hands the bytecode to the helper, which applies it at the top of `main` (S4: 17 µs). Every profile except `renderer-jit`'s contains an explicit `(deny dynamic-code-generation)`, because default deny doesn't cover it (S4).
 - **Graphics.** Frames cross processes as IOSurfaces sent as Mach ports. Renderers have no window-server connection.
 - **The fallback** if S4 shows that custom profiles no longer apply is App Sandbox per helper (option O2), with the weaker guarantees stated in the note.
 

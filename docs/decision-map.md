@@ -29,7 +29,7 @@ X  Cross-cutting    standards baseline · conformance testing · fuzzing · perf
 | R4 | Constraints: skills, time, hardware | Partly known | Charter §7; [OQ-1, OQ-6, OQ-9](open-questions.md) |
 | F1 | Implementation language | **Accepted** (final, 2026-10-17): Rust | [ADR-0002](adr/0002-implementation-language.md), [evaluation](technology/language-evaluation.md), [S1](research/s1-results.md), [S2](research/s2-results.md) |
 | F2 | GC and DOM memory model | **Accepted** (2026-10-17): one heap for JS and the DOM (R2), with Pattern B (Nova style) and obligations C1–C5 ([ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md)) | [S1 results](research/s1-results.md), [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md) |
-| F3 | Trust boundaries, process model, sandbox | **Proposed; reviewed by the owner** (2026-10-17): staged site isolation, with out-of-process iframes mandatory before L3; helpers that apply their own Seatbelt profiles; IPC trust rules; security levels L0–L3; JIT policy (accepted). Moves to Accepted when spike S4-Q1 and S4-Q2 pass | [ADR-0004](adr/0004-process-model-and-sandbox.md), [threat model](security/threat-model.md), [process model](security/process-model.md), [macOS note](research/macos-process-confinement.md) |
+| F3 | Trust boundaries, process model, sandbox | **Accepted** (2026-10-17): staged site isolation, with out-of-process iframes mandatory before L3; helpers that apply browser-compiled Seatbelt profiles first; IPC trust rules; security levels L0–L3; JIT policy. Validated by spike S4 | [ADR-0004](adr/0004-process-model-and-sandbox.md), [threat model](security/threat-model.md), [process model](security/process-model.md), [macOS note](research/macos-process-confinement.md), [S4 results](research/s4-results.md) |
 | F4 | Engine/embedder API | Open | Step 4 |
 | P1 | Event loop and threading model | Open | Step 4 |
 | P2 | Pipeline data model | Open | Step 4 |
@@ -91,7 +91,7 @@ These are recorded in ADR-0001.
 
 ## 4. Consequences of the Step 3 proposal
 
-These are proposed in [ADR-0004](adr/0004-process-model-and-sandbox.md), which the owner reviewed on 2026-10-17. They become binding when it is accepted (after spike S4-Q1 and S4-Q2).
+These follow from [ADR-0004](adr/0004-process-model-and-sandbox.md), accepted on 2026-10-17, and bind Step 4.
 1. **Every future process boundary is a message interface from the start** (process model PM6). It also works in-process, for tests and a single-process debugging mode.
 2. **The browser owns the frame tree, from the first line of code.** Each frame produces its own display list, and the browser routes input (SI4). **Out-of-process iframes are mandatory before L3** (the owner's decision), and this structure lets them arrive without an architectural rewrite.
 3. **One agent cluster per process** (SI7). This is an input to OQ-5.
@@ -107,7 +107,7 @@ These are proposed in [ADR-0004](adr/0004-process-model-and-sandbox.md), which t
 | 1 | Requirements: target, JavaScript, posture, defaults | Done: ADR-0001 Accepted |
 | 2a | Implementation language evaluation | Done: reviewed; ADR-0002 accepted (final, 2026-10-17) |
 | 2b | Validation spikes: S1 GC heap and DOM, S2 platform and build | **Done** (2026-10-17): [S1 results](research/s1-results.md), [S2 results](research/s2-results.md). ADR-0002 is final, and [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md) is accepted. Merged into `main`. S3 (the interpreter benchmark) is required, and runs in Step 4 |
-| 3 | Threat model, trust boundaries, process and sandbox model on macOS | **In progress** (2026-10-17): [threat model](security/threat-model.md) accepted; [process model](security/process-model.md) and [macOS note](research/macos-process-confinement.md) reviewed; [ADR-0004](adr/0004-process-model-and-sandbox.md) Proposed, and Accepted once spike S4-Q1 and S4-Q2 pass. Spike S4 authorized and running ([status](status.md)) |
+| 3 | Threat model, trust boundaries, process and sandbox model on macOS | **Done** (2026-10-17): [threat model](security/threat-model.md) and [ADR-0004](adr/0004-process-model-and-sandbox.md) accepted; [process model](security/process-model.md) binding; spike S4 passed ([S4 results](research/s4-results.md)). Merged into `main` |
 | 4 | Event loop, threading, pipeline data model, invalidation, embedder API | Not started; produces architecture proposal v0 |
 | 5 | Subsystems: text & fonts → rendering/compositing → networking/TLS → style → layout | Not started |
 | 6 | Standards baseline, testing, performance budgets, roadmap | Not started; ends in a design review and approval of Milestone 1 |

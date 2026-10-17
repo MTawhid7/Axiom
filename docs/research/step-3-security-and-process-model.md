@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Status** | **In progress:** CP1–CP5 complete and reviewed by the owner (2026-10-17); spike S4 (CP6–CP8) authorized and running |
+| **Status** | **Complete** (2026-10-17): CP1–CP9. The threat model and ADR-0004 are accepted; spike S4 passed |
 | **Authorized** | 2026-10-17, by the owner ("Continue implementation"), as Step 3 design work. Documents only (§2) |
-| **Branch** | `step-3`, to be merged into `main` after the owner's review |
+| **Branch** | `step-3`, merged into `main` (`--no-ff`) on 2026-10-17, as the owner instructed |
 | **Feeds** | ADR-0004 (process model and sandbox); OQ-4 (JIT policy); the architecture proposal in Step 4 |
 | **Last updated** | 2026-10-17 |
 
@@ -77,9 +77,9 @@ From CP6 on, the four standard checks cover real code again. S4-Q6, the fallback
 | CP4 | Process model: process types and privileges, site isolation policy, IPC trust rules, memory budgets, staging | ✅ 2026-10-17 (§7; [process model](../security/process-model.md)) |
 | CP5 | Synthesis: ADR-0004 (Proposed) with the JIT policy; decision map, open questions, indexes, status; branch ready for review | ✅ 2026-10-17 (§7; [ADR-0004](../adr/0004-process-model-and-sandbox.md)); reviewed by the owner |
 | CP6 | **S4a:** sandbox entry and denial probes (S4-Q1, S4-Q2), automated under `cargo test`; signing script | ✅ 2026-10-17 (§7): **S4-Q1 and S4-Q2 pass** |
-| CP7 | **S4b:** measurements: helper start-up and footprint, IPC latency and throughput over Mach messages and socket pairs (S4-Q3); the JIT matrix (S4-Q4); CoreText inside a renderer profile (S4-Q5) | Not started |
-| CP8 | **S4c:** `docs/research/s4-results.md`. ADR-0004 moves to Accepted if S4-Q1 and S4-Q2 pass. Docs synthesis | Not started |
-| CP9 | Merge `step-3` into `main` (`--no-ff`) | Not started |
+| CP7 | **S4b:** measurements: helper start-up and footprint, IPC latency and throughput over Mach messages and socket pairs (S4-Q3); the JIT matrix (S4-Q4); CoreText inside a renderer profile (S4-Q5) | ✅ 2026-10-17 (§7) |
+| CP8 | **S4c:** `docs/research/s4-results.md`. ADR-0004 moves to Accepted if S4-Q1 and S4-Q2 pass. Docs synthesis | ✅ 2026-10-17 (§7; [S4 results](s4-results.md)); ADR-0004 **Accepted** |
+| CP9 | Merge `step-3` into `main` (`--no-ff`) | ✅ 2026-10-17 |
 
 ## 6. Method
 
@@ -172,3 +172,44 @@ Decisions 1–8 are recorded in §2 and in the documents named there. `step-3` w
 **Tests.** `s4-sandbox` has 11 unit tests (including the Mach round trip with the audit trailer, and descriptor inheritance under `POSIX_SPAWN_CLOEXEC_DEFAULT`) and 3 integration scenarios, plus 1 opt-in test. The four standard checks pass: 110 tests, 5 ignored.
 
 **Housekeeping.** The named-profile runs left three crash reports under `~/Library/Logs/DiagnosticReports/Retired/`. They will be removed at S4c, after the final evidence run.
+
+### CP7 (S4b) — completed 2026-10-17
+
+**Code** (commit `1ca3e49`):
+- helper modes `ready`, `serve` and `jit`, and the precompiled method, in which the broker compiles and the helper applies bytecode (invariant X11, Chromium's `sandbox_profile_t`);
+- Mach RPC with send-once rights, reply-and-receive and out-of-line memory; footprint via `proc_pid_rusage`; a `MAP_JIT` probe;
+- profiles `bare.sb`, `renderer-jit.sb` and `text.sb`. `renderer.sb` now denies dynamic code explicitly;
+- the `s4-text` crate; `tools/s4-measure.sh`.
+
+The four standard checks pass: 115 tests, 5 ignored. `unsafe`: 48 blocks in `s4-sandbox` and 7 in `s4-text`, all in their `platform` modules.
+
+**Formal run.** `tools/s4-measure.sh --named-profile` at `1ca3e49` with a clean tree, output in `target/s4-results/20261017-134336/`. Every command passed. Medians:
+- **Start-up** (30 launches each):
+  - no profile: 2.17 ms, 1.14 MiB;
+  - `init`: 8.71 ms, 3.94 MiB;
+  - `compile` + `apply`: 8.14 ms, 3.94 MiB (5.7 ms compile, 33 µs apply);
+  - **precompiled: 2.11 ms, 1.14 MiB (17 µs apply, 498 bytes).**
+- **IPC:** 64 B round trip 4.92 µs over a socket against **3.75 µs over Mach**; 1 MiB in 599 µs over a socket with default 8 KiB buffers, 150 µs with 1 MiB buffers, and 172–177 µs over Mach out of line. The sandbox adds nothing.
+- **JIT:**
+  - hardened without `allow-jit`: `EINVAL` everywhere;
+  - `(deny default)` alone doesn't stop `MAP_JIT`; an explicit `(deny dynamic-code-generation)` does, for every executable;
+  - a second region is refused only with `single-jit`.
+- **Text:** `text.sb` renders pixel-identically to an unsandboxed run, for Helvetica and Times New Roman. The bare renderer profile silently draws other glyphs. A helper that has drawn text costs 10.84 ms and 4.05 MiB unsandboxed, or 14.27 ms and 6.33 MiB when it compiles its own profile.
+
+**How the text profile was grown.** Fonts alone left Times New Roman different pixel by pixel. Bisecting from `(allow default)` traced this to ICU's data in `/usr/share/icu`. Denying every Mach look-up, the font server included, changed nothing.
+
+**Housekeeping.** The formal run's named-profile crash report was copied into the results directory. All four `s4-helper` crash reports were then removed from `~/Library/Logs/DiagnosticReports/Retired/`.
+
+### CP8 (S4c) — completed 2026-10-17
+
+- [S4 results](s4-results.md) written.
+- **ADR-0004 Accepted**, per the owner's instruction, since S4-Q1 and S4-Q2 passed. S4's refinements are recorded in its decision history and decisions:
+  - D2: the browser compiles profiles;
+  - D3: the evidence favours Mach (OQ-17);
+  - J3: the explicit `(deny dynamic-code-generation)` is required;
+  - J5: `renderer-jit` carries `single-jit`.
+- Updated: process model (now binding: B2 basis, the font rules, §8 and §10), macOS note (outcome box), OQ-17 (evidence), decision map (F3 Accepted; Step 3 done), indexes, spikes README, status.
+
+### CP9 — completed 2026-10-17
+
+`step-3` merged into `main` with `git merge --no-ff step-3`, as the owner instructed once the S4 results were written and ADR-0004 was Accepted.

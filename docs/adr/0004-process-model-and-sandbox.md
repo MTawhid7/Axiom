@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-17). The owner reviewed it on 2026-10-17 and accepted its parts, with amendments (decision history). By the owner's instruction, it moves to **Accepted** once spike S4-Q1 and S4-Q2 pass on this Mac (D8) |
+| **Status** | **Accepted** (2026-10-17). The owner accepted its parts with amendments, and instructed that it move to Accepted once spike S4-Q1 and S4-Q2 passed on this Mac. They passed the same day ([S4 results](../research/s4-results.md)) |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
-| **Related** | [Threat model](../security/threat-model.md), [process model](../security/process-model.md), [macOS confinement note](../research/macos-process-confinement.md), [Step 3 tracker](../research/step-3-security-and-process-model.md), [ADR-0001](0001-scope-and-target.md) (R3, consequence 4), [ADR-0002](0002-implementation-language.md) (`unsafe` policy), [ADR-0003](0003-gc-handle-and-rooting-pattern.md) (one heap per agent), [S2 results](../research/s2-results.md) |
+| **Related** | [Threat model](../security/threat-model.md), [process model](../security/process-model.md), [macOS confinement note](../research/macos-process-confinement.md), [Step 3 tracker](../research/step-3-security-and-process-model.md), [ADR-0001](0001-scope-and-target.md) (R3, consequence 4), [ADR-0002](0002-implementation-language.md) (`unsafe` policy), [ADR-0003](0003-gc-handle-and-rooting-pattern.md) (one heap per agent), [S2 results](../research/s2-results.md), [S4 results](../research/s4-results.md) |
 
 ## Decision history
 
@@ -13,6 +13,8 @@
 |---|---|
 | 2026-10-17 | Proposed at the end of Step 3 (CP5) |
 | 2026-10-17 | **Owner's review.** Guiding principle: "we have no calendar deadline or fixed time limit on this project. We will not cut architectural corners or accept weaker security boundaries for convenience. Where we stage features, the underlying architecture must be designed for the complete, uncompromising model from day one." Decisions: the threat model is accepted; security levels L0–L3 and checks V1–V8 are accepted, with **full out-of-process iframes made a mandatory prerequisite for L3** (D4, D5); the JIT policy J1–J7 is accepted, with global and per-site switches (D7); SI1–SI7 are accepted as staged, with SI3 permitted only at L1 and non-sensitive L2 (D4); memory targets B1–B7 are accepted as initial baselines (D6); spike S4 is authorized. **The ADR stays Proposed until S4-Q1 and S4-Q2 pass, then moves to Accepted** |
+| 2026-10-17 | **Spike S4: S4-Q1 and S4-Q2 pass** ([S4 results](../research/s4-results.md)). A custom deny-by-default profile applies to an ad-hoc-signed, hardened-runtime helper built against SDK 27.0, by three methods. All 18 probes behave as specified. S4 also refines three decisions, recorded below: the browser compiles profiles (D2); J3's explicit rule is required (D7); J5 adds `single-jit` (D7) |
+| 2026-10-17 | **Accepted**, by the owner's instruction of the same day: "Once S4-Q1 and S4-Q2 pass, ADR-0004 moves to Accepted" |
 
 ## Question
 
@@ -79,6 +81,7 @@ The answer must meet ADR-0001 R3: a compromised renderer must expose neither cre
 
 - [Threat model](../security/threat-model.md), [process model](../security/process-model.md) and [macOS confinement note](../research/macos-process-confinement.md), with their sources. The note records the observations made on this machine (§9).
 - [S2 results](../research/s2-results.md): the footprint of a window with a Metal device; an event loop that costs nothing when idle.
+- [S4 results](../research/s4-results.md): the sandbox mechanism validated on this Mac; start-up, footprint, IPC, JIT and CoreText measurements.
 
 ## Decision (proposed)
 
@@ -96,6 +99,7 @@ The full capability matrix is in the [process model](../security/process-model.m
 
 **D2. Confinement.**
 - **Option O1.** Each helper is its own executable, signed ad hoc with the hardened runtime and only the entitlements it needs. It applies its own deny-by-default profile at the top of `main`, before any untrusted input or resource reaches it.
+- **The browser compiles each profile once**, with the helper's parameters, and sends the bytecode over the inherited channel. The helper applies it as its first act (S4 refinement). Measured: the helper is ready 2.1 ms after launch with a 1.1 MiB footprint, the same as an unsandboxed helper. Compiling in the helper would cost about 6 ms and 2.8 MiB per process.
 - **Profiles** live in the repository and are reviewed like `unsafe` code.
 - **The browser process stays unsandboxed** under the hardened runtime.
 - **Fallback:** option O2, with its weaker guarantees stated, if custom profiles stop working.
@@ -103,7 +107,7 @@ The full capability matrix is in the [process model](../security/process-model.m
 **D3. Launch and IPC.**
 - Only the browser launches processes, using `posix_spawn` with no inherited descriptors (`POSIX_SPAWN_CLOEXEC_DEFAULT`).
 - IPC follows requirements R1–R6 and trust rules IR1–IR10 ([process model](../security/process-model.md) §6). In particular, decoding is safe Rust, decisions come from the receiver's own records, and any violation kills the sender.
-- The transport (Mach messages or socket pairs) is chosen in Step 4 from S4-Q3's measurements (OQ-17).
+- The transport (Mach messages or socket pairs) is chosen in Step 4 (OQ-17). S4-Q3's measurements favour Mach messages: 24% faster round trips, port rights, and the kernel's audit trailer for peer identity.
 
 **D4. Site isolation.**
 - Rules SI1–SI7 ([process model](../security/process-model.md) §5): site locks from L2; process limits never merge sites.
@@ -125,16 +129,15 @@ The full capability matrix is in the [process model](../security/process-model.m
 |---|---|
 | J1 | **Interpreter first. Whether to build a JIT is decided by evidence:** spike S3 in Step 4, and target-corpus measurements once OQ-2 is answered |
 | J2 | **No JIT before L2,** and not before the JIT renderer variant passes the sandbox escape tests (V1) |
-| J3 | **Only one executable, `renderer-jit`, carries `com.apple.security.cs.allow-jit`.** Every other Axiom executable runs under the hardened runtime without it, so the kernel refuses to give it executable memory. Every profile except `renderer-jit`'s also contains `(deny dynamic-code-generation)` |
+| J3 | **Only one executable, `renderer-jit`, carries `com.apple.security.cs.allow-jit`.** Every other Axiom executable runs under the hardened runtime without it, so the kernel refuses to give it executable memory (S4: `EINVAL`). Every profile except `renderer-jit`'s **must** contain an explicit `(deny dynamic-code-generation)`: S4 showed that `(deny default)` doesn't cover it, while the explicit rule refuses `MAP_JIT` even to a holder of `allow-jit` |
 | J4 | **Sensitive sites, and every document rendered in a sensitive site's process, run in the no-JIT renderer.** A **global switch** moves every site to the no-JIT renderer, like Lockdown Mode, whose WebKit content process has no JIT entitlement (observed). A **per-site switch** does the same for any site the owner chooses. A mode that disables the JIT on unfamiliar sites, like Edge's "balanced" mode, can be added later as a setting |
-| J5 | **Generated code is written only through statically allowlisted callbacks** (`pthread_jit_write_with_callback_np` with `jit-write-allowlist`), as in every WebKit process. Code is flushed with `sys_icache_invalidate` and lives in the single `MAP_JIT` region |
+| J5 | **Generated code is written only through statically allowlisted callbacks** (`pthread_jit_write_with_callback_np` with `jit-write-allowlist`), as in every WebKit process. Code is flushed with `sys_icache_invalidate`. **`renderer-jit` also carries `com.apple.security.cs.single-jit`,** so that code lives in a single `MAP_JIT` region. S4 found that the limit applies only with this entitlement, which ad-hoc signing honours |
 | J6 | **A WebAssembly compiler counts as a JIT** and follows J1–J5. An interpreter keeps WebAssembly working in no-JIT renderers, as in Edge's enhanced security mode [6] |
 | J7 | **Before a JIT ships,** it needs: differential testing against the interpreter (test262 and fuzzing); a design for containing memory corruption within the JS heap; and a tested global switch (V7). JIT bugs are typically logic bugs that become memory corruption [5]. **Hypothesis:** Pattern B's 32-bit handles into arenas (ADR-0003) are a natural basis for that containment design, to be examined if J1 leads to a JIT |
 
-**D8. Validation before acceptance.**
-- Spike S4 ([macOS note](../research/macos-process-confinement.md) §7) needs the owner's authorization.
-- S4-Q1 and S4-Q2 must pass for D2 to stand: a custom profile applies to an ad-hoc-signed SDK 27 helper, and it denies files, network, process launching and the named Mach services.
-- S4-Q3 to S4-Q6 inform D3, D6, D7 and Step 5.
+**D8. Validation before acceptance: done.**
+- Spike S4 (authorized 2026-10-17) passed S4-Q1 and S4-Q2 on 2026-10-17 ([S4 results](../research/s4-results.md)).
+- S4-Q3 to S4-Q5 refined D2, D3, D6 and D7, as recorded above. S4-Q6, the fallbacks, wasn't needed.
 
 ## Rationale
 
@@ -152,7 +155,7 @@ The full capability matrix is in the [process model](../security/process-model.m
 
 ## Assumptions
 
-- Custom Seatbelt profiles keep working for binaries built against current SDKs. S4 tests this; the risk is below.
+- Custom Seatbelt profiles keep working for binaries built against current SDKs. S4 confirmed this for SDK 27 binaries on macOS 27.2; the risk of a later change is below.
 - A helper can apply its profile before it needs any resource the profile denies (S4-Q2, S4-Q5).
 - Partitioning third-party cookies and storage by top-level site is compatible with the target corpus. Safari and Firefox do it by default (background).
 - The owner can name the sites they consider sensitive.

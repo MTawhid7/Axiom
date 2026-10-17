@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Reviewed** by the owner (2026-10-17). Spike S4 (§7) authorized the same day; its results will be in `docs/research/s4-results.md` |
+| **Status** | **Reviewed** by the owner (2026-10-17). Spike S4 (§7) ran the same day: [S4 results](s4-results.md) |
 | **Question** | How can Axiom confine its helper processes on macOS 27, building with the Command Line Tools only and signing ad hoc (no paid developer account)? How do Chromium, WebKit and Firefox do it, and what does that imply for Axiom? |
 | **Feeds** | ADR-0004; [process model](../security/process-model.md); [threat model](../security/threat-model.md) §9; spike S4 (§7) |
 | **Last updated** | 2026-10-17 |
@@ -231,7 +231,9 @@ Both are public.
 - Treat O2 as the documented fallback if S4 shows that O1 no longer works for SDK 27 binaries.
 - Accepting ADR-0004 should depend on S4-Q1 and S4-Q2 passing.
 
-## 7. Spike S4 (proposed; needs the owner's authorization)
+## 7. Spike S4
+
+> **Outcome (2026-10-17):** authorized and run; S4-Q1 to S4-Q5 answered; S4-Q6 wasn't needed. See [S4 results](s4-results.md). Two of this note's expectations were refined. `(deny default)` does not cover dynamic code generation, so it needs an explicit rule (§2.4). Apple's one-region `MAP_JIT` limit applies only with `single-jit`.
 
 **Goal.** Validate O1 on this machine and measure what a sandboxed helper costs, before ADR-0004 is accepted.
 

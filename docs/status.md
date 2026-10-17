@@ -6,26 +6,39 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero, Step 3: spike S4 is running.** The threat model is accepted, and the process model and ADR-0004 are reviewed. Production engine code is **not** authorized |
-| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. `main` includes Step 2b. **Step 3 is on branch `step-3`, pushed to `origin`**; it merges into `main` (`--no-ff`) once the S4 results are written and ADR-0004 is Accepted |
-| Current checkpoint | Step 3 CP1–CP5 ✅ and reviewed; **CP6 (S4a)** next ([tracker](research/step-3-security-and-process-model.md) §5) |
-| Code | Spike code only, under `spikes/` (S1, S2, and S4 from CP6). Tooling under `tools/` |
-| Verified capabilities | None at engine level. The spikes' verified results are in the [S1 results](research/s1-results.md) and [S2 results](research/s2-results.md). Step 3's observations of this Mac are in the [macOS note](research/macos-process-confinement.md) §9 |
+| Phase | **Phase Zero. Step 3 is complete; Step 4 is next**: event loop, threading, pipeline data model, invalidation, embedder API. Production engine code is **not** authorized |
+| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 3**, merged with `--no-ff` on 2026-10-17. Branch `step-3` is pushed. `main` is not yet pushed with the merge |
+| Current checkpoint | Step 3 CP1–CP9 ✅ ([tracker](research/step-3-security-and-process-model.md)). Step 4 not started |
+| Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3). S1 stays as the baseline for spike S3. Tooling under `tools/` |
+| Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
-| | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final** (2026-10-17), with build thresholds T1–T4 |
-| | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 (2026-10-17) |
+| | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final**, with build thresholds T1–T4 |
+| | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 |
+| | [ADR-0004](adr/0004-process-model-and-sandbox.md): process model, sandbox and JIT policy (2026-10-17), validated by spike S4 |
 | | [Threat model](security/threat-model.md) (2026-10-17), amended: out-of-process iframes are required for L3 |
-| Proposed decisions | [ADR-0004](adr/0004-process-model-and-sandbox.md): process model, sandbox and JIT policy. The owner reviewed it on 2026-10-17 and accepted its parts with amendments. It becomes **Accepted once S4-Q1 and S4-Q2 pass** |
 
-## Next steps: spike S4 (authorized 2026-10-17)
+## Next steps: Step 4, the architecture proposal v0
 
-The design is in the [macOS note](research/macos-process-confinement.md) §7; the checkpoints are CP6–CP9 in the [tracker](research/step-3-security-and-process-model.md) §5.
-1. **CP6, S4a.** Probes for S4-Q1 (does a custom deny-by-default profile apply to an ad-hoc-signed helper built with SDK 27?) and S4-Q2 (are files, network, process launching and the named Mach services denied, and do allocation, threads, IPC and logging still work?). Automated under `cargo test`.
-2. **CP7, S4b.** Measurements: helper start-up and footprint; IPC latency and throughput over Mach messages and socket pairs (S4-Q3); the JIT matrix (S4-Q4); CoreText inside a renderer profile (S4-Q5).
-3. **CP8, S4c.** `docs/research/s4-results.md`. ADR-0004 moves to Accepted if S4-Q1 and S4-Q2 pass, by the owner's instruction.
-4. **CP9.** Merge `step-3` into `main` with `--no-ff`.
+**Step 4 is design work under the Phase Zero rule.** It starts on a new branch, `step-4`, with a plan and checkpoints, once the owner gives the go-ahead. Spike S3 is required in Step 4 (ADR-0003, C1). Its code still needs the go-ahead when Step 4's plan is ready.
 
-**Then Step 4:** event loop, threading, pipeline data model, invalidation, embedder API. Spike S3 is required there (ADR-0003, C1). Step 3's constraints for Step 4 are in the [decision map](decision-map.md) §4. Above all, the frame tree, per-frame display lists and browser-routed input come from the first line of code, because out-of-process iframes are mandatory before L3.
+**Topics** ([decision map](decision-map.md), P1–P3 and F4):
+- the event loop and threading model;
+- the pipeline data model: DOM → style → box tree → fragment tree → display list → compositor;
+- the invalidation and incremental-update model;
+- the engine/embedder API.
+
+**Binding inputs from Step 3** ([decision map](decision-map.md) §4):
+- message-based interfaces at every future process boundary;
+- **a browser-owned frame tree, per-frame display lists and browser-routed input from the first line of code**, so that out-of-process iframes, mandatory before L3, need no rewrite;
+- one agent cluster per process (OQ-5);
+- a display list that never makes the browser decode images or parse fonts;
+- helpers that apply browser-compiled profiles.
+
+**Open questions due in Step 4:**
+- OQ-17, the IPC transport. S4 favours Mach messages.
+- OQ-5, per-agent heaps and workers.
+- OQ-13 and OQ-14, the GC obligations C1–C4, with spike S3.
+- OQ-11, the shell.
 
 ## Session log
 
@@ -64,6 +77,22 @@ The design is in the [macOS note](research/macos-process-confinement.md) §7; th
 - **ADR-0004 stays Proposed** until S4-Q1 and S4-Q2 pass, then moves to Accepted.
 - **Spike S4 authorized** (S4a, S4b, S4c).
 - **Git:** `step-3` pushed now; it merges into `main` with `--no-ff` after S4.
+
+**Spike S4** (CP6–CP8; [S4 results](research/s4-results.md)):
+- **S4-Q1 and S4-Q2 pass.** A Rust helper built against SDK 27.0 and signed ad hoc with the hardened runtime enters a custom deny-by-default profile by three methods: `sandbox_init_with_parameters`; compile + apply; bytecode compiled by the broker. All 18 probes behave as specified, and the control run allows all 18. A *named* profile kills the helper (SIGKILL, namespace `SANDBOX`).
+- **S4-Q3.** With broker-compiled bytecode, a sandboxed helper starts as fast and as small as an unsandboxed one: 2.1 ms, 1.14 MiB. Compiling in the helper costs about 6 ms and 2.8 MiB. Mach round trips are 24% faster than a socket pair (3.75 against 4.92 µs). 1 MiB transfers are comparable once socket buffers are enlarged.
+- **S4-Q4.** `(deny default)` does not stop JIT; only an explicit `(deny dynamic-code-generation)` does. The one-region `MAP_JIT` limit applies only with `single-jit`. Ad-hoc signing honours `allow-jit` and `single-jit`.
+- **S4-Q5.** CoreText renders pixel-identically with the window server and font server denied, given read access to system fonts and ICU's data. Without either, it degrades silently.
+- **Code:** `spikes/s4/sandbox`, `spikes/s4/text`, `tools/s4-sign.sh`, `tools/s4-measure.sh`. The four standard checks pass (115 tests, 5 ignored).
+
+**ADR-0004 Accepted** (2026-10-17), per the owner's instruction, with S4's refinements recorded:
+- D2: the browser compiles profiles;
+- J3: the explicit JIT deny is required;
+- J5: `renderer-jit` carries `single-jit`.
+
+**Merged** `step-3` into `main` with `--no-ff` (CP9).
+
+**Housekeeping.** The named-profile runs left crash reports in `~/Library/Logs/DiagnosticReports`. One is archived with the formal results, and all were removed from that folder. The check is opt-in from now on.
 
 ### 2026-10-17 — Session 4 (renamed to Axiom)
 
