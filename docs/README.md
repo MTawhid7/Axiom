@@ -23,7 +23,8 @@ These documents are the project's source of truth. Conversation history is not.
 | [adr/](adr/) | Architecture Decision Records | See each ADR |
 | ↳ [0000-template.md](adr/0000-template.md) | ADR template | — |
 | ↳ [0001-scope-and-target.md](adr/0001-scope-and-target.md) | Target, JavaScript strategy, security posture, defaults | **Accepted** |
-| ↳ [0002-implementation-language.md](adr/0002-implementation-language.md) | Implementation language (Rust) | **Provisionally accepted** |
+| ↳ [0002-implementation-language.md](adr/0002-implementation-language.md) | Implementation language (Rust) | **Provisionally accepted**; final acceptance recommended (CP9) |
+| ↳ [0003-gc-handle-and-rooting-pattern.md](adr/0003-gc-handle-and-rooting-pattern.md) | GC handle and rooting pattern (Pattern B, Nova style) | **Proposed** |
 | [technology/language-evaluation.md](technology/language-evaluation.md) | Detailed language comparison and recommendation | Reviewed |
 | [research/step-2b-validation-spikes.md](research/step-2b-validation-spikes.md) | Step 2b plan and checkpoint tracker (spikes S1 and S2) | **In progress** |
 | [research/s1-results.md](research/s1-results.md) | S1 results: `unsafe` containment, ceremony, runtime, memory and build cost of the two GC patterns; recommendation for ADR-0003 | Draft (owner review at CP9) |

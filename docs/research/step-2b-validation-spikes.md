@@ -175,7 +175,7 @@ tools/check-unsafe-policy.sh
 | CP6 | Pattern B DOM and driver; oracle equality; A ≡ B differential | ✅ 2026-10-16 (§8) |
 | CP7 | S1 measurements (runtime, ceremony, build) and S1 results note | ✅ 2026-10-17 (§8; [S1 results](s1-results.md)) |
 | CP8 | S2 platform spike, measurements, and S2 results note | ✅ 2026-10-17 (§8; [S2 results](s2-results.md)); the owner's visual check is pending |
-| CP9 | Synthesis: ADR-0002 final recommendation; ADR-0003 (GC pattern) proposed; docs | ⬜ |
+| CP9 | Synthesis: ADR-0002 final recommendation; ADR-0003 (GC pattern) proposed; docs | 🔄 Synthesis written (2026-10-17); owner review, decisions and merge pending |
 
 ### CP1 — Foundation
 
@@ -809,3 +809,20 @@ Line-level profiles attribute B's remaining dispatch gap to root-stack traffic: 
 **Verification:** the four standard checks are green.
 
 **Pending:** the owner's visual check of the window (`cargo run -p s2-window`).
+
+### CP9 — synthesis written 2026-10-17; owner review pending
+
+**Prepared for the owner:**
+- **[ADR-0002](../adr/0002-implementation-language.md)** gains a Step 2b evidence table: every assumption holds, and revisit condition 1 did not trigger. It recommends **final acceptance** and links the proposed build thresholds T1–T4 to revisit condition 3. Its status stays *Provisionally accepted* until the owner confirms.
+- **[ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md), Proposed:** Pattern B (Nova style), with obligations C1–C5 (cheaper rooting, layout, a write-barrier API, a pause budget, native interop), and the risks, assumptions and conditions for revisiting.
+- **The [language evaluation](../technology/language-evaluation.md)** gains dated Step 2b notes in §1, §7.5, §15.6 and §16. Its analysis and scores are unchanged.
+- **The decision map, open questions and indexes** are updated.
+
+**Owner decisions needed to close CP9:**
+1. Is the ceremony acceptable (S1-Q2)?
+2. Accept ADR-0002 (Rust) as final?
+3. Accept, amend or reject ADR-0003 (Pattern B)?
+4. Accept thresholds T1–T4 (OQ-12)?
+5. Should S3 become required (OQ-15)?
+6. Visual check of the S2 window (`cargo run -p s2-window`).
+7. Merge `step-2b` into `main`.

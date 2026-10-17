@@ -8,17 +8,18 @@
 |---|---|
 | Phase | **Phase Zero, Step 2b: validation spikes** (authorized 2026-10-16). Production engine code is **not** authorized |
 | Repository | git. `main` = reviewed baseline (`a223fe2`); work in progress on branch **`step-2b`** |
-| Current checkpoint | CP1–CP8 ✅ done: **S1 and S2 are complete**; see the [S1 results](research/s1-results.md) and [S2 results](research/s2-results.md). **Next: CP9**, the synthesis: owner decisions, ADR-0002 final, ADR-0003 proposed, merge to `main`; see the [Step 2b tracker](research/step-2b-validation-spikes.md#6-checkpoints) |
+| Current checkpoint | CP1–CP8 ✅ done; **CP9 synthesis written**, awaiting the owner's review. Documents: [S1 results](research/s1-results.md), [S2 results](research/s2-results.md), [ADR-0002](adr/0002-implementation-language.md) (final acceptance recommended), [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md) (Proposed). **Next: the owner's decisions** (listed below), then the merge of `step-2b` into `main` |
 | Code | Spike code only, under `spikes/` (throwaway). Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike verification results are in the tracker's §8. S1's findings and recommendation (Pattern B for ADR-0003, conditionally) are in the [S1 results](research/s1-results.md) |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
-| Provisionally accepted | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), pending S1 and S2 |
+| Provisionally accepted | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition). S1 and S2 are complete; final acceptance is recommended |
+| Proposed | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 |
 
 ## Next steps
 
-1. Finish the current checkpoint in the [Step 2b tracker](research/step-2b-validation-spikes.md) and run its verification commands.
-2. Continue CP2 → CP9 in order. Each checkpoint ends with a green verification run and a commit on `step-2b`.
-3. At CP9, the owner reviews the S1 and S2 results, decides on final acceptance of ADR-0002, and merges `step-2b` into `main`.
+1. **Owner review.** Read the [S1 results](research/s1-results.md), the [S2 results](research/s2-results.md), [ADR-0002](adr/0002-implementation-language.md) and [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md), then make the decisions listed in the session log below.
+2. **After the decisions:** record them in the ADRs and open questions, then merge `step-2b` into `main`.
+3. **Then Phase Zero resumes** with Step 3 (threat model and security boundaries), as the [decision map](decision-map.md) sequences it. ADR-0003's obligations C1–C5 feed Step 4 (architecture).
 
 ## Session log
 
@@ -61,12 +62,20 @@
 - Build: 6.0 s clean with trimmed bindings, against 29 s with objc2's defaults; the whole workspace builds clean in 8.1 s.
 - [S2 results](research/s2-results.md) written, with the proposed build thresholds T1–T4 for ADR-0002 revisit condition 3.
 
-**Decisions waiting for the owner** (at CP9):
-- S1-Q2: is the ceremony acceptable?
-- ADR-0003: the GC pattern.
-- OQ-15: should S3 become required?
-- OQ-12: accept thresholds T1–T4?
-- Visual check of the S2 window (`cargo run -p s2-window`).
+**CP9 synthesis written:**
+- ADR-0002 recommends final acceptance, with a Step 2b evidence table.
+- ADR-0003 is proposed: Pattern B, with obligations C1–C5.
+- The language evaluation has dated Step 2b notes.
+- The decision map, open questions and indexes are updated.
+
+**Decisions waiting for the owner** (to close CP9):
+1. S1-Q2: is the ceremony acceptable?
+2. ADR-0002: accept Rust as final?
+3. ADR-0003: accept, amend or reject Pattern B?
+4. OQ-12: accept thresholds T1–T4?
+5. OQ-15: should S3 become required?
+6. Visual check of the S2 window (`cargo run -p s2-window`).
+7. Merge `step-2b` into `main`.
 
 **Verified**
 - `samply` works on this machine without Xcode, including line-level attribution through `dsymutil` and `atos` (Command Line Tools).

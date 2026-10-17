@@ -2,9 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | **Provisionally accepted** (2026-10-16). Final acceptance follows the Step 2b spikes S1 and S2 |
-| **Date** | 2026-10-16 |
+| **Status** | **Provisionally accepted** (2026-10-16). Step 2b is complete (2026-10-17) and **final acceptance is recommended**, pending the owner's confirmation at CP9 |
+| **Date** | 2026-10-16; evidence added 2026-10-17 |
 | **Deciders** | Project owner. Final acceptance requires the owner's explicit confirmation after the [Step 2b spikes](../research/step-2b-validation-spikes.md) |
+| **Related** | [Language evaluation](../technology/language-evaluation.md) (full analysis and sources), [ADR-0001](0001-scope-and-target.md), [S1 results](../research/s1-results.md), [S2 results](../research/s2-results.md), [ADR-0003](0003-gc-handle-and-rooting-pattern.md) (Proposed) |
 
 ## Decision history
 
@@ -13,7 +14,9 @@
 | 2026-10-16 | Proposed: Rust, with `unsafe` confined by policy |
 | 2026-10-16 | Owner **provisionally accepts** Rust (stable toolchain, 2024 edition) under the unsafe-code policy in evaluation §15.3. Step 2b (spikes S1 and S2) is authorized to validate it before final acceptance and before any production engine code |
 | 2026-10-16 | Policy refinement (evaluation §15.3, rule 7): `#![forbid(unsafe_code)]` does not catch macro-generated `unsafe`, so macros that emit `unsafe` belong to the unsafe boundary |
-| **Related** | [Language evaluation](../technology/language-evaluation.md) (full analysis and sources), [ADR-0001](0001-scope-and-target.md) |
+| 2026-10-17 | **S1 complete.** The central assumption holds: Pattern A confines `unsafe` to one GC module, and Pattern B needs none anywhere. Revisit condition 1 does not trigger ([S1 results](../research/s1-results.md)) |
+| 2026-10-17 | **S2 complete.** The objc2 platform stack (AppKit, Metal, CoreText) works without Xcode, with `unsafe` contained. Build thresholds T1–T4 are proposed for revisit condition 3 ([S2 results](../research/s2-results.md)) |
+| 2026-10-17 | **Recommendation: final acceptance**, awaiting the owner. The GC pattern is proposed separately as [ADR-0003](0003-gc-handle-and-rooting-pattern.md) |
 
 ## Question
 
@@ -71,11 +74,20 @@ Parsers, network policy and IPC message decoding contain no `unsafe` at all. The
 - GC convenience is weighted twice as heavily *and* memory safety half as heavily; or
 - Rust's GC story fails badly *and* `unsafe` leaks out of the GC crate.
 
+## Step 2b evidence (2026-10-17)
+
+| Assumption | Evidence | Status |
+|---|---|---|
+| At least one GC design keeps `unsafe` inside the `gc` crate with acceptable ergonomics | **S1.** Both designs keep it contained: Pattern A has 24 audited blocks in one module, and Pattern B has none anywhere. Both pass the reference oracle and Miri. Ergonomics differ in kind: architectural for A, lexical for B | **Holds.** Ergonomics is the owner's judgment (S1-Q2) |
+| The owner's fluency does not rule out Rust | OQ-6, resolved 2026-10-16 | **Holds** |
+| Builds on the 8 GB M1 are workable with mitigations | **S1 and S2.** The whole workspace builds clean in 8.1 s and incrementally in under 1 s. The largest `rustc` uses 0.35 GiB with trimmed bindings (1.4 GiB with objc2's defaults); the aggregate compiler peak is 0.94 GiB | **Holds.** Thresholds T1–T4 proposed ([S2 results](../research/s2-results.md) §6) |
+| The macOS layer can be written from Rust without Xcode, with `unsafe` contained (Rationale 5) | **S2.** 19 `unsafe` blocks, all in the platform module, under six invariants. A pixel-exact smoke test passes. The Command Line Tools lack an offline Metal compiler, so shaders compile at run time | **Holds** |
+
 ## Assumptions
 
-- At least one GC design keeps `unsafe` inside the `gc` crate with acceptable ergonomics. **This is the S1 hypothesis.**
+- At least one GC design keeps `unsafe` inside the `gc` crate with acceptable ergonomics. **Validated by S1**, as above.
 - The owner's fluency does not rule out Rust ([OQ-6](../open-questions.md)).
-- Build times on the 8 GB M1 are workable with mitigations. S2 measures this.
+- Build times on the 8 GB M1 are workable with mitigations. **Measured by S1 and S2**, as above.
 
 ## Risks and unresolved issues
 
@@ -87,11 +99,13 @@ See evaluation §15.5. The main ones:
 
 ## Conditions for revisiting
 
-See evaluation §15.6. The key condition: **S1 shows `unsafe` cannot stay inside the GC crate**, which is the scenario in which C++ overtakes Rust in the matrix.
+See evaluation §15.6.
+- The key condition, **S1 shows `unsafe` cannot stay inside the GC crate**, was tested in Step 2b and did not trigger.
+- **Condition 3 (build cost)** is proposed to mean: a threshold in [S2 results](../research/s2-results.md) §6 is exceeded *after* the listed mitigations. The thresholds cover incremental builds, clean builds, aggregate compiler memory and single-`rustc` memory (T1–T4). If accepted, they resolve OQ-12.
 
 ## Consequences if accepted
 
 - Future crates are designed around `#![forbid(unsafe_code)]` with a few audited exceptions.
 - The DOM is modelled with enums, traits and code generated from WebIDL, not class inheritance.
-- Spike S1 chooses the GC handle pattern, which becomes its own ADR.
+- The GC handle pattern is its own ADR: [ADR-0003](0003-gc-handle-and-rooting-pattern.md) proposes Pattern B (Nova style), with obligations C1–C5.
 - macOS integration goes through objc2 and C FFI. A thin Swift shell remains an option for later, not a plan.
