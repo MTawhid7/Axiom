@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | Living document |
-| **Last updated** | 2026-10-16 |
+| **Last updated** | 2026-10-17 |
 
 This map lists every major architectural decision, its layer, its status, and how the decisions constrain one another. Decisions are layered by **how expensive they are to reverse**.
 
@@ -29,7 +29,7 @@ X  Cross-cutting    standards baseline · conformance testing · fuzzing · perf
 | R4 | Constraints: skills, time, hardware | Partly known | Charter §7; [OQ-1, OQ-6, OQ-9](open-questions.md) |
 | F1 | Implementation language | **Accepted** (final, 2026-10-17): Rust | [ADR-0002](adr/0002-implementation-language.md), [evaluation](technology/language-evaluation.md), [S1](research/s1-results.md), [S2](research/s2-results.md) |
 | F2 | GC and DOM memory model | **Accepted** (2026-10-17): one heap for JS and the DOM (R2), with Pattern B (Nova style) and obligations C1–C5 ([ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md)) | [S1 results](research/s1-results.md), [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md) |
-| F3 | Trust boundaries, process model, sandbox | Open | Step 3 |
+| F3 | Trust boundaries, process model, sandbox | **Proposed** (2026-10-17): staged site isolation; helpers that apply their own Seatbelt profiles; IPC trust rules; security levels L0–L3; JIT policy. Awaits spike S4 and the owner's review | [ADR-0004](adr/0004-process-model-and-sandbox.md), [threat model](security/threat-model.md), [process model](security/process-model.md), [macOS note](research/macos-process-confinement.md) |
 | F4 | Engine/embedder API | Open | Step 4 |
 | P1 | Event loop and threading model | Open | Step 4 |
 | P2 | Pipeline data model | Open | Step 4 |
@@ -89,7 +89,17 @@ These are recorded in ADR-0001.
 6. The dominant risk is the schedule. Mitigations: staging, test oracles, measurable acceptance criteria.
 7. Per-process memory budgets are first-class.
 
-## 4. Phase Zero sequence
+## 4. Consequences of the Step 3 proposal
+
+These are proposed in [ADR-0004](adr/0004-process-model-and-sandbox.md) and become binding if it is accepted.
+1. **Every future process boundary is a message interface from the start** (process model PM6). It also works in-process, for tests and a single-process debugging mode.
+2. **The browser owns the frame tree.** Each frame produces its own display list, and the browser routes input. That keeps out-of-process iframes possible (SI4).
+3. **One agent cluster per process** (SI7). This is an input to OQ-5.
+4. **The browser never decodes images or parses fonts.** The display list carries only validated primitives (Rule of 2).
+5. **A JIT is a property of one executable** (`renderer-jit`) and comes no earlier than security level L2 (JIT rules J1–J7).
+6. **Memory targets B1–B7** (about 1 GB for a typical session; a soft limit of 16 renderers) are inputs to Step 6's budgets.
+
+## 5. Phase Zero sequence
 
 | Step | Topic | Status |
 |---|---|---|
@@ -97,7 +107,7 @@ These are recorded in ADR-0001.
 | 1 | Requirements: target, JavaScript, posture, defaults | Done: ADR-0001 Accepted |
 | 2a | Implementation language evaluation | Done: reviewed; ADR-0002 accepted (final, 2026-10-17) |
 | 2b | Validation spikes: S1 GC heap and DOM, S2 platform and build | **Done** (2026-10-17): [S1 results](research/s1-results.md), [S2 results](research/s2-results.md). ADR-0002 is final, and [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md) is accepted. Merged into `main`. S3 (the interpreter benchmark) is required, and runs in Step 4 |
-| 3 | Threat model, trust boundaries, process and sandbox model on macOS | **Next** (see [status](status.md)) |
+| 3 | Threat model, trust boundaries, process and sandbox model on macOS | **In review** (2026-10-17): [threat model](security/threat-model.md), [process model](security/process-model.md), [macOS note](research/macos-process-confinement.md); [ADR-0004](adr/0004-process-model-and-sandbox.md) Proposed. Spike S4 awaits authorization ([status](status.md)) |
 | 4 | Event loop, threading, pipeline data model, invalidation, embedder API | Not started; produces architecture proposal v0 |
 | 5 | Subsystems: text & fonts → rendering/compositing → networking/TLS → style → layout | Not started |
 | 6 | Standards baseline, testing, performance budgets, roadmap | Not started; ends in a design review and approval of Milestone 1 |

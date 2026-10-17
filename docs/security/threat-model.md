@@ -60,7 +60,7 @@ Claims follow the [research conventions](../research/README.md): **sourced facts
 
 **Why AD2 is a normal case, not an edge case.**
 - Chromium's site isolation work treats compromised renderers as something that must be "explicitly included in a browser's security threat model" [2].
-- 60% of the Chrome exploits seen in the wild from 2021 to 2023 started with V8 bugs [5].
+- Of the Chrome exploits seen in the wild from 2021 to 2023 that began with memory corruption in a renderer, 60% exploited V8 bugs [5].
 - V8's engineers argue that a memory-safe implementation language does not prevent these bugs, because many are logic bugs in JIT compilers that emit unsafe machine code [5].
 
 Each point is sourced. **Inference for Axiom:** writing the engine in Rust lowers the rate of renderer compromise, but does not remove it. The design must assume AD2.
@@ -206,7 +206,7 @@ All web sources were checked on 2026-10-17.
 2. Chromium, "Site Isolation" (chromium.org): compromised renderers "need to be explicitly included in a browser's security threat model"; Spectre reads renderer memory "even without bugs in Chrome"; CORB is "a best effort approach". https://www.chromium.org/Home/chromium-security/site-isolation/
 3. C. Reis, A. Moshchuk, N. Oskov, "Site Isolation: Process Separation for Web Sites within the Browser", USENIX Security 2019, §5.2–5.3: same-process transient-execution attacks; Chrome re-enabled `SharedArrayBuffer` and precise timers with Site Isolation; a 9–13% total memory overhead. https://www.usenix.org/conference/usenixsecurity19/presentation/reis
 4. Chromium, "The Rule Of 2": "Pick no more than 2 of: untrustworthy inputs; unsafe implementation language; and high privilege." https://chromium.googlesource.com/chromium/src/+/HEAD/docs/security/rule-of-2.md
-5. V8, "The V8 Sandbox" (2024-04-04): 60% of in-the-wild Chrome exploits from 2021 to 2023 were V8 vulnerabilities; JIT bugs are logic bugs that a memory-safe language would not prevent. https://v8.dev/blog/sandbox
+5. V8, "The V8 Sandbox" (2024-04-04): of the in-the-wild Chrome exploits from 2021 to 2023 that began with renderer memory corruption, 60% were V8 vulnerabilities; many V8 bugs are logic bugs, including JIT bugs, that a memory-safe language would not prevent. https://v8.dev/blog/sandbox
 6. WHATWG HTML: COOP, COEP and cross-origin isolation (§7.1.3–7.1.4); `SharedArrayBuffer` serialization requires the cross-origin isolated capability (§2.7.4); agent clusters (§8.1.2). W3C High Resolution Time (Editor's Draft, 2026-09-01) §4: 100 µs coarsening, or 5 µs when cross-origin isolated. https://html.spec.whatwg.org/multipage/ ; https://w3c.github.io/hr-time/
 7. A. van Kesteren, "Opaque Response Blocking (ORB, aka CORB++)", being upstreamed to the Fetch Standard (PR #1442). https://github.com/annevk/orb
 8. Isosceles, "The WebP 0day" (2023). https://blog.isosceles.com/the-webp-0day/

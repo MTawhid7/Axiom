@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress |
+| **Status** | **In review** (2026-10-17): CP1–CP5 complete; waiting for the owner's decisions |
 | **Authorized** | 2026-10-17, by the owner ("Continue implementation"), as Step 3 design work. Documents only (§2) |
 | **Branch** | `step-3`, to be merged into `main` after the owner's review |
 | **Feeds** | ADR-0004 (process model and sandbox); OQ-4 (JIT policy); the architecture proposal in Step 4 |
@@ -45,14 +45,14 @@ Nothing was compiled or installed. Each such fact names the command or file it c
 | Q5 | How is each process confined on macOS, with the Command Line Tools only and no paid developer account? | [macOS confinement note](macos-process-confinement.md); ADR-0004 |
 | Q6 | Which rules govern IPC between processes of different trust? | [Process model](../security/process-model.md) §6 |
 | Q7 | How much memory may each process use on 8 GB, and how many processes may run? | [Process model](../security/process-model.md) §7 |
-| Q8 | JIT policy (OQ-4): under what conditions may a JIT exist, and where is it off? | ADR-0004 |
+| Q8 | JIT policy (OQ-4): under what conditions may a JIT exist, and where is it off? | [ADR-0004](../adr/0004-process-model-and-sandbox.md), D7 |
 
 ## 4. Deliverables
 
-1. `docs/security/threat-model.md`
-2. `docs/research/macos-process-confinement.md`, a research note that also designs spike S4
-3. `docs/security/process-model.md`
-4. `docs/adr/0004-process-model-and-sandbox.md` (Proposed), including the JIT policy for OQ-4
+1. [`docs/security/threat-model.md`](../security/threat-model.md)
+2. [`docs/research/macos-process-confinement.md`](macos-process-confinement.md), a research note that also designs spike S4
+3. [`docs/security/process-model.md`](../security/process-model.md)
+4. [`docs/adr/0004-process-model-and-sandbox.md`](../adr/0004-process-model-and-sandbox.md) (Proposed), including the JIT policy for OQ-4
 5. Updates to the decision map, open questions, indexes and status
 
 ## 5. Checkpoints
@@ -68,7 +68,7 @@ Nothing was compiled or installed. Each such fact names the command or file it c
 | CP2 | Threat model: assets, adversaries, attack surfaces, trust boundaries, goals and non-goals, security levels | ✅ 2026-10-17 (§7; [threat model](../security/threat-model.md)) |
 | CP3 | Research note: process confinement on macOS, browser precedents, observations on this machine; spike S4 design | ✅ 2026-10-17 (§7; [note](macos-process-confinement.md)) |
 | CP4 | Process model: process types and privileges, site isolation policy, IPC trust rules, memory budgets, staging | ✅ 2026-10-17 (§7; [process model](../security/process-model.md)) |
-| CP5 | Synthesis: ADR-0004 (Proposed) with the JIT policy; decision map, open questions, indexes, status; branch ready for review | Not started |
+| CP5 | Synthesis: ADR-0004 (Proposed) with the JIT policy; decision map, open questions, indexes, status; branch ready for review | ✅ 2026-10-17 (§7; [ADR-0004](../adr/0004-process-model-and-sandbox.md)) |
 
 ## 6. Method
 
@@ -118,3 +118,13 @@ Correction during review: WebKit's XPC services don't carry the hardened-runtime
 - IPC requirements R1–R6 and trust rules IR1–IR10;
 - memory targets B1–B7, based on S2, the 1 MB process floor, and the Site Isolation paper's measurements;
 - lifecycle, and staging by security level L0–L3.
+
+### CP5 — completed 2026-10-17
+
+- [ADR-0004](../adr/0004-process-model-and-sandbox.md) written and **Proposed**: decisions D1–D8, including the JIT policy J1–J7 for OQ-4. It recommends acceptance once S4-Q1 and S4-Q2 pass.
+- [Decision map](../decision-map.md): F3 marked Proposed; Step 3 in review; a new §4 lists the consequences for Step 4.
+- [Open questions](../open-questions.md): OQ-4's policy proposed; Step 3 inputs added to OQ-5 and OQ-11; OQ-16 (WebAuthn), OQ-17 (IPC transport) and OQ-18 (out-of-process iframes) added.
+- Indexes ([docs](../README.md), [research](README.md)) and [status](../status.md) updated. Status lists the owner's decisions.
+- Every relative link in `docs/` resolves, and the four standard checks pass.
+
+**Review gate.** The owner decides on the threat model, the security levels, spike S4, ADR-0004, the JIT policy, SI3, the memory targets, and the merge ([status](../status.md), "Next steps").

@@ -6,60 +6,65 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero. Step 3 is next**: threat model, trust boundaries, and the macOS process and sandbox model. Step 2b (validation spikes) is complete. Production engine code is **not** authorized |
-| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. `main` includes Step 2b (merged 2026-10-17). The `step-2b` branch is kept |
-| Current checkpoint | Step 2b complete (CP1–CP9 ✅; [tracker](research/step-2b-validation-spikes.md)). Step 3 not started |
-| Code | Spike code only, under `spikes/`; it stays as the baseline for spike S3. Tooling under `tools/` |
-| Verified capabilities | None at engine level. The spikes' verified results are in the [S1 results](research/s1-results.md) and [S2 results](research/s2-results.md) |
+| Phase | **Phase Zero. Step 3 is in review**: the threat model, the process model and the macOS confinement note are written, and ADR-0004 is Proposed. Production engine code is **not** authorized |
+| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. `main` includes Step 2b. **Step 3 is on branch `step-3`**, not yet merged or pushed |
+| Current checkpoint | Step 3 CP1–CP5 ✅ ([tracker](research/step-3-security-and-process-model.md)); waiting for the owner's review |
+| Code | Spike code only, under `spikes/`; it stays as the baseline for spike S3. Tooling under `tools/`. Step 3 added no code |
+| Verified capabilities | None at engine level. The spikes' verified results are in the [S1 results](research/s1-results.md) and [S2 results](research/s2-results.md). Step 3's observations of this Mac are in the [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final** (2026-10-17), with build thresholds T1–T4 |
 | | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 (2026-10-17) |
+| Proposed decisions | [ADR-0004](adr/0004-process-model-and-sandbox.md): process model, sandbox and JIT policy (2026-10-17). Acceptance should depend on spike S4 |
 
-## Next steps: Step 3, the threat model, trust boundaries, and the macOS process and sandbox model
+## Next steps: the owner's review of Step 3
 
-**Step 3 is design work** under the Phase Zero rule: documents only. Code, including spikes, needs a specific authorization.
+**What to read:**
+1. [ADR-0004](adr/0004-process-model-and-sandbox.md), the decision in one place.
+2. [Threat model](security/threat-model.md) and [process model](security/process-model.md), the design behind it.
+3. [macOS confinement note](research/macos-process-confinement.md), the evidence, including spike S4's design (§7).
 
-**Goal.** Decide what Axiom protects, from whom, and where the trust boundaries lie. Then decide how processes are split and how each is confined on macOS, so that compromising one renderer exposes neither credentials, nor other sites' data, nor the file system (ADR-0001 R3).
+**Decisions only the owner can make:**
+1. **Threat model.** Accept the assets, adversaries, goals and non-goals. Notable choices: no Safe Browsing-style reputation service (NG5); no strong anti-fingerprinting (NG3); the compromised renderer treated as an expected case.
+2. **Security levels L0–L3, and the gate's checks V1–V8** for sensitive use (threat model §8). Optionally, set a higher bar for L3.
+3. **Authorize spike S4.** It is throwaway code under `spikes/s4/` plus a signing script in `tools/`, in three checkpoints (S4a probes, S4b measurements, S4c results). It confirms the sandbox mechanism on this Mac and measures what a helper costs.
+4. **ADR-0004.** Recommended: accept it once S4-Q1 and S4-Q2 pass. Alternatively, accept it now with S4 as a revisit condition.
+5. **JIT policy J1–J7** (OQ-4), in particular: no JIT before L2; a JIT in one executable only; sensitive sites always without a JIT.
+6. **Cross-site iframes.** Accept the interim rule SI3, which keeps cross-site iframes in the embedder's process under compensating rules, with out-of-process iframes deferred (OQ-18). The alternative is to plan out-of-process iframes earlier.
+7. **Memory targets B1–B7** as initial targets, to be finalized in Step 6.
+8. **Merge `step-3` into `main`** after the review. Push it to GitHub now or only with the merge?
 
-**Inputs**
-- **ADR-0001:**
-  - R3, a security posture fit for sensitive logins, with process isolation, a sandbox and site isolation reachable;
-  - the JIT policy: interpreter first, and a JIT only after isolation and the sandbox exist;
-  - the defaults: single user, no extensions and no sync.
-- **ADR-0002:** the `unsafe` policy. Parsers, network policy and IPC message decoding contain no `unsafe`.
-- **ADR-0003:** one single-threaded GC heap per agent; obligation C5, native interop.
-- **S2:**
-  - the objc2 platform layer works;
-  - an event-driven loop costs nothing when idle;
-  - an idle window process with a Metal device has a footprint of about 20 MB, a first data point for per-process budgets.
-- **Charter G4:** memory budgets per process on the 8 GB machine.
-- **Open questions:** OQ-4 (JIT policy, due at Step 3), OQ-5 (per-agent heaps and workers), OQ-11 (the shell).
+**After the review:**
+- S4, if authorized;
+- then ADR-0004's acceptance, and the merge;
+- then **Step 4**: event loop, threading, pipeline data model, invalidation, embedder API. Spike S3 is required there (ADR-0003, C1).
 
-**Proposed deliverables**
-1. `docs/security/threat-model.md`:
-   - assets;
-   - adversaries: malicious content, a compromised renderer, a network attacker;
-   - attack surfaces;
-   - security goals and non-goals.
-2. `docs/security/process-model.md`:
-   - the process split, for example browser, per-site renderers, network, GPU and decoders;
-   - what each process may do;
-   - the IPC trust rules;
-   - memory budgets per process on 8 GB.
-3. A research note on confining processes on macOS with the Command Line Tools and no paid developer account. It surveys, from primary sources:
-   - App Sandbox and entitlements, and ad-hoc code signing;
-   - the Seatbelt (`sandbox_init`) profiles that Chromium and WebKit use;
-   - the hardened runtime;
-   - the JIT entitlement and `MAP_JIT`;
-   - XPC against `posix_spawn` with Mach ports.
-4. **ADR-0004: process model and sandbox** (Proposed).
-5. A decision on OQ-4 (JIT policy), or a sharper version of it.
-
-**Likely spike, which needs authorization.** S4 would launch a sandboxed helper process from a Rust app bundle built with the Command Line Tools only. It would check that the sandbox denies file and network access, and measure the per-process overhead.
-
-**Housekeeping.** Step 3 starts on a new branch, `step-3`, merged after the owner's review, as in Step 2b.
+Step 3 adds these constraints for Step 4: message-based process boundaries; a browser-owned frame tree; one agent cluster per process; a display list free of image and font decoding ([decision map](decision-map.md) §4).
 
 ## Session log
+
+### 2026-10-17 — Session 5 (Step 3)
+
+**Owner input:** "Continue implementation". Read with status.md, this was taken as authorization for Step 3's design work. Spikes need their own authorization, so no code was written.
+
+**Done** (branch `step-3`, CP1–CP5; [tracker](research/step-3-security-and-process-model.md)):
+- **CP1:** the plan and checkpoint tracker.
+- **CP2:** the [threat model](security/threat-model.md): assumptions, assets, adversaries, attack surfaces, trust boundaries, goals SG1–SG12, non-goals, security levels L0–L3 and the gate's checks V1–V8.
+- **CP3:** the [macOS confinement note](research/macos-process-confinement.md), with mechanisms, browser precedent, observations of this Mac, and the design of spike S4.
+- **CP4:** the [process model](security/process-model.md): five process types, a capability matrix, site isolation SI1–SI7, IPC trust rules IR1–IR10, memory targets B1–B7, staging.
+- **CP5:** [ADR-0004](adr/0004-process-model-and-sandbox.md) (Proposed), including the JIT policy J1–J7 for OQ-4. Decision map, open questions (OQ-16 to OQ-18 added), indexes and this status updated.
+
+**Verified on this Mac** (read-only; nothing compiled or installed):
+- The macOS 27 SDK **kills processes that use the named sandbox profiles** (`sandbox_init(3)`).
+- Chrome Canary 158, built against SDK 27.0, still applies custom Seatbelt profiles through `sandbox_init_with_parameters` and `sandbox_apply` (`nm -u`). Firefox uses `sandbox_init_with_parameters`.
+- WebKit ships deny-by-default profiles for its WebContent, GPU and Networking processes. Its content profile denies the window server and font server, and its two no-JIT content variants deny `dynamic-code-generation`.
+- App Sandbox's base profile allows 170 global Mach services.
+- Multiple WebKit XPC instances rely on the private `_MultipleInstances` key.
+- The SDK contains BrowserEngineKit with macOS 14.3 availability, but Apple documents it for iOS, iPadOS and Mac Catalyst only, with entitlements by request.
+- A minimal process has a 1.03 MB footprint.
+
+**Corrected during review:** WebKit's XPC services carry no hardened-runtime flag. They are platform binaries with library validation only.
+
+**Verification:** the four standard checks pass, unchanged from Step 2b. Every relative link in `docs/` resolves.
 
 ### 2026-10-17 — Session 4 (renamed to Axiom)
 

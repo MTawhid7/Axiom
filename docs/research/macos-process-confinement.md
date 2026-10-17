@@ -155,7 +155,7 @@ All sourced from [9] or observed in the man pages:
 | **Enhanced Security helper extensions** | "Create Enhanced Security helper extensions on iOS, iPadOS, and macOS to enforce tighter sandbox restrictions." "The system runs your extension in a sandbox that restricts access to most system services and frameworks." Launched as an `AppExtensionProcess` [13] | New; no browser seen using one | **Unknown.** It is a public route to tight sandboxes, but it is built as an Xcode extension target. Whether it works without Xcode or a paid account, and with many instances, is unknown (S4-Q6, optional) |
 
 **Rendezvous and IPC transport.**
-- **Chrome and Firefox** both import `bootstrap_check_in` and `bootstrap_look_up` (observed). Chromium's renderer profile allows exactly one browser-specific service, `BUNDLE_ID.MachPortRendezvousServer.BROWSER_PID` [4].
+- **Chrome and Firefox** both import `bootstrap_check_in` and `bootstrap_look_up` (observed). Besides a short list of system services, Chromium's renderer profile allows lookup of a browser-specific rendezvous service, `BUNDLE_ID.MachPortRendezvousServer.BROWSER_PID` [4].
 - **Mach messages** carry port rights natively: IOSurfaces, memory entries and further channel endpoints. The kernel attaches an audit token identifying the sender (background).
 - **Unix-domain socket pairs** inherited at spawn are simpler and can pass descriptors (background). IOSurfaces still need Mach ports, though (§2.6).
 - **The choice is open:** S4-Q3 measures both.
