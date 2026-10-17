@@ -38,3 +38,7 @@ allow spikes/s4/sandbox src/platform/
 # Spike S4, S4-Q5: S2's CoreText and CoreGraphics rasterizer inside a sandbox, under
 # invariants T1–T2 (spikes/s4/text/src/platform/mod.rs).
 allow spikes/s4/text src/platform/
+
+# Spike S3, S3-Q1: C1's root stack, a lazily committed array of Cell<Value> slots, under
+# invariants R1–R3 (spikes/s3/gc/src/raw/mod.rs).
+allow spikes/s3/gc src/raw/

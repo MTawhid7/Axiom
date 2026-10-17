@@ -1,0 +1,20 @@
+[package]
+name = "s3-vm"
+description = "Spike S3: a register-machine bytecode interpreter over s3-gc, with builtins that call back into bytecode, four dispatch techniques, and a reference evaluator as its oracle. #![forbid(unsafe_code)]."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[features]
+# Counts executed instructions, calls and root operations (S3-Q2).
+count = ["s3-gc/count"]
+# The explicit-tail-call (`become`) dispatch technique. Nightly only: build
+# with `cargo +nightly … --features nightly-tail` (S3-Q3's reference point).
+nightly-tail = []
+
+[dependencies]
+s3-gc.workspace = true
+
+[lints]
+workspace = true

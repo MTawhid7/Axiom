@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Gate B passed** (2026-10-17). CP1–CP12 ✅. ADRs 0005–0007 and 0009 accepted; ADR-0008 pre-approved, pending S3-Q1 and S3-Q2; AC5 amended (OQ-19). **Spike S3 authorized:** CP13–CP15 run next, then Gate C |
+| **Status** | **Gate B passed** (2026-10-17). CP1–CP13 ✅. ADRs 0005–0007 and 0009 accepted; ADR-0008 pre-approved, pending S3-Q1 and S3-Q2; AC5 amended (OQ-19). **Spike S3:** CP14 (measurements) next, then CP15 and Gate C |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only, until Gate B. **Spike S3's code was authorized at Gate B** (2026-10-17): "Authorized for the full scope (questions S3-Q1 through S3-Q5 under spikes/s3/)" (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-18 |
 
 > **Resuming in a new session?**
 > 1. Read §6 to find the first checkpoint that isn't ✅.
@@ -177,7 +177,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | CP10 | Script, agents and heap (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5); spike S3's design | ✅ 2026-10-17 (§11; [document](../architecture/script-and-heap.md); S3 design §10) |
 | CP11 | Architecture overview v0, and the criteria check (§5) | ✅ 2026-10-17 (§11; [overview](../architecture/overview.md)) |
 | CP12 | Synthesis: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-17 (§11). **Gate B passed** 2026-10-17 |
-| CP13 | **S3a** (authorized at Gate B): implementation and correctness | |
+| CP13 | **S3a** (authorized at Gate B): implementation and correctness | ✅ 2026-10-18 (§11) |
 | CP14 | **S3b:** measurements | |
 | CP15 | **S3c:** `docs/research/s3-results.md`; ADR-0008 updated; docs synthesis. **Gate C** | |
 | CP16 | Merge `step-4` into `main` (`--no-ff`), on the owner's instruction | |
@@ -337,6 +337,8 @@ Written at CP10. At Gate B (2026-10-17) the owner authorized S3's code: "Authori
 | S3-Q5 | **C3:** with generated setters for handle-valued fields, how does S1-Q2's ceremony count change, and what does a write cost with a no-op barrier and with a card-marking barrier? | Optional; authorized at Gate B |
 
 ### 10.2 What gets built
+
+Refined during CP13, with reasons, in §11: a third root stack, without `unsafe`; the root stack borrowed rather than shared; a supplementary push measurement.
 
 | Crate | Contents | `unsafe` |
 |---|---|---|
@@ -564,3 +566,56 @@ The owner's decisions, each as recommended:
 - **The S4 test fix** (CP3's housekeeping) is approved.
 
 Recorded in the ADRs, the design documents, the decision map, the open questions, the indexes and [status](../status.md). CP13 starts.
+
+### CP13 — completed 2026-10-18 (S3a: implementation and correctness)
+
+**Built,** with no dependencies beyond the standard library and S1's crates (`s1-b-gc` is untouched):
+- **`spikes/s3/gc` (`s3-gc`):** S1's Pattern B heap, plus:
+  - `Value`, a NaN-boxed 64-bit value with `u32` handles inside, carrying the debug collection epoch in spare bits;
+  - **three root stacks behind one `RootStack` trait:** `RefCellStack` (S1's borrow-tracked design, with 8-byte slots); `CellStack` (8 KiB chunks of `Cell` slots, allocated on demand, no `unsafe`); and `RawStack`, C1's (one lazily committed, fixed-capacity array of `Cell` slots);
+  - a write-barrier hook (`NoBarrier`, `CardBarrier`) and a `setters!` macro, for S3-Q5.
+
+  Its only `unsafe` is 3 blocks in `src/raw/`, under invariants R1–R3, allowlisted in `tools/unsafe-policy.txt`. 1,411 lines, plus 586 of tests.
+- **`spikes/s3/vm` (`s3-vm`, `forbid(unsafe_code)`):**
+  - a register machine with 28 operations, Lua-style calls, and a register file of `Cell`s traced as one region;
+  - builtins `forEach`, `map` and `sortBy`, which call back into bytecode and root what they hold in Pattern B's style, and a `valueOf`-style coercion hook;
+  - four dispatch techniques: a `match` loop, a table of handlers, handlers that return the next handler, and `become` on nightly (feature `nightly-tail`);
+  - the reference evaluator; workloads W1–W4 with native models; a `count` feature.
+
+  3,580 lines, plus 639 of tests.
+- **`spikes/s3/bench` (`s3-bench`, `forbid(unsafe_code)`):**
+  - S1's harness, generalized to any number of variants;
+  - `s3-probe` (`bench`, `aggregate`, `roots`, `profile`, `sizes`) and `s3-count`;
+  - S1's Pattern B DOM ported to `s3-gc`, generic over stack and barrier, with handle-valued fields private behind generated setters, for S1's `dispatch` and `mutate` cases;
+  - four node layouts for S3-Q4.
+
+  2,271 lines.
+- **Scripts:** `tools/s3-bench.sh`, `tools/s3-profile.sh` and `tools/s3-ceremony.sh`. `tools/samply-summary.py` gains `--share NAME=REGEX`: the share of samples whose inlined frames include a matching file, so that root-stack code counts wherever it was inlined.
+
+**Correctness:**
+- **The oracle.** Every workload, and 34 edge-case programs in 10 tests, give the reference evaluator's result on 3 techniques × 3 stacks × 2 pacings (default, and a collection at every allocation). The edge cases cover 8 operators on 144 operand pairs each, `-0`, errors, unbounded recursion, closures, deep returns, and builtins whose callbacks grow the array, count comparisons, return NaN or hooked objects, allocate, and nest builtins.
+  - Debug builds check every handle's epoch; release builds pass too.
+  - The reference evaluator agrees with every workload's native model.
+- **Counted builds** (`--features count`): bytecode performs **zero** root operations, in every workload and technique. The interpreter executes exactly the reference evaluator's instructions.
+- **The oracle bites.** A builtin changed to hold its callback across callbacks, instead of re-reading it, fails the oracle with a stale-handle panic.
+- **Miri** (nightly 2026-04-08, strict provenance, Stacked Borrows and Tree Borrows; its leak checker is on by default): **no undefined behaviour and no leaks**, on `s3-gc`'s 44 tests (S1's heap tests on all three stacks, the root-stack tests, the doc example), and on `s3-vm`'s Miri test. That test runs every workload, small, on `RawStack` with two techniques and a collection at every allocation, about 190 s per borrow model.
+- **Every benchmark suite verifies its inputs** (logs, digests, folds, results) in a quick pass under `cargo test`.
+
+**Refinements made during implementation:**
+1. **A third stack, `CellStack`, without `unsafe`.** ADR-0008 says the `gc` crate's only `unsafe` is the root stack, "only if C1 needs it". Measuring a stack that is safe and has no borrow tracking answers whether it does.
+2. **C1's `unsafe` is narrower than planned.** The plan described "an `UnsafeCell`-based stack". `RawStack` uses `Cell` slots in one raw allocation, and its `unsafe` only allocates, views and frees that allocation.
+3. **The root stack is borrowed, not shared.** `HeapCore` and frames borrow it for `'r`, instead of S1's `Rc`, so frames cost no reference counting. A thread-per-agent design (EL15) owns the stack in the thread's function, so the borrow costs nothing in structure.
+4. **Values carry no lifetime.** A value held across a collection is caught by debug epochs under stress tests, not by the compiler. The engine's value type should carry the scope lifetime, as handles do.
+5. **QoS.** §10.4 planned user-interactive QoS. `taskpolicy` can only lower a process's QoS, and raising it needs a pthread call: new `unsafe` FFI in the benchmark. Runs use the default QoS of a command-line process instead, as S1's did. Evidence that they run on the performance cores: the in-process S1 probe reproduces S1's published 4.08 ns frame cost.
+6. **A supplementary push measurement** (below).
+
+**Preliminary observation** (development runs, not formal):
+- Under S1's probe method, **a push costs about 2.0 ns on every stack, C1's included**. Frames (0.54 ns) and reads (0.51 ns) are under the target.
+- The cause is the method:
+  - It puts a compiler barrier (`black_box`) after every push.
+  - The stack is reachable from escaped pointers, so each push must reload the length that the previous push stored. The disassembly of `RawStack`'s loop shows that store-to-load chain.
+  - A calibration on this Mac: a bare counter that has escaped costs **2.18 ns per increment** under the same barrier, against 0.67 ns when it hasn't escaped.
+- So `s3-probe roots` adds `push-run`: 64 back-to-back pushes per frame with one barrier, the shape of a builtin rooting its arguments. Preliminary: C1 0.56 ns, `RefCellStack` 0.72 ns, S1 0.83–0.91 ns.
+- S3-Q1's criterion stays as written: "measured the way `s1-probe roots` measured S1's stack". CP14 measures both formally.
+
+The four standard checks and the link check pass.

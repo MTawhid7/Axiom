@@ -301,6 +301,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "s3-bench"
+version = "0.0.0"
+dependencies = [
+ "s1-b-dom",
+ "s1-b-gc",
+ "s1-bench",
+ "s1-scenarios",
+ "s3-gc",
+ "s3-vm",
+]
+
+[[package]]
+name = "s3-gc"
+version = "0.0.0"
+dependencies = [
+ "s1-scenarios",
+]
+
+[[package]]
+name = "s3-vm"
+version = "0.0.0"
+dependencies = [
+ "s3-gc",
+]
+
+[[package]]
 name = "s4-sandbox"
 version = "0.0.0"
 

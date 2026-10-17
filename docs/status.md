@@ -2,13 +2,13 @@
 
 > **Read this first when resuming work.** Then check the documents it links to against the actual state of the repository (`git log`, `git status`, and the checkpoint tracker). Don't assume earlier work is still accurate.
 
-## Current state (2026-10-17)
+## Current state (2026-10-18)
 
 | Item | State |
 |---|---|
 | Phase | **Phase Zero, Step 4: Gate B passed; spike S3 in progress.** The decisions of the [architecture proposal v0](architecture/overview.md) are made: ADRs 0005–0007 and 0009 accepted, ADR-0008 pre-approved pending S3. Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 3** (merged with `--no-ff`) and is pushed, at `da79e69` (2026-10-17). Step 4 runs on branch `step-4`, pushed to `origin` |
-| Current checkpoint | **Step 4: CP1–CP12 ✅; Gate B passed; CP13 (spike S3a) next** ([tracker](research/step-4-architecture-proposal.md)). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
+| Current checkpoint | **Step 4: CP1–CP13 ✅; Gate B passed; CP14 (spike S3b, measurements) next** ([tracker](research/step-4-architecture-proposal.md)). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B. S1 stays as the baseline for S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -25,8 +25,8 @@
 ## Next steps: spike S3 (Step 4, CP13–CP15)
 
 Spike S3 is authorized for S3-Q1 to S3-Q5 ([tracker](research/step-4-architecture-proposal.md) §10), and runs without pausing until Gate C:
-1. **CP13 (S3a):** the crates `s3-gc`, `s3-vm` and `s3-bench` in `spikes/s3/`; the reference-evaluator oracle; Miri on the root stack's module.
-2. **CP14 (S3b):** formal measurements, from a clean tree.
+1. **CP13 (S3a):** done. The crates `s3-gc`, `s3-vm` and `s3-bench` in `spikes/s3/`; the reference-evaluator oracle; Miri on the root stack's module.
+2. **CP14 (S3b):** formal measurements, from a clean tree: `tools/s3-bench.sh`, `tools/s3-profile.sh`, `tools/s3-ceremony.sh`.
 3. **CP15 (S3c):** `docs/research/s3-results.md`. ADR-0008 moves to Accepted if S3-Q1 and S3-Q2 pass. Docs synthesis.
 
 **Then Gate C:** the owner reviews S3's results and ADR-0008, and decides on merging `step-4` into `main` (CP16). `step-4` stays pushed to `origin`.
@@ -43,6 +43,12 @@ Spike S3 is authorized for S3-Q1 to S3-Q5 ([tracker](research/step-4-architectur
 5. The S4 test fix from Session 6 is approved.
 
 **Recorded** in the ADRs' decision histories, the design documents (now binding where their ADR is accepted), AC5 in the tracker, EL11, PL10, the decision map, the open questions, the indexes and this status.
+
+**CP13 (spike S3a, completed 2026-10-18)** ([tracker](research/step-4-architecture-proposal.md) §11):
+- **Crates:** `s3-gc` (S1's heap with NaN-boxed values, three root stacks and a barrier hook; its only `unsafe` is 3 blocks in `src/raw/`), `s3-vm` (a register-machine interpreter with callback builtins, four dispatch techniques and a reference evaluator) and `s3-bench` (probes, S1's DOM ported to `s3-gc`, node layouts). Scripts `tools/s3-bench.sh`, `s3-profile.sh` and `s3-ceremony.sh`; `samply-summary.py` gains `--share`.
+- **Correctness:** every workload and 34 edge-case programs match the reference evaluator on every technique, stack and pacing. Counted builds show bytecode performs zero root operations. A deliberately unrooted value fails the oracle. Miri finds no undefined behaviour under Stacked and Tree Borrows, on `s3-gc` and on the VM driving C1's stack with a collection at every allocation.
+- **Refinements:** a third, safe root stack (`CellStack`), to test whether C1 needs `unsafe` at all; the stack borrowed instead of `Rc`-shared; QoS left at the command-line default, as S1's was, because raising it needs FFI.
+- **Preliminary, not formal:** frames and reads meet C1's 1 ns target, but under S1's method a push costs about 2.0 ns on every stack. The method's barrier forces each push to reload the stack length the previous one stored (calibrated: 2.18 ns for any escaped counter). A supplementary back-to-back push probe was added. CP14 measures formally.
 
 ### 2026-10-17 — Session 6 (Step 4 kickoff)
 
