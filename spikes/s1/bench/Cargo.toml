@@ -1,0 +1,23 @@
+[package]
+name = "s1-bench"
+description = "Spike S1: benchmarks and measurement probes comparing Pattern A and Pattern B on identical, reference-validated inputs. #![forbid(unsafe_code)]."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+s1-scenarios.workspace = true
+s1-a-gc.workspace = true
+s1-a-dom.workspace = true
+s1-b-gc.workspace = true
+s1-b-dom.workspace = true
+
+# `cargo bench -p s1-bench`. The same suites are reachable as `s1-probe bench`,
+# whose binary has a stable path for scripts and profilers.
+[[bench]]
+name = "s1"
+harness = false
+
+[lints]
+workspace = true

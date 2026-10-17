@@ -27,8 +27,8 @@ X  Cross-cutting    standards baseline · conformance testing · fuzzing · perf
 | R2 | JavaScript engine: our own | **Accepted** | ADR-0001 |
 | R3 | Security posture: sensitive logins (gated) | **Accepted** | ADR-0001 |
 | R4 | Constraints: skills, time, hardware | Partly known | Charter §7; [OQ-1, OQ-6, OQ-9](open-questions.md) |
-| F1 | Implementation language | **Proposed**: Rust | [ADR-0002](adr/0002-implementation-language.md), [evaluation](technology/language-evaluation.md) |
-| F2 | GC and DOM memory model | Unified heap Accepted in principle (R2); handle/rooting pattern open | Spike S1 → future ADR |
+| F1 | Implementation language | **Accepted** (final, 2026-10-17): Rust | [ADR-0002](adr/0002-implementation-language.md), [evaluation](technology/language-evaluation.md), [S1](research/s1-results.md), [S2](research/s2-results.md) |
+| F2 | GC and DOM memory model | **Accepted** (2026-10-17): one heap for JS and the DOM (R2), with Pattern B (Nova style) and obligations C1–C5 ([ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md)) | [S1 results](research/s1-results.md), [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md) |
 | F3 | Trust boundaries, process model, sandbox | Open | Step 3 |
 | F4 | Engine/embedder API | Open | Step 4 |
 | P1 | Event loop and threading model | Open | Step 4 |
@@ -95,9 +95,9 @@ These are recorded in ADR-0001.
 |---|---|---|
 | 0 | Decision landscape | Done (2026-10-16) |
 | 1 | Requirements: target, JavaScript, posture, defaults | Done: ADR-0001 Accepted |
-| 2a | Implementation language evaluation | **In review**: ADR-0002 Proposed |
-| 2b | Validation spikes: S1 GC heap, S2 platform and build, S3 dispatch | Proposed; needs authorization |
-| 3 | Threat model, trust boundaries, process and sandbox model on macOS | Not started |
+| 2a | Implementation language evaluation | Done: reviewed; ADR-0002 accepted (final, 2026-10-17) |
+| 2b | Validation spikes: S1 GC heap and DOM, S2 platform and build | **Done** (2026-10-17): [S1 results](research/s1-results.md), [S2 results](research/s2-results.md). ADR-0002 is final, and [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md) is accepted. Merged into `main`. S3 (the interpreter benchmark) is required, and runs in Step 4 |
+| 3 | Threat model, trust boundaries, process and sandbox model on macOS | **Next** (see [status](status.md)) |
 | 4 | Event loop, threading, pipeline data model, invalidation, embedder API | Not started; produces architecture proposal v0 |
 | 5 | Subsystems: text & fonts → rendering/compositing → networking/TLS → style → layout | Not started |
 | 6 | Standards baseline, testing, performance budgets, roadmap | Not started; ends in a design review and approval of Milestone 1 |

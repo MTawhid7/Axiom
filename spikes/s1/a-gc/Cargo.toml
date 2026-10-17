@@ -1,0 +1,16 @@
+[package]
+name = "s1-a-gc"
+description = "Spike S1, Pattern A: a gc-arena-style garbage-collected heap (branded lifetimes, raw pointers, non-moving mark-sweep). All unsafe is in src/raw/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+s1-a-gc-derive.workspace = true
+
+[dev-dependencies]
+s1-scenarios.workspace = true
+
+[lints]
+workspace = true

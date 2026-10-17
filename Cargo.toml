@@ -1,0 +1,72 @@
+# Arbor workspace.
+#
+# Phase Zero, Step 2b: only validation spikes live here (spikes/, throwaway).
+# Engine crates will live under crates/ once the architecture is approved;
+# the lints, profiles and toolchain pin below are meant to carry over.
+
+[workspace]
+resolver = "3"
+members = ["spikes/s1/*", "spikes/s2/*"]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.94"
+publish = false
+
+[workspace.dependencies]
+s1-scenarios = { path = "spikes/s1/scenarios" }
+s1-a-gc = { path = "spikes/s1/a-gc" }
+s1-a-gc-derive = { path = "spikes/s1/a-gc-derive" }
+s1-a-dom = { path = "spikes/s1/a-dom" }
+s1-b-gc = { path = "spikes/s1/b-gc" }
+s1-b-dom = { path = "spikes/s1/b-dom" }
+# External dependencies. Each needs a justification (charter §9.4):
+# - proc-macro2, quote, syn: required to implement #[derive(Trace)]. A derive is
+#   gc-arena's authentic design (Pattern A); hand-parsing token streams would be
+#   fragile. These are replaceable implementation details of a build-time macro
+#   and never linked into the product. Build cost is measured in CP3.
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "2", default-features = false, features = ["clone-impls", "derive", "parsing", "printing", "proc-macro"] }
+# - objc2 and its framework crates: the maintained Rust bindings to AppKit,
+#   Metal, QuartzCore, CoreText, CoreGraphics and CoreFoundation. Spike S2
+#   evaluates exactly these (evaluation §9, §13). Their default features
+#   compile every framework header, so defaults are off here and each member
+#   enables only the headers it uses. Build cost is measured in CP8.
+objc2 = "0.6.5"
+objc2-foundation = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-app-kit = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-quartz-core = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-metal = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-core-text = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-core-graphics = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-core-foundation = { version = "0.3.2", default-features = false, features = ["std"] }
+
+[workspace.lints.rust]
+# `unsafe_code` is set per crate root, with #![forbid] by default and #![deny] for
+# allowlisted crates (see tools/unsafe-policy.txt and evaluation §15.3).
+unsafe_op_in_unsafe_fn = "deny"
+missing_debug_implementations = "warn"
+unreachable_pub = "warn"
+unused_qualifications = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+# Unsafe hygiene (evaluation §15.3, rule 3).
+undocumented_unsafe_blocks = "deny"
+multiple_unsafe_ops_per_block = "deny"
+missing_safety_doc = "deny"
+unnecessary_safety_comment = "warn"
+unnecessary_safety_doc = "warn"
+# Pedantic lints that add noise without value for this codebase.
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+
+# Release with line tables, so `samply` can attribute inlined frames.
+[profile.profiling]
+inherits = "release"
+debug = "line-tables-only"

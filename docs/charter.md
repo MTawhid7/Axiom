@@ -20,7 +20,7 @@ The aim is the smallest well-engineered system that delivers meaningful browser 
 | G1 | Understand and implement the core browser-engine mechanisms ourselves (see the list below) |
 | G2 | Be genuinely useful on a defined and growing set of real websites, with an architecture that can reach the full modern app web (*Accepted*, ADR-0001 R1) |
 | G3 | Reach a security posture adequate for sensitive logins, in verified stages (*Accepted*, ADR-0001 R3) |
-| G4 | Treat performance as an architectural concern, with measurable budgets on the target machine |
+| G4 | **Efficiency is a primary architectural goal, not an afterthought:** low memory use, CPU efficiency and low power consumption, with measurable budgets on the target machine (owner direction, 2026-10-16) |
 | G5 | Make decisions from evidence, record them in ADRs, and keep these docs as the source of truth |
 
 The core mechanisms in G1 are:
@@ -76,9 +76,9 @@ This machine is also the **performance floor**: budgets are set and measured her
 
 - **Memory.** 8 GB of RAM makes per-process memory budgets and the number of processes first-class design inputs.
 - **Thermals.** A fanless machine throttles under sustained load, so benchmarks must control for it.
-- **Toolchain.** Command Line Tools only. Instruments requires Xcode ([OQ-7](open-questions.md)).
-- **Team.** One human developer with AI assistance (*assumption*, [OQ-9](open-questions.md)).
-- **Time.** Not yet stated ([OQ-1](open-questions.md)).
+- **Toolchain.** Command Line Tools only. Instruments requires Xcode ([OQ-7](open-questions.md)). Measurement uses CLI tools only: `samply`, `/usr/bin/time -l`, `cargo bench`, Miri.
+- **Team.** One human developer, fluent in Rust, with AI assistance. Being the only human developer is an *assumption* ([OQ-9](open-questions.md)).
+- **Time.** No calendar deadline and no fixed hourly budget. Work proceeds in bite-sized checkpoints, each leaving the workspace clean and working ([OQ-1](open-questions.md), resolved).
 - **Process.** Phase Zero is design-only. No implementation code, project skeleton or dependency installation happens without explicit authorization from the owner for a specific milestone or preparatory action.
 
 ## 8. Success criteria (Draft)

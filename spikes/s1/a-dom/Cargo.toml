@@ -1,0 +1,14 @@
+[package]
+name = "s1-a-dom"
+description = "Spike S1, Pattern A: a DOM model and script driver on the gc-arena-style heap. #![forbid(unsafe_code)]."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+s1-a-gc.workspace = true
+s1-scenarios.workspace = true
+
+[lints]
+workspace = true

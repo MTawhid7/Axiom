@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | Draft for review |
-| **Decision record** | [ADR-0002](../adr/0002-implementation-language.md), Proposed |
+| **Status** | Reviewed by the owner (2026-10-16); §15.3 amended with rule 7; Step 2b evidence added (2026-10-17) |
+| **Decision record** | [ADR-0002](../adr/0002-implementation-language.md), **Accepted** (final, 2026-10-17) |
 | **Phase** | Phase Zero, Step 2a |
 | **Inputs** | [ADR-0001](../adr/0001-scope-and-target.md) (scope and target), [decision map](../decision-map.md) |
-| **Last updated** | 2026-10-16 |
+| **Last updated** | 2026-10-17 |
 
 **How to read the evidence.**
 - A statement with a link is a **sourced fact**. Bracketed numbers such as [3] point to §17.
@@ -28,6 +28,15 @@
 **Confidence.**
 - **High** that Rust is the best of the four candidates for this project's requirements.
 - **Medium** on *how* Rust code will hold references into the garbage-collected heap. This is the one area where Rust is weakest and C++ strongest. Validation spike S1 (§16) should settle it before ADR-0002 is accepted.
+
+> **Step 2b update (2026-10-17).** The spikes tested this recommendation, and it stands.
+> - **[S1](../research/s1-results.md)** built two GC designs for a shared JS and DOM heap; both keep `unsafe` contained.
+>   - Pattern A (gc-arena style) has 24 audited blocks in one module.
+>   - Pattern B (Nova style) has none anywhere.
+>   - [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md) proposes Pattern B, with five obligations.
+> - **[S2](../research/s2-results.md)** drew CoreText text through Metal in an AppKit window via objc2, without Xcode, with `unsafe` confined to the platform module. Builds stay small on the 8 GB M1.
+>
+> The open part of "how" is now narrower and measurable: how much rooting traffic a real interpreter generates (ADR-0003, C1).
 
 **The argument in brief.**
 
@@ -350,6 +359,11 @@ The following are **inferences, to be validated by S1**:
    - Pattern D′: an unsafe core with typed handles and an explicit shadow-stack root set. This is the classic precise design.
 4. **Hypothesis: a data-oriented heap is an opportunity, not only a workaround.** Nova shows that typed arenas, 32-bit handles and splitting frequently used fields from rarely used ones can coexist with code that follows the specification's structure [15]. On an 8 GB budget, compact handles and compaction directly serve our memory goals.
 
+**Tested in S1 (2026-10-17)** ([S1 results](../research/s1-results.md)):
+- **Item 3.** A and B were built; D′ was not (owner's decision). Both keep `unsafe` contained, and B has none.
+- **Item 4 is supported.** B's typed arenas with 4-byte handles use 13% less memory per live node, everything included, and 35–44% fewer GC-heap bytes. Its compacting collector is 1.3–2.8× faster from 64k elements.
+- **Measured costs of B:** about 2 ns per root and 1.6 ns per read, hot in cache, and an index multiply on each dependent hop.
+
 ---
 
 ## 8. Interpreter and JIT
@@ -551,6 +565,10 @@ The nightly toolchain is allowed only for development tools (fuzzing, Miri, sani
    - IPC message decoding;
    - image and font parsing wrappers.
 6. Each unsafe crate exposes a safe API. A soundness bug in an unsafe crate is treated as a security bug.
+7. **Macro-generated `unsafe` is part of the unsafe boundary** (added 2026-10-16).
+   - **The gap:** `#![forbid(unsafe_code)]` does not fire on `unsafe` produced by *external* macros, whether a proc-macro derive or a `macro_rules!` from another crate. It does reject hand-written `unsafe`. This was verified on rustc 1.94.1 with a minimal three-crate experiment ([Step 2b plan §4.5](../research/step-2b-validation-spikes.md#45-finding-recorded-before-implementation-2026-10-16)).
+   - **What `forbid` proves:** that a crate has no *hand-written* `unsafe`. It does not prove the expanded code has none.
+   - **The rule:** any macro that can emit `unsafe` (for example `#[derive(Trace)]`) must live in a designated crate, be audited like the `unsafe` code it generates, and be registered in `tools/unsafe-policy.txt`.
 
 ### 15.4 Toolchain and dependencies (draft)
 
@@ -575,8 +593,10 @@ The nightly toolchain is allowed only for development tools (fuzzing, Miri, sani
 ### 15.6 Conditions that would reopen this decision
 
 1. **S1 shows `unsafe` cannot stay inside the `gc` crate.** For example, DOM or binding code needs `unsafe` to hold GC references, and ergonomics are poor. This is the scenario in §14 where C++ overtakes Rust (362 vs 376). The response would be to re-evaluate a C++ GC and DOM core with Rust elsewhere, or a different GC design.
+   - **Tested 2026-10-17; did not trigger.** Both S1 designs keep `unsafe` contained, and one has none ([S1 results](../research/s1-results.md)).
 2. **The owner is fluent in C++ or Swift but not in Rust**, and the time budget (OQ-1) can't absorb the learning cost.
 3. **Measured clean or incremental builds on the M1 make iteration impractical**, even after mitigations. S2 sets the thresholds.
+   - **Proposed 2026-10-17:** thresholds T1–T4 in [S2 results](../research/s2-results.md) §6, covering incremental builds, clean builds, aggregate compiler memory and single-`rustc` memory. Today's values are well below them.
 4. **The evidence changes materially.** Examples:
    - Rust gains GC-friendly language support, such as a sound form of the "contravariant handles" approach.
    - Swift gains an ownership model that suits a tracing GC.
@@ -584,7 +604,14 @@ The nightly toolchain is allowed only for development tools (fuzzing, Miri, sani
 
 ---
 
-## 16. Proposed validation spikes (not authorized; they need explicit approval)
+## 16. Validation spikes
+
+> **Status (2026-10-17).**
+> - **S1 and S2** were authorized on 2026-10-16 and completed on 2026-10-17: [S1 results](../research/s1-results.md), [S2 results](../research/s2-results.md).
+> - **S1 built two designs, not three.** The owner chose to keep exactly the two canonical patterns, A and B; D′ was not built.
+> - **S3 remains optional.** OQ-15 asks whether it should become required, to measure rooting traffic in an interpreter loop.
+>
+> The proposals below are kept as written.
 
 **S1: GC and DOM heap (highest priority).** A throwaway Rust prototype.
 - **Contents:** a heap of DOM-like nodes (tree plus attributes); JS-like objects and closures with cycles (listener → closure → node); weak references; an allocation-heavy workload.

@@ -1,0 +1,6 @@
+# Pinned so build-time and runtime measurements stay comparable across sessions.
+# Miri runs on nightly explicitly: `cargo +nightly miri test`.
+[toolchain]
+channel = "1.94.1"
+components = ["rustfmt", "clippy"]
+profile = "minimal"

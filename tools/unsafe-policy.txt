@@ -1,0 +1,33 @@
+# Unsafe-code allowlist, enforced by tools/check-unsafe-policy.sh.
+# Policy: docs/technology/language-evaluation.md §15.3.
+#
+# A crate not listed here must declare #![forbid(unsafe_code)] in every target
+# root (src/lib.rs, src/main.rs, src/bin/*.rs, tests/*.rs, benches/*.rs,
+# examples/*.rs).
+#
+# Entry formats (paths relative to the repository root; one entry per line):
+#
+#   allow <crate-dir> <path-prefix>[,<path-prefix>...]
+#       The crate's src/lib.rs or src/main.rs declares #![deny(unsafe_code)].
+#       `allow(unsafe_code)` may appear only in files under the listed prefixes,
+#       which are relative to the crate directory (for example src/raw/).
+#       Its other target roots still declare #![forbid(unsafe_code)].
+#
+#   emits-unsafe <crate-dir>
+#       A macro crate whose expansions contain `unsafe` (rule 7: #![forbid(unsafe_code)]
+#       in the *using* crate does not see macro-generated unsafe). It is audited as
+#       part of the unsafe boundary.
+#
+# Every entry needs a one-line justification comment directly above it.
+
+# Spike S1, Pattern A: the GC core (allocation, pointer dereference, sweep, std Trace impls),
+# under invariants I1–I6 (spikes/s1/a-gc/src/raw/mod.rs).
+allow spikes/s1/a-gc src/raw/
+# Pattern A's field!/unlock! macros expand to an `unsafe` Write projection in the calling crate.
+emits-unsafe spikes/s1/a-gc
+# Pattern A's #[derive(Trace)] expands to `unsafe impl Trace` in the deriving crate.
+emits-unsafe spikes/s1/a-gc-derive
+
+# Spike S2: calls into AppKit, Metal, QuartzCore, CoreText and CoreGraphics through objc2
+# that the bindings mark unsafe, under invariants P1–P6 (spikes/s2/window/src/platform/mod.rs).
+allow spikes/s2/window src/platform/

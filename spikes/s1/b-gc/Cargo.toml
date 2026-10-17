@@ -1,0 +1,13 @@
+[package]
+name = "s1-b-gc"
+description = "Spike S1, Pattern B: a Nova-style heap (typed arenas, u32 handles bound to GC scopes, explicit root frames, mark-compact). #![forbid(unsafe_code)]."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dev-dependencies]
+s1-scenarios.workspace = true
+
+[lints]
+workspace = true
