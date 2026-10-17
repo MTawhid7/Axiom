@@ -62,6 +62,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "s1-bench"
+version = "0.0.0"
+dependencies = [
+ "s1-a-dom",
+ "s1-a-gc",
+ "s1-b-dom",
+ "s1-b-gc",
+ "s1-scenarios",
+]
+
+[[package]]
 name = "s1-scenarios"
 version = "0.0.0"
 

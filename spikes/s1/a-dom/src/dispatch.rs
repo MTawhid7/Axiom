@@ -61,10 +61,14 @@ pub struct Dispatch<'gc> {
 
 impl<'gc> Dispatch<'gc> {
     pub fn begin(target: NodeRef<'gc>, event: EventType, bubbles: bool) -> Self {
+        let ancestors = || successors(Some(target), |n| n.parent.get());
+        // Sized first: one allocation instead of repeated growth (CP7 profile).
+        let mut path = Vec::with_capacity(ancestors().count());
+        path.extend(ancestors());
         Self {
             event,
             bubbles,
-            path: successors(Some(target), |n| n.parent.get()).collect(),
+            path,
             visit: 0,
             current_node: None,
             current_capture: true,

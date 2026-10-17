@@ -1,5 +1,7 @@
 //! The DOM object model and operations, in Nova style.
 
+use core::iter::successors;
+
 use s1_b_gc::{Forwarding, GcScope, Handle, Marker, Pacing, Roots, Trace, WeakHandle, heap};
 use s1_scenarios::counters::{Closures, Live, Nodes, live};
 use s1_scenarios::{
@@ -347,14 +349,23 @@ pub fn dispatch(
     bubbles: bool,
     mut gc: GcScope<'_>,
 ) {
+    let target = target.unbind();
     let path_frame = agent.heap.core.frame();
-    let mut path = Vec::new();
-    let mut cursor = Some(target.unbind());
+    // Sized first: one allocation instead of repeated growth (CP7 profile).
+    let depth = successors(Some(target), |&node| agent.heap.nodes[node].parent).count();
+    let mut path = Vec::with_capacity(depth);
+    let mut cursor = Some(target);
     while let Some(node) = cursor {
         path.push(node.scope(&path_frame));
         cursor = agent.heap.nodes[node].parent;
     }
 
+    // One frame and one buffer serve every visit's snapshot, so a visit
+    // allocates nothing once the buffer has grown. Snapshot roots are
+    // released when the dispatch returns. That is invisible to scripts:
+    // collections inside a dispatch are not observable.
+    let snapshot_frame = agent.heap.core.frame();
+    let mut snapshot = Vec::new();
     let n = path.len();
     let visits = n + if bubbles { n } else { 1 };
     let mut stop = false;
@@ -390,12 +401,13 @@ pub fn dispatch(
             .id
             .expect("listeners live on nodes with ids");
 
-        let snapshot_frame = agent.heap.core.frame();
-        let snapshot: Vec<_> = agent.heap.nodes[node]
-            .listeners
-            .iter()
-            .map(|listener| listener.scope(&snapshot_frame))
-            .collect();
+        snapshot.clear();
+        snapshot.extend(
+            agent.heap.nodes[node]
+                .listeners
+                .iter()
+                .map(|listener| listener.scope(&snapshot_frame)),
+        );
         for listener in &snapshot {
             let listener = &agent.heap.listeners[listener.get().bind(gc.nogc())];
             if listener.event != event || listener.capture != capture || listener.removed {

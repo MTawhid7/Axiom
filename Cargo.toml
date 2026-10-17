@@ -20,6 +20,7 @@ s1-a-gc = { path = "spikes/s1/a-gc" }
 s1-a-gc-derive = { path = "spikes/s1/a-gc-derive" }
 s1-a-dom = { path = "spikes/s1/a-dom" }
 s1-b-gc = { path = "spikes/s1/b-gc" }
+s1-b-dom = { path = "spikes/s1/b-dom" }
 # External dependencies. Each needs a justification (charter §9.4):
 # - proc-macro2, quote, syn: required to implement #[derive(Trace)]. A derive is
 #   gc-arena's authentic design (Pattern A); hand-parsing token streams would be

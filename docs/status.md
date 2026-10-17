@@ -2,13 +2,13 @@
 
 > **Read this first when resuming work.** Then check the documents it links to against the actual state of the repository (`git log`, `git status`, and the checkpoint tracker). Don't assume earlier work is still accurate.
 
-## Current state (2026-10-16)
+## Current state (2026-10-17)
 
 | Item | State |
 |---|---|
 | Phase | **Phase Zero, Step 2b: validation spikes** (authorized 2026-10-16). Production engine code is **not** authorized |
 | Repository | git. `main` = reviewed baseline (`a223fe2`); work in progress on branch **`step-2b`** |
-| Current checkpoint | CP1–CP6 ✅ done: both S1 patterns are implemented and verified. **Next: CP7 (S1 measurements and results note; installs `samply`)**; see the [Step 2b tracker](research/step-2b-validation-spikes.md#6-checkpoints) |
+| Current checkpoint | CP1–CP6 ✅ done. **CP7 in progress**: 7a ✅ (verified benchmark suites, probes, measurement scripts). **Next: 7b**, the formal measurement runs, then 7c, the S1 results note; see the [Step 2b tracker](research/step-2b-validation-spikes.md#6-checkpoints) |
 | Code | Spike code only, under `spikes/` (throwaway). Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike verification results are in the tracker's §8 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -21,6 +21,27 @@
 3. At CP9, the owner reviews the S1 and S2 results, decides on final acceptance of ADR-0002, and merges `step-2b` into `main`.
 
 ## Session log
+
+### 2026-10-17 — Session 3 (CP7)
+
+**Owner input:** "continue" with CP7, after the CP3–CP6 progress report.
+
+**CP7a completed** (benchmark harness):
+- `s1-bench`, with reference-validated inputs, six verified suites, and the `s1-probe` binary.
+- Measurement scripts in `tools/`: `s1-bench.sh`, `s1-memory.sh`, `s1-profile.sh`, `samply-summary.py`, `s1-ceremony.sh`.
+- `samply` 0.13.1 installed, as planned. Building it was itself measured: 281 crates in 83 s, with a 2.0 GiB aggregate compiler peak.
+- The shakedown run found five methodology problems, all fixed before any reported number:
+  - an invalid traversal case;
+  - unrealistic allocation order;
+  - clock ramp-up;
+  - samply's line attribution;
+  - profile scoping.
+- Profiles also showed incidental allocations in both patterns' dispatch. A symmetric fix went into both DOM crates; the oracle tests and Miri (`s1-a-dom`) were re-run green; before and after numbers are in the tracker's §8.
+
+**Verified**
+- `samply` works on this machine without Xcode, including line-level attribution through `dsymutil` and `atos` (Command Line Tools).
+- The system allocator is Apple's "xzone" malloc. Some of its paths call `mach_absolute_time`, so allocation in hot loops is relatively costly here.
+
 
 ### 2026-10-16 — Session 2 (Step 2b kickoff)
 
@@ -113,7 +134,7 @@ Results, workload volumes and the pressure bound for CP4 and CP6 are in the trac
 - Toolchains present:
   - 1.94.1 with clippy, rustfmt and rust-src;
   - nightly 2026-04-08, without Miri (to be added at CP3).
-- `samply` is not installed (to be installed at CP7).
+- `samply` was not installed (installed in Session 3, CP7a).
 
 ### 2026-10-16 — Session 1 (Phase Zero, Steps 0–2a)
 

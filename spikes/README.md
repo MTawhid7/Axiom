@@ -22,3 +22,13 @@ This directory holds validation experiments for [ADR-0002](../docs/adr/0002-impl
   ```
 
 - **Build measurements:** `tools/measure-build.sh --help`.
+- **S1 runtime measurements** (CP7). Each script prints its usage with `--help`, and writes its results under `target/s1-results/`.
+
+  | Script | Measures |
+  |---|---|
+  | `tools/s1-bench.sh` | Runtime suites: build, traverse, mutate, dispatch, collect, whole scenarios. Each run is a separate process; results are aggregated across runs |
+  | `tools/s1-memory.sh` | Peak footprint, maximum RSS and instructions retired per scenario, one fresh process per measurement; bytes per live node |
+  | `tools/s1-profile.sh` | `samply` CPU profiles per case, summarized to functions and source lines by `tools/samply-summary.py` |
+  | `tools/s1-ceremony.sh` | GC-API tokens and code size of the two DOM crates (S1-Q2) |
+
+  `cargo bench -p s1-bench` runs one pass of the runtime suites.

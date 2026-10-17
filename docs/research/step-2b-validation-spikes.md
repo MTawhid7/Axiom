@@ -6,7 +6,7 @@
 | **Authorized** | 2026-10-16, by the owner |
 | **Branch** | `step-2b`. It is merged into `main` only after owner review at CP9 |
 | **Feeds** | [ADR-0002](../adr/0002-implementation-language.md) final acceptance; a future ADR-0003 on the GC handle/rooting pattern |
-| **Last updated** | 2026-10-16 |
+| **Last updated** | 2026-10-17 |
 
 > **Resuming in a new session?**
 > 1. Read §6 to find the first checkpoint that isn't ✅.
@@ -136,13 +136,18 @@ Arbor/
 │   │   ├── a-dom/          s1-a-dom         DOM + driver on Pattern A; forbid(unsafe_code) (CP4)
 │   │   ├── b-gc/           s1-b-gc          Pattern B heap; target: no unsafe (CP5)
 │   │   ├── b-dom/          s1-b-dom         DOM + driver on Pattern B; forbid(unsafe_code) (CP6)
-│   │   └── bench/          s1-bench         harness=false benches, differential tests (CP7)
+│   │   └── bench/          s1-bench         verified benchmark suites; s1-probe binary (CP7)
 │   └── s2/window/          s2-window        AppKit + Metal + CoreText (CP8)
 └── tools/
     ├── check-unsafe-policy.sh   + unsafe-policy.txt (allowlist)
     ├── measure-build.sh         clean / no-op / incremental builds
     ├── rustc-rss-wrapper.sh     RUSTC_WRAPPER: per-crate wall time and max RSS
-    └── linker-rss-wrapper.sh    -C linker=…: per-link wall time and max RSS
+    ├── linker-rss-wrapper.sh    -C linker=…: per-link wall time and max RSS
+    ├── s1-bench.sh              runtime suites, N process runs, aggregated (CP7)
+    ├── s1-memory.sh             per-process peak footprint, RSS, instructions (CP7)
+    ├── s1-profile.sh            samply profiles per case (CP7)
+    ├── samply-summary.py        profile → hot functions and source lines (CP7)
+    └── s1-ceremony.sh           GC-API tokens and code size of the DOM crates (CP7)
 ```
 
 **Engine crates** will live in `crates/` once the architecture is approved. The workspace manifest (lints, profiles, toolchain) is built to be reused unchanged when that happens.
@@ -168,7 +173,7 @@ tools/check-unsafe-policy.sh
 | CP4 | Pattern A DOM and driver; oracle equality; Miri on small scenarios | ✅ 2026-10-16 (§8) |
 | CP5 | Pattern B heap; Miri | ✅ 2026-10-16 (§8) |
 | CP6 | Pattern B DOM and driver; oracle equality; A ≡ B differential | ✅ 2026-10-16 (§8) |
-| CP7 | S1 measurements (runtime, ceremony, build) and S1 results note | ⬜ |
+| CP7 | S1 measurements (runtime, ceremony, build) and S1 results note | 🔄 7a ✅ (harness, probes, scripts); 7b measurements; 7c results note |
 | CP8 | S2 platform spike, measurements, and S2 results note | ⬜ |
 | CP9 | Synthesis: ADR-0002 final recommendation; ADR-0003 (GC pattern) proposed; docs | ⬜ |
 
@@ -290,6 +295,14 @@ tools/check-unsafe-policy.sh
 
 **Verification:** three runs per measurement, reporting the median and spread. The machine is fanless, so cool-down and thermal state are noted.
 
+**Sub-steps** (each committed with the four standard checks green):
+
+| Step | Content | Status |
+|---|---|---|
+| 7a | `s1-bench` crate and `s1-probe` binary; reference-validated inputs (`plan`); measurement scripts; shakedown and methodology fixes | ✅ |
+| 7b | Formal runs: `tools/s1-bench.sh`, `tools/s1-memory.sh`, `tools/s1-profile.sh`, `tools/s1-ceremony.sh`, `tools/measure-build.sh` (dev and release) | ⬜ |
+| 7c | `docs/research/s1-results.md`: results, attribution, recommendation | ⬜ |
+
 ### CP8 — S2 platform spike
 
 **Deliverables**
@@ -327,15 +340,19 @@ tools/check-unsafe-policy.sh
 | Peak RSS per `rustc` invocation | `RUSTC_WRAPPER=tools/rustc-rss-wrapper.sh` runs each `rustc` under `/usr/bin/time -l -o …`. Logged as crate, wall time, max RSS and peak memory footprint |
 | Peak RSS per link | `-C linker=tools/linker-rss-wrapper.sh` wraps `cc` the same way |
 | Aggregate concurrent build RSS | A `ps -axo rss=,comm=` sampler (200 ms) sums `rustc`, `cc`, `ld` and `clang` while cargo runs, and records the peak. This matters on 8 GB with parallel jobs |
-| Runtime throughput and latency | `cargo bench` with `harness = false` benchmarks: warm-up, then K iterations, reporting median, min and max |
-| GC pauses, heap bytes, object counts | Each GC crate's metrics API |
-| Peak RSS at run time | `/usr/bin/time -l` on each bench and scenario binary |
-| CPU profiles | `samply record` (Firefox Profiler UI; works without Xcode) on the `profiling` profile (release plus line tables) |
+| Runtime throughput and latency | `s1-bench` suites (`cargo bench -p s1-bench`, or `tools/s1-bench.sh` for N runs). Per case: warm-up for a fixed time (300 ms; 500 ms for whole scenarios), then 11 samples per pattern (5 for scenarios), alternating A and B in ABBA order. Each run reports the median, min and max. Across 3 separate process runs with 60 s cool-downs, the summary reports the median of the run medians and their range |
+| Correctness of what is timed | Every case first checks both patterns against the reference results its plan carries (tree digests, dispatch logs, object counts, scenario outcomes), and the two traversal folds against each other. `cargo test` runs the same checks on small inputs |
+| GC pauses, heap bytes, object counts | Each GC crate's metrics API; full-collection pauses are also timed directly in the `collect` suite |
+| Peak memory and CPU work at run time | `tools/s1-memory.sh`. Each input is written once as a script file. Each measurement is a fresh `s1-probe run <none\|a\|b>` process under `/usr/bin/time -l`: peak memory footprint, max RSS, instructions retired. `none` only parses the script, and is subtracted |
+| CPU profiles | `tools/s1-profile.sh`: `samply record` on the `profiling` profile (release plus line tables), 1 kHz. `tools/samply-summary.py` narrows each profile to the timed loop and resolves samples to source lines with `dsymutil` and `atos -i` (Command Line Tools). Interactive view: `samply load` (Firefox Profiler; no Xcode) |
+| Ceremony | `tools/s1-ceremony.sh`: GC-API token counts and code size per file and per operation in the two DOM crates |
 | Undefined behaviour | `cargo +nightly miri test` on GC crates and on small DOM scenarios |
 
 **Caveats**
 - The MacBook Air is fanless, so sustained load throttles. Runs are repeated, with cool-downs, and the thermal state is noted.
 - Background load on the machine is not controlled. Medians of repeated runs are reported, not single runs.
+- **Clock ramp-up.** Apple Silicon raises a core's frequency only after it has been busy for a while, so warm-up is measured in time, not iterations (found in CP7; see §8).
+- **P-cores and E-cores.** Which core a benchmark runs on cannot be pinned from safe code. Instructions retired (`s1-memory.sh`) are a frequency-independent cross-check on wall-time ratios.
 
 ## 8. Results log
 
@@ -657,3 +674,46 @@ Beyond those counts, the whole dispatch state machine (`dispatch.rs`) exists onl
    - **Pattern B's cost is lexical:** `bind`/`unbind`/`scope` noise, the "soup" the Nova author describes. Local code stays structured normally.
    - For a JS engine (ADR-0001 R2), Pattern A would force a stackless interpreter. Pattern B allows a conventional recursive interpreter with rooting.
 3. **Pattern B's bound is tighter (overshoot ≤ 1 node), and its pauses were shorter in this run** (71 µs vs 145 µs). Peaks are not comparable in node counts, because the node sizes differ; CP7 compares bytes, throughput, and pauses against live-set size.
+
+### CP7 — in progress (7a completed 2026-10-17)
+
+**7a delivered**
+- **`s1-bench`** (`#![forbid(unsafe_code)]`):
+  - `plan`: benchmark inputs built from the CP2 tree generator. Every op is validated by the reference interpreter before it is recorded. Each plan carries its expected tree digests and dispatch log.
+  - `dom`: a `Dom` trait with `PatternA` and `PatternB` adapters that apply ops exactly as each pattern's driver does.
+  - `harness`: time-based warm-up, ABBA-alternating samples, medians, TSV output, aggregation across runs.
+  - `suites`: `build`, `traverse`, `mutate`, `dispatch`, `collect`, `scenario`. Every case verifies both patterns before it times anything.
+  - `script_io`: a text format for scripts, so memory measurements can run a script without generating it.
+  - `cli`: the `cargo bench` target, and the `s1-probe` binary (`bench`, `aggregate`, `gen`, `run`, `profile`, `sizes`).
+- **Measurement scripts:** `tools/s1-bench.sh`, `tools/s1-memory.sh`, `tools/s1-profile.sh`, `tools/samply-summary.py`, `tools/s1-ceremony.sh` (§7).
+- **`samply` 0.13.1 installed** with `cargo +1.94.1 install --locked samply`, under the rustc RSS wrapper. That build is a data point for a large dependency graph on this machine:
+  - 281 crates in 83 s wall time (411 s of CPU);
+  - largest single `rustc`: 911 MiB (the `samply` binary crate, in release);
+  - aggregate compiler peak: 2.0 GiB.
+- **Workspace:** 89 tests pass. clippy (pedantic) and the policy check are green; `s1-bench` has zero `unsafe`.
+
+**Methodology corrections found in the shakedown run** (before any reported number)
+1. **An invalid case.** "Traversal after random mutation" walked only 3,458 of 129,839 nodes, because the mutation mix detaches subtrees. `plan::shuffle` now moves nodes only under attached elements, so every node stays attached. The suite asserts the full count.
+2. **Allocation order.** The CP2 generator grows trees breadth-first; a parser creates nodes in document order.
+   - Plans now default to document order: same ids, same tree, same digest (tested).
+   - Breadth-first and shuffled orders are kept as traversal variants.
+3. **Clock ramp-up.** The first, short case ran at a low clock: `traverse/tree-10k` measured 11.9 ns/node for A, against 6.6 ns once warm. Warm-up is now measured in time (300 ms per case), not iterations.
+4. **Line attribution.** samply's presymbolicated sidecar holds inline frames per function, not per address. `tools/samply-summary.py` resolves lines with `dsymutil` and `atos -i` instead.
+5. **Profile scope.** Profiling loops run through `profiled_iteration`, which is never inlined and never tail-called. Summaries exclude input generation.
+
+**Change to both DOM crates (dispatch allocations), with before and after measurements**
+- **What the profiles showed:**
+  - both dispatches regrew a fresh event-path `Vec` on every dispatch;
+  - Pattern B also allocated a new rooted snapshot `Vec<Scoped>` on every visit. A's state machine already reused its snapshot buffer.
+- **The symmetric fix:**
+  - both crates now size the path first;
+  - B uses one snapshot frame and one buffer per dispatch. Its snapshot roots are released when the dispatch returns, which scripts cannot observe.
+- **Verification:** both oracle suites are green again (edge cases, seeds at both pacings, pressure bounds, A ≡ B). Miri on `s1-a-dom` (Stacked Borrows, strict provenance) found no undefined behaviour (98.7 s).
+
+| Case (3 runs, median of medians) | A before | A after | B before | B after | B/A before → after |
+|---|---|---|---|---|---|
+| `dispatch` (per dispatch) | 491 ns | 482 ns | 1,271 ns | 1,022 ns | 2.59 → 2.12 |
+| `scenario/listeners` | 158.2 ms | 157.1 ms | 178.3 ms | 163.3 ms | 1.13 → 1.04 |
+| `scenario/churn` | 158.4 ms | 161.8 ms | 181.3 ms | 181.2 ms | 1.14 → 1.12 |
+
+Line-level profiles attribute B's remaining dispatch gap to root-stack traffic: `RootFrame::push` and `Scoped::get` on a `Rc<RefCell<Vec<RootSlot>>>`. Without it, B's dispatch costs about what A's does. 7c analyses this.
