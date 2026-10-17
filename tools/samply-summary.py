@@ -182,7 +182,7 @@ def main():
                 else:
                     self_ours[f"(no frame of ours) {symbol}"] += weight
                 for _, regex, count in shares:
-                    if any(regex.search(os.path.relpath(p, REPO)) for _, p, _ in inline):
+                    if any(p and regex.search(os.path.relpath(p, REPO)) for _, p, _ in inline):
                         count[0] += weight
             else:
                 self_line[symbol] += weight
