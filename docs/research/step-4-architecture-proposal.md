@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **In progress.** CP1–CP7 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP8–CP12 run without pausing, and the next stop is Gate B, after CP12 |
+| **Status** | **In progress.** CP1–CP8 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP9–CP12 run without pausing, and the next stop is Gate B, after CP12 |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only. Spike S3's code needs a separate go-ahead once its design is ready (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
@@ -107,7 +107,7 @@ Nothing is compiled or installed before Gate B. Each such fact names the command
 | 5 | [`docs/architecture/frame-tree-and-navigation.md`](../architecture/frame-tree-and-navigation.md) (SI4) | CP5 |
 | 6 | [`docs/architecture/rendering-pipeline.md`](../architecture/rendering-pipeline.md) (P2, part of P4) | CP6 |
 | 7 | [`docs/architecture/invalidation.md`](../architecture/invalidation.md) (P3) | CP7 |
-| 8 | `docs/architecture/input-and-accessibility.md` (SI4) | CP8 |
+| 8 | [`docs/architecture/input-and-accessibility.md`](../architecture/input-and-accessibility.md) (SI4) | CP8 |
 | 9 | `docs/architecture/embedder-api.md` (F4, OQ-11) | CP9 |
 | 10 | `docs/architecture/script-and-heap.md` (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5), and spike S3's design in this tracker (§10) | CP10 |
 | 11 | `docs/architecture/overview.md`: the architecture proposal v0 | CP11 |
@@ -166,7 +166,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | CP5 | Frame tree, navigation and loading (SI4) | ✅ 2026-10-17 (§11; [document](../architecture/frame-tree-and-navigation.md)) |
 | CP6 | Rendering pipeline: data model, per-frame display lists, compositing, strings (P2, part of P4) | ✅ 2026-10-17 (§11; [document](../architecture/rendering-pipeline.md)) |
 | CP7 | Invalidation and incremental updates (P3) | ✅ 2026-10-17 (§11; [document](../architecture/invalidation.md)) |
-| CP8 | Input, focus, hit testing, scrolling and accessibility across frames (SI4) | |
+| CP8 | Input, focus, hit testing, scrolling and accessibility across frames (SI4) | ✅ 2026-10-17 (§11; [document](../architecture/input-and-accessibility.md)) |
 | CP9 | Engine/embedder API and shell (F4, OQ-11) | |
 | CP10 | Script, agents and heap (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5); spike S3's design | |
 | CP11 | Architecture overview v0, and the criteria check (§5) | |
@@ -420,5 +420,18 @@ Every relative link resolves; the four standard checks pass.
 - **The compositor scrolls and animates** from its property trees and display ports. Scroll offsets are reconciled by sequence numbers; listeners that may block scrolling are asked with a deadline; transform and opacity animations run on the compositor.
 - **Late, hidden and dependent content:** parser yields; targeted invalidation for images, fonts and resizes; no frames for hidden or offscreen frames; one frame in flight; cross-frame sizes through the browser.
 - **IV14:** a test mode compares every incremental update against a rebuild from scratch.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP8 — completed 2026-10-17
+
+[Input, focus, hit testing, scrolling and accessibility](../architecture/input-and-accessibility.md) written (**Proposed**; rules IN1–IN12), from the HTML standard (user activation, focus), Chromium (out-of-process iframes, RenderingNG), and Firefox (`ContentCache`, the Firefox 113 accessibility cache, APZ). Main proposals:
+- **Input enters at the compositor,** which hit-tests the composited frames and routes to the target frame's event loop in that frame's coordinates. Imprecise regions are asked with a deadline.
+- **Gestures are latched;** scrolling stays in the compositor, chaining across frames and processes.
+- **Pointer capture and focus are browser records;** sequential focus moves between frames through the browser.
+- **IME is answered from a mirror on the main thread,** kept current by the focused frame, as Firefox's `ContentCache` does. Chromium's 1.5 s block is avoided.
+- **User activation comes from routed input,** propagated and consumed as the HTML standard specifies, decided by the browser.
+- **Accessibility is a cache in the browser,** stitched across frames by token and enabled on first use. Firefox reports up to 20× gains on its worst pages.
+- **Mediation and integrity:** the browser mediates the pasteboard, menus and dragging; hit-test claims are clipped to each frame's area; routing is tested across processes.
 
 Every relative link resolves; the four standard checks pass.

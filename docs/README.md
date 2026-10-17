@@ -42,6 +42,7 @@ These documents are the project's source of truth. Conversation history is not.
 | [architecture/frame-tree-and-navigation.md](architecture/frame-tree-and-navigation.md) | Frame tree, navigation and loading: the browser's records, skeleton replicas, remote window proxies, browser-routed operations, browser-driven navigation, bound loader and storage endpoints | **Proposed** (Step 4, CP5) |
 | [architecture/rendering-pipeline.md](architecture/rendering-pipeline.md) | Rendering pipeline: DOM, style, box tree, immutable fragments, per-frame display lists over property trees, validation and compositing, strings and atoms | **Proposed** (Step 4, CP6) |
 | [architecture/invalidation.md](architecture/invalidation.md) | Invalidation and incremental updates: the lifecycle, entry points, reuse at each stage, compositor-driven scrolling and animation, late and hidden content | **Proposed** (Step 4, CP7) |
+| [architecture/input-and-accessibility.md](architecture/input-and-accessibility.md) | Input routing, gesture latching, scrolling, focus, IME mirror, user activation, accessibility cache, mediation | **Proposed** (Step 4, CP8) |
 | [research/](research/README.md) | Research conventions and notes | Living |
 
 **Planned documents**, each created when its Phase Zero step begins:
