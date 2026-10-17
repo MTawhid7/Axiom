@@ -76,7 +76,7 @@ From CP6 on, the four standard checks cover real code again. S4-Q6, the fallback
 | CP3 | Research note: process confinement on macOS, browser precedents, observations on this machine; spike S4 design | ✅ 2026-10-17 (§7; [note](macos-process-confinement.md)) |
 | CP4 | Process model: process types and privileges, site isolation policy, IPC trust rules, memory budgets, staging | ✅ 2026-10-17 (§7; [process model](../security/process-model.md)) |
 | CP5 | Synthesis: ADR-0004 (Proposed) with the JIT policy; decision map, open questions, indexes, status; branch ready for review | ✅ 2026-10-17 (§7; [ADR-0004](../adr/0004-process-model-and-sandbox.md)); reviewed by the owner |
-| CP6 | **S4a:** sandbox entry and denial probes (S4-Q1, S4-Q2), automated under `cargo test`; signing script | Not started |
+| CP6 | **S4a:** sandbox entry and denial probes (S4-Q1, S4-Q2), automated under `cargo test`; signing script | ✅ 2026-10-17 (§7): **S4-Q1 and S4-Q2 pass** |
 | CP7 | **S4b:** measurements: helper start-up and footprint, IPC latency and throughput over Mach messages and socket pairs (S4-Q3); the JIT matrix (S4-Q4); CoreText inside a renderer profile (S4-Q5) | Not started |
 | CP8 | **S4c:** `docs/research/s4-results.md`. ADR-0004 moves to Accepted if S4-Q1 and S4-Q2 pass. Docs synthesis | Not started |
 | CP9 | Merge `step-3` into `main` (`--no-ff`) | Not started |
@@ -143,3 +143,32 @@ Correction during review: WebKit's XPC services don't carry the hardened-runtime
 ### The owner's review — 2026-10-17
 
 Decisions 1–8 are recorded in §2 and in the documents named there. `step-3` was pushed to `origin` for off-site backup. Spike S4 starts at CP6.
+
+### CP6 (S4a) — completed 2026-10-17
+
+**Code.**
+- `spikes/s4/sandbox` (package `s4-sandbox`, std only):
+  - `src/platform/` holds every foreign call (libsandbox, Mach, `posix_spawn`, libbsm) under invariants X1–X8: 34 `unsafe` blocks, allowlisted in `tools/unsafe-policy.txt`;
+  - the probe suite (`probe.rs`), the broker side (`scenario.rs`), the `s4-helper` and `s4-broker` binaries, and the profile `profiles/renderer.sb`. The profile is `(deny default)` plus one `mach-lookup` for the broker's rendezvous name, passed as a parameter.
+- `tools/s4-sign.sh` signs copies ad hoc with the hardened runtime: `flags=0x10002(adhoc,runtime)`.
+
+**S4-Q1: passes.**
+- The helper is built against SDK 27.0 (`otool -l`: minos 11.0, sdk 27.0). Signed ad hoc with the hardened runtime, it enters the custom deny-by-default profile by **both** methods: `sandbox_init_with_parameters`, and `sandbox_compile_string` + `sandbox_apply`.
+- `sandbox_check` then reports it as sandboxed, and nothing kills it.
+- Applying the profile took 9–12 ms with `init` and 7–8 ms with `compile`. These are single observations from dev builds; S4b measures properly.
+
+**S4-Q2: passes.** 18 of 18 probes behave as expected, with both methods and both signings (linker-signed under `cargo test`; ad hoc with the hardened runtime from `target/s4/bin`):
+- Reading a file in the home directory, `/etc/hosts` and a system font, creating a file, TCP connect, UDP send, process launch and signalling the broker all fail with `EPERM`.
+- `getaddrinfo("localhost")` fails.
+- Looking up the window server, font server, pasteboard, LaunchServices and its database fails with `BOOTSTRAP_NOT_PRIVILEGED` (1100).
+- The broker saw no TCP connection or UDP datagram.
+- Allocating 64 MiB, four threads, a hello over the inherited socket, and a Mach hello to the broker all work. The PID in the hello's kernel audit trailer equals the spawned child's PID (process model R3).
+- **The control run** (no profile) allows all 18, so every probe can detect the access it tests.
+
+**The SDK 27 rule for named profiles is confirmed.** A helper that applies `kSBXProfilePureComputation` through `sandbox_init` is killed with SIGKILL. Its crash report gives the termination namespace `SANDBOX`, code 1, and the stack `sandbox_init` → `sandbox_init_with_parameters` → `sandbox_apply_container` → `__mac_syscall`. Each such kill leaves a crash report in `~/Library/Logs/DiagnosticReports`, so this check is opt-in: `--named-profile`, or `cargo test -- --ignored`.
+
+**Denials are logged.** The kernel logs every denial to the unified log, for example `Sandbox: s4-helper(24549) deny(1) file-read-data …/home-probe.txt` and `deny(1) mach-lookup com.apple.fonts`. Read them with `/usr/bin/log show --predicate 'sender == "Sandbox"'`; zsh shadows `log` with a builtin. This is evidence for threat-model check V1, and a way to grow profiles from evidence (S4b, S4-Q5).
+
+**Tests.** `s4-sandbox` has 11 unit tests (including the Mach round trip with the audit trailer, and descriptor inheritance under `POSIX_SPAWN_CLOEXEC_DEFAULT`) and 3 integration scenarios, plus 1 opt-in test. The four standard checks pass: 110 tests, 5 ignored.
+
+**Housekeeping.** The named-profile runs left three crash reports under `~/Library/Logs/DiagnosticReports/Retired/`. They will be removed at S4c, after the final evidence run.

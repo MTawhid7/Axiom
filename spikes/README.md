@@ -1,11 +1,14 @@
-# Spikes (Phase Zero, Step 2b)
+# Spikes (Phase Zero)
 
-This directory holds validation experiments for [ADR-0002](../docs/adr/0002-implementation-language.md). The code is **throwaway and not production**: it exists to answer the questions in the [Step 2b plan](../docs/research/step-2b-validation-spikes.md). It will be archived or deleted after CP9; its results live in `docs/research/`.
+This directory holds validation experiments. The code is **throwaway and not production**: it exists to answer the questions in a step's plan, and its results live in `docs/research/`.
+- S1 and S2 validate [ADR-0002](../docs/adr/0002-implementation-language.md) ([Step 2b plan](../docs/research/step-2b-validation-spikes.md)).
+- S4 validates [ADR-0004](../docs/adr/0004-process-model-and-sandbox.md) ([Step 3 plan](../docs/research/step-3-security-and-process-model.md); design in the [macOS confinement note](../docs/research/macos-process-confinement.md) §7).
 
 | Spike | Question | Crates |
 |---|---|---|
 | S1 | Can a GC heap shared by JS and the DOM keep `unsafe` inside the GC boundary, with acceptable ceremony and cost? Pattern A (gc-arena style) against Pattern B (Nova style) | `s1/*` |
 | S2 | objc2 AppKit + Metal + CoreText without Xcode: ergonomics, `unsafe` surface, build cost | `s2/window` |
+| S4 | Can a helper launched with `posix_spawn` enter a custom deny-by-default Seatbelt profile on macOS 27, and what does that cost? | `s4/sandbox` |
 
 ## Rules
 
@@ -33,3 +36,4 @@ This directory holds validation experiments for [ADR-0002](../docs/adr/0002-impl
   | `tools/s2-measure.sh` | S2: binary size, time to first frame, and idle CPU, wakeups, energy impact and memory of `s2-window` |
 
   `cargo bench -p s1-bench` runs one pass of the S1 runtime suites. `cargo run -p s2-window -- --smoke` checks the S2 window's rendering (it opens a window briefly).
+- **S4.** `cargo test -p s4-sandbox` runs the sandbox probes against the linker-signed helper. `tools/s4-sign.sh` signs copies ad hoc with the hardened runtime, and `target/s4/bin/s4-broker probe` runs the scenarios against them. `--named-profile`, and `cargo test -p s4-sandbox -- --ignored`, also check that a named profile kills the helper; each such run leaves a crash report in `~/Library/Logs/DiagnosticReports`.

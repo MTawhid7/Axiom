@@ -31,3 +31,7 @@ emits-unsafe spikes/s1/a-gc-derive
 # Spike S2: calls into AppKit, Metal, QuartzCore, CoreText and CoreGraphics through objc2
 # that the bindings mark unsafe, under invariants P1–P6 (spikes/s2/window/src/platform/mod.rs).
 allow spikes/s2/window src/platform/
+
+# Spike S4: libsandbox, Mach, posix_spawn and libbsm calls, under invariants X1–X8
+# (spikes/s4/sandbox/src/platform/mod.rs).
+allow spikes/s4/sandbox src/platform/
