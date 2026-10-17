@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **In progress.** CP1–CP8 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP9–CP12 run without pausing, and the next stop is Gate B, after CP12 |
+| **Status** | **In progress.** CP1–CP9 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP10–CP12 run without pausing, and the next stop is Gate B, after CP12 |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only. Spike S3's code needs a separate go-ahead once its design is ready (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
@@ -108,7 +108,7 @@ Nothing is compiled or installed before Gate B. Each such fact names the command
 | 6 | [`docs/architecture/rendering-pipeline.md`](../architecture/rendering-pipeline.md) (P2, part of P4) | CP6 |
 | 7 | [`docs/architecture/invalidation.md`](../architecture/invalidation.md) (P3) | CP7 |
 | 8 | [`docs/architecture/input-and-accessibility.md`](../architecture/input-and-accessibility.md) (SI4) | CP8 |
-| 9 | `docs/architecture/embedder-api.md` (F4, OQ-11) | CP9 |
+| 9 | [`docs/architecture/embedder-api.md`](../architecture/embedder-api.md) (F4, OQ-11) | CP9 |
 | 10 | `docs/architecture/script-and-heap.md` (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5), and spike S3's design in this tracker (§10) | CP10 |
 | 11 | `docs/architecture/overview.md`: the architecture proposal v0 | CP11 |
 | 12 | ADRs, Proposed. Provisional set: 0005, IPC transport and interfaces; 0006, event loop and threading; 0007, frame tree, pipeline and invalidation; 0008, script, agents and heap (accepted after S3); 0009, engine/embedder API and shell. CP12 may regroup them, and Gate B reports any change | CP12 |
@@ -167,7 +167,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | CP6 | Rendering pipeline: data model, per-frame display lists, compositing, strings (P2, part of P4) | ✅ 2026-10-17 (§11; [document](../architecture/rendering-pipeline.md)) |
 | CP7 | Invalidation and incremental updates (P3) | ✅ 2026-10-17 (§11; [document](../architecture/invalidation.md)) |
 | CP8 | Input, focus, hit testing, scrolling and accessibility across frames (SI4) | ✅ 2026-10-17 (§11; [document](../architecture/input-and-accessibility.md)) |
-| CP9 | Engine/embedder API and shell (F4, OQ-11) | |
+| CP9 | Engine/embedder API and shell (F4, OQ-11) | ✅ 2026-10-17 (§11; [document](../architecture/embedder-api.md)) |
 | CP10 | Script, agents and heap (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5); spike S3's design | |
 | CP11 | Architecture overview v0, and the criteria check (§5) | |
 | CP12 | Synthesis: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | |
@@ -433,5 +433,17 @@ Every relative link resolves; the four standard checks pass.
 - **User activation comes from routed input,** propagated and consumed as the HTML standard specifies, decided by the browser.
 - **Accessibility is a cache in the browser,** stitched across frames by token and enabled on first use. Firefox reports up to 20× gains on its worst pages.
 - **Mediation and integrity:** the browser mediates the pasteboard, menus and dragging; hit-test claims are clipped to each frame's area; routing is tested across processes.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP9 — completed 2026-10-17
+
+[Engine/embedder API and the shell](../architecture/embedder-api.md) written (**Proposed**; rules EM1–EM12), from Chromium's content API, Apple's WKWebView delegates and Servo's constellation messages. Main proposals:
+- **The shell is an embedder:** AppKit's main thread, talking to the engine's core through a message API defined in the IDL. The engine never depends on AppKit or the shell; the build enforces the rule, like Chromium's content/chrome layering.
+- **Commands in; events and requests for decisions out** (new windows, permissions, dialogs, downloads, file choices, authentication, context menus). The engine applies its policy first, and every request has a default and never waits indefinitely.
+- **Presentation, input, IME and accessibility** cross as objects the shell hosts and the engine keeps current.
+- **The browser's own UI is native,** so there is no privileged web UI.
+- **A headless embedder** with offscreen surfaces, synthetic input and virtual time, for WPT and reference tests.
+- **OQ-11: pure Rust with objc2.** The shell milestone first validates an objc2-defined view class for text input and accessibility, which S2 never tried. A Swift shell can sit behind the same API if needed.
 
 Every relative link resolves; the four standard checks pass.

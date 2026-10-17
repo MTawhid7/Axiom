@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Phase Zero, Step 4: the architecture proposal v0** (event loop, threading, pipeline data model, invalidation, embedder API). Authorized on 2026-10-17 as design work. Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 3** (merged with `--no-ff`) and is pushed, at `da79e69` (2026-10-17). Step 4 runs on branch `step-4`, pushed to `origin` |
-| Current checkpoint | **Step 4: CP1–CP8 ✅; Gate A passed** (plan approved as written, 2026-10-17); CP9 next ([tracker](research/step-4-architecture-proposal.md)). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
+| Current checkpoint | **Step 4: CP1–CP9 ✅; Gate A passed** (plan approved as written, 2026-10-17); CP10 next ([tracker](research/step-4-architecture-proposal.md)). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3). S1 stays as the baseline for spike S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -71,6 +71,8 @@
 **CLAUDE.md and a link checker** (the owner's request, then "proceed with your recommendation"):
 - `CLAUDE.md` at the repository root holds the working instructions: session start, authorization and review gates, communication (every decision presented with a recommendation and rationale), documentation conventions, verification, code rules, git workflow, environment. It stays in the public repository.
 - `tools/check-doc-links.py` (standard-library Python) checks every relative Markdown link and anchor in the repository. It is now the fifth check before every commit.
+
+**CP9:** [embedder API and shell](architecture/embedder-api.md) (Proposed): the shell as an embedder over a message API; commands, events and requests for decisions; hosted presentation, IME and accessibility objects; native browser UI only; a headless embedder for WPT; OQ-11 proposed as pure Rust with objc2, validated first at the shell milestone.
 
 **CP8:** [input and accessibility](architecture/input-and-accessibility.md) (Proposed): input enters at the compositor and is routed by hit testing; gestures latch; scrolling chains across frames in the compositor; focus and capture are browser records; IME from a main-thread mirror (Firefox's model); activation from routed input; accessibility as a browser-side cache.
 
