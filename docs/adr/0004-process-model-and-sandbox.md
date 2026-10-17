@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-17). The owner accepted its parts with amendments, and instructed that it move to Accepted once spike S4-Q1 and S4-Q2 passed on this Mac. They passed the same day ([S4 results](../research/s4-results.md)) |
+| **Status** | **Accepted** (2026-10-17). The owner accepted its parts with amendments, and instructed that it move to Accepted once spike S4-Q1 and S4-Q2 passed on this Mac. They passed the same day ([S4 results](../research/s4-results.md)). The owner then confirmed the refinements S4 made |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Threat model](../security/threat-model.md), [process model](../security/process-model.md), [macOS confinement note](../research/macos-process-confinement.md), [Step 3 tracker](../research/step-3-security-and-process-model.md), [ADR-0001](0001-scope-and-target.md) (R3, consequence 4), [ADR-0002](0002-implementation-language.md) (`unsafe` policy), [ADR-0003](0003-gc-handle-and-rooting-pattern.md) (one heap per agent), [S2 results](../research/s2-results.md), [S4 results](../research/s4-results.md) |
@@ -15,6 +15,7 @@
 | 2026-10-17 | **Owner's review.** Guiding principle: "we have no calendar deadline or fixed time limit on this project. We will not cut architectural corners or accept weaker security boundaries for convenience. Where we stage features, the underlying architecture must be designed for the complete, uncompromising model from day one." Decisions: the threat model is accepted; security levels L0–L3 and checks V1–V8 are accepted, with **full out-of-process iframes made a mandatory prerequisite for L3** (D4, D5); the JIT policy J1–J7 is accepted, with global and per-site switches (D7); SI1–SI7 are accepted as staged, with SI3 permitted only at L1 and non-sensitive L2 (D4); memory targets B1–B7 are accepted as initial baselines (D6); spike S4 is authorized. **The ADR stays Proposed until S4-Q1 and S4-Q2 pass, then moves to Accepted** |
 | 2026-10-17 | **Spike S4: S4-Q1 and S4-Q2 pass** ([S4 results](../research/s4-results.md)). A custom deny-by-default profile applies to an ad-hoc-signed, hardened-runtime helper built against SDK 27.0, by three methods. All 18 probes behave as specified. S4 also refines three decisions, recorded below: the browser compiles profiles (D2); J3's explicit rule is required (D7); J5 adds `single-jit` (D7) |
 | 2026-10-17 | **Accepted**, by the owner's instruction of the same day: "Once S4-Q1 and S4-Q2 pass, ADR-0004 moves to Accepted" |
+| 2026-10-17 | **Owner confirms S4's three refinements:** browser-compiled profile bytecode (D2), the required explicit `(deny dynamic-code-generation)` (J3), and `com.apple.security.cs.single-jit` on `renderer-jit` (J5). They "are well-justified by the S4 empirical data and strengthen both our security posture and memory budgets" |
 
 ## Question
 

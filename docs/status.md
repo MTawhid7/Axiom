@@ -6,26 +6,29 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero. Step 3 is complete; Step 4 is next**: event loop, threading, pipeline data model, invalidation, embedder API. Production engine code is **not** authorized |
-| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 3**, merged with `--no-ff` on 2026-10-17. Branch `step-3` is pushed. `main` is not yet pushed with the merge |
-| Current checkpoint | Step 3 CP1–CP9 ✅ ([tracker](research/step-3-security-and-process-model.md)). Step 4 not started |
+| Phase | **Phase Zero, Step 4: the architecture proposal v0** (event loop, threading, pipeline data model, invalidation, embedder API). Authorized on 2026-10-17 as design work. Production engine code is **not** authorized |
+| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 3** (merged with `--no-ff`) and is pushed, at `da79e69` (2026-10-17). Step 4 runs on branch `step-4`, which is local and not pushed |
+| Current checkpoint | **Step 4 CP1 ✅.** The plan ([tracker](research/step-4-architecture-proposal.md)) is with the owner for review (Gate A). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3). S1 stays as the baseline for spike S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final**, with build thresholds T1–T4 |
 | | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 |
-| | [ADR-0004](adr/0004-process-model-and-sandbox.md): process model, sandbox and JIT policy (2026-10-17), validated by spike S4 |
+| | [ADR-0004](adr/0004-process-model-and-sandbox.md): process model, sandbox and JIT policy (2026-10-17), validated by spike S4. The owner confirmed S4's refinements |
 | | [Threat model](security/threat-model.md) (2026-10-17), amended: out-of-process iframes are required for L3 |
 
 ## Next steps: Step 4, the architecture proposal v0
 
-**Step 4 is design work under the Phase Zero rule.** It starts on a new branch, `step-4`, with a plan and checkpoints, once the owner gives the go-ahead. Spike S3 is required in Step 4 (ADR-0003, C1). Its code still needs the go-ahead when Step 4's plan is ready.
+**Step 4 is design work under the Phase Zero rule** ([tracker](research/step-4-architecture-proposal.md)). The owner asked for the plan first.
 
-**Topics** ([decision map](decision-map.md), P1–P3 and F4):
-- the event loop and threading model;
-- the pipeline data model: DOM → style → box tree → fragment tree → display list → compositor;
-- the invalidation and incremental-update model;
-- the engine/embedder API.
+1. **Gate A.** The owner reviews the plan, including its scope (tracker §2). CP2 starts on approval.
+2. **CP2–CP12** run without pausing:
+   - a macOS research note;
+   - architecture documents for the event loop and threads, IPC, the frame tree and navigation, the rendering pipeline, invalidation, input and accessibility, the embedder API, and script and heap;
+   - the overview v0;
+   - ADRs 0005–0009, Proposed.
+3. **Gate B.** The owner decides on the ADRs, and on spike S3's code. S3 is designed at CP10, and no S3 code is written before the owner's go-ahead.
+4. **CP13–CP15:** spike S3, if authorized, then its results. **Gate C:** ADR-0008 and the merge.
 
 **Binding inputs from Step 3** ([decision map](decision-map.md) §4):
 - message-based interfaces at every future process boundary;
@@ -41,6 +44,23 @@
 - OQ-11, the shell.
 
 ## Session log
+
+### 2026-10-17 — Session 6 (Step 4 kickoff)
+
+**The owner's decisions:**
+1. Push `main`: authorized.
+2. ADR-0004's three S4 refinements are confirmed: browser-compiled profile bytecode, the required explicit `(deny dynamic-code-generation)`, and `single-jit` on `renderer-jit`.
+3. **Step 4 is authorized** as design work on a new branch `step-4`: "Submit the checkpoint plan and tracker first, and request separate go-ahead for Spike S3's code when its design is ready."
+
+**Done:**
+- `main` pushed to `origin` at `da79e69`.
+- Branch `step-4` created from `main`.
+- The confirmation recorded in ADR-0004's decision history.
+- **CP1:** the [Step 4 plan and tracker](research/step-4-architecture-proposal.md): 16 questions, 14 deliverables, the architecture criteria AC1–AC10, 16 checkpoints and three review gates. It proposes adding "HTML parsing and DOM" and "JavaScript engine and bindings" to Step 5, whose list doesn't name them.
+
+**Verified** (SDK 27 headers): `CVDisplayLink` is deprecated since macOS 15, in favour of AppKit's `displayLink(target:selector:)` on `NSView`, `NSWindow` and `NSScreen`. This bears on frame timing in renderers, which have no AppKit (CP2).
+
+**Verification:** every relative link in `docs/` resolves. The four standard checks pass, with the code unchanged.
 
 ### 2026-10-17 — Session 5 (Step 3)
 

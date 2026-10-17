@@ -62,3 +62,4 @@ This folder holds research notes on design history, modern alternatives, and exp
 | [Step 3 plan](step-3-security-and-process-model.md) | Plan and checkpoint tracker for Step 3: threat model, process model, macOS confinement, spike S4 | Complete (2026-10-17) |
 | [macOS process confinement](macos-process-confinement.md) | Seatbelt, App Sandbox, hardened runtime, JIT, launch and IPC options on macOS 27; browser precedent; spike S4 design | Reviewed (2026-10-17) |
 | [S4 results](s4-results.md) | Custom Seatbelt profiles on macOS 27: probes; start-up, footprint and IPC cost; the JIT matrix; CoreText in a sandbox | Complete (2026-10-17) |
+| [Step 4 plan](step-4-architecture-proposal.md) | Plan and checkpoint tracker for Step 4: the architecture proposal v0 (event loop, threads, IPC, frame tree, pipeline, invalidation, embedder API, script and heap) and spike S3 | In progress: plan under the owner's review |
