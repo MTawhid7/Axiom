@@ -26,6 +26,11 @@ These documents are the project's source of truth. Conversation history is not.
 | ↳ [0002-implementation-language.md](adr/0002-implementation-language.md) | Implementation language (Rust) | **Accepted** (final, 2026-10-17) |
 | ↳ [0003-gc-handle-and-rooting-pattern.md](adr/0003-gc-handle-and-rooting-pattern.md) | GC handle and rooting pattern (Pattern B, Nova style; obligations C1–C5) | **Accepted** (2026-10-17) |
 | ↳ [0004-process-model-and-sandbox.md](adr/0004-process-model-and-sandbox.md) | Process model, sandbox and JIT policy | **Accepted** (2026-10-17), after spike S4 |
+| ↳ [0005-ipc-transport-and-interfaces.md](adr/0005-ipc-transport-and-interfaces.md) | IPC: Mach transport, capabilities, IDL and generated decoders, `Untrusted<T>` | **Proposed** (2026-10-17) |
+| ↳ [0006-event-loop-and-threading.md](adr/0006-event-loop-and-threading.md) | Event loop and threading model | **Proposed** (2026-10-17) |
+| ↳ [0007-frame-tree-pipeline-and-input.md](adr/0007-frame-tree-pipeline-and-input.md) | Frame tree, rendering pipeline, invalidation and input across frames (SI4) | **Proposed** (2026-10-17) |
+| ↳ [0008-script-agents-and-heap.md](adr/0008-script-agents-and-heap.md) | Script, agents and the heap; ADR-0003's C1–C5 | **Proposed** (2026-10-17); acceptance after spike S3 |
+| ↳ [0009-embedder-api-and-shell.md](adr/0009-embedder-api-and-shell.md) | Engine/embedder API and the shell (OQ-11) | **Proposed** (2026-10-17) |
 | [security/threat-model.md](security/threat-model.md) | Assets, adversaries, attack surfaces, trust boundaries, security goals, security levels L0–L3 | **Accepted** (2026-10-17), amended: out-of-process iframes required for L3 |
 | [security/process-model.md](security/process-model.md) | Process types and privileges, site isolation, IPC trust rules, memory budgets | Binding (ADR-0004 accepted, 2026-10-17) |
 | [technology/language-evaluation.md](technology/language-evaluation.md) | Detailed language comparison and recommendation | Reviewed |
@@ -36,7 +41,7 @@ These documents are the project's source of truth. Conversation history is not.
 | [research/macos-process-confinement.md](research/macos-process-confinement.md) | Process confinement on macOS: Seatbelt, App Sandbox, hardened runtime, JIT, launch and IPC options; browser precedent; spike S4 design | Reviewed (2026-10-17) |
 | [research/s4-results.md](research/s4-results.md) | S4 results: custom Seatbelt profiles on macOS 27; probes; start-up, footprint and IPC cost; the JIT matrix; CoreText in a sandbox | Complete (2026-10-17) |
 | [research/macos-runtime-facilities.md](research/macos-runtime-facilities.md) | macOS facilities for the runtime: run loops, frame timing, QoS, surfaces, IME and accessibility; browser precedent | Complete (Step 4, CP2) |
-| [research/step-4-architecture-proposal.md](research/step-4-architecture-proposal.md) | Step 4 plan and checkpoint tracker: the architecture proposal v0, including spike S3 | In progress (plan approved at Gate A) |
+| [research/step-4-architecture-proposal.md](research/step-4-architecture-proposal.md) | Step 4 plan and checkpoint tracker: the architecture proposal v0, including spike S3's design | At Gate B (CP1–CP12 done) |
 | [architecture/overview.md](architecture/overview.md) | **Architecture proposal v0:** the system on one page, crates and `unsafe` map, end-to-end scenarios, criteria check, staging | **Proposed** (Step 4, CP11) |
 | [architecture/event-loop-and-threading.md](architecture/event-loop-and-threading.md) | Event loop and threading model: thread loops, the threads of each process, the HTML event loop, frame scheduling, agents and workers | **Proposed** (Step 4, CP3) |
 | [architecture/ipc.md](architecture/ipc.md) | IPC: Mach transport, channels and capabilities, the IDL and generated decoders, `Untrusted<T>` validation, synchronous requests, bulk data, backpressure | **Proposed** (Step 4, CP4) |

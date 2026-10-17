@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **In progress.** CP1–CP11 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP12 runs next, and the next stop is Gate B, after CP12 |
+| **Status** | **At Gate B** (2026-10-17). CP1–CP12 ✅. The owner decides on ADRs 0005–0009, spike S3's code and OQ-19 (status, "Next steps"). Gate A passed on 2026-10-17 |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only. Spike S3's code needs a separate go-ahead once its design is ready (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
@@ -111,7 +111,7 @@ Nothing is compiled or installed before Gate B. Each such fact names the command
 | 9 | [`docs/architecture/embedder-api.md`](../architecture/embedder-api.md) (F4, OQ-11) | CP9 |
 | 10 | [`docs/architecture/script-and-heap.md`](../architecture/script-and-heap.md) (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5), and spike S3's design in this tracker (§10) | CP10 |
 | 11 | [`docs/architecture/overview.md`](../architecture/overview.md): the architecture proposal v0 | CP11 |
-| 12 | ADRs, Proposed. Provisional set: 0005, IPC transport and interfaces; 0006, event loop and threading; 0007, frame tree, pipeline and invalidation; 0008, script, agents and heap (accepted after S3); 0009, engine/embedder API and shell. CP12 may regroup them, and Gate B reports any change | CP12 |
+| 12 | ADRs, Proposed: [0005](../adr/0005-ipc-transport-and-interfaces.md), IPC transport and interfaces; [0006](../adr/0006-event-loop-and-threading.md), event loop and threading; [0007](../adr/0007-frame-tree-pipeline-and-input.md), frame tree, pipeline, invalidation and input (regrouped to cover SI4 whole); [0008](../adr/0008-script-agents-and-heap.md), script, agents and heap (accepted after S3); [0009](../adr/0009-embedder-api-and-shell.md), engine/embedder API and shell | CP12 |
 | 13 | Updates to the decision map, open questions, indexes, status and spikes README | CP12, CP15 |
 | 14 | Spike S3, if authorized: code in `spikes/s3/`, scripts in `tools/`, results in `docs/research/s3-results.md` | CP13–CP15 |
 
@@ -170,7 +170,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | CP9 | Engine/embedder API and shell (F4, OQ-11) | ✅ 2026-10-17 (§11; [document](../architecture/embedder-api.md)) |
 | CP10 | Script, agents and heap (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5); spike S3's design | ✅ 2026-10-17 (§11; [document](../architecture/script-and-heap.md); S3 design §10) |
 | CP11 | Architecture overview v0, and the criteria check (§5) | ✅ 2026-10-17 (§11; [overview](../architecture/overview.md)) |
-| CP12 | Synthesis: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | |
+| CP12 | Synthesis: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-17 (§11). **Gate B:** the owner decides |
 | CP13 | **S3a**, if authorized: implementation and correctness | |
 | CP14 | **S3b:** measurements | |
 | CP15 | **S3c:** `docs/research/s3-results.md`; ADR-0008 updated; docs synthesis. **Gate C** | |
@@ -529,3 +529,21 @@ Every relative link resolves; the four standard checks pass.
 It also regroups the ADRs: ADR-0007 now covers the frame tree, pipeline, invalidation and input across frames (SI4 as a whole).
 
 Every relative link resolves; the four standard checks pass.
+
+### CP12 — completed 2026-10-17
+
+**ADRs written, all Proposed:**
+- [ADR-0005](../adr/0005-ipc-transport-and-interfaces.md): IPC; resolves OQ-17.
+- [ADR-0006](../adr/0006-event-loop-and-threading.md): event loop and threading, recording the clarification that an agent cluster never spans processes.
+- [ADR-0007](../adr/0007-frame-tree-pipeline-and-input.md): frame tree, pipeline, invalidation and input (SI4).
+- [ADR-0008](../adr/0008-script-agents-and-heap.md): script, agents and heap, recommended for acceptance after S3.
+- [ADR-0009](../adr/0009-embedder-api-and-shell.md): embedder API and shell; OQ-11.
+
+**Updates:**
+- [Decision map](../decision-map.md): F4, P1–P3 and part of P4 Proposed. F5 (IPC) added. F2 notes ADR-0008. §4's agent-cluster wording corrected. Step 4 marked as in review.
+- [Open questions](../open-questions.md): proposed resolutions for OQ-5, OQ-11, OQ-13 (design) and OQ-17. OQ-14 points to S3's design. **New:** OQ-19 (amend AC5 for lending) and OQ-20 (QoS on one-way Mach messages).
+- Indexes and status updated.
+
+Every relative link resolves; the four standard checks pass.
+
+**Gate B.** The owner decides, as listed with recommendations in [status](../status.md), "Next steps": the five ADRs; spike S3's code, with its optional parts and threshold; and OQ-19.
