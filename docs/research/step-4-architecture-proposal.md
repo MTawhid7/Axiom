@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **In progress.** CP1–CP10 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP11–CP12 run without pausing, and the next stop is Gate B, after CP12 |
+| **Status** | **In progress.** CP1–CP11 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP12 runs next, and the next stop is Gate B, after CP12 |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only. Spike S3's code needs a separate go-ahead once its design is ready (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
@@ -110,7 +110,7 @@ Nothing is compiled or installed before Gate B. Each such fact names the command
 | 8 | [`docs/architecture/input-and-accessibility.md`](../architecture/input-and-accessibility.md) (SI4) | CP8 |
 | 9 | [`docs/architecture/embedder-api.md`](../architecture/embedder-api.md) (F4, OQ-11) | CP9 |
 | 10 | [`docs/architecture/script-and-heap.md`](../architecture/script-and-heap.md) (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5), and spike S3's design in this tracker (§10) | CP10 |
-| 11 | `docs/architecture/overview.md`: the architecture proposal v0 | CP11 |
+| 11 | [`docs/architecture/overview.md`](../architecture/overview.md): the architecture proposal v0 | CP11 |
 | 12 | ADRs, Proposed. Provisional set: 0005, IPC transport and interfaces; 0006, event loop and threading; 0007, frame tree, pipeline and invalidation; 0008, script, agents and heap (accepted after S3); 0009, engine/embedder API and shell. CP12 may regroup them, and Gate B reports any change | CP12 |
 | 13 | Updates to the decision map, open questions, indexes, status and spikes README | CP12, CP15 |
 | 14 | Spike S3, if authorized: code in `spikes/s3/`, scripts in `tools/`, results in `docs/research/s3-results.md` | CP13–CP15 |
@@ -169,7 +169,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | CP8 | Input, focus, hit testing, scrolling and accessibility across frames (SI4) | ✅ 2026-10-17 (§11; [document](../architecture/input-and-accessibility.md)) |
 | CP9 | Engine/embedder API and shell (F4, OQ-11) | ✅ 2026-10-17 (§11; [document](../architecture/embedder-api.md)) |
 | CP10 | Script, agents and heap (OQ-5, OQ-13, OQ-14; ADR-0003 C1–C5); spike S3's design | ✅ 2026-10-17 (§11; [document](../architecture/script-and-heap.md); S3 design §10) |
-| CP11 | Architecture overview v0, and the criteria check (§5) | |
+| CP11 | Architecture overview v0, and the criteria check (§5) | ✅ 2026-10-17 (§11; [overview](../architecture/overview.md)) |
 | CP12 | Synthesis: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | |
 | CP13 | **S3a**, if authorized: implementation and correctness | |
 | CP14 | **S3b:** measurements | |
@@ -513,5 +513,19 @@ Every relative link resolves; the four standard checks pass.
   - **C4:** stop-the-world now; incremental marking in idle periods and a generational nursery later, ordered by corpus measurements.
   - **C5:** memory that reaches platform APIs lives outside the heap and never moves.
 - **Spike S3 design (§10):** three required questions (C1's root stack; rooting traffic in an interpreter; dispatch on stable Rust) and two optional ones (C2 layout; C3 barrier ceremony). It has `s3-gc` (a copy of S1's heap with an allowlisted `src/raw/` checked by Miri), `s3-vm` with a reference-evaluator oracle, and `s3-bench`. Pass criteria: ≤ 1.0 ns per root and per read, and rooting ≤ 10% of run time (a threshold for the owner to confirm).
+
+Every relative link resolves; the four standard checks pass.
+
+### CP11 — completed 2026-10-17
+
+[Architecture overview v0](../architecture/overview.md) written (**Proposed**). It has:
+- the system on one page;
+- a crate structure whose `unsafe` stays in `platform`, `gc`'s raw module, `jit` (later) and the shell's `platform` module;
+- five end-to-end scenarios traced through the rules: opening a URL, typing, scrolling across a cross-site iframe, forced layout, a renderer crash;
+- the criteria check, where **AC1–AC10 are all met**: AC3 and AC7 by design, with measurement to come, and AC5 as written, with the lending amendment left to Gate B;
+- the complete-model table (AC8);
+- the L0–L3 staging, in which L3 changes only process selection.
+
+It also regroups the ADRs: ADR-0007 now covers the frame tree, pipeline, invalidation and input across frames (SI4 as a whole).
 
 Every relative link resolves; the four standard checks pass.

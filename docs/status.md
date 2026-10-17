@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Phase Zero, Step 4: the architecture proposal v0** (event loop, threading, pipeline data model, invalidation, embedder API). Authorized on 2026-10-17 as design work. Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 3** (merged with `--no-ff`) and is pushed, at `da79e69` (2026-10-17). Step 4 runs on branch `step-4`, pushed to `origin` |
-| Current checkpoint | **Step 4: CP1–CP10 ✅; Gate A passed** (plan approved as written, 2026-10-17); CP11 next ([tracker](research/step-4-architecture-proposal.md)). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
+| Current checkpoint | **Step 4: CP1–CP11 ✅; Gate A passed** (plan approved as written, 2026-10-17); CP12 next ([tracker](research/step-4-architecture-proposal.md)). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3). S1 stays as the baseline for spike S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -71,6 +71,8 @@
 **CLAUDE.md and a link checker** (the owner's request, then "proceed with your recommendation"):
 - `CLAUDE.md` at the repository root holds the working instructions: session start, authorization and review gates, communication (every decision presented with a recommendation and rationale), documentation conventions, verification, code rules, git workflow, environment. It stays in the public repository.
 - `tools/check-doc-links.py` (standard-library Python) checks every relative Markdown link and anchor in the repository. It is now the fifth check before every commit.
+
+**CP11:** [architecture overview v0](architecture/overview.md) (Proposed): the system on one page, the crate structure and its `unsafe` map, five end-to-end scenarios, the criteria check (AC1–AC10 met), the complete-model table, and staging in which L3 changes only process selection.
 
 **CP10:** [script, agents and heap](architecture/script-and-heap.md) (Proposed): one heap per agent; copies, transfers and shared buffers between agents; script only in tasks and microtasks; the root set; C1–C5 resolved by design, with C1 left to spike S3, **whose design is in the [tracker](research/step-4-architecture-proposal.md) §10** for Gate B.
 
