@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Gate B passed** (2026-10-17). CP1–CP13 ✅. ADRs 0005–0007 and 0009 accepted; ADR-0008 pre-approved, pending S3-Q1 and S3-Q2; AC5 amended (OQ-19). **Spike S3:** CP14 (measurements) next, then CP15 and Gate C |
+| **Status** | **Gate B passed** (2026-10-17). CP1–CP14 ✅. ADRs 0005–0007 and 0009 accepted; ADR-0008 pre-approved, pending S3-Q1 and S3-Q2; AC5 amended (OQ-19). **Spike S3:** CP15 (results) next, then Gate C |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only, until Gate B. **Spike S3's code was authorized at Gate B** (2026-10-17): "Authorized for the full scope (questions S3-Q1 through S3-Q5 under spikes/s3/)" (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
@@ -178,7 +178,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | CP11 | Architecture overview v0, and the criteria check (§5) | ✅ 2026-10-17 (§11; [overview](../architecture/overview.md)) |
 | CP12 | Synthesis: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-17 (§11). **Gate B passed** 2026-10-17 |
 | CP13 | **S3a** (authorized at Gate B): implementation and correctness | ✅ 2026-10-18 (§11) |
-| CP14 | **S3b:** measurements | |
+| CP14 | **S3b:** measurements | ✅ 2026-10-18 (§11) |
 | CP15 | **S3c:** `docs/research/s3-results.md`; ADR-0008 updated; docs synthesis. **Gate C** | |
 | CP16 | Merge `step-4` into `main` (`--no-ff`), on the owner's instruction | |
 
@@ -619,3 +619,36 @@ Recorded in the ADRs, the design documents, the decision map, the open questions
 - S3-Q1's criterion stays as written: "measured the way `s1-probe roots` measured S1's stack". CP14 measures both formally.
 
 The four standard checks and the link check pass.
+
+### CP14 — completed 2026-10-18 (S3b: measurements)
+
+**Formal runs,** from the clean tree at `05185cb`, on AC power with Low Power Mode off, with no thermal warning before or after any run:
+
+| Run | Results (`target/`, not committed) |
+|---|---|
+| `tools/s3-bench.sh`: every suite, 3 process runs with 60 s cool-downs; `s3-count`; 3 nightly runs adding `become` | `s3-results/bench-20261018-005914` |
+| S1's own `dispatch` and `traverse` suites, for Pattern A in the same session | `s1-results/bench-20261018-010643`, `bench-20261018-010948` |
+| `tools/s3-profile.sh`: 39 profiles, 5 s each, at `11be3a7` (which changes only `samply-summary.py`) | `s3-results/profiles-20261018-011414` |
+| `tools/s3-ceremony.sh` | `s3-results/ceremony-20261018-002529` |
+
+**Two incidents:**
+- **A first formal run was discarded** (`bench-20261018-001555`). The Mac was on battery, where its settings turn on Low Power Mode (`pmset -g custom`). Every timing came out about 1.64 times slower, S1's own included (6.69 against 4.08 ns), and the shortest micro-benchmarks spread widely. The owner plugged in the charger, and the runs above repeated the full set.
+- **`samply-summary.py --share` crashed** on inlined frames that `atos` reports without a source path. Fixed in `11be3a7`; the profiles then ran in full.
+
+**Main results** (median of 3 run medians; spreads mostly ≤ 1%):
+- **S3-Q1.**
+  - C1's stack: frame 0.75 ns, **read 0.51 ns**, push by S1's method **2.03 ns**, push back to back 0.56 ns. S1's stack measured 4.08, 1.64, 2.05 and 0.90 ns in the same process.
+  - The safe `CellStack`: 0.53, 0.50, 2.32 and 0.86 ns.
+  - S1's dispatch case: 1,017 ns per dispatch on S1's Pattern B, 753 ns on the port with C1's stack, and 472 ns on Pattern A. C1 closes 47–48% of B's gap to A.
+- **S3-Q2.**
+  - Bytecode performs no root operations. W3's 650,146 are all in builtins, 650,124 of them reads.
+  - **Rooting takes 0.9–1.1% of W3's time on C1's stack** (profiles), and 8.1–9.0% on `RefCellStack`. W1, W2 and W4 spend 0%.
+- **S3-Q3.**
+  - Stable Rust: `match` 2.64 ns per instruction on W1. `table` and `threaded` are 33–65% slower wherever bytecode dominates.
+  - Nightly `become` is 5–22% faster than `match` built by the same compiler.
+- **S3-Q4.** One-based struct-of-arrays link columns: 5.1–6.5 ns per node in cache-friendly orders and 14.3 ns after random moves. That is faster than S1's Pattern B (8.0–9.4 and 40.4 ns) and Pattern A (6.5–8.5 and 44.3 ns) in every case.
+- **S3-Q5.**
+  - A setter without a barrier costs what a plain write does (1.26 against 1.28 ns). Card marking adds 0.03–0.05 ns per write, and 2.6–3.1% on S1's mutation case.
+  - Setters replace S1's 14 link writes one for one.
+
+The analysis is CP15's, in `docs/research/s3-results.md`. The four standard checks and the link check pass.

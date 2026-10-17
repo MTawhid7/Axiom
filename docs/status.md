@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Phase Zero, Step 4: Gate B passed; spike S3 in progress.** The decisions of the [architecture proposal v0](architecture/overview.md) are made: ADRs 0005–0007 and 0009 accepted, ADR-0008 pre-approved pending S3. Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 3** (merged with `--no-ff`) and is pushed, at `da79e69` (2026-10-17). Step 4 runs on branch `step-4`, pushed to `origin` |
-| Current checkpoint | **Step 4: CP1–CP13 ✅; Gate B passed; CP14 (spike S3b, measurements) next** ([tracker](research/step-4-architecture-proposal.md)). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
+| Current checkpoint | **Step 4: CP1–CP14 ✅; Gate B passed; CP15 (spike S3c, results) next** ([tracker](research/step-4-architecture-proposal.md)). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B. S1 stays as the baseline for S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -26,7 +26,7 @@
 
 Spike S3 is authorized for S3-Q1 to S3-Q5 ([tracker](research/step-4-architecture-proposal.md) §10), and runs without pausing until Gate C:
 1. **CP13 (S3a):** done. The crates `s3-gc`, `s3-vm` and `s3-bench` in `spikes/s3/`; the reference-evaluator oracle; Miri on the root stack's module.
-2. **CP14 (S3b):** formal measurements, from a clean tree: `tools/s3-bench.sh`, `tools/s3-profile.sh`, `tools/s3-ceremony.sh`.
+2. **CP14 (S3b):** done. Formal measurements from the clean tree, on AC power.
 3. **CP15 (S3c):** `docs/research/s3-results.md`. ADR-0008 moves to Accepted if S3-Q1 and S3-Q2 pass. Docs synthesis.
 
 **Then Gate C:** the owner reviews S3's results and ADR-0008, and decides on merging `step-4` into `main` (CP16). `step-4` stays pushed to `origin`.
@@ -49,6 +49,16 @@ Spike S3 is authorized for S3-Q1 to S3-Q5 ([tracker](research/step-4-architectur
 - **Correctness:** every workload and 34 edge-case programs match the reference evaluator on every technique, stack and pacing. Counted builds show bytecode performs zero root operations. A deliberately unrooted value fails the oracle. Miri finds no undefined behaviour under Stacked and Tree Borrows, on `s3-gc` and on the VM driving C1's stack with a collection at every allocation.
 - **Refinements:** a third, safe root stack (`CellStack`), to test whether C1 needs `unsafe` at all; the stack borrowed instead of `Rc`-shared; QoS left at the command-line default, as S1's was, because raising it needs FFI.
 - **Preliminary, not formal:** frames and reads meet C1's 1 ns target, but under S1's method a push costs about 2.0 ns on every stack. The method's barrier forces each push to reload the stack length the previous one stored (calibrated: 2.18 ns for any escaped counter). A supplementary back-to-back push probe was added. CP14 measures formally.
+
+**CP14 (spike S3b, completed 2026-10-18):** formal runs from the clean tree at `05185cb` ([tracker](research/step-4-architecture-proposal.md) §11).
+- **A first run was discarded:** on battery, Low Power Mode slowed every timing about 1.64 times. After the owner plugged in the charger, the full set ran on AC power. The repeat covered S3's suites with counts and nightly tail calls, S1's dispatch and traverse suites for Pattern A, the profiles, and the ceremony count.
+- **A tool fix:** `samply-summary.py --share` skipped inlined frames without a source path (`11be3a7`).
+- **Headlines:**
+  - C1 reads in 0.51 ns, but pushes in 2.03 ns by S1's method (0.56 ns back to back).
+  - Rooting is 0.9–1.1% of W3's time with C1's stack.
+  - `match` is the fastest dispatch on stable Rust; nightly `become` is 5–22% faster than it.
+  - Struct-of-arrays link columns traverse faster than both of S1's patterns.
+  - Setters are free without a barrier; card marking adds about 3%.
 
 ### 2026-10-17 — Session 6 (Step 4 kickoff)
 
