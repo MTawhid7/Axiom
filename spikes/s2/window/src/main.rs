@@ -31,8 +31,8 @@ use crate::platform::app::{App, Wait};
 use crate::platform::gpu::{CLEAR, Gpu, Readback, TEXT_COLOR};
 use crate::platform::text::{Coverage, rasterize_line};
 
-const TITLE: &str = "Arbor S2: CoreText on Metal";
-const TEXT: &str = "Arbor S2: CoreText → CGBitmapContext → Metal, without Xcode";
+const TITLE: &str = "Axiom S2: CoreText on Metal";
+const TEXT: &str = "Axiom S2: CoreText → CGBitmapContext → Metal, without Xcode";
 const FONT: &str = "Helvetica";
 const FONT_POINTS: f64 = 26.0;
 const WINDOW_POINTS: (f64, f64) = (960.0, 200.0);

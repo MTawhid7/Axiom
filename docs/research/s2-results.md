@@ -200,7 +200,7 @@ The thresholds are a proposal. If accepted at CP9, they resolve OQ-12.
 
 ---
 
-## 7. Implications for Arbor
+## 7. Implications for Axiom
 
 - **ADR-0002.** S2 raises no objection to Rust. The platform stack works without Xcode, through bindings that make most calls safe, with `unsafe` contained and documented. Its build cost is small once features are trimmed.
 - **OQ-11, a pure-Rust shell or a Swift layer.** The evidence supports pure Rust through objc2 for the window, rendering and text path. **Not tested:** accessibility (AccessKit), text input and IME (`NSTextInputClient`), menus, multiple windows, and an app bundle. Each is a candidate for a later, focused spike.

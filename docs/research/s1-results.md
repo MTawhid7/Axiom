@@ -375,7 +375,7 @@ The patterns differ in three confounded ways (tracker §4.4). Profiles and disas
 
 ---
 
-## 10. Implications for ADR-0002 and Arbor
+## 10. Implications for ADR-0002 and Axiom
 
 - **The ADR-0002 hypothesis holds.** A shared GC heap can be written in Rust with `unsafe` confined to one GC module (A), or with none at all (B), at measured, explainable cost. Revisit condition 1 does not trigger.
   - **Recommendation:** accept ADR-0002 at CP9, subject to S2.

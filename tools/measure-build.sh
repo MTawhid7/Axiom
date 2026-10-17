@@ -113,10 +113,10 @@ printf 'run\tphase\twall_s\trustc_n\trustc_max_mib\trustc_max_crate\tlink_n\tlin
 
 run_phase() { # run-index phase-name
   local tag="$1-$2" build_pid sampler_pid status wall rustc_n rustc_max rustc_crate link_n link_max peak_kib
-  export ARBOR_RUSTC_LOG="$run_dir/$tag.rustc.tsv"
-  export ARBOR_LINK_LOG="$run_dir/$tag.link.tsv"
-  : >"$ARBOR_RUSTC_LOG"
-  : >"$ARBOR_LINK_LOG"
+  export AXIOM_RUSTC_LOG="$run_dir/$tag.rustc.tsv"
+  export AXIOM_LINK_LOG="$run_dir/$tag.link.tsv"
+  : >"$AXIOM_RUSTC_LOG"
+  : >"$AXIOM_LINK_LOG"
 
   # shellcheck disable=SC2086 # word splitting of cargo_args is intended
   /usr/bin/time -l -o "$run_dir/$tag.cargo.time" cargo $cargo_args >"$run_dir/$tag.cargo.log" 2>&1 &
@@ -128,11 +128,11 @@ run_phase() { # run-index phase-name
   wait "$sampler_pid"
 
   wall=$(awk '/ real / { print $1 }' "$run_dir/$tag.cargo.time")
-  rustc_n=$(wc -l <"$ARBOR_RUSTC_LOG" | tr -d ' ')
-  rustc_max=$(sort -t "$(printf '\t')" -k4,4n "$ARBOR_RUSTC_LOG" | tail -1 | cut -f4)
-  rustc_crate=$(sort -t "$(printf '\t')" -k4,4n "$ARBOR_RUSTC_LOG" | tail -1 | cut -f1)
-  link_n=$(wc -l <"$ARBOR_LINK_LOG" | tr -d ' ')
-  link_max=$(sort -t "$(printf '\t')" -k3,3n "$ARBOR_LINK_LOG" | tail -1 | cut -f3)
+  rustc_n=$(wc -l <"$AXIOM_RUSTC_LOG" | tr -d ' ')
+  rustc_max=$(sort -t "$(printf '\t')" -k4,4n "$AXIOM_RUSTC_LOG" | tail -1 | cut -f4)
+  rustc_crate=$(sort -t "$(printf '\t')" -k4,4n "$AXIOM_RUSTC_LOG" | tail -1 | cut -f1)
+  link_n=$(wc -l <"$AXIOM_LINK_LOG" | tr -d ' ')
+  link_max=$(sort -t "$(printf '\t')" -k3,3n "$AXIOM_LINK_LOG" | tail -1 | cut -f3)
   peak_kib=$(cat "$run_dir/$tag.peak")
   printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$1" "$2" "$wall" "$rustc_n" \
     "$(mib "${rustc_max:-0}")" "${rustc_crate:--}" "$link_n" "$(mib "${link_max:-0}")" \

@@ -310,7 +310,7 @@ mod tests {
     #[test]
     fn shaders_compile_and_text_uploads() {
         let mut gpu = Gpu::new().expect("a Metal device, and shaders that compile");
-        let mask = rasterize_line("Arbor", "Helvetica", 32.0).expect("CoreText is available");
+        let mask = rasterize_line("Axiom", "Helvetica", 32.0).expect("CoreText is available");
         gpu.set_text(&mask).expect("the mask uploads");
         let text = gpu.text.as_ref().expect("a text texture");
         assert_eq!((text.width, text.height), (mask.width, mask.height));

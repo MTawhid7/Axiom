@@ -45,7 +45,7 @@ Each question was presented with its alternatives and trade-offs. Claude's recom
 1. **R1. Target.** The architecture must be able to reach the **full modern app web**: Docs, Figma and YouTube-class applications.
    - This is a *reachability* requirement, not a milestone order.
    - Milestones still begin with static documents.
-2. **R2. JavaScript.** Arbor will have **its own JavaScript engine**. The JS engine joins the core we implement ourselves.
+2. **R2. JavaScript.** Axiom will have **its own JavaScript engine**. The JS engine joins the core we implement ourselves.
 3. **R3. Security.** The architecture must be able to reach a posture suitable for **sensitive logins**: email, banking, and accounts with write access.
    - That means process isolation, sandboxing, and eventually site isolation.
    - Sensitive use is **gated** until the isolation milestone is verified.

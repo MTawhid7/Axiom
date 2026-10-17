@@ -1,4 +1,4 @@
-# Arbor workspace.
+# Axiom workspace.
 #
 # Phase Zero, Step 2b: only validation spikes live here (spikes/, throwaway).
 # Engine crates will live under crates/ once the architecture is approved;

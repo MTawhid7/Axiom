@@ -7,7 +7,7 @@
 | Item | State |
 |---|---|
 | Phase | **Phase Zero. Step 3 is next**: threat model, trust boundaries, and the macOS process and sandbox model. Step 2b (validation spikes) is complete. Production engine code is **not** authorized |
-| Repository | git, local only. `main` includes Step 2b (merged 2026-10-17). The `step-2b` branch is kept |
+| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. `main` includes Step 2b (merged 2026-10-17). The `step-2b` branch is kept |
 | Current checkpoint | Step 2b complete (CP1–CP9 ✅; [tracker](research/step-2b-validation-spikes.md)). Step 3 not started |
 | Code | Spike code only, under `spikes/`; it stays as the baseline for spike S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. The spikes' verified results are in the [S1 results](research/s1-results.md) and [S2 results](research/s2-results.md) |
@@ -19,7 +19,7 @@
 
 **Step 3 is design work** under the Phase Zero rule: documents only. Code, including spikes, needs a specific authorization.
 
-**Goal.** Decide what Arbor protects, from whom, and where the trust boundaries lie. Then decide how processes are split and how each is confined on macOS, so that compromising one renderer exposes neither credentials, nor other sites' data, nor the file system (ADR-0001 R3).
+**Goal.** Decide what Axiom protects, from whom, and where the trust boundaries lie. Then decide how processes are split and how each is confined on macOS, so that compromising one renderer exposes neither credentials, nor other sites' data, nor the file system (ADR-0001 R3).
 
 **Inputs**
 - **ADR-0001:**
@@ -60,6 +60,18 @@
 **Housekeeping.** Step 3 starts on a new branch, `step-3`, merged after the owner's review, as in Step 2b.
 
 ## Session log
+
+### 2026-10-17 — Session 4 (renamed to Axiom)
+
+**Owner input:** the project is renamed from Arbor to **Axiom**, including its folder on disk. The owner created the GitHub repository <https://github.com/MTawhid7/Axiom>.
+
+**Done**
+- Every reference in the repository now uses the new name: the docs, the workspace manifest, the S2 window's title, drawn text and tests, and the build-measurement scripts, whose log variables are now `AXIOM_RUSTC_LOG` and `AXIOM_LINK_LOG`.
+- Earlier commits are unchanged, so their files still use the old name.
+- The project folder moved from `~/Documents/Arbor` to `~/Documents/Axiom`.
+- The GitHub repository is the remote `origin`. `main` and `step-2b` are pushed to it.
+
+**Verified:** the four standard checks pass, and the S2 smoke test passes with the new text.
 
 ### 2026-10-17 — Session 3 (CP7)
 

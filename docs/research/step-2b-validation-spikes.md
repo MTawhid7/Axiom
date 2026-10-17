@@ -121,7 +121,7 @@ The experiment was a minimal three-crate workspace, built in the scratchpad.
 ## 5. Workspace structure
 
 ```
-Arbor/
+Axiom/
 ├── Cargo.toml              virtual workspace: shared package metadata, lints, profiles
 ├── Cargo.lock              committed (benchmarks and measurements must be reproducible)
 ├── rust-toolchain.toml     pinned stable 1.94.1 (+ rustfmt, clippy); Miri uses +nightly

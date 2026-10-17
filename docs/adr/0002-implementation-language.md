@@ -21,7 +21,7 @@
 
 ## Question
 
-What language should Arbor be written in? This covers the browser shell, the engine, our own JavaScript engine (with its GC and any future JIT), and the macOS platform layer.
+What language should Axiom be written in? This covers the browser shell, the engine, our own JavaScript engine (with its GC and any future JIT), and the macOS platform layer.
 
 ## Requirements and constraints
 
@@ -45,7 +45,7 @@ Excluded, with reasons given in the evaluation (§6.5): languages with their own
 
 ## Decision
 
-**Rust for all Arbor code**, using the stable toolchain and the 2024 edition. A strict policy confines `unsafe` to designated crates:
+**Rust for all Axiom code**, using the stable toolchain and the 2024 edition. A strict policy confines `unsafe` to designated crates:
 - `gc`;
 - `jit`, later;
 - `platform`;
@@ -58,7 +58,7 @@ Parsers, network policy and IPC message decoding contain no `unsafe` at all. The
 1. **Security.**
    - About 70% of Chromium's high-severity security bugs are memory-safety bugs.
    - Android cut the memory-safety share of its vulnerabilities from 76% to 24% (2019–2024), mainly by writing new code in memory-safe languages.
-   - All of Arbor's code is new.
+   - All of Axiom's code is new.
 2. **Parallelism and multiple agents.** Rust checks for data races at compile time. Mozilla built Firefox's parallel style system in Rust after two failed C++ attempts.
 3. **Our own JS engine.** This is Rust's weakest criterion, and the choice accepts it deliberately:
    - viable designs exist (gc-arena, Nova, Brimstone, Boa);
@@ -68,7 +68,7 @@ Parsers, network policy and IPC message decoding contain no `unsafe` at all. The
 4. **Tooling and ecosystem.**
    - The tools work without Xcode: `samply`, `cargo-fuzz`, Miri.
    - Several candidate libraries are already proven in Chromium and Firefox.
-5. **Platform.** `objc2` and C FFI cover what Arbor needs. Swift's advantage is ergonomic, not a capability we would otherwise lack.
+5. **Platform.** `objc2` and C FFI cover what Axiom needs. Swift's advantage is ergonomic, not a capability we would otherwise lack.
 6. **Corroboration.** Ladybird adopted Rust in 2026 despite the same concern about GC and inheritance.
 
 **Weighted matrix (/500):** Rust **432**, C++ 376, Swift 331, Zig 286. C++ overtakes Rust only if one of two things happens:

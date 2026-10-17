@@ -1,4 +1,4 @@
-# Arbor
+# Axiom
 
 A browser engine designed from first principles for personal use on macOS (Apple Silicon).
 

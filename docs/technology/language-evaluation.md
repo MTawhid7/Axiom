@@ -40,17 +40,17 @@
 
 **The argument in brief.**
 
-1. **The security posture rules out C++ and Zig as the default.** Arbor must be safe enough for sensitive logins ([ADR-0001](../adr/0001-scope-and-target.md) R3).
+1. **The security posture rules out C++ and Zig as the default.** Axiom must be safe enough for sensitive logins ([ADR-0001](../adr/0001-scope-and-target.md) R3).
    - Memory-unsafe code is the dominant source of severe vulnerabilities in the best-studied browser codebase: about 70% of Chromium's high-severity security bugs [1].
    - The most effective known remedy is writing *new* code in memory-safe languages. Android cut memory-safety bugs from 76% to 24% of its vulnerabilities between 2019 and 2024, mainly by doing that [2].
-   - All of Arbor's code is new, so C++ and Zig would need some other large advantage to compensate.
-2. **The JS engine requirement is Rust's weak spot, but working designs exist.** Arbor will run its own JS engine, and that engine's garbage collector also manages the DOM (ADR-0001 R2). This is C++'s home ground. Rust already has three working approaches, each with known costs (§7):
+   - All of Axiom's code is new, so C++ and Zig would need some other large advantage to compensate.
+2. **The JS engine requirement is Rust's weak spot, but working designs exist.** Axiom will run its own JS engine, and that engine's garbage collector also manages the DOM (ADR-0001 R2). This is C++'s home ground. Rust already has three working approaches, each with known costs (§7):
    - sound but restrictive: `gc-arena`, used in production by Ruffle;
    - checked by the borrow checker but verbose: Nova;
    - unsafe but contained: Brimstone, which passes over 97% of test262's language tests.
 
    The cost is real and bounded. It falls on one layer (GC, DOM, bindings), not on parsers, networking, style, layout or inter-process communication (IPC).
-3. **The app-web target needs parallelism, and Rust checks data races at compile time.** Arbor must eventually run parallel and multi-agent: workers, `SharedArrayBuffer`, parallel style and layout (R1).
+3. **The app-web target needs parallelism, and Rust checks data races at compile time.** Axiom must eventually run parallel and multi-agent: workers, `SharedArrayBuffer`, parallel style and layout (R1).
    - Rust's compile-time data-race checking is the strongest available.
    - Mozilla parallelized its style system in Rust after two failed attempts in C++ [4].
 4. **Swift is safe and Apple-native, but fits a GC heap poorly.**
@@ -73,7 +73,7 @@ The matrix analysis (§14) shows exactly which combination of weakened assumptio
 
 ## 2. The question, and why it is foundational
 
-**Question:** In which language or languages will Arbor be written? That covers the browser engine, its JavaScript engine, and its macOS shell.
+**Question:** In which language or languages will Axiom be written? That covers the browser engine, its JavaScript engine, and its macOS shell.
 
 **The cost of reversal is not only a rewrite.** A language fixes the system's *invariants*: how objects refer to each other, how memory is reclaimed, how threads share data, and where unsafe code lives. Each candidate pushes toward different answers:
 - Rust: handles and explicit ownership.
@@ -260,7 +260,7 @@ Each criterion is scored from 1 (poor) to 5 (excellent). The maximum weighted to
 
 ### 7.1 The problem
 
-ADR-0001 commits Arbor to one tracing GC heap holding both JS objects and DOM nodes, the same model Ladybird uses. That has consequences in any language.
+ADR-0001 commits Axiom to one tracing GC heap holding both JS objects and DOM nodes, the same model Ladybird uses. That has consequences in any language.
 
 **The graph is cyclic and shared.** Typical edges:
 - node ⇄ parent and children;
@@ -344,7 +344,7 @@ ADR-0001 commits Arbor to one tracing GC heap holding both JS objects and DOM no
 - **Swift needs unsafe code for the whole heap.** ARC manages class instances, not a tracing heap (§6.3). **Inference:** the heap layer would be `UnsafeMutableRawPointer` code. The DOM could not be idiomatic Swift classes without bringing back the reference-counting and wrapper complexity (WebKit's opaque roots) that ADR-0001's unified heap is meant to avoid.
 - **Zig is natural to write but checks nothing.** Manual memory management and `comptime` layouts make a GC straightforward to write, but nothing protects the references. Kiesel uses Boehm's conservative collector instead of its own [19].
 
-### 7.5 What this means for Arbor
+### 7.5 What this means for Axiom
 
 The following are **inferences, to be validated by S1**:
 
@@ -368,7 +368,7 @@ The following are **inferences, to be validated by S1**:
 
 ## 8. Interpreter and JIT
 
-Arbor's JS engine starts as a bytecode interpreter, with any JIT gated behind isolation (ADR-0001, consequence 4).
+Axiom's JS engine starts as a bytecode interpreter, with any JIT gated behind isolation (ADR-0001, consequence 4).
 
 **Interpreter dispatch** differs by language:
 
@@ -407,7 +407,7 @@ Arbor's JS engine starts as a bytecode interpreter, with any JIT gated behind is
 | NSAccessibility | AccessKit's `accesskit_macos` adapter [41] or our own objc2 code | Objective-C++ | Native | Manual |
 
 **Inference:**
-- Most of the platform surface Arbor needs is a C or Objective-C API.
+- Most of the platform surface Axiom needs is a C or Objective-C API.
 - Swift's advantage is ergonomics, not capability.
 - If the AppKit shell later grows complex (preferences, menus, rich UI chrome), a thin Swift shell is a contained, later option (§13).
 
@@ -415,7 +415,7 @@ Arbor's JS engine starts as a bytecode interpreter, with any JIT gated behind is
 
 ## 10. Concurrency and parallelism
 
-What Arbor will need:
+What Axiom will need:
 - parallel style computation (Stylo-like);
 - parallel layout, which LayoutNG's immutable fragments make possible [48];
 - one JS heap per agent, on worker threads;
@@ -528,7 +528,7 @@ Scores run from 1 to 5. The weighted total is out of 500.
 
 ### 15.1 Decision (proposed)
 
-**Rust** (stable toolchain, 2024 edition) for all Arbor code:
+**Rust** (stable toolchain, 2024 edition) for all Axiom code:
 - the browser shell;
 - the engine;
 - the JavaScript engine, including its GC and any future JIT;
@@ -546,7 +546,7 @@ The nightly toolchain is allowed only for development tools (fuzzing, Miri, sani
    - generated code absorbs the ceremony;
    - S1 validates the approach before acceptance.
 4. **Tooling and ecosystem (C6, C7).** The tools work without Xcode, and key supporting libraries are proven in Chromium and Firefox.
-5. **Platform (C5).** `objc2` and C FFI cover what Arbor needs. Swift's advantage is ergonomic, not a capability we would otherwise lack.
+5. **Platform (C5).** `objc2` and C FFI cover what Axiom needs. Swift's advantage is ergonomic, not a capability we would otherwise lack.
 6. **Independent corroboration.** Ladybird reached the same conclusion in 2026 despite raising the same GC and inheritance concern [5], [6].
 
 ### 15.3 Unsafe-code policy (draft; finalized with the architecture)

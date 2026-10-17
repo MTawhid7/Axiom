@@ -17,7 +17,7 @@
 
 ## Question
 
-How does Arbor's code refer to objects in the garbage-collected heap that JavaScript and the DOM share, and how does it keep them alive and correct across collections? The answer fixes:
+How does Axiom's code refer to objects in the garbage-collected heap that JavaScript and the DOM share, and how does it keep them alive and correct across collections? The answer fixes:
 - the type of a heap reference;
 - where collections may happen;
 - how references held by native (Rust) code survive a collection;

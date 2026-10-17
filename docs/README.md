@@ -1,6 +1,6 @@
-# Arbor — Design Documentation
+# Axiom — Design Documentation
 
-Arbor is a from-first-principles browser engine for personal use on macOS. **The project is in Phase Zero: research, requirements and architecture.**
+Axiom is a from-first-principles browser engine for personal use on macOS. **The project is in Phase Zero: research, requirements and architecture.**
 - **Authorized:** the Step 2b validation spikes in `spikes/`, which are throwaway code.
 - **Not yet authorized:** production engine code.
 

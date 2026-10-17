@@ -109,7 +109,7 @@ mod tests {
     /// CoreText needs no window, so this runs under `cargo test`.
     #[test]
     fn a_line_rasterizes_to_a_plausible_mask() {
-        let mask = rasterize_line("Arbor", "Helvetica", 40.0).expect("CoreText is available");
+        let mask = rasterize_line("Axiom", "Helvetica", 40.0).expect("CoreText is available");
         assert_eq!(mask.pixels.len(), mask.width * mask.height);
         // Five glyphs at 40 px: roughly 100 px wide and 40–60 px tall.
         assert!((60..200).contains(&mask.width), "width {}", mask.width);

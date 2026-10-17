@@ -46,7 +46,7 @@ This folder holds research notes on design history, modern alternatives, and exp
 ## Background and history
 ## Current state (with dates)
 ## Analysis (labelled fact / inference / hypothesis)
-## Implications for Arbor
+## Implications for Axiom
 ## Open questions
 ## Sources
 ```
