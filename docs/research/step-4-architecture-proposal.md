@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **In progress.** CP1–CP2 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP3–CP12 run without pausing, and the next stop is Gate B, after CP12 |
+| **Status** | **In progress.** CP1–CP3 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP4–CP12 run without pausing, and the next stop is Gate B, after CP12 |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only. Spike S3's code needs a separate go-ahead once its design is ready (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
@@ -102,7 +102,7 @@ Nothing is compiled or installed before Gate B. Each such fact names the command
 |---|---|---|
 | 1 | This plan and tracker | CP1 |
 | 2 | [`docs/research/macos-runtime-facilities.md`](macos-runtime-facilities.md), a research note on the macOS facilities the runtime needs, with observations of this Mac | CP2 |
-| 3 | `docs/architecture/event-loop-and-threading.md` (P1) | CP3 |
+| 3 | [`docs/architecture/event-loop-and-threading.md`](../architecture/event-loop-and-threading.md) (P1) | CP3 |
 | 4 | `docs/architecture/ipc.md` (OQ-17) | CP4 |
 | 5 | `docs/architecture/frame-tree-and-navigation.md` (SI4) | CP5 |
 | 6 | `docs/architecture/rendering-pipeline.md` (P2, part of P4) | CP6 |
@@ -161,7 +161,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 |---|---|---|
 | **CP1** | This plan; branch `step-4`; the owner's decisions recorded | ✅ 2026-10-17 (§11). **Gate A passed:** approved as written |
 | CP2 | Research note: macOS facilities for the runtime | ✅ 2026-10-17 (§11; [note](macos-runtime-facilities.md)) |
-| CP3 | Event loop and threading model (P1) | |
+| CP3 | Event loop and threading model (P1) | ✅ 2026-10-17 (§11; [document](../architecture/event-loop-and-threading.md)) |
 | CP4 | IPC: transport and interface definitions (OQ-17) | |
 | CP5 | Frame tree, navigation and loading (SI4) | |
 | CP6 | Rendering pipeline: data model, per-frame display lists, compositing, strings (P2, part of P4) | |
@@ -350,3 +350,27 @@ Written at CP10 (§6.1).
 - 16 implications for CP3–CP10, and five open questions.
 
 Every relative link resolves; the four standard checks pass, with the code unchanged.
+
+### Between CP2 and CP3 — 2026-10-17
+
+At the owner's request, `CLAUDE.md` was written as the project's working instructions, with the rule that every decision put to the owner carries a recommendation and its rationale. On the owner's approval ("proceed with your recommendation"), `tools/check-doc-links.py` was added as the fifth check before every commit, and `CLAUDE.md` stays in the public repository.
+
+### CP3 — completed 2026-10-17
+
+[Event loop and threading model](../architecture/event-loop-and-threading.md) written (**Proposed**; rules EL1–EL24), from the HTML and ECMAScript specifications, Apple's run-loop and QoS guidance, XNU's scheduler documentation, and Chromium, Firefox, WebKit, Ladybird and Servo. Main proposals:
+- **One wait per thread:** helper threads in one `kevent64` call; AppKit's main thread and the compositor in their run loops, with engine sources in the common modes on the main thread.
+- **Endpoints bound to threads,** with no intermediate I/O thread.
+- **Browser threads:** main (AppKit only), **core** (frame tree, navigation, process management, policy), compositor (display links, frame scheduling, compositing), and a worker pool.
+- **Renderers: one thread per event loop,** with a heap each, plus a control thread and a helper pool that never touches a heap. Servo's script threads are the closest precedent.
+- **Task selection:** discrete input, then a due rendering update, then other tasks oldest first, then idle work. Continuous input is coalesced into the next frame, as Chrome has done since 2017.
+- **Frames:** the browser's compositor owns a paused-when-idle display link per window, offers frames only to subscribed event loops (one outstanding offer each), and never waits for a renderer.
+- **Throttling** starts from Chrome's tested levels and covers whole agent clusters, as ECMAScript requires. QoS follows visibility, using public interfaces only.
+- **Clarification:** "one agent cluster per process" (decision map §4, ADR-0004) means that an agent cluster never spans processes. A renderer may host several clusters of its own site. CP12 brings the decision map's wording into line.
+
+**Housekeeping: a flaky check.** The first test run after a session restart failed once.
+- Its totals traced the failure to `s4-sandbox`'s unit tests. Sixty repeated runs reproduced it once, in `this_process_has_a_plausible_footprint`.
+- The test asserted that the lifetime-maximum footprint is at least the current one. A single `proc_pid_rusage` call doesn't snapshot both counters together, and the maximum trailed by one 16 KiB page, about once in 75 runs.
+- The assertion now checks only the maximum's scale. Afterwards there were no failures in 150 runs. This maintains S4's authorized test suite, in its own commit.
+- S4's reported footprints are unaffected (inference): a lag of one page in the peak is negligible beside MiB-scale results.
+
+Every relative link resolves; the four standard checks pass.
