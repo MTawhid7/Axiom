@@ -174,7 +174,7 @@ tools/check-unsafe-policy.sh
 | CP5 | Pattern B heap; Miri | ✅ 2026-10-16 (§8) |
 | CP6 | Pattern B DOM and driver; oracle equality; A ≡ B differential | ✅ 2026-10-16 (§8) |
 | CP7 | S1 measurements (runtime, ceremony, build) and S1 results note | ✅ 2026-10-17 (§8; [S1 results](s1-results.md)) |
-| CP8 | S2 platform spike, measurements, and S2 results note | ⬜ |
+| CP8 | S2 platform spike, measurements, and S2 results note | 🔄 8a ✅ (window, Metal, CoreText, smoke oracle, tests, measurement script); 8b measurements; 8c results note |
 | CP9 | Synthesis: ADR-0002 final recommendation; ADR-0003 (GC pattern) proposed; docs | ⬜ |
 
 ### CP1 — Foundation
@@ -323,6 +323,14 @@ tools/check-unsafe-policy.sh
 - `cargo run -p s2-window -- --smoke` exits 0.
 - The owner checks the window visually.
 - Policy check passes, with `unsafe` confined to platform modules.
+
+**Sub-steps** (each committed with the four standard checks green):
+
+| Step | Content | Status |
+|---|---|---|
+| 8a | `s2-window`: AppKit window; `CAMetalLayer`; a Metal pipeline compiled from MSL at run time; CoreText → `CGBitmapContext` → texture → quad; `--smoke` with an exact pixel oracle; unit tests; `tools/s2-measure.sh` | ✅ |
+| 8b | Formal runs: `tools/s2-measure.sh`; `tools/measure-build.sh` in dev and release, with minimal and full bindings | ⬜ |
+| 8c | `docs/research/s2-results.md` | ⬜ |
 
 ### CP9 — Synthesis
 
@@ -737,3 +745,48 @@ Line-level profiles attribute B's remaining dispatch gap to root-stack traffic: 
 | Recommendation | Pattern B for ADR-0003, conditionally (C1–C5), medium confidence. New open questions OQ-13 to OQ-15 |
 
 **Verification:** the four standard checks are green (§6). `s1-bench` gained the `roots` module and a test for it.
+
+### CP8 — in progress (8a completed 2026-10-17)
+
+**8a delivered: `s2-window`**
+- **Allowlist.** Registered in `tools/unsafe-policy.txt`: `src/main.rs` is `#![deny(unsafe_code)]`, and `unsafe` is allowed only in `src/platform/`, under invariants P1–P6 (`platform/mod.rs`).
+- **AppKit.** `NSApplication` and an `NSWindow`, created through objc2 0.6.5 and its framework crates 0.3.2.
+  - The content view is layer-hosting, with a `CAMetalLayer` (BGRA8, `framebufferOnly = false` so it can be read back).
+  - The event loop is pumped by hand (`nextEventMatchingMask:…`) and blocks when there is nothing to draw.
+- **Metal.** The device, the queue, and a render pipeline whose MSL source is compiled at run time (`newLibraryWithSource:…`). The quad's corners come from `vertex_id`; blending is premultiplied alpha.
+- **CoreText.** A `CTLine` is rasterized by CoreGraphics into an 8-bit coverage mask in a Rust-owned buffer, uploaded as an `R8Unorm` texture, and drawn 1:1 in pixels.
+- **`--smoke`.** It draws 3 frames, blits the last presented drawable into a shared buffer, and checks:
+  - the background, exactly;
+  - no ink outside the text box;
+  - the number of ink pixels inside the box against the count predicted from the coverage mask by the blending formula.
+
+  The first run matched exactly: 19,052 of 19,052 pixels.
+- **Tests:** 6, under `cargo test`, with no window needed:
+  - argument parsing and centring;
+  - the oracle accepting a correct frame;
+  - the oracle rejecting stray ink, missing text, and misplaced text;
+  - CoreText rasterization;
+  - device creation, MSL compilation, pipeline creation and texture upload.
+- **Dependencies.**
+  - objc2's framework crates compile every header by default: AppKit alone enables 307 features and pulls in CloudKit, CoreData, CoreImage, CoreVideo and IOSurface bindings.
+  - The workspace turns defaults off; `s2-window` enables only what it uses.
+  - A `full-bindings` feature restores the defaults, so both configurations can be measured.
+- **`tools/s2-measure.sh`:** binary size; smoke runs with the app's timings plus `/usr/bin/time -l`; idle runs sampled with `top` (CPU, idle wakeups, energy impact, footprint) and `ps`.
+
+**`unsafe` inventory: 19 blocks, every one with a `// SAFETY:` comment**
+
+| Kind | Blocks | Invariant |
+|---|---|---|
+| Raw pointers into Rust memory (texture upload, vertex bytes, bitmap context, out-parameters, null font matrix) | 6 | P2 |
+| Reading a shared GPU buffer | 1 | P3 |
+| GPU bounds (indexed subscripts, binding resources, draw, blit, texture descriptor) | 6 | P4, P5 |
+| Window ownership (`initWithContentRect…`, `setReleasedWhenClosed`) | 2 | P1 |
+| Extern statics (`NSDefaultRunLoopMode`, CoreText attribute keys) | 2 | P6 |
+| CoreFoundation and CoreText functions the bindings mark `unsafe` without a pointer argument | 2 | Documented per call |
+
+**Findings so far**
+1. **There is no offline Metal compiler without Xcode.** `xcrun -f metal` fails with only the Command Line Tools installed. Shaders must be compiled from MSL source at run time, and the OS caches the result.
+   - The first compile after a build took about 0.5 s.
+   - Later runs had the device and shaders ready about 75 ms after `main` starts.
+2. **CoreText draws black unless told otherwise.** The context's fill colour is used only when `kCTForegroundColorFromContextAttributeName` is set. The smoke oracle caught the empty mask on the first run.
+3. **A layer-hosted Metal view needs no subclass and no Objective-C class definitions** (`define_class!`). Without one, live resizing stretches the last frame until the mouse is released; that is acceptable for a spike, and it is noted.

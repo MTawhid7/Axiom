@@ -1,0 +1,89 @@
+[package]
+name = "s2-window"
+description = "Spike S2: an AppKit window whose CAMetalLayer shows CoreText-rendered text through a Metal pipeline compiled at run time, without Xcode. unsafe only in src/platform/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+objc2.workspace = true
+objc2-foundation = { workspace = true, features = [
+    "NSDate",
+    "NSError",
+    "NSGeometry",
+    "NSObjCRuntime",
+    "NSRunLoop",
+    "NSString",
+] }
+objc2-app-kit = { workspace = true, features = [
+    "NSApplication",
+    "NSEvent",
+    "NSGraphics",
+    "NSResponder",
+    "NSRunningApplication",
+    "NSView",
+    "NSWindow",
+    "objc2-core-foundation",
+    "objc2-quartz-core",
+] }
+objc2-quartz-core = { workspace = true, features = [
+    "CALayer",
+    "CAMetalLayer",
+    "objc2-core-foundation",
+    "objc2-metal",
+] }
+objc2-metal = { workspace = true, features = [
+    "MTLAllocation",
+    "MTLBlitCommandEncoder",
+    "MTLBuffer",
+    "MTLCommandBuffer",
+    "MTLCommandEncoder",
+    "MTLCommandQueue",
+    "MTLDevice",
+    "MTLDrawable",
+    "MTLLibrary",
+    "MTLPixelFormat",
+    "MTLRenderCommandEncoder",
+    "MTLRenderPass",
+    "MTLRenderPipeline",
+    "MTLResource",
+    "MTLTexture",
+    "MTLTypes",
+] }
+objc2-core-text = { workspace = true, features = [
+    "CTFont",
+    "CTLine",
+    "CTStringAttributes",
+    "objc2-core-graphics",
+] }
+objc2-core-graphics = { workspace = true, features = [
+    "CGBitmapContext",
+    "CGColorSpace",
+    "CGContext",
+    "CGImage",
+] }
+objc2-core-foundation = { workspace = true, features = [
+    "CFAttributedString",
+    "CFCGTypes",
+    "CFDictionary",
+    "CFNumber",
+    "CFString",
+] }
+
+
+[features]
+# Measurement switch for S2-Q6: compile every framework header, as the objc2
+# crates do by default, instead of only the headers this spike uses.
+full-bindings = [
+    "objc2-app-kit/default",
+    "objc2-core-foundation/default",
+    "objc2-core-graphics/default",
+    "objc2-core-text/default",
+    "objc2-foundation/default",
+    "objc2-metal/default",
+    "objc2-quartz-core/default",
+]
+
+[lints]
+workspace = true

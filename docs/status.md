@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Phase Zero, Step 2b: validation spikes** (authorized 2026-10-16). Production engine code is **not** authorized |
 | Repository | git. `main` = reviewed baseline (`a223fe2`); work in progress on branch **`step-2b`** |
-| Current checkpoint | CP1–CP7 ✅ done: **S1 is complete**; see the [S1 results](research/s1-results.md). **Next: CP8**, the S2 platform spike (objc2 AppKit + Metal + CoreText); see the [Step 2b tracker](research/step-2b-validation-spikes.md#6-checkpoints) |
+| Current checkpoint | CP1–CP7 ✅ done: **S1 is complete**; see the [S1 results](research/s1-results.md). **CP8 in progress**: 8a ✅ (the S2 window draws CoreText through Metal; the smoke oracle passes). **Next: 8b**, the formal measurements, then 8c, the S2 results note; see the [Step 2b tracker](research/step-2b-validation-spikes.md#6-checkpoints) |
 | Code | Spike code only, under `spikes/` (throwaway). Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike verification results are in the tracker's §8. S1's findings and recommendation (Pattern B for ADR-0003, conditionally) are in the [S1 results](research/s1-results.md) |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -48,6 +48,13 @@
 - [S1 results](research/s1-results.md) written. Its recommendation for ADR-0003 is Pattern B (Nova style), conditional on C1–C5, with medium confidence.
 - New open questions OQ-13 to OQ-15.
 - Design facts checked against current sources: gc-arena (intrusive list, incremental, barriers), piccolo (stackless because of gc-arena) and Nova (`stack_refs` is a `RefCell<Vec>`).
+
+**CP8a completed** (S2 window):
+- `s2-window` draws CoreText through a Metal pipeline whose shaders are compiled from source at run time, in an AppKit window, with no Xcode.
+- 19 `unsafe` blocks, all in `src/platform/`, under P1–P6.
+- The smoke oracle matches the predicted ink pixel for pixel.
+- Six tests run under `cargo test` without a window.
+- The Command Line Tools have no offline Metal compiler.
 
 **Decisions waiting for the owner** (at CP9):
 - S1-Q2: is the ceremony acceptable?

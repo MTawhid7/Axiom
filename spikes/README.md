@@ -5,7 +5,7 @@ This directory holds validation experiments for [ADR-0002](../docs/adr/0002-impl
 | Spike | Question | Crates |
 |---|---|---|
 | S1 | Can a GC heap shared by JS and the DOM keep `unsafe` inside the GC boundary, with acceptable ceremony and cost? Pattern A (gc-arena style) against Pattern B (Nova style) | `s1/*` |
-| S2 | objc2 AppKit + Metal + CoreText without Xcode: ergonomics, `unsafe` surface, build cost | `s2/*` (from CP8) |
+| S2 | objc2 AppKit + Metal + CoreText without Xcode: ergonomics, `unsafe` surface, build cost | `s2/window` |
 
 ## Rules
 
@@ -22,7 +22,7 @@ This directory holds validation experiments for [ADR-0002](../docs/adr/0002-impl
   ```
 
 - **Build measurements:** `tools/measure-build.sh --help`.
-- **S1 runtime measurements** (CP7). Each script prints its usage with `--help`, and writes its results under `target/s1-results/`.
+- **Runtime measurements** (CP7 and CP8). Each script prints its usage with `--help`, and writes its results under `target/s1-results/`.
 
   | Script | Measures |
   |---|---|
@@ -30,5 +30,6 @@ This directory holds validation experiments for [ADR-0002](../docs/adr/0002-impl
   | `tools/s1-memory.sh` | Peak footprint, maximum RSS and instructions retired per scenario, one fresh process per measurement; bytes per live node |
   | `tools/s1-profile.sh` | `samply` CPU profiles per case, summarized to functions and source lines by `tools/samply-summary.py` |
   | `tools/s1-ceremony.sh` | GC-API tokens and code size of the two DOM crates (S1-Q2) |
+  | `tools/s2-measure.sh` | S2: binary size, time to first frame, and idle CPU, wakeups, energy impact and memory of `s2-window` |
 
-  `cargo bench -p s1-bench` runs one pass of the runtime suites.
+  `cargo bench -p s1-bench` runs one pass of the S1 runtime suites. `cargo run -p s2-window -- --smoke` checks the S2 window's rendering (it opens a window briefly).

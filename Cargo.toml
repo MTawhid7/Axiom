@@ -6,7 +6,7 @@
 
 [workspace]
 resolver = "3"
-members = ["spikes/s1/*"]
+members = ["spikes/s1/*", "spikes/s2/*"]
 
 [workspace.package]
 version = "0.0.0"
@@ -29,6 +29,19 @@ s1-b-dom = { path = "spikes/s1/b-dom" }
 proc-macro2 = "1"
 quote = "1"
 syn = { version = "2", default-features = false, features = ["clone-impls", "derive", "parsing", "printing", "proc-macro"] }
+# - objc2 and its framework crates: the maintained Rust bindings to AppKit,
+#   Metal, QuartzCore, CoreText, CoreGraphics and CoreFoundation. Spike S2
+#   evaluates exactly these (evaluation §9, §13). Their default features
+#   compile every framework header, so defaults are off here and each member
+#   enables only the headers it uses. Build cost is measured in CP8.
+objc2 = "0.6.5"
+objc2-foundation = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-app-kit = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-quartz-core = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-metal = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-core-text = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-core-graphics = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-core-foundation = { version = "0.3.2", default-features = false, features = ["std"] }
 
 [workspace.lints.rust]
 # `unsafe_code` is set per crate root, with #![forbid] by default and #![deny] for
