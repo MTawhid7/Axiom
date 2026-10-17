@@ -38,9 +38,9 @@ Nothing was compiled or installed. Each such fact names the command or file it c
 
 | ID | Question | Answered in |
 |---|---|---|
-| Q1 | What does Axiom protect, and from whom? | Threat model (`docs/security/threat-model.md`) §3–§4 |
-| Q2 | Where are the trust boundaries? | Threat model §6 |
-| Q3 | When may Axiom be used for sensitive logins? | Threat model §8 (security levels and the gate) |
+| Q1 | What does Axiom protect, and from whom? | [Threat model](../security/threat-model.md) §3–§4 |
+| Q2 | Where are the trust boundaries? | [Threat model](../security/threat-model.md) §6 |
+| Q3 | When may Axiom be used for sensitive logins? | [Threat model](../security/threat-model.md) §8 (security levels and the gate) |
 | Q4 | Which processes exist, and what may each one do? | Process model (`docs/security/process-model.md`) §3–§4 |
 | Q5 | How is each process confined on macOS, with the Command Line Tools only and no paid developer account? | macOS confinement note (`docs/research/macos-process-confinement.md`); ADR-0004 |
 | Q6 | Which rules govern IPC between processes of different trust? | Process model §6 |
@@ -58,14 +58,14 @@ Nothing was compiled or installed. Each such fact names the command or file it c
 ## 5. Checkpoints
 
 **Every checkpoint ends with:**
-- every relative link in `docs/` resolving to an existing file;
+- every relative link in `docs/` resolving to an existing file. Forward links to this step's own planned documents (§4) are allowed until they are written, and must all resolve by CP5;
 - the four standard checks still green (no code changes, so they must stay green): `cargo fmt --all --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, `tools/check-unsafe-policy.sh`;
 - a commit on `step-3` and an update to this tracker.
 
 | CP | Scope | Status |
 |---|---|---|
 | **CP1** | This plan; branch `step-3` | ✅ 2026-10-17 (§7) |
-| CP2 | Threat model: assets, adversaries, attack surfaces, trust boundaries, goals and non-goals, security levels | Not started |
+| CP2 | Threat model: assets, adversaries, attack surfaces, trust boundaries, goals and non-goals, security levels | ✅ 2026-10-17 (§7; [threat model](../security/threat-model.md)) |
 | CP3 | Research note: process confinement on macOS, browser precedents, observations on this machine; spike S4 design | Not started |
 | CP4 | Process model: process types and privileges, site isolation policy, IPC trust rules, memory budgets, staging | Not started |
 | CP5 | Synthesis: ADR-0004 (Proposed) with the JIT policy; decision map, open questions, indexes, status; branch ready for review | Not started |
@@ -83,3 +83,15 @@ Nothing was compiled or installed. Each such fact names the command or file it c
 - Branch `step-3` created from `main` at `33df346`.
 - This plan written.
 - The four standard checks pass unchanged (recorded at commit time).
+
+### CP2 — completed 2026-10-17
+
+[Threat model](../security/threat-model.md) written:
+- assumptions TA1–TA5, including that Apple's complex-format parsers are not trusted with untrusted input in a privileged process;
+- assets AS1–AS9 and adversaries AD1–AD4, with the compromised renderer (AD2) treated as an expected case;
+- attack surfaces mapped to the process that must handle each;
+- trust boundaries TB1–TB7 and trust zones Z0–Z4;
+- goals SG1–SG12 and non-goals NG1–NG8;
+- security levels L0–L3. The sensitive-use gate (L3) requires checks V1–V8.
+
+New question raised: OQ-16, WebAuthn and passkeys without a paid developer account.
