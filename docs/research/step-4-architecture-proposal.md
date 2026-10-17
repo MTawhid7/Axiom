@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **In progress.** CP1 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP2–CP12 run without pausing, and the next stop is Gate B, after CP12 |
+| **Status** | **In progress.** CP1–CP2 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP3–CP12 run without pausing, and the next stop is Gate B, after CP12 |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only. Spike S3's code needs a separate go-ahead once its design is ready (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
@@ -101,7 +101,7 @@ Nothing is compiled or installed before Gate B. Each such fact names the command
 | # | Deliverable | Checkpoint |
 |---|---|---|
 | 1 | This plan and tracker | CP1 |
-| 2 | `docs/research/macos-runtime-facilities.md`, a research note on the macOS facilities the runtime needs, with observations of this Mac | CP2 |
+| 2 | [`docs/research/macos-runtime-facilities.md`](macos-runtime-facilities.md), a research note on the macOS facilities the runtime needs, with observations of this Mac | CP2 |
 | 3 | `docs/architecture/event-loop-and-threading.md` (P1) | CP3 |
 | 4 | `docs/architecture/ipc.md` (OQ-17) | CP4 |
 | 5 | `docs/architecture/frame-tree-and-navigation.md` (SI4) | CP5 |
@@ -160,7 +160,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | CP | Scope | Status |
 |---|---|---|
 | **CP1** | This plan; branch `step-4`; the owner's decisions recorded | ✅ 2026-10-17 (§11). **Gate A passed:** approved as written |
-| CP2 | Research note: macOS facilities for the runtime | |
+| CP2 | Research note: macOS facilities for the runtime | ✅ 2026-10-17 (§11; [note](macos-runtime-facilities.md)) |
 | CP3 | Event loop and threading model (P1) | |
 | CP4 | IPC: transport and interface definitions (OQ-17) | |
 | CP5 | Frame tree, navigation and loading (SI4) | |
@@ -338,3 +338,15 @@ Written at CP10 (§6.1).
 - Step 5's list in the [decision map](../decision-map.md) §5 now names "HTML parsing and DOM" and "JavaScript engine and bindings", as the owner instructed.
 - Cadence: CP2–CP12 run without pausing. Gate B, after CP12, covers ADRs 0005–0009 and the authorization of S3's code together.
 - `step-4` pushed to `origin`, as the owner authorized.
+
+### CP2 — completed 2026-10-17
+
+[macOS runtime note](macos-runtime-facilities.md) written, from SDK 27 headers, `sysctl`, `system_profiler`, the imports of Chrome Canary 158 and Tor Browser 16.0a11, and the Chromium, Firefox, WebKit and Ladybird sources. Main findings:
+- **Frame clock.** `CVDisplayLink` is deprecated since macOS 15. Its replacement, `CADisplayLink`, comes only from `NSView`, `NSWindow` or `NSScreen`, so renderers can't have one. The browser owns the frame clock and sends frame signals, as WebKit's UI process does with `DisplayDidRefresh`. Chromium needs a private function to create a display link outside AppKit.
+- **Waiting.** Helpers can wait on Mach messages, timers and descriptors in one `kevent64` call, receiving the message in the same call. The browser's engine sources go in the run loop's common modes, as Firefox and WebKit do.
+- **Priority.** Mach messages can carry the sender's QoS and importance (a new input to OQ-17). Apple says background work is "more likely" to run on the efficiency cores, not that it always does.
+- **Surfaces.** IOSurfaces cross only as Mach ports. Since macOS 14.4 a surface's memory can be charged to another task (hypothesis: useful for per-renderer accounting).
+- **IME and accessibility** are synchronous queries on the browser's main thread, so the browser answers them from state it holds. Chromium instead blocks its UI thread for up to 1.5 s on the renderer.
+- 16 implications for CP3–CP10, and five open questions.
+
+Every relative link resolves; the four standard checks pass, with the code unchanged.
