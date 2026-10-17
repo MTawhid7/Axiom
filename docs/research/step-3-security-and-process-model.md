@@ -41,10 +41,10 @@ Nothing was compiled or installed. Each such fact names the command or file it c
 | Q1 | What does Axiom protect, and from whom? | [Threat model](../security/threat-model.md) §3–§4 |
 | Q2 | Where are the trust boundaries? | [Threat model](../security/threat-model.md) §6 |
 | Q3 | When may Axiom be used for sensitive logins? | [Threat model](../security/threat-model.md) §8 (security levels and the gate) |
-| Q4 | Which processes exist, and what may each one do? | Process model (`docs/security/process-model.md`) §3–§4 |
+| Q4 | Which processes exist, and what may each one do? | [Process model](../security/process-model.md) §3–§4 |
 | Q5 | How is each process confined on macOS, with the Command Line Tools only and no paid developer account? | [macOS confinement note](macos-process-confinement.md); ADR-0004 |
-| Q6 | Which rules govern IPC between processes of different trust? | Process model §6 |
-| Q7 | How much memory may each process use on 8 GB, and how many processes may run? | Process model §7 |
+| Q6 | Which rules govern IPC between processes of different trust? | [Process model](../security/process-model.md) §6 |
+| Q7 | How much memory may each process use on 8 GB, and how many processes may run? | [Process model](../security/process-model.md) §7 |
 | Q8 | JIT policy (OQ-4): under what conditions may a JIT exist, and where is it off? | ADR-0004 |
 
 ## 4. Deliverables
@@ -67,7 +67,7 @@ Nothing was compiled or installed. Each such fact names the command or file it c
 | **CP1** | This plan; branch `step-3` | ✅ 2026-10-17 (§7) |
 | CP2 | Threat model: assets, adversaries, attack surfaces, trust boundaries, goals and non-goals, security levels | ✅ 2026-10-17 (§7; [threat model](../security/threat-model.md)) |
 | CP3 | Research note: process confinement on macOS, browser precedents, observations on this machine; spike S4 design | ✅ 2026-10-17 (§7; [note](macos-process-confinement.md)) |
-| CP4 | Process model: process types and privileges, site isolation policy, IPC trust rules, memory budgets, staging | Not started |
+| CP4 | Process model: process types and privileges, site isolation policy, IPC trust rules, memory budgets, staging | ✅ 2026-10-17 (§7; [process model](../security/process-model.md)) |
 | CP5 | Synthesis: ADR-0004 (Proposed) with the JIT policy; decision map, open questions, indexes, status; branch ready for review | Not started |
 
 ## 6. Method
@@ -108,3 +108,13 @@ New question raised: OQ-16, WebAuthn and passkeys without a paid developer accou
 Recommendation for ADR-0004: helpers launched with `posix_spawn` that apply their own deny-by-default profile first (option O1); the browser process unsandboxed but hardened. Spike S4 (Q1–Q6) is designed in §7 of the note and needs the owner's authorization.
 
 Correction during review: WebKit's XPC services don't carry the hardened-runtime flag. They are platform binaries with library validation only (`codesign -dv`).
+
+### CP4 — completed 2026-10-17
+
+[Process model](../security/process-model.md) written:
+- principles PM1–PM8, including the Rule of 2 adapted to Axiom;
+- five process types (browser, renderer, network, GPU, utility), with an OS-capability matrix and a Rule of 2 placement table;
+- site isolation rules SI1–SI7. Cross-site iframes stay in the embedder's process until out-of-process iframes exist, under three compensating rules (partitioned third-party state, ORB, no sensitive site in another site's process);
+- IPC requirements R1–R6 and trust rules IR1–IR10;
+- memory targets B1–B7, based on S2, the 1 MB process floor, and the Site Isolation paper's measurements;
+- lifecycle, and staging by security level L0–L3.
