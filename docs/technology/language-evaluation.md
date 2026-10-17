@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | Reviewed by the owner (2026-10-16); §15.3 amended with rule 7; Step 2b evidence added (2026-10-17) |
-| **Decision record** | [ADR-0002](../adr/0002-implementation-language.md), Provisionally accepted; final acceptance recommended after Step 2b |
+| **Decision record** | [ADR-0002](../adr/0002-implementation-language.md), **Accepted** (final, 2026-10-17) |
 | **Phase** | Phase Zero, Step 2a |
 | **Inputs** | [ADR-0001](../adr/0001-scope-and-target.md) (scope and target), [decision map](../decision-map.md) |
 | **Last updated** | 2026-10-17 |

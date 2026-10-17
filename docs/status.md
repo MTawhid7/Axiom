@@ -6,20 +6,58 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero, Step 2b: validation spikes** (authorized 2026-10-16). Production engine code is **not** authorized |
-| Repository | git. `main` = reviewed baseline (`a223fe2`); work in progress on branch **`step-2b`** |
-| Current checkpoint | CP1–CP8 ✅ done; **CP9 synthesis written**, awaiting the owner's review. Documents: [S1 results](research/s1-results.md), [S2 results](research/s2-results.md), [ADR-0002](adr/0002-implementation-language.md) (final acceptance recommended), [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md) (Proposed). **Next: the owner's decisions** (listed below), then the merge of `step-2b` into `main` |
-| Code | Spike code only, under `spikes/` (throwaway). Tooling under `tools/` |
-| Verified capabilities | None at engine level. Spike verification results are in the tracker's §8. S1's findings and recommendation (Pattern B for ADR-0003, conditionally) are in the [S1 results](research/s1-results.md) |
+| Phase | **Phase Zero. Step 3 is next**: threat model, trust boundaries, and the macOS process and sandbox model. Step 2b (validation spikes) is complete. Production engine code is **not** authorized |
+| Repository | git, local only. `main` includes Step 2b (merged 2026-10-17). The `step-2b` branch is kept |
+| Current checkpoint | Step 2b complete (CP1–CP9 ✅; [tracker](research/step-2b-validation-spikes.md)). Step 3 not started |
+| Code | Spike code only, under `spikes/`; it stays as the baseline for spike S3. Tooling under `tools/` |
+| Verified capabilities | None at engine level. The spikes' verified results are in the [S1 results](research/s1-results.md) and [S2 results](research/s2-results.md) |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
-| Provisionally accepted | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition). S1 and S2 are complete; final acceptance is recommended |
-| Proposed | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 |
+| | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final** (2026-10-17), with build thresholds T1–T4 |
+| | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 (2026-10-17) |
 
-## Next steps
+## Next steps: Step 3, the threat model, trust boundaries, and the macOS process and sandbox model
 
-1. **Owner review.** Read the [S1 results](research/s1-results.md), the [S2 results](research/s2-results.md), [ADR-0002](adr/0002-implementation-language.md) and [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md), then make the decisions listed in the session log below.
-2. **After the decisions:** record them in the ADRs and open questions, then merge `step-2b` into `main`.
-3. **Then Phase Zero resumes** with Step 3 (threat model and security boundaries), as the [decision map](decision-map.md) sequences it. ADR-0003's obligations C1–C5 feed Step 4 (architecture).
+**Step 3 is design work** under the Phase Zero rule: documents only. Code, including spikes, needs a specific authorization.
+
+**Goal.** Decide what Arbor protects, from whom, and where the trust boundaries lie. Then decide how processes are split and how each is confined on macOS, so that compromising one renderer exposes neither credentials, nor other sites' data, nor the file system (ADR-0001 R3).
+
+**Inputs**
+- **ADR-0001:**
+  - R3, a security posture fit for sensitive logins, with process isolation, a sandbox and site isolation reachable;
+  - the JIT policy: interpreter first, and a JIT only after isolation and the sandbox exist;
+  - the defaults: single user, no extensions and no sync.
+- **ADR-0002:** the `unsafe` policy. Parsers, network policy and IPC message decoding contain no `unsafe`.
+- **ADR-0003:** one single-threaded GC heap per agent; obligation C5, native interop.
+- **S2:**
+  - the objc2 platform layer works;
+  - an event-driven loop costs nothing when idle;
+  - an idle window process with a Metal device has a footprint of about 20 MB, a first data point for per-process budgets.
+- **Charter G4:** memory budgets per process on the 8 GB machine.
+- **Open questions:** OQ-4 (JIT policy, due at Step 3), OQ-5 (per-agent heaps and workers), OQ-11 (the shell).
+
+**Proposed deliverables**
+1. `docs/security/threat-model.md`:
+   - assets;
+   - adversaries: malicious content, a compromised renderer, a network attacker;
+   - attack surfaces;
+   - security goals and non-goals.
+2. `docs/security/process-model.md`:
+   - the process split, for example browser, per-site renderers, network, GPU and decoders;
+   - what each process may do;
+   - the IPC trust rules;
+   - memory budgets per process on 8 GB.
+3. A research note on confining processes on macOS with the Command Line Tools and no paid developer account. It surveys, from primary sources:
+   - App Sandbox and entitlements, and ad-hoc code signing;
+   - the Seatbelt (`sandbox_init`) profiles that Chromium and WebKit use;
+   - the hardened runtime;
+   - the JIT entitlement and `MAP_JIT`;
+   - XPC against `posix_spawn` with Mach ports.
+4. **ADR-0004: process model and sandbox** (Proposed).
+5. A decision on OQ-4 (JIT policy), or a sharper version of it.
+
+**Likely spike, which needs authorization.** S4 would launch a sandboxed helper process from a Rust app bundle built with the Command Line Tools only. It would check that the sandbox denies file and network access, and measure the per-process overhead.
+
+**Housekeeping.** Step 3 starts on a new branch, `step-3`, merged after the owner's review, as in Step 2b.
 
 ## Session log
 
@@ -68,14 +106,15 @@
 - The language evaluation has dated Step 2b notes.
 - The decision map, open questions and indexes are updated.
 
-**Decisions waiting for the owner** (to close CP9):
-1. S1-Q2: is the ceremony acceptable?
-2. ADR-0002: accept Rust as final?
-3. ADR-0003: accept, amend or reject Pattern B?
-4. OQ-12: accept thresholds T1–T4?
-5. OQ-15: should S3 become required?
-6. Visual check of the S2 window (`cargo run -p s2-window`).
-7. Merge `step-2b` into `main`.
+**The owner's decisions (2026-10-17)** close Step 2b:
+1. S1-Q2: Pattern B's ceremony is acceptable.
+2. ADR-0002 is **accepted as final**.
+3. ADR-0003 is **accepted as proposed**: Pattern B, with obligations C1–C5.
+4. Thresholds T1–T4 are accepted (OQ-12 resolved).
+5. S3 is a **required** benchmark, run in Step 4 (OQ-15 resolved).
+6. The S2 smoke test and the owner's visual check are satisfactory.
+
+**Recorded and merged.** The decisions are recorded in ADR-0002, ADR-0003, the open questions, the decision map, the indexes and the tracker. `step-2b` was merged into `main` with a merge commit (`--no-ff`), which keeps Step 2b's history together.
 
 **Verified**
 - `samply` works on this machine without Xcode, including line-level attribution through `dsymutil` and `atos` (Command Line Tools).

@@ -2,10 +2,18 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-17). Only the owner can accept it |
+| **Status** | **Accepted** (2026-10-17), as proposed, with obligations C1–C5 |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner |
 | **Related** | [S1 results](../research/s1-results.md) (all evidence), [Step 2b tracker](../research/step-2b-validation-spikes.md), [ADR-0001](0001-scope-and-target.md) (R2, R3), [ADR-0002](0002-implementation-language.md), [language evaluation](../technology/language-evaluation.md) §7, §15.3 |
+
+## Decision history
+
+| Date | Event |
+|---|---|
+| 2026-10-17 | Proposed after spike S1 (Step 2b, CP9) |
+| 2026-10-17 | **Owner accepts it as proposed**: Pattern B, with obligations C1–C5. On ceremony (S1-Q2): "Nova's lexical ceremony (scope tokens, bind/unbind) is acceptable. It is checked by the compiler and far preferable to the architectural burden of turning the JS interpreter and DOM dispatch into resumable state machines under gc-arena." |
+| 2026-10-17 | **Owner makes spike S3 a required benchmark**, to run during Step 4 as part of the interpreter and root-stack design. It validates obligation C1 (OQ-15) |
 
 ## Question
 
@@ -59,7 +67,7 @@ The full data and its attribution are in [S1 results](../research/s1-results.md)
 - [S1 results](../research/s1-results.md). It reports measurements over 3 process runs, per-process memory and instruction counts, line-level profiles and disassembly, and the ceremony counts. Sources 1–4 there cover gc-arena, piccolo and Nova.
 - Tracker §8, CP3–CP7: correctness evidence, including oracle equality on every workload, A ≡ B, and Miri.
 
-## Decision (recommendation, pending the owner)
+## Decision
 
 **Adopt Pattern B, the Nova style, for the JS and DOM heap:**
 - typed arenas addressed by `u32` handles;
@@ -72,7 +80,7 @@ It comes with the **obligations** C1–C5 below. Each is settled during the arch
 
 | # | Obligation | Validation |
 |---|---|---|
-| C1 | **Cheaper rooting:** at most about 1 ns per root and per read, against 2.05 and 1.58 ns measured. **Hypothesis:** a root stack without `RefCell` borrow tracking (an `UnsafeCell`-based stack in an allowlisted module, as gc-arena does for its gray queue), with 8-byte slots | `s1-probe roots` and the dispatch suite; an interpreter-shaped benchmark (OQ-14, OQ-15) |
+| C1 | **Cheaper rooting:** at most about 1 ns per root and per read, against 2.05 and 1.58 ns measured. **Hypothesis:** a root stack without `RefCell` borrow tracking (an `UnsafeCell`-based stack in an allowlisted module, as gc-arena does for its gray queue), with 8-byte slots | **Spike S3** (required; runs in Step 4 with the interpreter and root-stack design). Also `s1-probe roots` and the dispatch suite (OQ-14) |
 | C2 | **No index arithmetic on hot dependent loads.** Power-of-two strides, or struct-of-arrays `u32` link columns, so the scaling folds into the load's addressing mode | The `traverse` suite on the new layout |
 | C3 | **A write-barrier API** for fields that hold handles, designed before any incremental or generational collector, so the type system enforces it | Recount S1-Q2's ceremony tokens with the barrier added (OQ-13) |
 | C4 | **A pause budget**, and a plan for incremental or generational collection. The stop-the-world pause is about 4 ms at 130k live nodes and 15 ms at 333k objects | The performance section (Step 6); measurement on a recorded corpus of real pages |
@@ -90,7 +98,7 @@ It comes with the **obligations** C1–C5 below. Each is settled during the arch
 
 ## Assumptions
 
-- **Most rooting traffic comes from native builtins, not from bytecode execution** (inference). An interpreter's value stack and registers are roots traced as a whole; per-value `scope`/`get` is needed only where Rust code holds values across a call that may allocate. S1 measured the worst case, a builtin holding every listener of every visited node. The validation is an interpreter-shaped benchmark (C1, OQ-15).
+- **Most rooting traffic comes from native builtins, not from bytecode execution** (inference). An interpreter's value stack and registers are roots traced as a whole; per-value `scope`/`get` is needed only where Rust code holds values across a call that may allocate. S1 measured the worst case, a builtin holding every listener of every visited node. Spike S3 validates this in Step 4 (C1).
 - **A barrier API can be added for incremental or generational collection** without approaching A's write ceremony (C3).
 - **Heaps are per agent and single-threaded.** B's root stack (`Rc<RefCell<…>>`) is deliberately not `Send`.
 - **`u32` handles per arena are enough** for one agent's heap: about 4 billion objects of each type.
@@ -99,7 +107,7 @@ It comes with the **obligations** C1–C5 below. Each is settled during the arch
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Root traffic dominates interpreter-heavy workloads | Medium | High | C1; an interpreter design that keeps live values in rooted VM state; S3-style measurement |
+| Root traffic dominates interpreter-heavy workloads | Medium | High | C1; an interpreter design that keeps live values in rooted VM state; spike S3 in Step 4 |
 | Barriers for incremental or generational GC add write ceremony | Medium | Medium | Design C3 early, with the ceremony recounted |
 | Stop-the-world pauses on large heaps | High (for large apps) | Medium | C4: a pause budget, then a generational nursery or incremental marking |
 | A "use after GC" (stale handle) reaches a release build | Medium | High (logic errors in a security boundary) | Compile-time scope discipline; debug epochs in tests and fuzzing; consider a generation check in release builds (Nova notes spare handle bits) |
@@ -111,7 +119,7 @@ It comes with the **obligations** C1–C5 below. Each is settled during the arch
 
 - **C1 fails.** Rooting stays well above 1 ns per operation and dominates an interpreter-shaped workload.
 - **C3 makes B's writes as ceremonious as A's, *and* a JS-engine design emerges in which only a small, fixed set of re-entry points must be resumable.** Together, these would remove A's main architectural cost.
-- **The owner judges B's lexical ceremony unacceptable** (S1-Q2 is the owner's judgment).
+- **Real engine code shows the lexical ceremony to be much heavier than S1's.** The owner judged S1's ceremony acceptable on 2026-10-17.
 - **Agents need to share GC handles across threads.**
 
 ## Consequences
@@ -120,4 +128,7 @@ It comes with the **obligations** C1–C5 below. Each is settled during the arch
 - **Builtins, the DOM and the bindings are ordinary Rust functions.** WebIDL code generation emits the handle and rooting glue mechanically (evaluation §7.5).
 - **The GC crate's `unsafe` boundary is small or empty.** The S1 prototype needed none. C1 may add a small audited root-stack module, registered in `tools/unsafe-policy.txt`.
 - **ADR-0002's assumption about GC references is confirmed.** This ADR becomes the GC section's constraint in the architecture (Step 4).
-- **Open questions:** OQ-13 (incremental or generational strategy), OQ-14 (root stack) and OQ-15 (S3) track C1, C3 and C4.
+- **Follow-up work:**
+  - OQ-13 (incremental or generational strategy) tracks C3 and C4.
+  - OQ-14 (root-stack design) tracks C1.
+  - Spike S3, required in Step 4, validates C1.

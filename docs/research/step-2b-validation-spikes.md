@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Status** | In progress |
+| **Status** | **Complete** (2026-10-17) |
 | **Authorized** | 2026-10-16, by the owner |
-| **Branch** | `step-2b`. It is merged into `main` only after owner review at CP9 |
+| **Branch** | `step-2b`, merged into `main` on 2026-10-17 after the owner's review |
 | **Feeds** | [ADR-0002](../adr/0002-implementation-language.md) final acceptance; a future ADR-0003 on the GC handle/rooting pattern |
 | **Last updated** | 2026-10-17 |
 
@@ -175,7 +175,7 @@ tools/check-unsafe-policy.sh
 | CP6 | Pattern B DOM and driver; oracle equality; A ≡ B differential | ✅ 2026-10-16 (§8) |
 | CP7 | S1 measurements (runtime, ceremony, build) and S1 results note | ✅ 2026-10-17 (§8; [S1 results](s1-results.md)) |
 | CP8 | S2 platform spike, measurements, and S2 results note | ✅ 2026-10-17 (§8; [S2 results](s2-results.md)); the owner's visual check is pending |
-| CP9 | Synthesis: ADR-0002 final recommendation; ADR-0003 (GC pattern) proposed; docs | 🔄 Synthesis written (2026-10-17); owner review, decisions and merge pending |
+| CP9 | Synthesis: ADR-0002 final recommendation; ADR-0003 (GC pattern) proposed; docs | ✅ 2026-10-17: owner decisions recorded (§8); merged into `main` |
 
 ### CP1 — Foundation
 
@@ -810,7 +810,7 @@ Line-level profiles attribute B's remaining dispatch gap to root-stack traffic: 
 
 **Pending:** the owner's visual check of the window (`cargo run -p s2-window`).
 
-### CP9 — synthesis written 2026-10-17; owner review pending
+### CP9 — completed 2026-10-17
 
 **Prepared for the owner:**
 - **[ADR-0002](../adr/0002-implementation-language.md)** gains a Step 2b evidence table: every assumption holds, and revisit condition 1 did not trigger. It recommends **final acceptance** and links the proposed build thresholds T1–T4 to revisit condition 3. Its status stays *Provisionally accepted* until the owner confirms.
@@ -826,3 +826,15 @@ Line-level profiles attribute B's remaining dispatch gap to root-stack traffic: 
 5. Should S3 become required (OQ-15)?
 6. Visual check of the S2 window (`cargo run -p s2-window`).
 7. Merge `step-2b` into `main`.
+
+**The owner's decisions (2026-10-17):**
+1. **S1-Q2: the ceremony is acceptable.** "Nova's lexical ceremony (scope tokens, bind/unbind) is acceptable. It is checked by the compiler and far preferable to the architectural burden of turning the JS interpreter and DOM dispatch into resumable state machines under gc-arena."
+2. **ADR-0002 is accepted as final.** "The S1 and S2 evidence conclusively validates the Rust hypothesis."
+3. **ADR-0003 is accepted as proposed:** Pattern B (Nova style), with obligations C1–C5.
+4. **Thresholds T1–T4 are accepted** (OQ-12), as the meaning of ADR-0002 revisit condition 3.
+5. **S3 is a required benchmark** (OQ-15). It runs during Step 4 as part of the interpreter and root-stack design, and validates C1.
+6. **The S2 smoke test and the owner's visual check are satisfactory.**
+
+ADR-0002, ADR-0003, the open questions, the decision map and the indexes record these decisions. `step-2b` was then merged into `main`.
+
+**Spike code.** It stays in the tree for now. The S1 Pattern B prototype, its benchmarks and `s1-probe roots` are the baseline that spike S3 and obligation C1 will be measured against.

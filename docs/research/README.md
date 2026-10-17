@@ -56,6 +56,6 @@ This folder holds research notes on design history, modern alternatives, and exp
 | Note | Topic | Status |
 |---|---|---|
 | [Language evaluation](../technology/language-evaluation.md) | Implementation language. Kept under `technology/` because it is a technology evaluation; §7 doubles as the research note on GC and DOM memory models | Reviewed |
-| [Step 2b validation spikes](step-2b-validation-spikes.md) | Plan, design and checkpoint tracker for S1 (GC/DOM heap patterns) and S2 (platform and build) | In progress |
-| [S1 results](s1-results.md) | GC heap patterns for a shared JS and DOM heap: `unsafe` containment, ceremony, runtime, memory, build cost; recommendation for ADR-0003 | Draft |
-| [S2 results](s2-results.md) | AppKit, Metal and CoreText through objc2 without Xcode: `unsafe` surface, build and run-time cost; proposed build thresholds for ADR-0002 | Draft |
+| [Step 2b validation spikes](step-2b-validation-spikes.md) | Plan, design and checkpoint tracker for S1 (GC/DOM heap patterns) and S2 (platform and build) | Complete (2026-10-17) |
+| [S1 results](s1-results.md) | GC heap patterns for a shared JS and DOM heap: `unsafe` containment, ceremony, runtime, memory, build cost; recommendation for ADR-0003 | Reviewed (2026-10-17) |
+| [S2 results](s2-results.md) | AppKit, Metal and CoreText through objc2 without Xcode: `unsafe` surface, build and run-time cost; proposed build thresholds for ADR-0002 | Reviewed (2026-10-17) |
