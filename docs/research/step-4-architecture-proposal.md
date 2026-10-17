@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **In progress.** CP1–CP3 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP4–CP12 run without pausing, and the next stop is Gate B, after CP12 |
+| **Status** | **In progress.** CP1–CP4 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP5–CP12 run without pausing, and the next stop is Gate B, after CP12 |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only. Spike S3's code needs a separate go-ahead once its design is ready (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
@@ -103,7 +103,7 @@ Nothing is compiled or installed before Gate B. Each such fact names the command
 | 1 | This plan and tracker | CP1 |
 | 2 | [`docs/research/macos-runtime-facilities.md`](macos-runtime-facilities.md), a research note on the macOS facilities the runtime needs, with observations of this Mac | CP2 |
 | 3 | [`docs/architecture/event-loop-and-threading.md`](../architecture/event-loop-and-threading.md) (P1) | CP3 |
-| 4 | `docs/architecture/ipc.md` (OQ-17) | CP4 |
+| 4 | [`docs/architecture/ipc.md`](../architecture/ipc.md) (OQ-17) | CP4 |
 | 5 | `docs/architecture/frame-tree-and-navigation.md` (SI4) | CP5 |
 | 6 | `docs/architecture/rendering-pipeline.md` (P2, part of P4) | CP6 |
 | 7 | `docs/architecture/invalidation.md` (P3) | CP7 |
@@ -162,7 +162,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | **CP1** | This plan; branch `step-4`; the owner's decisions recorded | ✅ 2026-10-17 (§11). **Gate A passed:** approved as written |
 | CP2 | Research note: macOS facilities for the runtime | ✅ 2026-10-17 (§11; [note](macos-runtime-facilities.md)) |
 | CP3 | Event loop and threading model (P1) | ✅ 2026-10-17 (§11; [document](../architecture/event-loop-and-threading.md)) |
-| CP4 | IPC: transport and interface definitions (OQ-17) | |
+| CP4 | IPC: transport and interface definitions (OQ-17) | ✅ 2026-10-17 (§11; [document](../architecture/ipc.md)) |
 | CP5 | Frame tree, navigation and loading (SI4) | |
 | CP6 | Rendering pipeline: data model, per-frame display lists, compositing, strings (P2, part of P4) | |
 | CP7 | Invalidation and incremental updates (P3) | |
@@ -372,5 +372,18 @@ At the owner's request, `CLAUDE.md` was written as the project's working instruc
 - The test asserted that the lifetime-maximum footprint is at least the current one. A single `proc_pid_rusage` call doesn't snapshot both counters together, and the maximum trailed by one 16 KiB page, about once in 75 runs.
 - The assertion now checks only the maximum's scale. Afterwards there were no failures in 150 runs. This maintains S4's authorized test suite, in its own commit.
 - S4's reported footprints are unaffected (inference): a lag of one page in the peak is negligible beside MiB-scale results.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP4 — completed 2026-10-17
+
+[IPC: transport and interface definitions](../architecture/ipc.md) written (**Proposed**; rules IP1–IP22), from S4's measurements, the SDK 27 Mach headers, and Chromium (Mojo), Firefox (IPDL), WebKit, Servo (`ipc-channel`), Ladybird (LibIPC) and libdispatch. Main proposals:
+- **OQ-17: Mach messages,** the only transport between processes. They carry every handle Axiom passes, IOSurfaces included, and an audit trailer per message. Small round trips are 24% faster than over sockets. Chromium, Servo and Ladybird use Mach on macOS. The same channels run in-process, always encoding and decoding.
+- **Endpoints are capabilities** that only the browser creates and hands out. Launch pins each child's audit token. Ports are guarded and immovable, with queue limits.
+- **An IDL and a safe-Rust generator** emit types, canonical encoders, checking decoders and a fuzzing entry point per decoder. Handles never sit in the bytes.
+- **`Untrusted<T>`,** after WebKit's 2026 design: decoded values can't be used before a validator checks them against the browser's records. A violation is `Terminate` or, for a race, `Ignore`.
+- **Synchronous requests** only toward more privilege, only where the platform requires them, with timeouts and no re-entry. Bulk data goes out of line or through single-writer shared memory. Every queue is bounded, and the browser never blocks.
+- **Not settled by sources:** whether a priority override on a one-way message boosts a receiver waiting in `kevent64` (IP20). It is measured in the first implementation milestone, and the macOS note's open question 2 now says so.
+- OQ-17's entry in the open questions is updated at CP12, with the ADRs.
 
 Every relative link resolves; the four standard checks pass.

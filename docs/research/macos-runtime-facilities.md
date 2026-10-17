@@ -297,7 +297,7 @@ All inference, for the checkpoints named. Later documents cite them as "macOS ru
 | # | Question | Where it is settled |
 |---|---|---|
 | 1 | Does `IOSurfaceSetOwnershipIdentity` work for an ad-hoc-signed browser charging surfaces to its sandboxed child, without an entitlement? | Only if the design relies on it. A test would need the owner's authorization |
-| 2 | Does QoS propagation or importance donation apply to asynchronous one-way Mach messages, or only to synchronous request-and-reply? | CP4, from XNU's source and Apple's documentation |
+| 2 | Does QoS propagation or importance donation apply to asynchronous one-way Mach messages, or only to synchronous request-and-reply? | **Not settled by sources** (CP4): libdispatch sends one-way messages with an override, and XNU's documentation doesn't describe the receiving side. Measured in the first implementation milestone ([IPC](../architecture/ipc.md), IP20) |
 | 3 | When a renderer has been demoted (task role or `PRIO_DARWIN_BG`), does a message from the browser that carries QoS lift the receiving thread? | CP3 and CP4 |
 | 4 | Do App Nap's policies reach helper processes that the browser launched with `posix_spawn`? Apple's guide describes apps, not helpers | CP3. If unknown, Axiom sets the helpers' policies explicitly |
 | 5 | How does an AppKit display link behave across display reconfiguration and sleep? Chromium notes that a `CADisplayLink` "may stop firing after display reconfiguration or power resume" without a window-server event pump | CP7. The browser has a full AppKit event loop, so this may not apply |
