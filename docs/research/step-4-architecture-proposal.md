@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Gate B passed** (2026-10-17). CP1–CP14 ✅. ADRs 0005–0007 and 0009 accepted; ADR-0008 pre-approved, pending S3-Q1 and S3-Q2; AC5 amended (OQ-19). **Spike S3:** CP15 (results) next, then Gate C |
+| **Status** | **Gate B passed** (2026-10-17). CP1–CP15 ✅. ADRs 0005–0007 and 0009 accepted; AC5 amended (OQ-19). **At Gate C:** spike S3 is complete ([results](s3-results.md)); the owner decides on ADR-0008 and the merge |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only, until Gate B. **Spike S3's code was authorized at Gate B** (2026-10-17): "Authorized for the full scope (questions S3-Q1 through S3-Q5 under spikes/s3/)" (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
@@ -179,7 +179,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | CP12 | Synthesis: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-17 (§11). **Gate B passed** 2026-10-17 |
 | CP13 | **S3a** (authorized at Gate B): implementation and correctness | ✅ 2026-10-18 (§11) |
 | CP14 | **S3b:** measurements | ✅ 2026-10-18 (§11) |
-| CP15 | **S3c:** `docs/research/s3-results.md`; ADR-0008 updated; docs synthesis. **Gate C** | |
+| CP15 | **S3c:** `docs/research/s3-results.md`; ADR-0008 updated; docs synthesis. **Gate C** | ✅ 2026-10-18 (§11). **Gate C:** the owner decides |
 | CP16 | Merge `step-4` into `main` (`--no-ff`), on the owner's instruction | |
 
 ### 6.1 What each checkpoint decides
@@ -295,7 +295,7 @@ Between gates, checkpoints run without pausing, as in Steps 2b and 3.
 |---|---|---|
 | A | CP1 | This plan, including its scope (§2). **Passed 2026-10-17:** approved as written |
 | B | CP12 | ADRs 0005–0009 (Proposed). ADR-0008's acceptance may wait for S3, as ADR-0004's waited for S4. Also: authorizing spike S3's code. **Passed 2026-10-17:** ADRs 0005–0007 and 0009 accepted; ADR-0008 pre-approved, pending S3-Q1 and S3-Q2; S3 authorized (Q1–Q5); AC5 amended |
-| C | CP15 | ADR-0008, in the light of S3; merging `step-4` into `main` |
+| C | CP15 | ADR-0008, in the light of S3; merging `step-4` into `main`. **Reached 2026-10-18:** the decisions and recommendations are in [status](../status.md), "Next steps" |
 
 ## 8. Method
 
@@ -652,3 +652,27 @@ The four standard checks and the link check pass.
   - Setters replace S1's 14 link writes one for one.
 
 The analysis is CP15's, in `docs/research/s3-results.md`. The four standard checks and the link check pass.
+
+### CP15 — completed 2026-10-18 (S3c: results and synthesis)
+
+**Written:** [S3 results](s3-results.md). Its answers:
+- **S3-Q1: reads yes, pushes no, as S1's method measures them.**
+  - C1's stack reads in 0.51 ns, opens and closes a frame in 0.75 ns, and is Miri-clean.
+  - By S1's method a push costs 2.03 ns, S1's own figure. The method forces a store-to-load round trip on every stack. Back to back, a push costs 0.56 ns.
+  - S1's dispatch case runs 26% faster, closing about half of Pattern B's gap to Pattern A.
+  - As written, S3-Q1 does not pass.
+- **S3-Q2 passes.** Bytecode performs no root operations, and with C1's stack rooting takes 0.9–1.1% of the callback-heavy workload, against the 10% threshold. ADR-0003's assumption holds.
+- **S3-Q3:** on stable Rust, a `match` loop is fastest. Nightly tail calls are faster again, but rustc flags the feature as incomplete.
+- **S3-Q4:** one-based struct-of-arrays link columns are the fastest layout in every traversal case, faster than both of S1's patterns.
+- **S3-Q5:** setters cost nothing without a barrier; card marking costs about 3%.
+
+**Updated:**
+- [ADR-0008](../adr/0008-script-agents-and-heap.md): the S3 results in its decision history, analysis, decisions 5–7 and 10, assumptions, risks and consequences. Decision 6 now names struct-of-arrays columns. **It stays Proposed:** the pre-approved condition, that S3-Q1 and S3-Q2 pass, is not met as written.
+- [Script and heap](../architecture/script-and-heap.md): SH7–SH9, SH13 and open questions 1–2.
+- [Open questions](../open-questions.md): OQ-14 answered, resolving with ADR-0008; OQ-13's barrier cost measured.
+- The [decision map](../decision-map.md) (F2, Step 4) and the indexes ([docs](../README.md), [research](README.md)).
+- `RawStack`'s lazy commitment is verified: an 8 MiB stack holding 1,000 roots adds 32 KiB to the peak footprint. A code comment's unverified comparison with V8's handle blocks is removed.
+
+The four standard checks and the link check pass.
+
+**Gate C.** The owner decides on ADR-0008 and on merging `step-4` into `main`. The recommendations are in [status](../status.md), "Next steps".

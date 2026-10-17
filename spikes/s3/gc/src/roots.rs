@@ -211,7 +211,7 @@ impl RootStack for RefCellStack {
 
 // ----- CellStack -----
 
-/// Slots per chunk: 8 KiB, the size of V8's handle-scope blocks.
+/// Slots per chunk: 8 KiB.
 const CHUNK: usize = 1024;
 /// Chunks: at most 1,048,576 roots.
 const CHUNKS: usize = 1024;

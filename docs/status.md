@@ -6,11 +6,11 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero, Step 4: Gate B passed; spike S3 in progress.** The decisions of the [architecture proposal v0](architecture/overview.md) are made: ADRs 0005–0007 and 0009 accepted, ADR-0008 pre-approved pending S3. Production engine code is **not** authorized |
+| Phase | **Phase Zero, Step 4 at Gate C:** spike S3 is complete ([results](research/s3-results.md)). ADRs 0005–0007 and 0009 are accepted; ADR-0008 awaits the owner. Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 3** (merged with `--no-ff`) and is pushed, at `da79e69` (2026-10-17). Step 4 runs on branch `step-4`, pushed to `origin` |
-| Current checkpoint | **Step 4: CP1–CP14 ✅; Gate B passed; CP15 (spike S3c, results) next** ([tracker](research/step-4-architecture-proposal.md)). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
+| Current checkpoint | **Step 4: CP1–CP15 ✅; Gate C** ([tracker](research/step-4-architecture-proposal.md)). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B. S1 stays as the baseline for S3. Tooling under `tools/` |
-| Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
+| Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final**, with build thresholds T1–T4 |
 | | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 |
@@ -20,20 +20,27 @@
 | | [ADR-0006](adr/0006-event-loop-and-threading.md): event loop and threading, with EL11 amended for read-only lending of DOM arenas (2026-10-17, Gate B) |
 | | [ADR-0007](adr/0007-frame-tree-pipeline-and-input.md): frame tree, rendering pipeline, invalidation and input across frames (2026-10-17, Gate B) |
 | | [ADR-0009](adr/0009-embedder-api-and-shell.md): engine/embedder API and the pure-Rust shell (2026-10-17, Gate B) |
-| Pre-approved | [ADR-0008](adr/0008-script-agents-and-heap.md): script, agents and heap. It moves to Accepted once spike S3-Q1 and S3-Q2 pass |
+| Proposed | [ADR-0008](adr/0008-script-agents-and-heap.md): script, agents and heap. Its pre-approved condition, that S3-Q1 and S3-Q2 pass, is not met as written: S3-Q2 passes; S3-Q1 passes for reads, not for pushes. The owner decides at Gate C |
 
-## Next steps: spike S3 (Step 4, CP13–CP15)
+## Next steps: Gate C (Step 4)
 
-Spike S3 is authorized for S3-Q1 to S3-Q5 ([tracker](research/step-4-architecture-proposal.md) §10), and runs without pausing until Gate C:
-1. **CP13 (S3a):** done. The crates `s3-gc`, `s3-vm` and `s3-bench` in `spikes/s3/`; the reference-evaluator oracle; Miri on the root stack's module.
-2. **CP14 (S3b):** done. Formal measurements from the clean tree, on AC power.
-3. **CP15 (S3c):** `docs/research/s3-results.md`. ADR-0008 moves to Accepted if S3-Q1 and S3-Q2 pass. Docs synthesis.
+**Spike S3 is complete** ([results](research/s3-results.md); [tracker](research/step-4-architecture-proposal.md) §11, CP13–CP15). Each decision below carries a recommendation and its reason (CLAUDE.md):
 
-**Then Gate C:** the owner reviews S3's results and ADR-0008, and decides on merging `step-4` into `main` (CP16). `step-4` stays pushed to `origin`.
+1. **[ADR-0008](adr/0008-script-agents-and-heap.md), script, agents and heap. Recommend: accept, with C1 met by `RawStack`.**
+   - Your pre-approval was conditional on S3-Q1 and S3-Q2 passing. S3-Q2 passes: bytecode never roots, and rooting is 0.9–1.1% of the callback-heavy workload, against your 10% threshold.
+   - S3-Q1 passes for reads (0.51 ns, against S1's 1.64) but not for pushes as written. A push costs 2.03 ns by S1's method, the same as S1's own stack, because the method forces a store-to-load round trip on any stack. Back to back, a push costs 0.56 ns.
+   - Reads are 99.99% of W3's root operations, and ADR-0003's revisit condition needs rooting to dominate a workload, which it doesn't. So C1's purpose is met.
+   - Accepting the updated ADR also adopts two refinements S3 measured: struct-of-arrays link columns for C2 (decision 6), and a `match`-loop interpreter as Step 5's starting point (decision 10).
+2. **C1's implementation. Recommend: `RawStack`, not the safe `CellStack`.** It makes S1's dispatch case 11% faster (753 against 847 ns) and is equal on reads and on the interpreter workloads. Its `unsafe` is three small blocks that allocate, view and free one array, checked by Miri under both borrow models. `CellStack` remains the measured fallback if you prefer no `unsafe` in the `gc` crate.
+3. **Merge `step-4` into `main` with `--no-ff` (CP16), and push `main`. Recommend: yes, once ADR-0008 is decided.** Step 4's design, its ADRs and spike S3 are complete and verified: 180 tests, Miri clean, every link resolving.
+
+**Informational:**
+- **The first formal run was discarded:** on battery, Low Power Mode slowed every timing 1.64×. You plugged in the charger, and the full set was repeated on AC power.
+- **QoS:** the runs used a command-line process's default QoS, as S1's did, because raising it needs FFI. S1's numbers reproduced exactly, which shows the runs were on the performance cores.
 
 ## Session log
 
-### 2026-10-17 — Session 7 (Gate B; spike S3)
+### 2026-10-17 to 2026-10-18 — Session 7 (Gate B; spike S3; Gate C)
 
 **Gate B, the owner's decisions** (each as recommended):
 1. ADR-0005 (IPC), ADR-0006 (event loop and threading), ADR-0007 (frame tree, pipeline, input) and ADR-0009 (embedder API and pure-Rust shell): **accepted**. OQ-11 and OQ-17 are resolved.
@@ -59,6 +66,8 @@ Spike S3 is authorized for S3-Q1 to S3-Q5 ([tracker](research/step-4-architectur
   - `match` is the fastest dispatch on stable Rust; nightly `become` is 5–22% faster than it.
   - Struct-of-arrays link columns traverse faster than both of S1's patterns.
   - Setters are free without a barrier; card marking adds about 3%.
+
+**CP15 (spike S3c, completed 2026-10-18):** the [S3 results](research/s3-results.md), ADR-0008 updated (still Proposed), script-and-heap (SH7–SH9, SH13), open questions (OQ-14 answered), decision map and indexes. Also: `RawStack`'s lazy commitment verified (an 8 MiB stack with 1,000 roots adds 32 KiB to the footprint), and an unverified comment removed. **Gate C** is listed under "Next steps".
 
 ### 2026-10-17 — Session 6 (Step 4 kickoff)
 

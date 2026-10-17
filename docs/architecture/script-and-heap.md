@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 4, CP10). Decided in ADR-0008, whose acceptance the owner pre-approved at Gate B (2026-10-17), effective once spike S3-Q1 and S3-Q2 pass |
+| **Status** | **Proposed** (Step 4, CP10). Decided in ADR-0008. Spike S3 (2026-10-18) passed S3-Q2, and S3-Q1 for reads but not for pushes as written; the owner decides at Gate C ([S3 results](../research/s3-results.md)) |
 | **Question** | How do agents, realms and heaps fit together; how do messages, transfers and `SharedArrayBuffer` cross between agents; how does script integrate with the event loop; and how does the engine meet ADR-0003's obligations C1–C5: cheaper rooting, heap layout, a write-barrier API, a plan for incremental or generational collection, and native interop? What must spike S3 measure? |
 | **Answers** | Step 4 questions Q4 (second half) and Q15 ([tracker](../research/step-4-architecture-proposal.md) §3); OQ-5, OQ-13, OQ-14 |
 | **Feeds** | ADR-0008; spike S3 ([tracker](../research/step-4-architecture-proposal.md) §10); Step 5 (the JavaScript engine and bindings, HTML and DOM) |
@@ -20,7 +20,7 @@ Everything here is **planned**; nothing is implemented. Rules are numbered SH1�
   - `SharedArrayBuffer` memory is mapped into the cluster's one process, and `Atomics.wait` uses macOS's public wait-on-address primitive.
 - **Script runs only inside tasks and microtasks** (SH4, SH5). Promise jobs run in the HTML microtask queue in order, and an atomic interrupt flag lets the browser stop a runaway script.
 - **The root set** (SH6) is the interpreter's registers and frames, traced as whole regions; values that native code holds across a possible collection, on the root stack; and the realms' and the event loop's own roots.
-- **C1, cheaper rooting** (SH7): a root stack without `RefCell` borrow tracking, with 8-byte slots, in one audited module. S1 measured 2.05 ns per root and 1.58 ns per read; the target is about 1 ns. **Spike S3 tests it**, along with how much rooting an interpreter really does and how stable Rust can dispatch bytecode.
+- **C1, cheaper rooting** (SH7): a root stack without `RefCell` borrow tracking, with 8-byte slots, in one audited module. S1 measured 2.05 ns per root and 1.58 ns per read; the target is about 1 ns. **Spike S3 measured it:** 0.51 ns per read, and 0.56 ns per push back to back but 2.03 ns by S1's method, a figure every stack shares. Bytecode roots nothing, and rooting takes about 1% of a callback-heavy workload ([S3 results](../research/s3-results.md)).
 - **C2–C5** (SH8–SH11):
   - **C2:** hot link fields are laid out so that no index arithmetic sits in a dependent chain of loads.
   - **C3:** every write of a handle-valued field goes through generated setters, the insertion point for any future barrier.
@@ -73,9 +73,9 @@ From sources read on 2026-10-17 (Sources).
 | # | Rule |
 |---|---|
 | SH6 | **The root set has three parts.** (1) **The interpreter's registers and frames**, traced as whole regions: values are tagged, so tracing them is precise, and executing bytecode roots nothing value by value. (2) **Values native code holds across a possible collection**, on the root stack: builtins, the DOM and the bindings use Pattern B's frames and scoped handles. (3) **The agent's own roots:** each realm's intrinsics, the event loop's queues and timers, module maps. These are held from roots the collector knows |
-| SH7 | **C1: a root stack without borrow tracking.** The hypothesis from ADR-0003 is a root stack whose 8-byte slots live in storage without `RefCell` borrow tracking: an `UnsafeCell`-based stack in one allowlisted module of the `gc` crate, with stated invariants, checked by Miri. Pattern B's scope tokens, not runtime borrow checks, already prevent misuse. **Target:** about 1 ns per root and per read, against S1's 2.05 and 1.58 ns. **Validated by spike S3** (S3-Q1, S3-Q2) before the JavaScript object model is fixed. **If it fails,** ADR-0003's first revisit condition applies, and the owner decides |
-| SH8 | **C2: no index arithmetic in dependent chains.** Hot link fields, such as a node's parent, first child and next sibling, are either `u32` columns in a struct-of-arrays layout, or elements with power-of-two strides, so that scaling folds into the load's addressing mode. Validated on S1's `traverse` suite (an optional S3 part, S3-Q4, or the first heap milestone) |
-| SH9 | **C3: a typed write-barrier API from the start.** A field that holds a handle is private to its type, and is written only through a setter that the type's derived `Trace` support generates. With the stop-the-world collector the setter is a plain store. It is the single place where an incremental barrier (marking the old or new value) or a generational barrier (recording old-to-young references) is later added, with no change at call sites. S1-Q2's ceremony is recounted with the setters in place (an optional S3 part, S3-Q5, or the first heap milestone) |
+| SH7 | **C1: a root stack without borrow tracking.** The hypothesis from ADR-0003 is a root stack whose 8-byte slots live in storage without `RefCell` borrow tracking: an `UnsafeCell`-based stack in one allowlisted module of the `gc` crate, with stated invariants, checked by Miri. Pattern B's scope tokens, not runtime borrow checks, already prevent misuse. **Target:** about 1 ns per root and per read, against S1's 2.05 and 1.58 ns. **Validated by spike S3** (S3-Q1, S3-Q2) before the JavaScript object model is fixed. **If it fails,** ADR-0003's first revisit condition applies, and the owner decides. **Measured** (2026-10-18; [S3 results](../research/s3-results.md) §3–§4):<br>• `RawStack`, one lazily committed array of `Cell` slots whose `unsafe` is three Miri-clean blocks, reads in 0.51 ns, opens and closes a frame in 0.75 ns, and pushes in 0.56 ns back to back.<br>• By S1's method a push costs 2.03 ns, the same as S1's stack: the method forces a store-to-load round trip on any stack.<br>• `CellStack`, with no `unsafe`, equals it on reads and is 11% slower on DOM dispatch |
+| SH8 | **C2: no index arithmetic in dependent chains.** Hot link fields, such as a node's parent, first child and next sibling, are `u32` columns in a struct-of-arrays layout, indexed from 1 (a dummy element 0 lets a handle's stored index + 1 index directly), so that scaling folds into the load's addressing mode and no subtraction remains. **Measured by S3-Q4** ([S3 results](../research/s3-results.md) §6): the fastest layout in every traversal case, faster than both of S1's patterns, and about three times faster after random moves. Power-of-two strides, the other candidate, cost up to 22% once the nodes outgrow the cache |
+| SH9 | **C3: a typed write-barrier API from the start.** A field that holds a handle is private to its type, and is written only through a setter that the type's derived `Trace` support generates. With the stop-the-world collector the setter is a plain store. It is the single place where an incremental barrier (marking the old or new value) or a generational barrier (recording old-to-young references) is later added, with no change at call sites. S1-Q2's ceremony is recounted with the setters in place. **Measured by S3-Q5** ([S3 results](../research/s3-results.md) §7): setters replace writes one for one and cost nothing with the barrier a no-op; card marking adds about 3% to mutation-heavy work |
 
 ### 3.4 Collection and interop (C4, C5)
 
@@ -89,7 +89,7 @@ From sources read on 2026-10-17 (Sources).
 | # | Rule |
 |---|---|
 | SH12 | **Bindings are generated, safe and mechanical.** A WebIDL generator (Step 5) emits the glue between JavaScript and DOM types in the same heap: argument conversion, scope tokens, and rooting of what each method holds across calls that may allocate (ADR-0003, consequences). Generated code contains no `unsafe` (ADR-0002 rule 7) |
-| SH13 | **Room for a JIT, without building one** (J1–J7). The interpreter is the baseline. The value representation (tagged 64-bit values, handles inside them) and the object model leave room for inline caches and a baseline JIT in `renderer-jit`, from L2 and only if J1's evidence calls for it. S3-Q3's dispatch measurements are part of that evidence. J7's hypothesis that handle-based heaps help contain JIT bugs is examined if a JIT is ever built |
+| SH13 | **Room for a JIT, without building one** (J1–J7). The interpreter is the baseline. The value representation (tagged 64-bit values, handles inside them) and the object model leave room for inline caches and a baseline JIT in `renderer-jit`, from L2 and only if J1's evidence calls for it. S3-Q3's dispatch measurements are part of that evidence: a `match` loop is fastest on stable Rust, and explicit tail calls are faster again on nightly ([S3 results](../research/s3-results.md) §5). J7's hypothesis that handle-based heaps help contain JIT bugs is examined if a JIT is ever built |
 | SH14 | **Heaps are budgeted.** Each agent's heap grows by policy, triggered by allocation volume and idle periods. Memory pressure triggers a full collection and cache trims ([process model](../security/process-model.md) §7). Step 6 sets the budgets against B2, B3 and B7 |
 
 ## 4. Staging
@@ -107,7 +107,7 @@ From sources read on 2026-10-17 (Sources).
 | A | **Wrapper objects** that join a DOM heap and a JavaScript heap | Cross-heap cycles were the problem ADR-0001 R2 set out to remove. Rejected for SH1 |
 | B | **Conservative stack scanning** for native roots | Rejected in ADR-0003 (it prevents compaction). SH6 keeps rooting precise |
 | C | **Choosing incremental or generational collection now** | Premature. The barrier API (SH9) keeps both open, and corpus measurements decide (SH10) |
-| D | **Keeping S1's `RefCell` root stack** | Measured at 2.05 and 1.58 ns. It is S3's baseline, kept if the alternative fails to beat it safely |
+| D | **Keeping S1's `RefCell` root stack** | Measured at 2.05 and 1.58 ns. It is S3's baseline, kept if the alternative fails to beat it safely. S3: the alternative reads 3.2 times faster and roots back to back 1.6 times faster; by S1's push method they are equal |
 
 ## 6. Criteria check
 
@@ -116,14 +116,14 @@ From sources read on 2026-10-17 (Sources).
 | AC5 | One heap per agent, on one thread; only copies, transfers and shared buffers between agents (SH1–SH3) |
 | AC8 | Workers, `SharedArrayBuffer`, transfers and Wasm threads, whose memory is a shared buffer (SH3), have their place |
 | AC9 | The only new `unsafe` is C1's root-stack module, allowlisted and checked by Miri (SH7) |
-| AC10 | C1 waits for S3's measurements; C4's order waits for the corpus |
+| AC10 | C1 measured by spike S3; C4's order waits for the corpus |
 
 ## 7. Open questions
 
 | # | Question | Where it is settled |
 |---|---|---|
-| 1 | C1: does the root stack without borrow tracking reach about 1 ns per root and per read? | **Spike S3** (S3-Q1, S3-Q2), authorized at Gate B (2026-10-17) |
-| 2 | Which bytecode dispatch technique the interpreter uses | S3-Q3, then Step 5 |
+| 1 | C1: does the root stack without borrow tracking reach about 1 ns per root and per read? | **Measured by spike S3** (2026-10-18): reads yes; pushes by S1's method no. The owner decides at Gate C |
+| 2 | Which bytecode dispatch technique the interpreter uses | S3-Q3 recommends a `match` loop on stable Rust; Step 5 decides |
 | 3 | The pause budget, and the order of incremental and generational collection | Step 6 (budget), then corpus measurements |
 | 4 | Where shared and service workers run when no same-site renderer exists | Step 5 (workers), as frame-tree open question 3 |
 
