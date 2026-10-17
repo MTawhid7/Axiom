@@ -1,0 +1,34 @@
+[package]
+name = "s4-text"
+description = "Spike S4 (S4-Q5): CoreText lays out and rasterizes a line inside a renderer-like Seatbelt profile, with the window server and font server denied. unsafe only in src/platform/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+s4-sandbox.workspace = true
+# The same trimmed CoreText, CoreGraphics and CoreFoundation bindings as S2
+# (justified in the workspace manifest), with only the headers this uses.
+objc2-core-text = { workspace = true, features = [
+    "CTFont",
+    "CTLine",
+    "CTStringAttributes",
+    "objc2-core-graphics",
+] }
+objc2-core-graphics = { workspace = true, features = [
+    "CGBitmapContext",
+    "CGColorSpace",
+    "CGContext",
+    "CGImage",
+] }
+objc2-core-foundation = { workspace = true, features = [
+    "CFAttributedString",
+    "CFCGTypes",
+    "CFDictionary",
+    "CFNumber",
+    "CFString",
+] }
+
+[lints]
+workspace = true

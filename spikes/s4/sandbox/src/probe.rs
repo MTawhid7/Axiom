@@ -22,6 +22,7 @@ use std::fs::File;
 use std::io::{self, BufRead, BufReader, Read, Write};
 use std::net::{SocketAddr, TcpStream, ToSocketAddrs, UdpSocket};
 use std::os::fd::RawFd;
+use std::os::unix::net::UnixStream;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::str::FromStr;
@@ -202,10 +203,15 @@ pub struct Config {
 }
 
 /// Run every probe in [`catalogue`] order, reporting each line to `out` as
-/// soon as it is known.
-pub fn run_all(config: &Config, out: &mut dyn Write) -> io::Result<()> {
+/// soon as it is known. `socket` is the inherited socket if the helper has
+/// adopted it already (the precompiled method reads its bytecode there).
+pub fn run_all(
+    config: &Config,
+    out: &mut dyn Write,
+    mut socket: Option<UnixStream>,
+) -> io::Result<()> {
     for (name, _) in catalogue() {
-        let (outcome, detail) = run_one(&name, config);
+        let (outcome, detail) = run_one(&name, config, &mut socket);
         writeln!(
             out,
             "{}",
@@ -220,7 +226,7 @@ pub fn run_all(config: &Config, out: &mut dyn Write) -> io::Result<()> {
     Ok(())
 }
 
-fn run_one(name: &str, config: &Config) -> (Outcome, String) {
+fn run_one(name: &str, config: &Config, socket: &mut Option<UnixStream>) -> (Outcome, String) {
     if let Some(service) = name.strip_prefix("mach-lookup:") {
         return match mach::look_up(service) {
             Ok(_right) => (Outcome::Allowed, "found".to_owned()),
@@ -241,7 +247,7 @@ fn run_one(name: &str, config: &Config) -> (Outcome, String) {
         }
         "alloc-64mib" => (Outcome::Allowed, allocate()),
         "threads" => from_io(threads()),
-        "ipc-socket" => from_io(ipc_socket()),
+        "ipc-socket" => from_io(ipc_socket(socket.take())),
         "ipc-mach" => ipc_mach(config),
         other => (Outcome::Failed, format!("unknown probe {other}")),
     }
@@ -330,8 +336,11 @@ fn threads() -> io::Result<String> {
 }
 
 /// Say hello to the broker over the inherited socket, and expect "ok".
-fn ipc_socket() -> io::Result<String> {
-    let mut socket = process::adopt_inherited_socket(SOCKET_FD)?;
+fn ipc_socket(adopted: Option<UnixStream>) -> io::Result<String> {
+    let mut socket = match adopted {
+        Some(socket) => socket,
+        None => process::adopt_inherited_socket(SOCKET_FD)?,
+    };
     socket.set_read_timeout(Some(Duration::from_secs(5)))?;
     socket.write_all(b"hello\n")?;
     let mut answer = String::new();
@@ -347,13 +356,10 @@ fn ipc_socket() -> io::Result<String> {
 /// this process's ID, which the broker compares with the audit trailer.
 fn ipc_mach(config: &Config) -> (Outcome, String) {
     let pid = i32::try_from(std::process::id()).expect("pids fit in an i32");
+    let pid_bytes = pid.to_ne_bytes();
     let result = mach::look_up(&config.rendezvous).and_then(|broker| {
-        broker.send(
-            HELLO_ID,
-            &pid.to_ne_bytes(),
-            None,
-            Some(Duration::from_secs(2)),
-        )
+        let hello = mach::Outgoing::new(HELLO_ID, &pid_bytes);
+        broker.send(hello, None, Some(Duration::from_secs(2)))
     });
     match result {
         Ok(()) => (

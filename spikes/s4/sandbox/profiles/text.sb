@@ -1,0 +1,19 @@
+;; Spike S4: the renderer profile plus what CoreText needs to lay out and
+;; rasterize text with system fonts (S4-Q5). The window server and the font
+;; server stay denied, as in WebKit's content profile. Each rule was added
+;; because a logged denial, and a pixel comparison with an unsandboxed run,
+;; showed the text path needs it.
+(version 1)
+(deny default)
+
+(allow mach-lookup (global-name (param "RENDEZVOUS")))
+(deny dynamic-code-generation)
+
+;; System fonts, read-only. Without them CoreText silently draws last-resort
+;; glyphs instead of failing.
+(allow file-read* (subpath "/System/Library/Fonts"))
+
+;; ICU's data. Without it CoreText still draws, but places some glyphs
+;; differently (a Times New Roman line differed pixel by pixel with the same
+;; size and ink).
+(allow file-read* (subpath "/usr/share/icu"))

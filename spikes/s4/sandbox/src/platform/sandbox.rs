@@ -24,11 +24,13 @@ struct Params {
     _marker: PhantomData<(*mut u8, PhantomPinned)>,
 }
 
-/// libsandbox's opaque compiled profile.
+/// A compiled profile, `sandbox_profile_t` as Chromium declares it in
+/// `sandbox/mac/seatbelt.cc` (X11).
 #[repr(C)]
 struct Compiled {
-    _data: [u8; 0],
-    _marker: PhantomData<(*mut u8, PhantomPinned)>,
+    builtin: *mut c_char,
+    data: *const u8,
+    size: usize,
 }
 
 // libsystem_sandbox, part of libSystem.
@@ -71,6 +73,9 @@ pub fn enter(profile: &str, params: &[(&str, &str)], method: Method) -> Result<(
     match method {
         Method::InitWithParameters => init_with_parameters(&profile, &owned),
         Method::CompileAndApply => compile_and_apply(&profile, &owned),
+        Method::Precompiled => {
+            Err("precompiled profiles arrive as bytecode (apply_bytecode)".to_owned())
+        }
     }
 }
 
@@ -91,6 +96,21 @@ fn init_with_parameters(profile: &CStr, params: &[CString]) -> Result<(), String
 }
 
 fn compile_and_apply(profile: &CStr, params: &[CString]) -> Result<(), String> {
+    compile_c(profile, params)?.apply()
+}
+
+/// Compile the SBPL `profile` with `params`, without applying it.
+pub fn compile(profile: &str, params: &[(&str, &str)]) -> Result<CompiledProfile, String> {
+    let profile = c_string(profile)?;
+    let mut owned = Vec::with_capacity(params.len() * 2);
+    for &(key, value) in params {
+        owned.push(c_string(key)?);
+        owned.push(c_string(value)?);
+    }
+    compile_c(&profile, &owned)
+}
+
+fn compile_c(profile: &CStr, params: &[CString]) -> Result<CompiledProfile, String> {
     let set = ParamSet::new()?;
     for pair in params.chunks_exact(2) {
         // SAFETY: X1; X3 (`set` owns a live parameter set).
@@ -104,15 +124,9 @@ fn compile_and_apply(profile: &CStr, params: &[CString]) -> Result<(), String> {
     // the compilation because `params` does).
     let compiled = unsafe { sandbox_compile_string(profile.as_ptr(), set.0, &raw mut error) };
     if compiled.is_null() {
-        return Err(take_error(error));
-    }
-    let compiled = CompiledProfile(compiled);
-    // SAFETY: X3 (`compiled` owns a live compiled profile).
-    let status = unsafe { sandbox_apply(compiled.0) };
-    if status == 0 {
-        Ok(())
+        Err(take_error(error))
     } else {
-        Err(format!("sandbox_apply failed with {status}"))
+        Ok(CompiledProfile(compiled))
     }
 }
 
@@ -138,6 +152,29 @@ pub fn enter_named_pure_computation() -> Result<(), String> {
         Ok(())
     } else {
         Err(take_error(error))
+    }
+}
+
+/// Apply compiled bytecode produced by [`CompiledProfile::bytecode`],
+/// possibly in another process. The calling process only applies the
+/// profile; it doesn't load libsandbox's compiler or pay for compilation.
+pub fn apply_bytecode(bytecode: &[u8]) -> Result<(), String> {
+    let mut profile = Compiled {
+        builtin: ptr::null_mut(),
+        data: bytecode.as_ptr(),
+        size: bytecode.len(),
+    };
+    // SAFETY: X11. A stack `sandbox_profile_t` built as Chromium's
+    // `ApplyCompiledProfile` builds it (no builtin name, borrowed bytes);
+    // `bytecode` outlives the call, and libsandbox doesn't keep the pointer.
+    let status = unsafe { sandbox_apply(&raw mut profile) };
+    if status == 0 {
+        Ok(())
+    } else {
+        Err(format!(
+            "sandbox_apply failed with {status}: {}",
+            std::io::Error::last_os_error()
+        ))
     }
 }
 
@@ -183,8 +220,40 @@ impl Drop for ParamSet {
     }
 }
 
-/// Owns a compiled profile (X3).
-struct CompiledProfile(*mut Compiled);
+/// A compiled profile, freed on drop (X3).
+pub struct CompiledProfile(*mut Compiled);
+
+impl CompiledProfile {
+    /// The compiled bytecode, for applying in another process with
+    /// [`apply_bytecode`] (as Chromium's browser hands profiles to helpers).
+    pub fn bytecode(&self) -> Result<Vec<u8>, String> {
+        // SAFETY: X3 (`self` owns a live compiled profile); X11 (its layout).
+        let compiled = unsafe { &*self.0 };
+        if !compiled.builtin.is_null() || compiled.data.is_null() || compiled.size > 16 << 20 {
+            return Err("the compiled profile has an unexpected shape".to_owned());
+        }
+        // SAFETY: X11. libsandbox owns `size` bytes at `data` for as long as
+        // `self` lives; they are copied before this borrow ends.
+        Ok(unsafe { core::slice::from_raw_parts(compiled.data, compiled.size) }.to_vec())
+    }
+
+    /// Apply this profile to the calling process.
+    pub fn apply(&self) -> Result<(), String> {
+        // SAFETY: X3 (`self` owns a live compiled profile).
+        let status = unsafe { sandbox_apply(self.0) };
+        if status == 0 {
+            Ok(())
+        } else {
+            Err(format!("sandbox_apply failed with {status}"))
+        }
+    }
+}
+
+impl std::fmt::Debug for CompiledProfile {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CompiledProfile")
+    }
+}
 
 impl Drop for CompiledProfile {
     fn drop(&mut self) {

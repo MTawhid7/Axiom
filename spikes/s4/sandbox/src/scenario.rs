@@ -14,8 +14,9 @@ use std::time::Duration;
 
 use crate::platform::mach::{self, MessageBuffer};
 use crate::platform::process::{Command, Exit};
+use crate::platform::sandbox;
 use crate::probe::{self, HELLO_ID, Line, Outcome, ProbeResult, SOCKET_FD};
-use crate::profile::{Method, Profile};
+use crate::profile::{Method, Profile, RENDEZVOUS_PARAM};
 
 /// Makes rendezvous names and probe directories unique within this process.
 static RUN: AtomicU32 = AtomicU32::new(0);
@@ -205,10 +206,25 @@ fn run_in(run: &ProbeRun<'_>, id: &str, dir: &Path) -> io::Result<ProbeReport> {
         .stdout(stdout_writer.as_fd())
         .inherit_stderr()
         .map_fd(helper_end.as_fd(), SOCKET_FD);
+    // The precompiled method: this process compiles the profile, with the
+    // helper's parameters, before launching it.
+    let bytecode = match run.profile {
+        Some((profile, Method::Precompiled)) => Some(
+            sandbox::compile(profile.source(), &[(RENDEZVOUS_PARAM, &rendezvous)])
+                .and_then(|compiled| compiled.bytecode())
+                .map_err(io::Error::other)?,
+        ),
+        _ => None,
+    };
     let child = command.spawn()?;
     drop(command);
     drop(stdout_writer);
     drop(helper_end);
+    if let Some(bytecode) = &bytecode {
+        let len = u32::try_from(bytecode.len()).map_err(io::Error::other)?;
+        (&broker_end).write_all(&len.to_le_bytes())?;
+        (&broker_end).write_all(bytecode)?;
+    }
 
     let done = AtomicBool::new(false);
     let (output, exit, broker) = thread::scope(|scope| -> io::Result<_> {

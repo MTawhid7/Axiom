@@ -1,0 +1,8 @@
+;; Spike S4: the renderer profile for the JIT renderer variant. It is identical
+;; to renderer.sb except that it allows dynamic code generation. Every other
+;; profile denies it, by default (JIT rule J3, ADR-0004).
+(version 1)
+(deny default)
+
+(allow mach-lookup (global-name (param "RENDEZVOUS")))
+(allow dynamic-code-generation)

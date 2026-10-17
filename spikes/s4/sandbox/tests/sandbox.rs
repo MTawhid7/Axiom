@@ -58,6 +58,16 @@ fn the_renderer_profile_applies_with_compile_and_apply() {
     assert_eq!(report.state("sandboxed"), Some("true"));
 }
 
+/// The browser's way (Chromium's): the broker compiles the profile and the
+/// helper only applies the bytecode, so it pays neither the compilation time
+/// nor libsandbox's compiler memory.
+#[test]
+fn the_renderer_profile_applies_as_bytecode_compiled_by_the_broker() {
+    let report = run(Some((Profile::Renderer, Method::Precompiled)));
+    assert_eq!(report.state("sandboxed"), Some("true"));
+    assert!(report.state("bytecode-bytes").is_some_and(|n| n != "0"));
+}
+
 /// The SDK 27.0 man page for `sandbox_init`: the named profiles "must not be
 /// used when building against macOS SDK >= 27.0. Processes opting into them
 /// will be killed on attempt to do so."

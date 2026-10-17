@@ -31,10 +31,26 @@
 //! - **X8, framework globals.** Extern statics (`bootstrap_port`,
 //!   `mach_task_self_`, `kSBXProfilePureComputation`) are initialized by
 //!   libSystem before `main` and are only read.
+//! - **X9, JIT code.** A `MAP_JIT` region is written only while the calling
+//!   thread's JIT write protection is off, and executed only after it is back
+//!   on and the instruction cache has been invalidated for the written bytes.
+//!   The code is a fixed, complete function (`mov w0, #42; ret`). The region
+//!   is unmapped once, by its only owner.
+//! - **X10, out-of-line memory.** A region sent out of line points into a
+//!   live Rust slice for the whole `mach_msg` call. A region received out of
+//!   line is the kernel's fresh mapping of `len` readable bytes, owned by one
+//!   value that reads it and returns it with `vm_deallocate` once.
+//! - **X11, compiled profiles.** `sandbox_profile_t` is laid out as Chromium
+//!   declares it (`sandbox/mac/seatbelt.cc`: `char* builtin; const uint8_t*
+//!   data; size_t size;`). A compiled profile's bytes belong to libsandbox
+//!   until it is freed, and are copied out before then. Bytecode applied in
+//!   another process is passed in a stack struct with no builtin name, as
+//!   Chromium's `ApplyCompiledProfile` does, and outlives the call.
 //!
 //! [`CString`]: std::ffi::CString
 #![allow(unsafe_code)]
 
+pub mod jit;
 pub mod mach;
 pub mod process;
 pub mod sandbox;

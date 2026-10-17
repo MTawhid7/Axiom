@@ -26,6 +26,9 @@ const O_RDONLY: c_int = 0;
 /// `SOL_SOCKET` and `SO_TYPE` (`sys/socket.h`).
 const SOL_SOCKET: c_int = 0xffff;
 const SO_TYPE: c_int = 0x1008;
+/// `SO_SNDBUF` and `SO_RCVBUF` (`sys/socket.h`).
+const SO_SNDBUF: c_int = 0x1001;
+const SO_RCVBUF: c_int = 0x1002;
 
 unsafe extern "C" {
     fn posix_spawn(
@@ -63,6 +66,80 @@ unsafe extern "C" {
         value: *mut c_void,
         length: *mut u32,
     ) -> c_int;
+    fn proc_pid_rusage(pid: c_int, flavor: c_int, buffer: *mut c_void) -> c_int;
+    fn setsockopt(
+        socket: c_int,
+        level: c_int,
+        name: c_int,
+        value: *const c_void,
+        length: u32,
+    ) -> c_int;
+}
+
+/// Set a socket's send and receive buffer sizes.
+pub fn set_socket_buffers(socket: &UnixStream, bytes: usize) -> io::Result<()> {
+    let value = c_int::try_from(bytes).map_err(|_| invalid("buffer size too large"))?;
+    let length = u32::try_from(size_of::<c_int>()).expect("an int's size fits");
+    for name in [SO_SNDBUF, SO_RCVBUF] {
+        // SAFETY: X2. `value` is a live, aligned int of the length passed,
+        // which setsockopt only reads during the call; the descriptor belongs
+        // to `socket`, borrowed for the call.
+        let result = unsafe {
+            setsockopt(
+                socket.as_raw_fd(),
+                SOL_SOCKET,
+                name,
+                (&raw const value).cast(),
+                length,
+            )
+        };
+        if result != 0 {
+            return Err(io::Error::last_os_error());
+        }
+    }
+    Ok(())
+}
+
+/// `RUSAGE_INFO_V4` (`sys/resource.h`).
+const RUSAGE_INFO_V4: c_int = 4;
+
+/// `struct rusage_info_v4`: a 16-byte UUID followed by 35 counters.
+#[repr(C)]
+struct RusageInfoV4 {
+    uuid: [u8; 16],
+    counters: [u64; 35],
+}
+
+const _: () = assert!(size_of::<RusageInfoV4>() == 296);
+/// Indices of `ri_phys_footprint` and `ri_lifetime_max_phys_footprint`.
+const PHYS_FOOTPRINT: usize = 7;
+const LIFETIME_MAX_PHYS_FOOTPRINT: usize = 28;
+
+/// A process's memory footprint, in bytes: what macOS charges it for, the
+/// figure Activity Monitor and S2 report (not resident size, which includes
+/// shared framework pages).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Footprint {
+    pub current: u64,
+    pub lifetime_max: u64,
+}
+
+/// Read `pid`'s footprint (a process this user owns).
+pub fn footprint(pid: i32) -> io::Result<Footprint> {
+    let mut info = RusageInfoV4 {
+        uuid: [0; 16],
+        counters: [0; 35],
+    };
+    // SAFETY: X2. `info` is a live `rusage_info_v4`, the struct the V4 flavor
+    // fills.
+    let result = unsafe { proc_pid_rusage(pid, RUSAGE_INFO_V4, (&raw mut info).cast()) };
+    if result != 0 {
+        return Err(io::Error::last_os_error());
+    }
+    Ok(Footprint {
+        current: info.counters[PHYS_FOOTPRINT],
+        lifetime_max: info.counters[LIFETIME_MAX_PHYS_FOOTPRINT],
+    })
 }
 
 /// A helper to launch.
@@ -408,6 +485,14 @@ mod tests {
         let probe = "if [ -e /dev/fd/2 ]; then echo open; else echo closed; fi";
         assert_eq!(shell(probe, false), "closed");
         assert_eq!(shell(probe, true), "open");
+    }
+
+    #[test]
+    fn this_process_has_a_plausible_footprint() {
+        let pid = i32::try_from(std::process::id()).expect("pid fits");
+        let footprint = footprint(pid).expect("own footprint");
+        assert!(footprint.current > 100 * 1024, "{footprint:?}");
+        assert!(footprint.lifetime_max >= footprint.current, "{footprint:?}");
     }
 
     #[test]

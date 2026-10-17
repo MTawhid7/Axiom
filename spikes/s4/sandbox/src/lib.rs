@@ -14,16 +14,21 @@
 //! - **S4-Q2:** inside the profile, are files, the network, process launching
 //!   and the named Mach services denied, while allocation, threads, inherited
 //!   IPC channels and logging keep working?
+//! - **S4-Q3:** what does a sandboxed helper cost to start and to keep, and
+//!   what does IPC cost over Mach messages and over a socket pair?
+//! - **S4-Q4:** where can a helper generate code: which signing, entitlement
+//!   and profile combinations allow `MAP_JIT`?
 //!
 //! Layout:
 //! - [`platform`]: every foreign call (libsandbox, Mach, `posix_spawn`,
-//!   libbsm). The only module where `unsafe` is allowed.
+//!   libbsm, `MAP_JIT`). The only module where `unsafe` is allowed.
 //! - [`profile`]: the SBPL profiles and their parameters.
 //! - [`probe`]: what a helper tries, and how outcomes are encoded and checked.
-//! - [`scenario`]: the broker's side: launch a helper with its channels, run a
-//!   scenario, collect a report.
+//! - [`scenario`]: the broker's side of a probe run.
+//! - [`bench`]: both sides of the start-up, IPC and JIT measurements.
 #![deny(unsafe_code)]
 
+pub mod bench;
 pub mod platform;
 pub mod probe;
 pub mod profile;

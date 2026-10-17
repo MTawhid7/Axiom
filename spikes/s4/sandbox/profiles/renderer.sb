@@ -9,3 +9,7 @@
 (deny default)
 
 (allow mach-lookup (global-name (param "RENDEZVOUS")))
+
+;; (deny default) does not cover dynamic code generation (S4-Q4, bare.sb), so
+;; it is denied explicitly, as in WebKit's no-JIT content profiles (JIT rule J3).
+(deny dynamic-code-generation)

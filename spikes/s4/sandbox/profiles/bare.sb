@@ -1,0 +1,9 @@
+;; Spike S4: deny by default plus the broker's rendezvous, and nothing else:
+;; no rule about dynamic code generation. S4-Q4 found that (deny default)
+;; alone does not stop a process holding com.apple.security.cs.allow-jit from
+;; mapping MAP_JIT memory; only an explicit (deny dynamic-code-generation)
+;; does. This profile keeps that evidence reproducible.
+(version 1)
+(deny default)
+
+(allow mach-lookup (global-name (param "RENDEZVOUS")))

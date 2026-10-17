@@ -8,7 +8,7 @@ This directory holds validation experiments. The code is **throwaway and not pro
 |---|---|---|
 | S1 | Can a GC heap shared by JS and the DOM keep `unsafe` inside the GC boundary, with acceptable ceremony and cost? Pattern A (gc-arena style) against Pattern B (Nova style) | `s1/*` |
 | S2 | objc2 AppKit + Metal + CoreText without Xcode: ergonomics, `unsafe` surface, build cost | `s2/window` |
-| S4 | Can a helper launched with `posix_spawn` enter a custom deny-by-default Seatbelt profile on macOS 27, and what does that cost? | `s4/sandbox` |
+| S4 | Can a helper launched with `posix_spawn` enter a custom deny-by-default Seatbelt profile on macOS 27, and what does that cost? Where can it generate code? Does CoreText work inside it? | `s4/sandbox`, `s4/text` |
 
 ## Rules
 
@@ -36,4 +36,4 @@ This directory holds validation experiments. The code is **throwaway and not pro
   | `tools/s2-measure.sh` | S2: binary size, time to first frame, and idle CPU, wakeups, energy impact and memory of `s2-window` |
 
   `cargo bench -p s1-bench` runs one pass of the S1 runtime suites. `cargo run -p s2-window -- --smoke` checks the S2 window's rendering (it opens a window briefly).
-- **S4.** `cargo test -p s4-sandbox` runs the sandbox probes against the linker-signed helper. `tools/s4-sign.sh` signs copies ad hoc with the hardened runtime, and `target/s4/bin/s4-broker probe` runs the scenarios against them. `--named-profile`, and `cargo test -p s4-sandbox -- --ignored`, also check that a named profile kills the helper; each such run leaves a crash report in `~/Library/Logs/DiagnosticReports`.
+- **S4.** `cargo test -p s4-sandbox` runs the sandbox probes against the linker-signed helper. `tools/s4-sign.sh` signs copies ad hoc with the hardened runtime (plus the JIT variants), and `target/s4/bin/s4-broker probe|startup|ipc|jit|text` runs each scenario against them. `tools/s4-measure.sh` runs them all on release builds and writes `target/s4-results/<timestamp>/`. `--named-profile`, and `cargo test -p s4-sandbox -- --ignored`, also check that a named profile kills the helper; each such run leaves a crash report in `~/Library/Logs/DiagnosticReports`.
