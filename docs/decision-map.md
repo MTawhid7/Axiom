@@ -108,8 +108,8 @@ These follow from [ADR-0004](adr/0004-process-model-and-sandbox.md), accepted on
 | 2a | Implementation language evaluation | Done: reviewed; ADR-0002 accepted (final, 2026-10-17) |
 | 2b | Validation spikes: S1 GC heap and DOM, S2 platform and build | **Done** (2026-10-17): [S1 results](research/s1-results.md), [S2 results](research/s2-results.md). ADR-0002 is final, and [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md) is accepted. Merged into `main`. S3 (the interpreter benchmark) is required, and runs in Step 4 |
 | 3 | Threat model, trust boundaries, process and sandbox model on macOS | **Done** (2026-10-17): [threat model](security/threat-model.md) and [ADR-0004](adr/0004-process-model-and-sandbox.md) accepted; [process model](security/process-model.md) binding; spike S4 passed ([S4 results](research/s4-results.md)). Merged into `main` |
-| 4 | Event loop, threading, pipeline data model, invalidation, embedder API | **In progress** (authorized 2026-10-17): the plan is with the owner for review ([tracker](research/step-4-architecture-proposal.md)). Produces architecture proposal v0 |
-| 5 | Subsystems: text & fonts → rendering/compositing → networking/TLS → style → layout | Not started |
+| 4 | Event loop, threading, pipeline data model, invalidation, embedder API | **In progress** (authorized 2026-10-17; plan approved at Gate A): [tracker](research/step-4-architecture-proposal.md). Produces architecture proposal v0 |
+| 5 | Subsystems: text & fonts → rendering/compositing → networking/TLS → style → layout; also HTML parsing and DOM, and the JavaScript engine and bindings (added by the owner at Step 4's Gate A, 2026-10-17) | Not started |
 | 6 | Standards baseline, testing, performance budgets, roadmap | Not started; ends in a design review and approval of Milestone 1 |
 
 ## Sources

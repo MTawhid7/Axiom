@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **CP1 ✅ (2026-10-17). The plan is submitted for the owner's review** (Gate A), as the owner asked. CP2 starts when the owner approves it |
+| **Status** | **In progress.** CP1 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP2–CP12 run without pausing, and the next stop is Gate B, after CP12 |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only. Spike S3's code needs a separate go-ahead once its design is ready (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
@@ -36,6 +36,8 @@ The proposal must carry the complete model that Step 3 fixed from the first line
 | **Step 4 is authorized:** design work on a new branch, `step-4`, "focused on architecture design under Phase Zero rules (browser-owned frame tree, per-frame display lists, event loop, and pipeline data model)" | This plan |
 | "Submit the checkpoint plan and tracker first" | CP1 ends at a review gate (Gate A, §7). CP2 starts once the owner approves the plan |
 | "Request separate go-ahead for Spike S3's code when its design is ready" | S3 is designed at CP10 and put to the owner at Gate B. No S3 code is written before then |
+| **Gate A (2026-10-17):** the plan is "approved as written": its scope, the criteria AC1–AC10 and the 16 checkpoints. Step 5's list gains "HTML parsing and DOM" and "JavaScript engine and bindings". The cadence is approved: "pause at Gate B (after CP12) to review proposed ADRs 0005–0009 and authorize Spike S3 code concurrently" | [Decision map](../decision-map.md) §5 updated. CP2–CP12 run without pausing |
+| Push `step-4`: authorized | Pushed to `origin` on 2026-10-17, and kept pushed as checkpoints land, for off-site backup |
 
 **Binding inputs** (decision map §4; ADR-0003; ADR-0004):
 - Every future process boundary is a message interface from the start, and it also works in-process (PM6, R6).
@@ -63,7 +65,7 @@ The proposal must carry the complete model that Step 3 fixed from the first line
 **Out of scope.** Each item names the step that designs it.
 - The internals of style, layout, text, graphics, networking, decoders and the accessibility bridge: Step 5 (I1–I5).
 - The internals of the HTML parser, of the JavaScript engine (parser, bytecode set, object shapes, inline caches), and of the WebIDL bindings generator. Step 4 fixes only their interfaces with the event loop, the heap and the pipeline.
-  - **Proposal:** add "HTML parsing and DOM" and "JavaScript engine and bindings" to Step 5's list of subsystems, which doesn't name them today (decision map §5).
+  - **Approved at Gate A:** Step 5's list of subsystems now names "HTML parsing and DOM" and "JavaScript engine and bindings" ([decision map](../decision-map.md) §5). It didn't name them before.
 - The standards baseline, testing strategy, performance budgets and roadmap: Step 6.
 - Production code, a project skeleton and dependencies: none in Phase Zero.
 
@@ -157,7 +159,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 
 | CP | Scope | Status |
 |---|---|---|
-| **CP1** | This plan; branch `step-4`; the owner's decisions recorded | ✅ 2026-10-17 (§11). **Gate A:** the owner reviews the plan |
+| **CP1** | This plan; branch `step-4`; the owner's decisions recorded | ✅ 2026-10-17 (§11). **Gate A passed:** approved as written |
 | CP2 | Research note: macOS facilities for the runtime | |
 | CP3 | Event loop and threading model (P1) | |
 | CP4 | IPC: transport and interface definitions (OQ-17) | |
@@ -285,7 +287,7 @@ Between gates, checkpoints run without pausing, as in Steps 2b and 3.
 
 | Gate | After | The owner decides |
 |---|---|---|
-| A | CP1 | This plan, including its scope (§2) |
+| A | CP1 | This plan, including its scope (§2). **Passed 2026-10-17:** approved as written |
 | B | CP12 | ADRs 0005–0009 (Proposed). ADR-0008's acceptance may wait for S3, as ADR-0004's waited for S4. Also: authorizing spike S3's code |
 | C | CP15 | ADR-0008, in the light of S3; merging `step-4` into `main` |
 
@@ -329,3 +331,10 @@ Written at CP10 (§6.1).
 - Every relative link in `docs/` resolves, and the four standard checks pass, with the code unchanged.
 
 **Gate A.** The owner reviews this plan.
+
+### Gate A — passed 2026-10-17
+
+- The owner approved the plan as written: scope, criteria AC1–AC10, and the 16 checkpoints.
+- Step 5's list in the [decision map](../decision-map.md) §5 now names "HTML parsing and DOM" and "JavaScript engine and bindings", as the owner instructed.
+- Cadence: CP2–CP12 run without pausing. Gate B, after CP12, covers ADRs 0005–0009 and the authorization of S3's code together.
+- `step-4` pushed to `origin`, as the owner authorized.
