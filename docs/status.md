@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Phase Zero, Step 4: the architecture proposal v0** (event loop, threading, pipeline data model, invalidation, embedder API). Authorized on 2026-10-17 as design work. Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 3** (merged with `--no-ff`) and is pushed, at `da79e69` (2026-10-17). Step 4 runs on branch `step-4`, pushed to `origin` |
-| Current checkpoint | **Step 4: CP1–CP4 ✅; Gate A passed** (plan approved as written, 2026-10-17); CP5 next ([tracker](research/step-4-architecture-proposal.md)). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
+| Current checkpoint | **Step 4: CP1–CP5 ✅; Gate A passed** (plan approved as written, 2026-10-17); CP6 next ([tracker](research/step-4-architecture-proposal.md)). Step 3 is complete ([tracker](research/step-3-security-and-process-model.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3). S1 stays as the baseline for spike S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -71,6 +71,8 @@
 **CLAUDE.md and a link checker** (the owner's request, then "proceed with your recommendation"):
 - `CLAUDE.md` at the repository root holds the working instructions: session start, authorization and review gates, communication (every decision presented with a recommendation and rationale), documentation conventions, verification, code rules, git workflow, environment. It stays in the public repository.
 - `tools/check-doc-links.py` (standard-library Python) checks every relative Markdown link and anchor in the repository. It is now the fifth check before every commit.
+
+**CP5:** [frame tree, navigation and loading](architecture/frame-tree-and-navigation.md) (Proposed): the core thread's authoritative frame tree; skeleton replicas and remote window proxies in renderers; every operation between agents routed through the browser, even within one process, so out-of-process iframes change only process selection; browser-driven navigation and session history; loader and storage endpoints bound at commit; V9 tests specified.
 
 **CP4:** [IPC](architecture/ipc.md) (Proposed): Mach messages as the only transport between processes (OQ-17); endpoints as browser-issued capabilities; an IDL with a safe-Rust generator; `Untrusted<T>` validation after WebKit; synchronous requests only toward more privilege; bounded queues, with a browser that never blocks.
 

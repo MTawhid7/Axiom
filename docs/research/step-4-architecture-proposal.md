@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **In progress.** CP1–CP4 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP5–CP12 run without pausing, and the next stop is Gate B, after CP12 |
+| **Status** | **In progress.** CP1–CP5 ✅. **Gate A passed (2026-10-17):** the owner approved the plan as written. CP6–CP12 run without pausing, and the next stop is Gate B, after CP12 |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only. Spike S3's code needs a separate go-ahead once its design is ready (§2) |
 | **Branch** | `step-4`, from `main` at `da79e69` |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
@@ -104,7 +104,7 @@ Nothing is compiled or installed before Gate B. Each such fact names the command
 | 2 | [`docs/research/macos-runtime-facilities.md`](macos-runtime-facilities.md), a research note on the macOS facilities the runtime needs, with observations of this Mac | CP2 |
 | 3 | [`docs/architecture/event-loop-and-threading.md`](../architecture/event-loop-and-threading.md) (P1) | CP3 |
 | 4 | [`docs/architecture/ipc.md`](../architecture/ipc.md) (OQ-17) | CP4 |
-| 5 | `docs/architecture/frame-tree-and-navigation.md` (SI4) | CP5 |
+| 5 | [`docs/architecture/frame-tree-and-navigation.md`](../architecture/frame-tree-and-navigation.md) (SI4) | CP5 |
 | 6 | `docs/architecture/rendering-pipeline.md` (P2, part of P4) | CP6 |
 | 7 | `docs/architecture/invalidation.md` (P3) | CP7 |
 | 8 | `docs/architecture/input-and-accessibility.md` (SI4) | CP8 |
@@ -163,7 +163,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | CP2 | Research note: macOS facilities for the runtime | ✅ 2026-10-17 (§11; [note](macos-runtime-facilities.md)) |
 | CP3 | Event loop and threading model (P1) | ✅ 2026-10-17 (§11; [document](../architecture/event-loop-and-threading.md)) |
 | CP4 | IPC: transport and interface definitions (OQ-17) | ✅ 2026-10-17 (§11; [document](../architecture/ipc.md)) |
-| CP5 | Frame tree, navigation and loading (SI4) | |
+| CP5 | Frame tree, navigation and loading (SI4) | ✅ 2026-10-17 (§11; [document](../architecture/frame-tree-and-navigation.md)) |
 | CP6 | Rendering pipeline: data model, per-frame display lists, compositing, strings (P2, part of P4) | |
 | CP7 | Invalidation and incremental updates (P3) | |
 | CP8 | Input, focus, hit testing, scrolling and accessibility across frames (SI4) | |
@@ -385,5 +385,17 @@ Every relative link resolves; the four standard checks pass.
 - **Synchronous requests** only toward more privilege, only where the platform requires them, with timeouts and no re-entry. Bulk data goes out of line or through single-writer shared memory. Every queue is bounded, and the browser never blocks.
 - **Not settled by sources:** whether a priority override on a one-way message boosts a receiver waiting in `kevent64` (IP20). It is measured in the first implementation milestone, and the macOS note's open question 2 now says so.
 - OQ-17's entry in the open questions is updated at CP12, with the ADRs.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP5 — completed 2026-10-17
+
+[Frame tree, navigation and loading](../architecture/frame-tree-and-navigation.md) written (**Proposed**; rules FT1–FT14), from the HTML standard (navigables, browsing context groups, session history) and from Chromium (navigation, out-of-process iframes), Firefox (BrowsingContext, process selection), WebKit (site isolation) and Servo (constellation). Main proposals:
+- **The core thread holds the only authoritative frame tree:** tabs, frames, documents, browsing context groups with their agent-cluster maps, and processes. Every fact in it the browser derived itself. Tokens are scoped per process.
+- **Renderers hold a skeleton replica:** the tree's shape, names and closed state, enough for script's synchronous questions and nothing more (WebKit's side-channel caution). Remote frames are remote `WindowProxy` objects with only the cross-origin operations.
+- **Every operation between agents goes through the browser,** even within one process under SI3. So L3 changes only process selection, never an interface.
+- **Navigation is browser-driven,** from request to acknowledged commit, with process and event-loop selection at the response (SI1–SI7). Session history lives in the browser, and same-document navigations stay synchronous and are validated afterwards.
+- **Loader and storage endpoints are bound at commit** to the document's facts. Bodies stream from the network process to the renderer.
+- **V9's lying-renderer tests** are specified (FT14).
 
 Every relative link resolves; the four standard checks pass.
