@@ -153,7 +153,7 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 ## 6. Checkpoints
 
 **Every checkpoint ends with:**
-- every relative link in `docs/` resolving. Planned documents are named in code font, not linked, until they exist;
+- every relative link resolving, checked by `tools/check-doc-links.py` (added 2026-10-17, with the owner's approval). Planned documents are named in code font, not linked, until they exist;
 - the four standard checks green: `cargo fmt --all --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, `tools/check-unsafe-policy.sh`. CP1–CP12 change no code;
 - a commit on `step-4`, and an update to this tracker.
 

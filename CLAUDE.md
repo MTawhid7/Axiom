@@ -39,7 +39,7 @@ Axiom is a browser engine designed from first principles for the owner's own Mac
 - **Keep distinct:** implemented and planned; standards-compliant and approximate.
 - **Dates are absolute** (YYYY-MM-DD).
 - **Numbered rules and IDs belong to their document** (for example PM, SI, IR, B and J in Step 3; AC and EL in Step 4). Check existing IDs before adding new ones.
-- **Links:** every relative link in `docs/` must resolve, including `#anchors`. Name planned documents in code font until they exist.
+- **Links:** every relative link must resolve, including `#anchors` (`tools/check-doc-links.py`). Name planned documents in code font until they exist.
 - **Dependencies** each carry a written justification and a class: required platform facility, replaceable implementation detail, or foundational dependency.
 - **ADRs** start from `docs/adr/0000-template.md` and keep a decision-history table.
 - **Indexes:** a new document gets a row in `docs/README.md`, and research notes also one in `docs/research/README.md`.
@@ -53,20 +53,19 @@ Axiom is a browser engine designed from first principles for the owner's own Mac
   - `technology/`;
   - `architecture/`, from Step 4.
 - `spikes/`: throwaway validation code, one directory per spike. Results go in `docs/research/sN-results.md`. See `spikes/README.md`.
-- `tools/`: the unsafe-policy checker (`check-unsafe-policy.sh`, `unsafe-policy.txt`), and measurement and signing scripts. Each prints its usage with `--help`.
+- `tools/`: the unsafe-policy checker (`check-unsafe-policy.sh`, `unsafe-policy.txt`), the link checker (`check-doc-links.py`), and measurement and signing scripts. Each prints its usage with `--help`.
 
 # Verification
 
-All four must pass before every commit, including commits that change only documents:
+Five checks must pass before every commit, including commits that change only documents. The first four are the project's "four standard checks"; the fifth checks that every relative Markdown link in the repository resolves, anchors included:
 
 ```sh
 cargo fmt --all --check
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
 tools/check-unsafe-policy.sh
+tools/check-doc-links.py
 ```
-
-Also check that every relative link in `docs/` resolves, anchors included.
 
 # Code rules
 

@@ -68,6 +68,10 @@
 - Cadence: CP2–CP12 run without pausing; Gate B, after CP12, covers ADRs 0005–0009 and S3's code together.
 - `step-4` push authorized; pushed to `origin`.
 
+**CLAUDE.md and a link checker** (the owner's request, then "proceed with your recommendation"):
+- `CLAUDE.md` at the repository root holds the working instructions: session start, authorization and review gates, communication (every decision presented with a recommendation and rationale), documentation conventions, verification, code rules, git workflow, environment. It stays in the public repository.
+- `tools/check-doc-links.py` (standard-library Python) checks every relative Markdown link and anchor in the repository. It is now the fifth check before every commit.
+
 **CP2:** the [macOS runtime note](research/macos-runtime-facilities.md): run loops, frame timing, QoS, surfaces, IME and accessibility on macOS 27, with browser precedent. The browser must own the frame clock, since `CADisplayLink` comes only from AppKit objects; Mach messages can carry QoS (an input to OQ-17).
 
 ### 2026-10-17 — Session 5 (Step 3)

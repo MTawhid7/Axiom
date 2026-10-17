@@ -22,6 +22,7 @@ This directory holds validation experiments. The code is **throwaway and not pro
   cargo clippy --workspace --all-targets -- -D warnings
   cargo test --workspace
   tools/check-unsafe-policy.sh
+  tools/check-doc-links.py   # every relative Markdown link and anchor resolves
   ```
 
 - **Build measurements:** `tools/measure-build.sh --help`.
