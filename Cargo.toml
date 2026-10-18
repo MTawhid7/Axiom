@@ -1,13 +1,13 @@
 # Axiom workspace.
 #
 # Phase Zero: only validation spikes live here (spikes/, throwaway): S1 and S2
-# from Step 2b, S4 from Step 3, S3 from Step 4, S5 from Step 5. Engine crates will live
+# from Step 2b, S4 from Step 3, S3 from Step 4, S5 and S6 from Step 5. Engine crates will live
 # under crates/ once the architecture is approved; the lints, profiles and toolchain pin
 # below are meant to carry over.
 
 [workspace]
 resolver = "3"
-members = ["spikes/s1/*", "spikes/s2/*", "spikes/s3/*", "spikes/s4/*", "spikes/s5/*"]
+members = ["spikes/s1/*", "spikes/s2/*", "spikes/s3/*", "spikes/s4/*", "spikes/s5/*", "spikes/s6/*"]
 # S5's text corpus and font list are data, not a crate.
 exclude = ["spikes/s5/corpus"]
 
@@ -54,6 +54,10 @@ objc2-core-foundation = { version = "0.3.2", default-features = false, features 
 # - objc2-image-io: ImageIO, from the same objc2 family, for S5-Q5 (AVIF under the
 #   renderer's profile, IM3). Only the CGImageSource header is enabled.
 objc2-image-io = { version = "0.3.2", default-features = false, features = ["std"] }
+# - objc2-io-surface: IOSurface, from the same objc2 family (already in the register
+#   with it), for S6's tiles: IOSurfaces drawn by Metal and shown as CoreAnimation
+#   layer contents (GR2), and their colour tagging (GR6).
+objc2-io-surface = { version = "0.3.2", default-features = false, features = ["std"] }
 s5-rust-text = { path = "spikes/s5/rust-text" }
 # Spike S5's candidates, authorized at Step 5's Gate B (2026-10-18) "including the
 # listed candidate crates". Each is a candidate for the engine under the dependency

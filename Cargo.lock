@@ -611,6 +611,7 @@ dependencies = [
  "objc2",
  "objc2-core-foundation",
  "objc2-foundation",
+ "objc2-io-surface",
 ]
 
 [[package]]
@@ -884,6 +885,24 @@ dependencies = [
  "s4-sandbox",
  "s5-rust-text",
  "skrifa 0.48.0",
+]
+
+[[package]]
+name = "s6-compositor"
+version = "0.0.0"
+dependencies = [
+ "objc2",
+ "objc2-app-kit",
+ "objc2-core-foundation",
+ "objc2-core-graphics",
+ "objc2-foundation",
+ "objc2-io-surface",
+ "objc2-metal",
+ "objc2-quartz-core",
+ "s5-rust-text",
+ "skrifa 0.48.0",
+ "vello_cpu",
+ "zeno",
 ]
 
 [[package]]

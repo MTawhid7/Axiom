@@ -45,9 +45,14 @@ allow spikes/s4/text src/platform/
 allow spikes/s3/gc src/raw/
 
 # Spike S5 (S5-Q1, S5-Q2, S5-Q4): CoreText, CoreGraphics and CoreFoundation calls through
-# objc2, and read-only mmap of system font files, under invariants C1–C5
+# objc2, and read-only mmap of system font files, under invariants C1–C6
 # (spikes/s5/text/src/platform/mod.rs).
 allow spikes/s5/text src/platform/
-# Spike S5 (S5-Q5): ImageIO and CoreGraphics calls through objc2, under invariants I1–I3
+# Spike S5 (S5-Q5): ImageIO and CoreGraphics calls through objc2, under invariants I1–I4
 # (spikes/s5/image/src/platform/mod.rs).
 allow spikes/s5/image src/platform/
+
+# Spike S6: AppKit, CoreAnimation, IOSurface and Metal calls for the compositor
+# (GR1: Metal through `platform`), under invariants K1–K9
+# (spikes/s6/compositor/src/platform/mod.rs).
+allow spikes/s6/compositor src/platform/
