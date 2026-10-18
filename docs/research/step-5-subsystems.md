@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Gate A passed** (2026-10-18): the plan is approved as written, and X4 is added. CP2–CP9 run without pausing until Gate B (§6) |
+| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **At Gate B:** ADRs 0010–0014 Proposed, and spikes S5–S7 designed for authorization (§7, §10) |
 | **Authorized** | 2026-10-18, by the owner: "Step 5 Authorization: Authorized." Planning on a new branch, `step-5`, with "the Step 5 plan and checkpoint tracker first for Gate A review" (§2). Design documents only; each spike needs its own authorization |
 | **Branch** | `step-5`, from `main` at `c642ab3` (the Step 4 merge). Pushed to `origin` as the owner authorized at Gate A, and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items I1–I5, the text part of P4, and X4 if the owner adds it (§2.3); the questions earlier steps handed to Step 5 (§2.2); OQ-3, as evidence; ADRs from 0010 (§4); Step 6 |
@@ -261,7 +261,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | CP6 | Networking: URLs, HTTP, TLS, DNS, cache, cookies, Fetch's policy (I3); spike S7's design | ✅ 2026-10-18 (§11; [document](../architecture/networking.md); S7 design §10.3) |
 | CP7 | Storage and workers | ✅ 2026-10-18 (§11; [document](../architecture/storage-and-workers.md)) |
 | CP8 | Accessibility: the tree and the bridge (I5); the shell's questions for the owner | ✅ 2026-10-18 (§11; [document](../architecture/accessibility.md)) |
-| CP9 | Synthesis of part 1: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | Not started |
+| CP9 | Synthesis of part 1: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-18 (§11). **At Gate B** |
 | | **Spikes**, each only if authorized at Gate B | |
 | CP10 | Spike S5: the text stack | Not started |
 | CP11 | Spike S6: compositing on Metal | Not started |
@@ -861,3 +861,21 @@ Every relative link resolves; the four standard checks pass.
 - reserved key equivalents: Chromium's reserved set, plus ⌘L and ⌘,, reserved in fullscreen too.
 
 Every relative link resolves; the four standard checks pass.
+
+### CP9 — completed 2026-10-18
+
+**ADRs written, all Proposed:**
+- [ADR-0010](../adr/0010-dependency-and-supply-chain-policy.md): the dependency and supply-chain policy (X4), with CP3's refinement of DP10.
+- [ADR-0011](../adr/0011-text-fonts-and-unicode.md): text, fonts and Unicode (I1), recommended for acceptance once S5-Q1 and S5-Q3 pass.
+- [ADR-0012](../adr/0012-graphics-images-and-media.md): graphics, images and media (I2, I4), recommended once S6-Q1, S6-Q3 and S6-Q5 pass and S5-Q5 checks ImageIO. GR5's amendment to PL7 is a separate decision, after S6-Q4.
+- [ADR-0013](../adr/0013-networking-storage-and-workers.md): networking, storage and workers (I3), recommended once S7-Q1, S7-Q3 and S7-Q4 pass. The storage engine is settled at its milestone by crash tests.
+- [ADR-0014](../adr/0014-accessibility.md): accessibility (I5), with the settings list and the reserved key equivalents for the owner.
+
+**Updates:**
+- [Decision map](../decision-map.md): I1–I5 and P4's text part Proposed, with their ADRs; X4 points to ADR-0010; Step 5's row at Gate B.
+- [Open questions](../open-questions.md): **new OQ-21,** Axiom's own license, with a recommendation; OQ-7 notes that the graphics design needs no Xcode.
+- The indexes, the [register](../technology/dependency-register.md) (complete for part 1), and [status](../status.md).
+
+Every relative link resolves; the four standard checks pass.
+
+**Gate B.** The owner decides on the five ADRs, the three spikes, the two shell questions and OQ-21, as listed with recommendations in [status](../status.md), "Next steps".

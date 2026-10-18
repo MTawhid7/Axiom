@@ -6,9 +6,9 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero: Step 5, subsystem design** (authorized 2026-10-18). Gate A passed: the plan is approved as written. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
+| Phase | **Phase Zero: Step 5, subsystem design** (authorized 2026-10-18). Part 1 is complete and **at Gate B**: ADRs 0010–0014 Proposed, spikes S5–S7 designed. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 4** (merged with `--no-ff` on 2026-10-18) and is pushed. Step 4 ran on branch `step-4`, also pushed. **Step 5 runs on branch `step-5`**, from `main` at `c642ab3`, pushed to `origin` as the owner authorized at Gate A |
-| Current checkpoint | **Step 5: CP1–CP8 ✅, Gate A passed** ([tracker](research/step-5-subsystems.md)). CP9 (synthesis of part 1) is next; CP2–CP9 run without pausing until Gate B. Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
+| Current checkpoint | **Step 5: CP1–CP9 ✅** ([tracker](research/step-5-subsystems.md)). **Gate B:** the owner decides ("Next steps"). Nothing after CP9 starts until then. Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -22,9 +22,31 @@
 | | [ADR-0008](adr/0008-script-agents-and-heap.md): script, agents and heap. C1 is met by `SliceStack`, a safe root stack, so the `gc` crate has no `unsafe` (2026-10-18, Gate C) |
 | | [ADR-0009](adr/0009-embedder-api-and-shell.md): engine/embedder API and the pure-Rust shell (2026-10-17, Gate B) |
 
-## Next steps: Step 5, CP2–CP9
+## Next steps: Gate B (Step 5, part 1)
 
-**Gate A passed** (2026-10-18). CP2–CP9 run without pausing, as the owner approved, each committed and pushed on `step-5` ([tracker](research/step-5-subsystems.md) §6). **Gate B** follows CP9: the ADRs for part 1, and the code authorization of each candidate spike (S5, S6, S7).
+**Part 1 is done** (CP2–CP9): six design documents, the dependency policy and register, five ADRs, and three spike designs ([tracker](research/step-5-subsystems.md) §10). Each decision below carries a recommendation and its reason (CLAUDE.md):
+
+1. **[ADR-0010](adr/0010-dependency-and-supply-chain-policy.md), the dependency policy. Recommend: accept.** It turns charter principle 4 into rules every checkpoint applied, and closes the gap ADR-0002 left, since rule 5 governed only Axiom's own code. Applying it changed real decisions, which shows it has teeth: Axiom writes its own encodings, URL parser and HTTP/1.1 parser, and bars `encoding_rs`, `zune-jpeg` and `httparse`. CP3's refinement of DP10 is part of it.
+2. **[ADR-0011](adr/0011-text-fonts-and-unicode.md), text, fonts and Unicode. Recommend: pre-approve, to be accepted once S5-Q1 and S5-Q3 pass,** with TX12 settled by S5-Q2. Its core claim, that no C parser ever sees a web font, is stricter than any engine today, and S5 checks that it works in the sandbox.
+3. **[ADR-0012](adr/0012-graphics-images-and-media.md), graphics, images and media. Recommend: pre-approve, to be accepted once S6-Q1, S6-Q3 and S6-Q5 pass, and S5-Q5 shows ImageIO working under the renderer's profile.** The compositor's costs and the ImageIO exception are the parts no source settles for this Mac. GR5's amendment (path items in PL7) comes to you separately, after S6-Q4, only if GPU path filling pays.
+4. **[ADR-0013](adr/0013-networking-storage-and-workers.md), networking, storage and workers. Recommend: pre-approve, to be accepted once S7-Q1, S7-Q3 and S7-Q4 pass.** The network process's sandbox is the one profile S4 never tested. The storage engine (`redb`, or SQLite as the fallback) is settled by crash tests at its milestone, under the rule this ADR states.
+5. **[ADR-0014](adr/0014-accessibility.md), accessibility. Recommend: accept, with decisions 9 and 10.** It needs no spike: the shell milestone validates its objc2 classes first (EM11), and the design follows three engines and the text-marker API that SDK 27 documents.
+6. **Spike S5, the text stack, with images. Recommend: authorize S5-Q1 to S5-Q5 under `spikes/s5/`** ([tracker](research/step-5-subsystems.md) §10.1).
+   - **Crates:** `read-fonts`, `skrifa`, HarfRust, `brotli-decompressor`, one or two Rust rasterizers, and `png`, `jpeg-decoder`, `gif` and `image-webp`.
+   - **Test web fonts** under WPT's or OFL licenses.
+
+   It settles TX12, checks the Rust-only web-font path, and tests ImageIO in the sandbox for AVIF.
+7. **Spike S6, compositing on Metal. Recommend: authorize S6-Q1 to S6-Q5 under `spikes/s6/`, and confirm its thresholds** (§10.2):
+   - a typical update takes ≤ 4 ms on the GPU and ≤ 2 ms on the compositor thread;
+   - scrolling and animation take ≤ 1 ms per frame.
+
+   These are a quarter of a 60 Hz frame and less, leaving the rest for renderers. The spike measures the compositor's whole premise before any of it is written.
+8. **Spike S7, the network process and TLS. Recommend: authorize S7-Q1 to S7-Q4 under `spikes/s7/`,** including read-only requests to public test hosts, with rustls, `aws-lc-rs` (which compiles C and assembly) and `quinn-proto` (§10.3). It validates the last untested sandbox profile, and the one-wait shape of the protocol code.
+9. **The settings list** ([accessibility](architecture/accessibility.md) §6.1). **Recommend: approve.** It covers every switch the architecture requires (sensitive sites, the JIT switches, permissions, local network access, persistent storage), and the content settings text needs, and nothing speculative.
+10. **Reserved key equivalents** (§6.2). **Recommend: approve:** Chromium's reserved set, plus ⌘L and ⌘,, reserved in fullscreen too, with Esc always leaving fullscreen. A page that could block ⌘L could hide where the user is.
+11. **OQ-21, Axiom's own license.** The repository is public with no license file. **Recommend: "MIT OR Apache-2.0",** the Rust ecosystem's convention, compatible with every license the policy allows. Deferring it until before the first engine code is also safe, since DP17 keeps every option open meanwhile.
+
+After Gate B, the plan runs the authorized spikes (CP10–CP12), then CP13–CP18 without pausing until Gate C.
 
 ## Session log
 
@@ -97,6 +119,15 @@
 - Renderers push trees built under HTML-AAM and Core-AAM, once an assistive technology first asks. The browser answers from its cache.
 - Text markers, public in SDK 27, carry text navigation, with boundaries computed in the renderer. The bridge is our own.
 - Two questions for the owner at Gate B: the settings list, and reserved key equivalents.
+
+**CP9 (completed 2026-10-18):** ADRs [0010](adr/0010-dependency-and-supply-chain-policy.md)–[0014](adr/0014-accessibility.md) Proposed:
+- the dependency policy;
+- text, fonts and Unicode, pending S5;
+- graphics, images and media, pending S6 and S5-Q5;
+- networking, storage and workers, pending S7;
+- accessibility.
+
+The decision map has I1–I5 Proposed. The open questions gain OQ-21 (Axiom's license), and OQ-7 notes that the graphics design needs no Xcode. **Gate B** is listed under "Next steps".
 
 ### 2026-10-17 to 2026-10-18 — Session 7 (Gate B; spike S3; Gate C; S3 addendum; merge)
 

@@ -31,6 +31,11 @@ These documents are the project's source of truth. Conversation history is not.
 | ↳ [0007-frame-tree-pipeline-and-input.md](adr/0007-frame-tree-pipeline-and-input.md) | Frame tree, rendering pipeline, invalidation and input across frames (SI4) | **Accepted** (2026-10-17, Gate B) |
 | ↳ [0008-script-agents-and-heap.md](adr/0008-script-agents-and-heap.md) | Script, agents and the heap; ADR-0003's C1–C5 | **Accepted** (2026-10-18, Gate C), with C1 met by the safe `SliceStack` |
 | ↳ [0009-embedder-api-and-shell.md](adr/0009-embedder-api-and-shell.md) | Engine/embedder API and the shell (OQ-11) | **Accepted** (2026-10-17, Gate B) |
+| ↳ [0010-dependency-and-supply-chain-policy.md](adr/0010-dependency-and-supply-chain-policy.md) | Dependency and supply-chain policy (X4) | **Proposed** (Step 5, CP9) |
+| ↳ [0011-text-fonts-and-unicode.md](adr/0011-text-fonts-and-unicode.md) | Text, fonts and Unicode (I1) | **Proposed** (Step 5, CP9); acceptance after spike S5 |
+| ↳ [0012-graphics-images-and-media.md](adr/0012-graphics-images-and-media.md) | Graphics, images and media (I2, I4) | **Proposed** (Step 5, CP9); acceptance after spike S6 and S5-Q5 |
+| ↳ [0013-networking-storage-and-workers.md](adr/0013-networking-storage-and-workers.md) | Networking, storage and workers (I3) | **Proposed** (Step 5, CP9); acceptance after spike S7 |
+| ↳ [0014-accessibility.md](adr/0014-accessibility.md) | Accessibility, and the shell's settings and reserved keys (I5) | **Proposed** (Step 5, CP9) |
 | [security/threat-model.md](security/threat-model.md) | Assets, adversaries, attack surfaces, trust boundaries, security goals, security levels L0–L3 | **Accepted** (2026-10-17), amended: out-of-process iframes required for L3 |
 | [security/process-model.md](security/process-model.md) | Process types and privileges, site isolation, IPC trust rules, memory budgets | Binding (ADR-0004 accepted, 2026-10-17) |
 | [technology/language-evaluation.md](technology/language-evaluation.md) | Detailed language comparison and recommendation | Reviewed |
@@ -68,7 +73,7 @@ These documents are the project's source of truth. Conversation history is not.
 | Document | Step |
 |---|---|
 | `requirements.md` | Steps 1→6 |
-| One file per subsystem under `architecture/` | Step 5 |
+| One file per subsystem under `architecture/`: six written in Step 5's part 1 (CP3–CP8); HTML and the DOM, style, layout and paint, the JavaScript engine, and bindings to come | Step 5 (CP13–CP17) |
 | `standards.md` | Step 6 |
 | `performance.md` | Step 6 |
 | `testing.md` | Step 6 |
