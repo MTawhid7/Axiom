@@ -14,6 +14,7 @@
 | 2026-10-17 | Proposed after spike S1 (Step 2b, CP9) |
 | 2026-10-17 | **Owner accepts it as proposed**: Pattern B, with obligations C1–C5. On ceremony (S1-Q2): "Nova's lexical ceremony (scope tokens, bind/unbind) is acceptable. It is checked by the compiler and far preferable to the architectural burden of turning the JS interpreter and DOM dispatch into resumable state machines under gc-arena." |
 | 2026-10-17 | **Owner makes spike S3 a required benchmark**, to run during Step 4 as part of the interpreter and root-stack design. It validates obligation C1 (OQ-15) |
+| 2026-10-18 | **C1 settled at Step 4's Gate C** ([ADR-0008](0008-script-agents-and-heap.md) decision 5; [S3 results](../research/s3-results.md) §3). The owner adopted `SliceStack`, a root stack without borrow tracking and with no `unsafe`, so the `gc` crate stays `#![forbid(unsafe_code)]`. C1's hypothesis (below) expected an allowlisted `unsafe` module; spike S3 showed that none is needed |
 
 ## Question
 

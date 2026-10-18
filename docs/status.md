@@ -2,45 +2,144 @@
 
 > **Read this first when resuming work.** Then check the documents it links to against the actual state of the repository (`git log`, `git status`, and the checkpoint tracker). Don't assume earlier work is still accurate.
 
-## Current state (2026-10-17)
+## Current state (2026-10-18)
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero. Step 3 is complete; Step 4 is next**: event loop, threading, pipeline data model, invalidation, embedder API. Production engine code is **not** authorized |
-| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 3**, merged with `--no-ff` on 2026-10-17. Branch `step-3` is pushed. `main` is not yet pushed with the merge |
-| Current checkpoint | Step 3 CP1–CP9 ✅ ([tracker](research/step-3-security-and-process-model.md)). Step 4 not started |
-| Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3). S1 stays as the baseline for spike S3. Tooling under `tools/` |
-| Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
+| Phase | **Phase Zero: Step 4 is complete** (2026-10-18). ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
+| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 4** (merged with `--no-ff` on 2026-10-18) and is pushed. Step 4 ran on branch `step-4`, also pushed |
+| Current checkpoint | **Step 4: CP1–CP17 ✅** ([tracker](research/step-4-architecture-proposal.md)). Step 5 starts when the owner decides ("Next steps") |
+| Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. Tooling under `tools/` |
+| Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final**, with build thresholds T1–T4 |
 | | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 |
-| | [ADR-0004](adr/0004-process-model-and-sandbox.md): process model, sandbox and JIT policy (2026-10-17), validated by spike S4 |
+| | [ADR-0004](adr/0004-process-model-and-sandbox.md): process model, sandbox and JIT policy (2026-10-17), validated by spike S4. The owner confirmed S4's refinements |
 | | [Threat model](security/threat-model.md) (2026-10-17), amended: out-of-process iframes are required for L3 |
+| | [ADR-0005](adr/0005-ipc-transport-and-interfaces.md): IPC, Mach transport, capabilities, IDL, `Untrusted<T>` (2026-10-17, Gate B) |
+| | [ADR-0006](adr/0006-event-loop-and-threading.md): event loop and threading, with EL11 amended for read-only lending of DOM arenas (2026-10-17, Gate B) |
+| | [ADR-0007](adr/0007-frame-tree-pipeline-and-input.md): frame tree, rendering pipeline, invalidation and input across frames (2026-10-17, Gate B) |
+| | [ADR-0008](adr/0008-script-agents-and-heap.md): script, agents and heap. C1 is met by `SliceStack`, a safe root stack, so the `gc` crate has no `unsafe` (2026-10-18, Gate C) |
+| | [ADR-0009](adr/0009-embedder-api-and-shell.md): engine/embedder API and the pure-Rust shell (2026-10-17, Gate B) |
 
-## Next steps: Step 4, the architecture proposal v0
+## Next steps: Step 5
 
-**Step 4 is design work under the Phase Zero rule.** It starts on a new branch, `step-4`, with a plan and checkpoints, once the owner gives the go-ahead. Spike S3 is required in Step 4 (ADR-0003, C1). Its code still needs the go-ahead when Step 4's plan is ready.
+**Step 4 is complete and merged** ([tracker](research/step-4-architecture-proposal.md)). Step 5 has not started ([decision map](decision-map.md)): the subsystems (text and fonts, rendering and compositing, networking and TLS, style, layout), HTML parsing and the DOM, and the JavaScript engine and bindings. Each decision below carries a recommendation and its reason (CLAUDE.md):
 
-**Topics** ([decision map](decision-map.md), P1–P3 and F4):
-- the event loop and threading model;
-- the pipeline data model: DOM → style → box tree → fragment tree → display list → compositor;
-- the invalidation and incremental-update model;
-- the engine/embedder API.
-
-**Binding inputs from Step 3** ([decision map](decision-map.md) §4):
-- message-based interfaces at every future process boundary;
-- **a browser-owned frame tree, per-frame display lists and browser-routed input from the first line of code**, so that out-of-process iframes, mandatory before L3, need no rewrite;
-- one agent cluster per process (OQ-5);
-- a display list that never makes the browser decode images or parse fonts;
-- helpers that apply browser-compiled profiles.
-
-**Open questions due in Step 4:**
-- OQ-17, the IPC transport. S4 favours Mach messages.
-- OQ-5, per-agent heaps and workers.
-- OQ-13 and OQ-14, the GC obligations C1–C4, with spike S3.
-- OQ-11, the shell.
+1. **Start Step 5. Recommend: authorize planning it on a new branch, `step-5`, plan first (CP1, then Gate A), as Steps 3 and 4 did.** The plan sets the order of the subsystems, which ones need design documents or spikes, and where the review gates fall. Step 4 left inputs for it: S3's recommendations for the interpreter and the root stack ([S3 results](research/s3-results.md) §9), the overview's crate map, and the open questions assigned to Step 5.
 
 ## Session log
+
+### 2026-10-17 to 2026-10-18 — Session 7 (Gate B; spike S3; Gate C; S3 addendum; merge)
+
+**Gate B, the owner's decisions** (each as recommended):
+1. ADR-0005 (IPC), ADR-0006 (event loop and threading), ADR-0007 (frame tree, pipeline, input) and ADR-0009 (embedder API and pure-Rust shell): **accepted**. OQ-11 and OQ-17 are resolved.
+2. ADR-0008 (script, agents, heap): "Pre-approved; will move to Accepted upon S3-Q1 and S3-Q2 passing."
+3. **Spike S3** is "Authorized for the full scope (questions S3-Q1 through S3-Q5 under spikes/s3/)". S3-Q2's threshold is "Confirmed at ≤10% of runtime spent rooting".
+4. **OQ-19:** "Amend criterion AC5 and rule EL11 to allow read-only scoped lending of DOM arenas to helper threads during borrow-checker-frozen rendering stages. Keep the actual parallel style/layout implementation deferred until profiling benchmarks justify it."
+5. The S4 test fix from Session 6 is approved.
+
+**Recorded** in the ADRs' decision histories, the design documents (now binding where their ADR is accepted), AC5 in the tracker, EL11, PL10, the decision map, the open questions, the indexes and this status.
+
+**CP13 (spike S3a, completed 2026-10-18)** ([tracker](research/step-4-architecture-proposal.md) §11):
+- **Crates:** `s3-gc` (S1's heap with NaN-boxed values, three root stacks and a barrier hook; its only `unsafe` is 3 blocks in `src/raw/`), `s3-vm` (a register-machine interpreter with callback builtins, four dispatch techniques and a reference evaluator) and `s3-bench` (probes, S1's DOM ported to `s3-gc`, node layouts). Scripts `tools/s3-bench.sh`, `s3-profile.sh` and `s3-ceremony.sh`; `samply-summary.py` gains `--share`.
+- **Correctness:** every workload and 34 edge-case programs match the reference evaluator on every technique, stack and pacing. Counted builds show bytecode performs zero root operations. A deliberately unrooted value fails the oracle. Miri finds no undefined behaviour under Stacked and Tree Borrows, on `s3-gc` and on the VM driving C1's stack with a collection at every allocation.
+- **Refinements:** a third, safe root stack (`CellStack`), to test whether C1 needs `unsafe` at all; the stack borrowed instead of `Rc`-shared; QoS left at the command-line default, as S1's was, because raising it needs FFI.
+- **Preliminary, not formal:** frames and reads meet C1's 1 ns target, but under S1's method a push costs about 2.0 ns on every stack. The method's barrier forces each push to reload the stack length the previous one stored (calibrated: 2.18 ns for any escaped counter; **corrected at CP16:** the cost depends on how the code around the push compiles). A supplementary back-to-back push probe was added. CP14 measures formally.
+
+**CP14 (spike S3b, completed 2026-10-18):** formal runs from the clean tree at `05185cb` ([tracker](research/step-4-architecture-proposal.md) §11).
+- **A first run was discarded:** on battery, Low Power Mode slowed every timing about 1.64 times. After the owner plugged in the charger, the full set ran on AC power. The repeat covered S3's suites with counts and nightly tail calls, S1's dispatch and traverse suites for Pattern A, the profiles, and the ceremony count.
+- **A tool fix:** `samply-summary.py --share` skipped inlined frames without a source path (`11be3a7`).
+- **Headlines:**
+  - C1 reads in 0.51 ns, but pushes in 2.03 ns by S1's method (0.56 ns back to back).
+  - Rooting is 0.9–1.1% of W3's time with C1's stack.
+  - `match` is the fastest dispatch on stable Rust; nightly `become` is 5–22% faster than it.
+  - Struct-of-arrays link columns traverse faster than both of S1's patterns.
+  - Setters are free without a barrier; card marking adds about 3%.
+
+**CP15 (spike S3c, completed 2026-10-18):** the [S3 results](research/s3-results.md), ADR-0008 updated (still Proposed), script-and-heap (SH7–SH9, SH13), open questions (OQ-14 answered), decision map and indexes. Also: `RawStack`'s lazy commitment verified (an 8 MiB stack with 1,000 roots adds 32 KiB to the footprint), and an unverified comment removed. **Gate C** is listed under "Next steps".
+
+**Before Gate C, the owner asked** whether `RawStack`'s `unsafe` was worth its 94 ns on S1's dispatch case, and shared a second opinion that recommended `CellStack`.
+- **The answer was no.** The architecture admits `gc`'s raw module "only if C1 needs it", and `CellStack` meets C1 exactly where `RawStack` does; recommending `RawStack` had given one benchmark too much weight.
+- **A probe outside the repository** then found a safe contiguous stack (`SliceStack`) that compiles to `RawStack`'s push. With its length first, it halved S1's push and made dispatch 19% faster (informal).
+- **It also showed that CP15's explanation of the 2 ns push was wrong.**
+
+**Gate C, the owner's decisions** (2026-10-18):
+1. "S3 Addendum Checkpoint: Authorized."
+2. "C1 Implementation: Adopt `SliceStack` (Safe Contiguous Stack)." "The `gc` crate remains strictly `#![forbid(unsafe_code)]`." "Keep `RawStack` archived in spikes/s3/ as benchmark history."
+3. "We will formally accept ADR-0008 and merge `step-4` into `main` (with a subsequent push to origin) immediately upon completion of the formal addendum measurements."
+
+**CP16 (the S3 addendum, completed 2026-10-18)** ([tracker](research/step-4-architecture-proposal.md) §11):
+- **Code** (`17775c4`):
+  - `SliceStack` and its field-order control in `s3-gc`, with no `unsafe`; `RawStack` stays, archived.
+  - Every stack in the heap, root-stack and oracle tests: 197 tests pass, and Miri passes on `s3-gc` under both borrow models.
+  - The new stacks in the benchmarks and profiles, and a new `s3-probe footprint` command.
+- **Formal runs** at `17775c4`, on AC power. The Mac was in use, so absolute times were noisier than CP14's. The comparisons rest on ratios within each run, which reproduce CP14's.
+- **Results:**
+  - `SliceStack` reads in 0.53 ns and has no `unsafe`.
+  - By S1's method a push costs 2.12 ns, as on every stack: **the informal 1.02 ns did not reproduce.** The push's own code is the same in both binaries; the harness's code differs. So S1's method measures the loads and stores around a push as much as the push.
+  - **S3-Q1 still fails as written.** The corrected explanation is in the [S3 results](research/s3-results.md) §3.2.
+  - In S1's dispatch case `SliceStack` is the fastest stack: in each run, 13–17% faster than `RawStack` and 14–20% faster than its control.
+  - Rooting takes 0.8–1.0% of W3, and the counts are unchanged.
+- **Documents:**
+  - The S3 results, ADR-0008, and ADR-0003's decision history.
+  - Script and heap, now binding; the overview, where `gc` has no `unsafe`.
+  - The decision map, and the open questions: OQ-5, OQ-14 and OQ-13's design part resolved, and OQ-5's row repaired.
+  - The indexes and the spikes README.
+- **Disclosed:** S1's suite and the profiles ran with uncommitted Markdown changes in the tree; the code was `17775c4`.
+
+**Gate C passed** (2026-10-18): the measurements were complete, so ADR-0008 is Accepted. **CP17:** `step-4` merged into `main` (`--no-ff`), and `main` pushed, as the owner instructed.
+
+### 2026-10-17 — Session 6 (Step 4 kickoff)
+
+**The owner's decisions:**
+1. Push `main`: authorized.
+2. ADR-0004's three S4 refinements are confirmed: browser-compiled profile bytecode, the required explicit `(deny dynamic-code-generation)`, and `single-jit` on `renderer-jit`.
+3. **Step 4 is authorized** as design work on a new branch `step-4`: "Submit the checkpoint plan and tracker first, and request separate go-ahead for Spike S3's code when its design is ready."
+
+**Done:**
+- `main` pushed to `origin` at `da79e69`.
+- Branch `step-4` created from `main`.
+- The confirmation recorded in ADR-0004's decision history.
+- **CP1:** the [Step 4 plan and tracker](research/step-4-architecture-proposal.md): 16 questions, 14 deliverables, the architecture criteria AC1–AC10, 16 checkpoints and three review gates. It proposes adding "HTML parsing and DOM" and "JavaScript engine and bindings" to Step 5, whose list doesn't name them.
+
+**Verified** (SDK 27 headers): `CVDisplayLink` is deprecated since macOS 15, in favour of AppKit's `displayLink(target:selector:)` on `NSView`, `NSWindow` and `NSScreen`. This bears on frame timing in renderers, which have no AppKit (CP2).
+
+**Verification:** every relative link in `docs/` resolves. The four standard checks pass, with the code unchanged.
+
+**Gate A (owner, 2026-10-17):**
+- The plan is approved as written: scope, criteria AC1–AC10, the 16 checkpoints.
+- Step 5's list in the decision map gains "HTML parsing and DOM" and "JavaScript engine and bindings" (done).
+- Cadence: CP2–CP12 run without pausing; Gate B, after CP12, covers ADRs 0005–0009 and S3's code together.
+- `step-4` push authorized; pushed to `origin`.
+
+**CLAUDE.md and a link checker** (the owner's request, then "proceed with your recommendation"):
+- `CLAUDE.md` at the repository root holds the working instructions: session start, authorization and review gates, communication (every decision presented with a recommendation and rationale), documentation conventions, verification, code rules, git workflow, environment. It stays in the public repository.
+- `tools/check-doc-links.py` (standard-library Python) checks every relative Markdown link and anchor in the repository. It is now the fifth check before every commit.
+
+**CP12:** ADRs [0005](adr/0005-ipc-transport-and-interfaces.md)–[0009](adr/0009-embedder-api-and-shell.md) Proposed. Decision map (F4, F5, P1–P4), open questions (OQ-5, 11, 13, 14 and 17 updated; OQ-19 and OQ-20 new) and indexes updated. **Gate B** is listed under "Next steps".
+
+**CP11:** [architecture overview v0](architecture/overview.md) (Proposed): the system on one page, the crate structure and its `unsafe` map, five end-to-end scenarios, the criteria check (AC1–AC10 met), the complete-model table, and staging in which L3 changes only process selection.
+
+**CP10:** [script, agents and heap](architecture/script-and-heap.md) (Proposed): one heap per agent; copies, transfers and shared buffers between agents; script only in tasks and microtasks; the root set; C1–C5 resolved by design, with C1 left to spike S3, **whose design is in the [tracker](research/step-4-architecture-proposal.md) §10** for Gate B.
+
+**CP9:** [embedder API and shell](architecture/embedder-api.md) (Proposed): the shell as an embedder over a message API; commands, events and requests for decisions; hosted presentation, IME and accessibility objects; native browser UI only; a headless embedder for WPT; OQ-11 proposed as pure Rust with objc2, validated first at the shell milestone.
+
+**CP8:** [input and accessibility](architecture/input-and-accessibility.md) (Proposed): input enters at the compositor and is routed by hit testing; gestures latch; scrolling chains across frames in the compositor; focus and capture are browser records; IME from a main-thread mirror (Firefox's model); activation from routed input; accessibility as a browser-side cache.
+
+**CP7:** [invalidation](architecture/invalidation.md) (Proposed): a compiler-checked lifecycle per document; two entry points, with no synchronous flush across agents; reuse at every stage; compositor-driven scrolling and animation with display ports; a test oracle comparing incremental updates with rebuilds from scratch.
+
+**CP6:** [rendering pipeline](architecture/rendering-pipeline.md) (Proposed): five owned stages; immutable fragments; per-frame display lists of validated primitives over property trees; glyphs rasterized in the renderer; compositing by token; one 8-bit or 16-bit string representation; style and layout on the event loop's thread within AC5, with lendable DOM arenas. Amending AC5 for parallel stages is a Gate B question.
+
+**CP5:** [frame tree, navigation and loading](architecture/frame-tree-and-navigation.md) (Proposed): the core thread's authoritative frame tree; skeleton replicas and remote window proxies in renderers; every operation between agents routed through the browser, even within one process, so out-of-process iframes change only process selection; browser-driven navigation and session history; loader and storage endpoints bound at commit; V9 tests specified.
+
+**CP4:** [IPC](architecture/ipc.md) (Proposed): Mach messages as the only transport between processes (OQ-17); endpoints as browser-issued capabilities; an IDL with a safe-Rust generator; `Untrusted<T>` validation after WebKit; synchronous requests only toward more privilege; bounded queues, with a browser that never blocks.
+
+**Housekeeping:** an intermittent test failure (about one run in 75) was traced to an unsound assertion in S4's `this_process_has_a_plausible_footprint`: the kernel's lifetime-maximum footprint can trail the current footprint by a page. The assertion was fixed; afterwards there were no failures in 150 runs.
+
+**CP3:** the [event loop and threading model](architecture/event-loop-and-threading.md) (Proposed): one wait per thread; a browser **core** thread separate from AppKit's main thread; one thread and heap per event loop in renderers; input-first task selection; frames offered by the browser's compositor only to event loops that asked; throttling from Chrome's tested levels, applied per agent cluster.
+
+**CP2:** the [macOS runtime note](research/macos-runtime-facilities.md): run loops, frame timing, QoS, surfaces, IME and accessibility on macOS 27, with browser precedent. The browser must own the frame clock, since `CADisplayLink` comes only from AppKit objects; Mach messages can carry QoS (an input to OQ-17).
 
 ### 2026-10-17 — Session 5 (Step 3)
 

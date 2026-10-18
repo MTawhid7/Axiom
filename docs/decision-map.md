@@ -28,13 +28,14 @@ X  Cross-cutting    standards baseline · conformance testing · fuzzing · perf
 | R3 | Security posture: sensitive logins (gated) | **Accepted** | ADR-0001 |
 | R4 | Constraints: skills, time, hardware | Partly known | Charter §7; [OQ-1, OQ-6, OQ-9](open-questions.md) |
 | F1 | Implementation language | **Accepted** (final, 2026-10-17): Rust | [ADR-0002](adr/0002-implementation-language.md), [evaluation](technology/language-evaluation.md), [S1](research/s1-results.md), [S2](research/s2-results.md) |
-| F2 | GC and DOM memory model | **Accepted** (2026-10-17): one heap for JS and the DOM (R2), with Pattern B (Nova style) and obligations C1–C5 ([ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md)) | [S1 results](research/s1-results.md), [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md) |
+| F2 | GC and DOM memory model | **Accepted** (2026-10-17): one heap for JS and the DOM (R2), with Pattern B (Nova style) and obligations C1–C5 ([ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md)). **Agents, heaps and C1–C5 decided** ([ADR-0008](adr/0008-script-agents-and-heap.md), accepted 2026-10-18 at Step 4's Gate C). C1 is `SliceStack`, a root stack with no `unsafe`, so the `gc` crate has none (spike S3 and its addendum) | [S1 results](research/s1-results.md), [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md), [script and heap](architecture/script-and-heap.md), [S3 results](research/s3-results.md) |
 | F3 | Trust boundaries, process model, sandbox | **Accepted** (2026-10-17): staged site isolation, with out-of-process iframes mandatory before L3; helpers that apply browser-compiled Seatbelt profiles first; IPC trust rules; security levels L0–L3; JIT policy. Validated by spike S4 | [ADR-0004](adr/0004-process-model-and-sandbox.md), [threat model](security/threat-model.md), [process model](security/process-model.md), [macOS note](research/macos-process-confinement.md), [S4 results](research/s4-results.md) |
-| F4 | Engine/embedder API | Open | Step 4 |
-| P1 | Event loop and threading model | Open | Step 4 |
-| P2 | Pipeline data model | Open | Step 4 |
-| P3 | Invalidation and incremental-update model | Open | Step 4 |
-| P4 | String and text representation (UTF-8, UTF-16, Latin-1; interned atoms) | Open | Steps 4–5 |
+| F4 | Engine/embedder API | **Accepted** (2026-10-17, Gate B): the shell as an embedder over a message API; native browser UI; a headless embedder; a pure-Rust shell (OQ-11), validated first at the shell milestone | [ADR-0009](adr/0009-embedder-api-and-shell.md), [embedder API](architecture/embedder-api.md) |
+| F5 | IPC transport and interface definitions | **Accepted** (2026-10-17, Gate B): Mach messages (OQ-17); endpoints as capabilities; an IDL with generated safe decoders; `Untrusted<T>` | [ADR-0005](adr/0005-ipc-transport-and-interfaces.md), [IPC](architecture/ipc.md) |
+| P1 | Event loop and threading model | **Accepted** (2026-10-17, Gate B): one wait per thread; a browser core thread; one thread and heap per event loop; frames driven by the browser | [ADR-0006](adr/0006-event-loop-and-threading.md), [event loop and threading](architecture/event-loop-and-threading.md) |
+| P2 | Pipeline data model | **Accepted** (2026-10-17, Gate B): five owned stages; immutable fragments; per-frame display lists of validated primitives; the browser-owned frame tree (SI4). AC5 amended to allow read-only lending of DOM arenas during frozen stages (OQ-19) | [ADR-0007](adr/0007-frame-tree-pipeline-and-input.md), [rendering pipeline](architecture/rendering-pipeline.md), [frame tree](architecture/frame-tree-and-navigation.md) |
+| P3 | Invalidation and incremental-update model | **Accepted** (2026-10-17, Gate B): a compiler-checked lifecycle; reuse at each stage; compositor-driven scrolling and animation | [ADR-0007](adr/0007-frame-tree-pipeline-and-input.md), [invalidation](architecture/invalidation.md) |
+| P4 | String and text representation (UTF-8, UTF-16, Latin-1; interned atoms) | **Representation accepted** (2026-10-17, Gate B): 8-bit or 16-bit strings for JavaScript and the DOM; static and process-wide atoms. Text and shaping in Step 5 | [ADR-0007](adr/0007-frame-tree-pipeline-and-input.md), [rendering pipeline](architecture/rendering-pipeline.md) §4.5 |
 | I1 | Text shaping, fonts, line breaking, bidi | Open | Step 5 |
 | I2 | Graphics backend and compositing | Open | Step 5 |
 | I3 | HTTP/TLS/DNS transport | Open | Step 5 |
@@ -94,7 +95,7 @@ These are recorded in ADR-0001.
 These follow from [ADR-0004](adr/0004-process-model-and-sandbox.md), accepted on 2026-10-17, and bind Step 4.
 1. **Every future process boundary is a message interface from the start** (process model PM6). It also works in-process, for tests and a single-process debugging mode.
 2. **The browser owns the frame tree, from the first line of code.** Each frame produces its own display list, and the browser routes input (SI4). **Out-of-process iframes are mandatory before L3** (the owner's decision), and this structure lets them arrive without an architectural rewrite.
-3. **One agent cluster per process** (SI7). This is an input to OQ-5.
+3. **An agent cluster never spans processes** (SI7). A renderer may host several clusters of its own site. Step 4 clarified this wording, which earlier read "one agent cluster per process" ([ADR-0006](adr/0006-event-loop-and-threading.md)). This is an input to OQ-5.
 4. **The browser never decodes images or parses fonts.** The display list carries only validated primitives (Rule of 2).
 5. **A JIT is a property of one executable** (`renderer-jit`) and comes no earlier than security level L2 (JIT rules J1–J7).
 6. **Memory targets B1–B7** (about 1 GB for a typical session; a soft limit of 16 renderers) are inputs to Step 6's budgets.
@@ -108,8 +109,8 @@ These follow from [ADR-0004](adr/0004-process-model-and-sandbox.md), accepted on
 | 2a | Implementation language evaluation | Done: reviewed; ADR-0002 accepted (final, 2026-10-17) |
 | 2b | Validation spikes: S1 GC heap and DOM, S2 platform and build | **Done** (2026-10-17): [S1 results](research/s1-results.md), [S2 results](research/s2-results.md). ADR-0002 is final, and [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md) is accepted. Merged into `main`. S3 (the interpreter benchmark) is required, and runs in Step 4 |
 | 3 | Threat model, trust boundaries, process and sandbox model on macOS | **Done** (2026-10-17): [threat model](security/threat-model.md) and [ADR-0004](adr/0004-process-model-and-sandbox.md) accepted; [process model](security/process-model.md) binding; spike S4 passed ([S4 results](research/s4-results.md)). Merged into `main` |
-| 4 | Event loop, threading, pipeline data model, invalidation, embedder API | Not started; produces architecture proposal v0 |
-| 5 | Subsystems: text & fonts → rendering/compositing → networking/TLS → style → layout | Not started |
+| 4 | Event loop, threading, pipeline data model, invalidation, embedder API | **Done** (2026-10-18): [architecture proposal v0](architecture/overview.md); ADRs 0005–0007 and 0009 accepted at Gate B, and ADR-0008 at Gate C after spike S3 and its addendum ([S3 results](research/s3-results.md)); AC5 amended for read-only lending (OQ-19). Merged into `main` ([tracker](research/step-4-architecture-proposal.md)) |
+| 5 | Subsystems: text & fonts → rendering/compositing → networking/TLS → style → layout; also HTML parsing and DOM, and the JavaScript engine and bindings (added by the owner at Step 4's Gate A, 2026-10-17) | Not started |
 | 6 | Standards baseline, testing, performance budgets, roadmap | Not started; ends in a design review and approval of Milestone 1 |
 
 ## Sources

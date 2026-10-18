@@ -492,7 +492,10 @@ mod tests {
         let pid = i32::try_from(std::process::id()).expect("pid fits");
         let footprint = footprint(pid).expect("own footprint");
         assert!(footprint.current > 100 * 1024, "{footprint:?}");
-        assert!(footprint.lifetime_max >= footprint.current, "{footprint:?}");
+        // The two counters aren't one snapshot: the lifetime maximum can trail
+        // the current footprint (observed 2026-10-17: by 16 KiB, one page, in
+        // about one run in 75). So only its scale is checked.
+        assert!(footprint.lifetime_max > 100 * 1024, "{footprint:?}");
     }
 
     #[test]

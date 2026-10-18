@@ -9,6 +9,7 @@ which writes out.json.gz and its sidecar out.json.syms.json. Then:
 
     python3 -I tools/samply-summary.py out.json.gz [--top N] [--match TEXT]
                                        [--lines BINARY] [--source-root DIR]
+                                       [--share NAME=REGEX ...]
 
 It prints, as a share of the selected samples:
   - self time by compiled function (after inlining);
@@ -22,6 +23,13 @@ It prints, as a share of the selected samples:
 --match keeps only samples whose stack contains a compiled function whose
 name includes TEXT, to focus on one phase of a run (for example the timed
 loop rather than input generation).
+
+--share NAME=REGEX (with --lines; repeatable) also prints the share of the
+selected samples whose leaf address has, anywhere in its chain of inlined
+frames, a frame whose repository-relative file path matches REGEX. Code
+inlined from a module therefore counts toward it wherever it was inlined.
+Time in a separate compiled function that such code calls (for example a
+vector's out-of-line growth) does not.
 
 --lines resolves the profiled executable's addresses with `atos -i`, which
 reads a .dSYM bundle next to the binary; the script creates one with
@@ -37,6 +45,7 @@ import collections
 import gzip
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -97,6 +106,7 @@ def main():
     parser.add_argument("--match", default=None)
     parser.add_argument("--lines", metavar="BINARY", default=None)
     parser.add_argument("--source-root", action="append", default=None)
+    parser.add_argument("--share", action="append", default=[], metavar="NAME=REGEX")
     args = parser.parse_args()
     roots = [os.path.abspath(r) for r in (args.source_root or [os.path.join(REPO, "spikes"), os.path.join(REPO, "crates")])]
 
@@ -146,6 +156,13 @@ def main():
         leaves = {chain[0][1] for _, chain in selected if chain[0][0] == binary_name}
         lines = resolve_lines(args.lines, leaves)
 
+    shares = []
+    for spec in args.share:
+        name, sep, pattern = spec.partition("=")
+        if not sep:
+            sys.exit(f"--share expects NAME=REGEX, got {spec!r}")
+        shares.append((name, re.compile(pattern), [0]))
+
     self_compiled, inclusive = collections.Counter(), collections.Counter()
     self_line, self_ours = collections.Counter(), collections.Counter()
     for weight, chain in selected:
@@ -164,6 +181,9 @@ def main():
                     self_ours[f"{os.path.relpath(p, REPO)}:{n}  ({f})"] += weight
                 else:
                     self_ours[f"(no frame of ours) {symbol}"] += weight
+                for _, regex, count in shares:
+                    if any(p and regex.search(os.path.relpath(p, REPO)) for _, p, _ in inline):
+                        count[0] += weight
             else:
                 self_line[symbol] += weight
                 self_ours[f"(outside {binary_name}) {lib}"] += weight
@@ -182,6 +202,10 @@ def main():
         print(f"\n{title}:")
         for name, count in counter.most_common(args.top):
             print(f"  {100 * count / total:5.1f}%  {name}")
+    if shares:
+        print()
+        for name, _, count in shares:
+            print(f"share {name}: {100 * count[0] / total:.1f}%")
 
 
 if __name__ == "__main__":
