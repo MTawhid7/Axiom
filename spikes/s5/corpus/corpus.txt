@@ -11,7 +11,8 @@
 # reph (Devanagari), stacked marks (Thai), subscripts (Khmer), medials and
 # stacked consonants (Myanmar), and emoji sequences: a ZWJ family, a skin tone,
 # two flags, a keycap, a VS16 heart, the rainbow flag, a ZWJ astronaut with a
-# skin tone, and a technologist.
+# skin tone, and a technologist. The niqqud line is the first verse of Genesis,
+# with its traditional pointing; the other extra lines were written for this spike.
 latin	en	Helvetica	All human beings are born free and equal in dignity and rights. Office “fluffy” AVATAR Typography — café, naïve, 1,234.56
 latin-system	en	system	All human beings are born free and equal in dignity and rights. Office “fluffy” AVATAR Typography — café, naïve, 1,234.56
 latin-times	en	Times New Roman	All human beings are born free and equal in dignity and rights. Office “fluffy” AVATAR Typography — café, naïve, 1,234.56

@@ -31,11 +31,12 @@
 #          unsandboxed, against the manifest's expectations; then --mutants
 #          variants of each of eight seed fonts, each in its own sandboxed
 #          process with a 10 s watchdog. Mutants that crash or hang are kept
-#   S5-Q4  s5-text footprint (five helpers per configuration); executable
-#          sizes, release and stripped
+#   S5-Q4  s5-text footprint (five helpers per configuration, on the whole
+#          corpus and on its Latin line); executable sizes, release and stripped
 #   S5-Q5  s5-image: Rust's pixels against ImageIO's; every image's pixels
-#          under the renderer profile with S5's rules; with --crash-checks,
-#          each rule removed in turn
+#          under the renderer profile with S5's rules; ten decodes of each
+#          large JPEG per decoder and profile, for determinism; with
+#          --crash-checks, each rule removed in turn
 # and then, --runs times: s5-text raster-timing (S5-Q2) and speed (S5-Q4), and
 # every test image through each decoder in a fresh process: cold, after a
 # warm-up decode, and after a warm-up decode inside the profile a renderer would
@@ -58,7 +59,7 @@ while [ $# -gt 0 ]; do
     --crash-checks) crash=yes; shift ;;
     --allow-battery) battery=yes; shift ;;
     --quick) quick=yes; shift ;;
-    -h | --help) sed -n '2,46p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h | --help) sed -n '2,47p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown argument: $1 (see --help)" >&2; exit 2 ;;
   esac
 done
@@ -264,6 +265,21 @@ check "$out/q5-compare.txt" "$image" compare "$I"/photo.* "$I"/landscape.* "$I"/
     done
   done
 } >"$out/q5-sandbox.txt"
+# Does a decoder give the same pixels every time? Ten processes for each large
+# JPEG, decoder and profile.
+{
+  echo "# determinism	file	decoder	profile	hashes (first four hex digits), one per process"
+  for file in landscape.jpg pattern.jpg; do
+    for config in "imageio none" "imageio renderer+imageio" "imageio renderer+avif" "rust none" "rust renderer"; do
+      set -- $config
+      hashes=""
+      for i in 1 2 3 4 5 6 7 8 9 10; do
+        hashes="$hashes $(decoded --decoder "$1" --profile "$2" --repeat 1 "$I/$file" | awk '{ for (i = 1; i < NF; i++) if ($i == "hash") print substr($(i + 1), 1, 4) }')"
+      done
+      printf 'determinism\t%s\t%s\t%s\t%s\n' "$file" "$1" "$2" "$hashes"
+    done
+  done
+} >"$out/q5-determinism.txt"
 if [ -n "$crash" ]; then
   # S4's renderer profile plus R1-R6, then each rule removed in turn, then S4's
   # renderer profile alone.
@@ -366,7 +382,7 @@ q5_medians() {
     "$out/q5-decode.txt" | LC_ALL=C sort
 }
 {
-  echo "S5 results, $start (commit $(git rev-parse --short HEAD)$(git diff --quiet && git diff --cached --quiet || echo ', uncommitted changes'))"
+  echo "S5 results, $start ($(grep '^commit:' "$out/environment.txt"), at the start)"
   echo
   echo "S5-Q1 shaping (verdicts per run, Axiom's tracking unless noted)"
   for f in none s4-text s5-text harfrust-tracking; do
@@ -389,7 +405,7 @@ q5_medians() {
   echo "  mutants: $(cut -f1 "$out/q3-mutants.txt" | sed 's/(.*//' | sort | uniq -c | tr -s ' ' | tr '\n' ' ')"
   echo
   echo "S5-Q4 footprint (median of $helpers helpers: current, then lifetime maximum, bytes)"
-  for config in none coretext harfrust-coretext rust rust-icu; do
+  for config in none coretext-latin harfrust-coretext-latin rust-latin coretext harfrust-coretext rust rust-icu; do
     printf '  %-18s %s\n' "$config" "$(awk -F'\t' -v c="$config" '$1 == "footprint" && $2 == c { print $4 "\t" $5 }' "$out/q4-footprint.txt" |
       sort -n | awk -F'\t' '{ a[NR] = $1; b[NR] = $2 } END { if (NR) print a[int((NR + 1) / 2)] "  " b[int((NR + 1) / 2)] }')"
   done
@@ -398,6 +414,8 @@ q5_medians() {
   echo
   echo "S5-Q5 images: median over runs of each process's median total time, and of the peak memory it added"
   q5_medians | sed 's/^/  /'
+  echo "  determinism (hashes over ten processes):"
+  grep -v '^#' "$out/q5-determinism.txt" | sed 's/^determinism/   /'
   echo "  sandboxed decodes:"
   grep -v '^#' "$out/q5-sandbox.txt" | sed 's/^sandbox/   /'
   [ -f "$out/q5-removal.txt" ] && grep -v '^#' "$out/q5-removal.txt" | sed 's/^removal/   /'

@@ -14,6 +14,9 @@
 //! - `rust-icu`: `rust`, plus ICU4X's line breaker (its "auto" model, with
 //!   the LSTM and dictionary data for South-East Asian scripts and CJK) and
 //!   word segmenter over every line.
+//! - `coretext-latin`, `harfrust-coretext-latin`, `rust-latin`: the same, on
+//!   the corpus's Latin line alone: each stack's cost for a renderer's first
+//!   text, where the whole corpus is a heavily multilingual page.
 //!
 //! The helper's side follows S4's protocol: it reads compiled profile bytecode
 //! from descriptor 3, applies it, does its work, says ready and waits; the
@@ -40,7 +43,16 @@ use crate::platform::coretext::{Canvas, Font, Line, Smoothing};
 use crate::{Options, shaping};
 
 /// The configurations, in the order the broker measures them.
-const CONFIGS: [&str; 5] = ["none", "coretext", "harfrust-coretext", "rust", "rust-icu"];
+const CONFIGS: [&str; 8] = [
+    "none",
+    "coretext-latin",
+    "harfrust-coretext-latin",
+    "rust-latin",
+    "coretext",
+    "harfrust-coretext",
+    "rust",
+    "rust-icu",
+];
 /// The size the workload shapes and draws at, in points (1×).
 const SIZE: f64 = 16.0;
 
@@ -117,23 +129,33 @@ fn report(work: &Work, elapsed: Duration) {
 
 fn run(config: &str) -> Result<Work, String> {
     let mut work = Work::default();
+    let (config, samples): (&str, Vec<Sample>) = match config.strip_suffix("-latin") {
+        Some(base) => (
+            base,
+            corpus::samples()
+                .into_iter()
+                .filter(|s| s.id == "latin")
+                .collect(),
+        ),
+        None => (config, corpus::samples()),
+    };
     match config {
         "none" => {}
         "coretext" => {
-            for sample in corpus::samples() {
-                coretext_line(&sample, &mut work);
+            for sample in &samples {
+                coretext_line(sample, &mut work);
             }
         }
         "harfrust-coretext" | "rust" | "rust-icu" => {
             let segmenter = GraphemeClusterSegmenter::new();
             let rust_raster = config != "harfrust-coretext";
-            for sample in corpus::samples() {
-                harfrust_line(&sample, segmenter, rust_raster, &mut work)?;
+            for sample in &samples {
+                harfrust_line(sample, segmenter, rust_raster, &mut work)?;
             }
             if config == "rust-icu" {
                 let lines = LineSegmenter::new_auto(LineBreakOptions::default());
                 let words = WordSegmenter::new_auto(WordBreakInvariantOptions::default());
-                for sample in corpus::samples() {
+                for sample in &samples {
                     work.line_breaks += lines.segment_str(sample.text).count();
                     work.words += words.segment_str(sample.text).count();
                 }

@@ -13,7 +13,7 @@
 //!   is given (unreported, so first-use costs fall outside the measurement),
 //!   then decode each file `N` times and print one line: format, size, the
 //!   median total time and its two parts, time per megapixel, the peak memory
-//!   the decodes added, and a hash of the pixels. `imageio` decodes when the
+//!   the first decode added (its output included), and a hash of the pixels. `imageio` decodes when the
 //!   image is created (`kCGImageSourceShouldCacheImmediately`), then draws it
 //!   into Axiom's buffer: its parts are the decode and the conversion.
 //!   `imageio-lazy` caches nothing, so drawing decodes, as an engine that
@@ -143,13 +143,17 @@ fn decode(args: &[String]) -> Result<(), String> {
     );
     for (name, data) in &inputs {
         let before = peak_footprint();
-        let mut times = Vec::with_capacity(repeat);
-        let mut first = None;
+        let (mut times, mut first, mut added) = (Vec::with_capacity(repeat), None, 0);
         for _ in 0..repeat.max(1) {
             match engine.decode(data) {
                 Ok((image, decode, convert)) => {
                     times.push((decode, convert));
-                    first.get_or_insert(image);
+                    if first.is_none() {
+                        // The first decode's peak, its output included. Each
+                        // image is freed before the next decode.
+                        added = peak_footprint().saturating_sub(before);
+                        first = Some(Pixels::of(&image));
+                    }
                 }
                 Err(e) => {
                     println!("error\t{name}\t{}\t{e}", engine.name());
@@ -157,9 +161,8 @@ fn decode(args: &[String]) -> Result<(), String> {
                 }
             }
         }
-        let added = peak_footprint().saturating_sub(before);
-        if let Some(decoded) = first {
-            report(name, engine, &decoded, &times, added);
+        if let Some(pixels) = first {
+            report(name, engine, &pixels, &times, added);
         }
     }
     Ok(())
@@ -192,29 +195,45 @@ fn enter_profile(profile: Option<&str>) -> Result<(), String> {
     .map_err(|e| format!("the profile did not apply: {e}"))
 }
 
+/// What `decode` reports about an image's pixels, so that the pixels
+/// themselves can be freed before the next decode.
+struct Pixels {
+    format: String,
+    width: usize,
+    height: usize,
+    hash: u64,
+    mean: String,
+}
+
+impl Pixels {
+    fn of(decoded: &Decoded) -> Self {
+        Self {
+            format: decoded.format.clone(),
+            width: decoded.width,
+            height: decoded.height,
+            hash: fnv(&decoded.rgba),
+            mean: mean_rgba(decoded),
+        }
+    }
+}
+
 /// One `decode` line: the medians of the total and of each part, and a
 /// summary of the pixels for comparing runs.
-fn report(
-    name: &str,
-    engine: Engine,
-    decoded: &Decoded,
-    times: &[(Duration, Duration)],
-    added: u64,
-) {
+fn report(name: &str, engine: Engine, pixels: &Pixels, times: &[(Duration, Duration)], added: u64) {
     let total = median(times.iter().map(|&(decode, convert)| decode + convert));
-    let megapixels = to_f64(decoded.width * decoded.height) / 1e6;
+    let megapixels = to_f64(pixels.width * pixels.height) / 1e6;
     println!(
         "decode\t{name}\t{}\t{}\t{}x{}\t{}\t{:.0}\t{}\t{}\t{added}\t{:016x}\t{}",
         engine.name(),
-        decoded.format,
-        decoded.width,
-        decoded.height,
+        pixels.format,
+        pixels.width,
+        pixels.height,
         total.as_micros(),
         total.as_secs_f64() * 1e6 / megapixels.max(1e-9),
         median(times.iter().map(|&(decode, _)| decode)).as_micros(),
         median(times.iter().map(|&(_, convert)| convert)).as_micros(),
-        fnv(&decoded.rgba),
-        mean_rgba(decoded)
+        pixels.hash,
+        pixels.mean
     );
 }
 
