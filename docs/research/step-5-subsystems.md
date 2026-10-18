@@ -1,0 +1,611 @@
+# Step 5 — Subsystem Design: Plan and Checkpoint Tracker
+
+| | |
+|---|---|
+| **Status** | **CP1 ✅** (2026-10-18). **At Gate A:** the owner reviews this plan |
+| **Authorized** | 2026-10-18, by the owner: "Step 5 Authorization: Authorized." Planning on a new branch, `step-5`, with "the Step 5 plan and checkpoint tracker first for Gate A review" (§2). Design documents only; each spike needs its own authorization |
+| **Branch** | `step-5`, from `main` at `c642ab3` (the Step 4 merge). Local until the owner authorizes a push (§7) |
+| **Feeds** | Decision-map items I1–I5, the text part of P4, and X4 if the owner adds it (§2.3); the questions earlier steps handed to Step 5 (§2.2); OQ-3, as evidence; ADRs from 0010 (§4); Step 6 |
+| **Last updated** | 2026-10-18 |
+
+> **Resuming in a new session?**
+> 1. Read §6 to find the first checkpoint that isn't ✅.
+> 2. Check the repository against §11, the results log.
+> 3. Continue from that checkpoint's deliverables (§6.1).
+
+---
+
+## 1. Purpose
+
+Design the subsystems behind the interfaces that Step 4 fixed: what each one computes, with which data structures and families of algorithms, which code Axiom writes and which it reuses, which process runs it, and what it costs on the 8 GB M1.
+
+The subsystems are the ones the [decision map](../decision-map.md) assigns to Step 5:
+- text and fonts (I1), with the text part of P4;
+- graphics and compositing (I2);
+- networking and TLS (I3);
+- image and media decoders (I4);
+- the accessibility bridge (I5);
+- style and layout;
+- HTML parsing and the DOM, and the JavaScript engine and bindings, which the owner added at Step 4's Gate A (2026-10-17).
+
+Storage and workers are designed after networking: the [process model](../security/process-model.md) §3 places web storage in the network process, and service workers intercept its fetches.
+
+**Step 4 fixed interfaces, ownership, threads and invariants. Step 5 designs what sits behind them, and changes none of them without the owner** (SC1). Step 6 then sets the standards baseline, the testing strategy, the budgets and the roadmap from Step 5's inputs.
+
+**The level of design** is the decisions that are expensive to reverse: data structures, the interfaces between subsystems, families of algorithms, build or reuse, and process placement. Complete algorithms are not designed here. Each document names what it leaves to the implementation milestones.
+
+## 2. Owner input and scope (2026-10-18)
+
+| Input | Effect |
+|---|---|
+| "Step 4 is formally accepted." | Step 4 is closed: merged into `main` at `c642ab3` and pushed ([Step 4 tracker](step-4-architecture-proposal.md), CP17) |
+| "Step 5 Authorization: Authorized." | This plan, as design work under the Phase Zero rule |
+| "Proceed with planning Phase Zero Step 5 (Subsystems) on a new branch `step-5`." | Branch `step-5`, created from `main` at `c642ab3` |
+| "Submit the Step 5 plan and checkpoint tracker first for Gate A review, defining the subsystem sequence, review gates, and identifying which areas may require targeted validation spikes." | CP1 ends at Gate A (§7). The sequence is in §6, the gates in §7, and the candidate spikes in §10. No spike is designed in detail or built before the gate that authorizes it |
+
+### 2.1 Binding inputs
+
+Every one of these is accepted, so Step 5 designs within them:
+- **[ADR-0001](../adr/0001-scope-and-target.md):**
+  - the full modern app web must stay reachable;
+  - our own JavaScript engine, with JavaScript and the DOM in one heap;
+  - sensitive logins, gated;
+  - Apple Silicon and the current macOS only;
+  - web content in all languages, in stages.
+- **[ADR-0002](../adr/0002-implementation-language.md):**
+  - Rust;
+  - the `unsafe` policy ([evaluation](../technology/language-evaluation.md) §15.3): FFI only in `platform` modules, and no `unsafe` in parsers, network policy, IPC decoding, or image and font wrappers (rule 5);
+  - build thresholds T1–T4.
+- **[ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md) and [ADR-0008](../adr/0008-script-agents-and-heap.md):**
+  - Pattern B, with one heap per agent;
+  - `SliceStack` for C1;
+  - struct-of-arrays link columns (SH8);
+  - generated setters (SH9);
+  - memory that reaches platform APIs lives outside the heap (SH11);
+  - generated bindings (SH12);
+  - room for a JIT (SH13).
+- **[ADR-0004](../adr/0004-process-model-and-sandbox.md):**
+  - the process types and the Rule of 2;
+  - the browser never decodes images or parses fonts;
+  - system parsers run only in sandboxed helpers;
+  - the JIT policy J1–J7;
+  - memory targets B1–B7.
+- **ADRs [0005](../adr/0005-ipc-transport-and-interfaces.md)–[0007](../adr/0007-frame-tree-pipeline-and-input.md) and [0009](../adr/0009-embedder-api-and-shell.md):**
+  - Mach IPC with generated safe decoders and `Untrusted<T>`;
+  - one thread and heap per event loop;
+  - the browser's frame tree;
+  - five pipeline stages, with immutable fragments and per-frame display lists of validated primitives;
+  - the invalidation lifecycle;
+  - input and accessibility through the browser;
+  - the embedder API, a headless embedder and the pure-Rust shell.
+
+  The design documents behind these ADRs are binding.
+- **[Charter](../charter.md):**
+  - the core mechanisms of G1 are Axiom's own, and supporting infrastructure is reused only with a justification and a class (principle 4);
+  - efficiency is a primary goal (G4);
+  - no architectural corners are cut (principle 7).
+
+### 2.2 Questions earlier steps handed to Step 5
+
+| # | Question | Raised in | Checkpoint |
+|---|---|---|---|
+| 1 | The dependency policy, "to be finalized" | [Language evaluation](../technology/language-evaluation.md) §12, §15.4 | CP2 |
+| 2 | Text and shaping (the text part of P4). Web fonts. Checking that fonts resolved, since failures are silent. Reviewed rules for user-installed fonts | [Decision map](../decision-map.md) P4; [S4 results](s4-results.md) §7, item 6 | CP3 |
+| 3 | Where glyphs are rasterized: the renderer, or a GPU process | [ADR-0004](../adr/0004-process-model-and-sandbox.md), consequences; [process model](../security/process-model.md) §3, note 4; [rendering pipeline](../architecture/rendering-pipeline.md) open question 2 | CP3, CP4 |
+| 4 | The rasterizer and the GPU backend behind the compositor | [Rendering pipeline](../architecture/rendering-pipeline.md) PL9, open question 3 | CP4 |
+| 5 | Damage tracking and partial presentation | [Invalidation](../architecture/invalidation.md) IV7, open question 3 | CP4 |
+| 6 | Which animations run on the compositor beyond `transform` and `opacity` | [Invalidation](../architecture/invalidation.md) open question 2 | CP4, CP14 |
+| 7 | How the network process enforces initiator locks and ORB | [ADR-0004](../adr/0004-process-model-and-sandbox.md), consequences | CP6 |
+| 8 | The TLS stack. If it is Apple's, it must stay out of the browser process | [ADR-0004](../adr/0004-process-model-and-sandbox.md), consequences; [overview](../architecture/overview.md) §2 | CP6 |
+| 9 | Private Network Access-style checks | [Threat model](../security/threat-model.md) §5 | CP6 |
+| 10 | Name resolution on the network process's worker pool, if a blocking resolver is chosen | [Event loop and threading](../architecture/event-loop-and-threading.md#42-the-threads-of-each-process) §4.2 | CP6 |
+| 11 | Where shared and service workers run when no same-site renderer exists | [Script and heap](../architecture/script-and-heap.md) open question 4; [frame tree](../architecture/frame-tree-and-navigation.md) open question 3 | CP7 |
+| 12 | The mapping from accessibility trees to `NSAccessibility` roles and actions | [Input and accessibility](../architecture/input-and-accessibility.md) open question 3 | CP8 |
+| 13 | Which key equivalents a page may override, decided with the owner | [Input and accessibility](../architecture/input-and-accessibility.md) open question 2 | CP8 |
+| 14 | The full list of settings, and how the sensitive-site list and the JIT switches are presented, decided with the owner | [Embedder API](../architecture/embedder-api.md) open question 2 | CP8 |
+| 15 | Style invalidation's details | [Invalidation](../architecture/invalidation.md) IV3 | CP14 |
+| 16 | The cascade and its caches; the layout unit | [Rendering pipeline](../architecture/rendering-pipeline.md) PL3, PL5, open question 4 | CP14, CP15 |
+| 17 | The bytecode dispatch technique. S3 recommends a `match` loop | [Script and heap](../architecture/script-and-heap.md) open question 2; [S3 results](s3-results.md) §9, item 5 | CP16 |
+| 18 | S3's three inputs for the engine: a value type that carries the scope lifetime; rooting many values as one heap array, as event dispatch's listener snapshot could; keeping the root stack's length where the compiler loads it on its own, with S1's dispatch case kept as a benchmark | [S3 results](s3-results.md) §9, item 6 | CP13, CP16, CP17 |
+| 19 | Ropes and slices for JavaScript strings | [Rendering pipeline](../architecture/rendering-pipeline.md) PL11 | CP16 |
+| 20 | The WebIDL generator | [Script and heap](../architecture/script-and-heap.md) SH12 | CP17 |
+| 21 | OQ-3, WebAssembly: our own engine or an embedded one. Its evidence includes the JavaScript engine's design | [Open questions](../open-questions.md); decision map I6 | CP16, as evidence only |
+
+### 2.3 Scope
+
+**In scope:** the subsystems in §1, each designed to the level stated there, with its build-or-reuse decisions and the spikes the owner authorizes.
+
+**Proposed for Gate A: a new decision-map item, X4, dependency and supply-chain policy.** It would be decided in Step 5, at CP2, and recorded in ADR-0010. Three reasons:
+- Step 5 is the first step to choose dependencies.
+- The language evaluation leaves the policy "to be finalized" (§12, §15.4).
+- ADR-0002's rule 5 (no `unsafe` in parsers) needs a rule for code Axiom doesn't write, such as a font parser crate that contains `unsafe`.
+
+**Out of scope.** Each item names where it is decided.
+- **Step 6:** the standards baseline and support matrix (X1), the testing and fuzzing strategy (X2), the performance budgets (X3), and the roadmap and its milestones. Step 5 supplies their inputs: each subsystem's specifications and test suites (SC5), its costs (SC6) and its staging.
+- **OQ-3, WebAssembly:** whether Axiom writes its own engine or embeds one stays open until before the first Wasm milestone. CP16 records what a Wasm engine needs from the JavaScript engine and the heap, and assesses the options as evidence.
+- **Whether to build a JIT** (J1) stays evidence-driven and comes later. Step 5 keeps room for one (SH13).
+- **Media codecs' internals and DRM.** DRM is a non-goal (charter §6). Step 5 places media decoding; it designs no codec.
+- **Production code, a project skeleton and dependencies:** none in Phase Zero. Spikes run only as the owner authorizes each one.
+
+**Not needed by Step 5: OQ-2, the target-site corpus.** Step 5 designs for the complete model, and the corpus orders the work in Step 6's roadmap. If the owner lists sites earlier, the staging notes will use them.
+
+**Evidence gathering without code**, as in Steps 3 and 4:
+- SDK headers, export stubs and man pages;
+- `nm -u`, `otool -L` and `codesign -d` on installed browsers;
+- listings of the system's fonts and ICU data;
+- crate sources, metadata and documentation, read on GitHub, docs.rs and crates.io.
+
+Nothing is downloaded with cargo or installed. Each such fact names the command or URL it comes from. Measurements come only from authorized spikes.
+
+## 3. Questions
+
+| ID | Question | Answered at |
+|---|---|---|
+| Q1 | Which code does Axiom write itself, and which may it reuse? How is each dependency justified, classed, audited and kept within the `unsafe` policy and the build thresholds, including the `unsafe` and C code inside it? | CP2 |
+| Q2 | How does the engine handle Unicode: character properties, segmentation, line breaking, bidi, normalization, case mapping, IDNA, and the Encoding Standard? Where does the Unicode data come from, for text, CSS, URLs and JavaScript alike? | CP3 |
+| Q3 | How are fonts found, matched and fallen back to across scripts? How are web fonts loaded safely in the renderer? How is text shaped? Where and how are glyphs rasterized, and in what form do they reach the display list? | CP3 |
+| Q4 | What draws the display list: the GPU interface, path and glyph rasterization, compositing of property trees and effects, color management, damage tracking and partial presentation? Which animations run on the compositor, and how does all of it move into a GPU process later? | CP4 |
+| Q5 | Which image formats are decoded, by safe Rust or by ImageIO inside the renderer's sandbox? How do decoding, animation and color profiles stay within memory budgets? Where do media decoding and audio output run? | CP5 |
+| Q6 | How does the network process fetch: URLs and sites, HTTP/1.1, HTTP/2 and HTTP/3, TLS and certificate verification against the system's trust store, DNS, connections, the HTTP cache and cookies? How does it enforce Fetch's policy from the browser's records: initiator locks, CORS, ORB, CORP, mixed content, HSTS, Private Network Access? | CP6 |
+| Q7 | Where and how are web storage, IndexedDB, the Cache API and quotas stored? How do service workers intercept fetches, and where do shared and service workers run when no same-site renderer exists? | CP7 |
+| Q8 | How is the accessibility tree built in the renderer, and how does the browser expose it through `NSAccessibility`? With the owner: the settings list, and the key equivalents a page may override | CP8 |
+| Q9 | How is HTML parsed, from bytes to tree? How is the DOM represented in Pattern B arenas: nodes, links, attributes, text, events, mutation observers, Shadow DOM, custom elements, ranges and selection, forms and editing? | CP13 |
+| Q10 | How is CSS parsed and the cascade computed: selector matching, the cascade and its caches, invalidation, computed values, custom properties, queries, animations and transitions, the CSSOM? | CP14 |
+| Q11 | How does layout work: the layout unit, box construction, formatting contexts, intrinsic sizing, writing modes, fragmentation, scrolling and overflow, replaced elements and child frames, fragment reuse? How is the fragment tree painted into a display list, hit-tested and queried? | CP15 |
+| Q12 | How does the JavaScript engine work: parser, bytecode and interpreter, the value type, the object model and inline caches, strings, builtins and `RegExp`, `Intl`, modules, generators and async functions, the job queue? What would Wasm and a JIT need from it? | CP16 |
+| Q13 | How are the WebIDL bindings generated: platform objects in the heap, argument conversion, rooting conventions, prototypes and realms, exceptions, cross-origin objects, and the hot path of event dispatch? | CP17 |
+| Q14 | How do the subsystems fit together: the crate structure and `unsafe` map, the dependency register, end-to-end scenarios through the subsystems, and the check of SC1–SC10? | CP18 |
+
+## 4. Deliverables
+
+Planned documents are named in code font until they exist.
+
+| # | Deliverable | Checkpoint |
+|---|---|---|
+| 1 | This plan and tracker | CP1 |
+| 2 | `docs/technology/dependency-policy.md` (X4, if added): the rules, and the format of a register that lists every proposed dependency | CP2 |
+| 3 | `docs/architecture/text-and-fonts.md` (I1, the text part of P4); spike S5's design, in this tracker | CP3 |
+| 4 | `docs/architecture/graphics.md` (I2); spike S6's design | CP4 |
+| 5 | `docs/architecture/images-and-media.md` (I4) | CP5 |
+| 6 | `docs/architecture/networking.md` (I3); spike S7's design | CP6 |
+| 7 | `docs/architecture/storage-and-workers.md` | CP7 |
+| 8 | `docs/architecture/accessibility.md` (I5) | CP8 |
+| 9 | ADRs for part 1, Proposed, grouped by coupling as Step 4's were. Tentatively: ADR-0010, the dependency policy (X4); ADR-0011, text, fonts and Unicode (I1); ADR-0012, graphics, images and media (I2, I4); ADR-0013, networking, storage and workers (I3); ADR-0014, accessibility (I5). CP9 settles the grouping | CP9 |
+| 10 | Spikes, each only if authorized: code in `spikes/s5/`, `spikes/s6/` and `spikes/s7/`, scripts in `tools/`, results in `docs/research/s5-results.md`, `s6-results.md` and `s7-results.md` | CP10–CP12 |
+| 11 | `docs/architecture/html-and-dom.md` | CP13 |
+| 12 | `docs/architecture/style.md` | CP14 |
+| 13 | `docs/architecture/layout-and-paint.md` | CP15 |
+| 14 | `docs/architecture/javascript-engine.md` | CP16 |
+| 15 | `docs/architecture/bindings.md` | CP17 |
+| 16 | The [overview](../architecture/overview.md), refined; ADRs for part 2, Proposed. Tentatively: ADR-0015, HTML parsing and the DOM; ADR-0016, style, layout and paint; ADR-0017, the JavaScript engine and bindings. CP18 settles the grouping | CP18 |
+| 17 | Updates to the decision map, open questions, indexes, status and spikes README | CP9, CP12, CP18 |
+
+**Every subsystem document has the same structure:**
+- status, question, what it feeds and what it builds on;
+- summary;
+- binding inputs: the Step 3 and Step 4 rules it must satisfy;
+- specifications: what it implements, dated, and where Axiom will be approximate;
+- precedent: how Chromium, Firefox, WebKit, Servo and Ladybird do it, and relevant Rust projects, sourced and dated;
+- build or reuse: the candidates judged by ADR-0010's rules, with each dependency's justification and class;
+- the design, as numbered rules with one prefix per document:
+  - DP, the dependency policy;
+  - TX, text and fonts;
+  - GR, graphics;
+  - IM, images and media;
+  - NW, networking;
+  - SW, storage and workers;
+  - AX, accessibility;
+  - HD, HTML and the DOM;
+  - ST, style;
+  - LY, layout and paint;
+  - JE, the JavaScript engine;
+  - WB, the WebIDL bindings;
+- interfaces with neighbouring subsystems;
+- security: Rule of 2 placement, `unsafe` and FFI;
+- efficiency: memory owners and estimates, threads, idle behaviour;
+- incremental updates, and the test oracle;
+- staging across L0–L3, and the complete model: where later app-web features will live;
+- open questions and sources.
+
+Each design document becomes binding when its ADR is accepted, as Step 4's did.
+
+## 5. Subsystem criteria
+
+Each subsystem design is judged against these criteria. CP18 checks every one and records the evidence in the overview.
+
+| # | Criterion | From |
+|---|---|---|
+| SC1 | **Step 4's interfaces hold.** Each subsystem sits behind the interfaces of ADRs 0005–0009 and changes none of them. A subsystem that needs one changed raises an amendment for the owner, recorded in the ADR that owns the interface. Nothing changes silently | AC1; ADRs 0005–0009; charter principle 7 |
+| SC2 | **Untrusted input is parsed only where the Rule of 2 allows.** Every parser of web content or network bytes runs in a renderer or a sandboxed helper. Apple's C and Objective-C parsers (CoreText, ImageIO, and Apple's TLS and certificate code) run only in sandboxed helpers, never in the browser. The browser still never decodes an image or parses a font | PM2, TA5, AC4; ADR-0004 |
+| SC3 | **`unsafe` stays where ADR-0002 allows it, dependencies included.** Axiom's parsers, network policy, IPC decoding, and image and font wrappers contain no `unsafe` (rule 5). New FFI (CoreText, ImageIO, Security, Metal, AppKit's accessibility) lives in `platform` modules. A dependency's own `unsafe` and C code are accounted for under ADR-0010's rules | ADR-0002, evaluation §15.3; AC9 |
+| SC4 | **Build or reuse follows the charter.** The core mechanisms of charter G1 are Axiom's own. Supporting infrastructure may be reused, each dependency with a written justification and a class: required platform facility, replaceable implementation detail, or foundational dependency. Dependencies stay within build thresholds T1–T4 | Charter G1 and principle 4; ADR-0002 |
+| SC5 | **Standards first, and testable.** Each subsystem names the specifications it implements, dated, and the suites that will check it: WPT directories, html5lib-tests, test262, Unicode's conformance files. It keeps standards-compliant and approximate behaviour apart. Step 6 sets the baseline and the pass rates | Charter §8 and principle 5; X1, X2 |
+| SC6 | **Efficiency is designed.** Each subsystem names its long-lived structures, with owners and size estimates, its threads (EL rules), and its idle behaviour, consistent with B1–B7 on the 8 GB M1 | Charter G4; AC3, AC7; PM7, PM8 |
+| SC7 | **Incremental by design.** Each pipeline subsystem says what it caches, what invalidates it, and how IV14's oracle compares its incremental output with a rebuild from scratch | P3; IV1–IV14 |
+| SC8 | **Deterministic and headless.** Each subsystem runs headless and in one process, with deterministic output under the test scheduler and virtual time (EL24). Where output depends on the OS, as with system fonts and codecs, the document says how tests stay stable | AC6 |
+| SC9 | **The complete model fits.** Each subsystem names where its later app-web features will live without architectural change. For example: every script and writing mode; variable and color fonts; GPU canvas and video; HTTP/3, WebSockets and service-worker interception; Wasm, `SharedArrayBuffer` and `Intl` | AC8; ADR-0001 R1; charter principle 7 |
+| SC10 | **Every decision traces to evidence:** a dated source, a measurement on this Mac, or a labelled inference or hypothesis that names the step that will test it | AC10; research conventions |
+
+## 6. Sequence and checkpoints
+
+**The order: the platform-facing subsystems first, then the spikes, then the document and script engine.**
+1. **The dependency policy first (CP2).** Every later checkpoint chooses between building and reusing, so they all need one rule. That includes how a dependency's own `unsafe` counts against ADR-0002's boundary.
+2. **Part 1, the platform-facing subsystems (CP3–CP8).** Text, graphics, images, networking, storage and accessibility meet Apple's frameworks (CoreText, Metal, ImageIO, Security, `NSAccessibility`), supporting libraries and sandbox rules. So they carry most of the dependency and placement decisions that are expensive to reverse, and most of the questions that may need measurement. Designing them first lets the spikes report before the engine's designs depend on them. Within part 1, the order is the decision map's (text, then rendering, then networking), extended:
+   - **Text first:** inline layout, painting (the glyph atlas), HTML (encodings), URLs (IDNA) and JavaScript (`Intl`, `RegExp`) all depend on its Unicode and font decisions.
+   - **Then graphics,** which consumes text's glyph decision and Step 4's display list, and then images, whose decoded pixels, color profiles and memory meet the compositor.
+   - **Then networking,** before the engine because HTML parsing consumes its streams and its URL parser. Storage and workers follow it: storage lives in the network process, and service workers intercept its fetches.
+   - **Accessibility last:** it is small, and consumes the accessibility-tree contracts PL12 and IN9.
+3. **The spikes, between the parts (CP10–CP12),** so that their results arrive before part 2 uses them. S5's text results, for example, feed inline layout.
+4. **Part 2, the document engine, in pipeline order (CP13–CP15):** HTML and the DOM, then style, then layout and paint. This is the static-document pipeline that milestones begin with ([ADR-0001](../adr/0001-scope-and-target.md), decision 1), and each stage consumes the one before.
+5. **Script last (CP16–CP17):** the JavaScript engine, then the bindings, which join the engine's object model to the DOM. DOM objects are the JavaScript objects (SH1), so CP13 fixes how nodes are stored and leaves their JavaScript facet (prototypes, expando properties) as an explicit interface, which CP17 closes.
+
+**Every checkpoint ends with:**
+- every relative link resolving, checked by `tools/check-doc-links.py`. Planned documents are named in code font, not linked, until they exist;
+- the four standard checks green: `cargo fmt --all --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, `tools/check-unsafe-policy.sh`. Only the spike checkpoints change code;
+- a commit on `step-5`, and an update to this tracker.
+
+| CP | Scope | Status |
+|---|---|---|
+| **CP1** | This plan; branch `step-5`; the owner's decisions recorded | ✅ 2026-10-18 (§11). **Gate A** |
+| | **Part 1: the platform-facing subsystems** | |
+| CP2 | Dependency policy and build-or-reuse rules (X4) | Not started |
+| CP3 | Text, fonts and Unicode (I1, the text part of P4); spike S5's design | Not started |
+| CP4 | Graphics: rasterization, compositing and presentation (I2); spike S6's design | Not started |
+| CP5 | Images and media (I4) | Not started |
+| CP6 | Networking: URLs, HTTP, TLS, DNS, cache, cookies, Fetch's policy (I3); spike S7's design | Not started |
+| CP7 | Storage and workers | Not started |
+| CP8 | Accessibility: the tree and the bridge (I5); the shell's questions for the owner | Not started |
+| CP9 | Synthesis of part 1: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | Not started |
+| | **Spikes**, each only if authorized at Gate B | |
+| CP10 | Spike S5: the text stack | Not started |
+| CP11 | Spike S6: compositing on Metal | Not started |
+| CP12 | Spike S7: the network process and TLS | Not started |
+| | **Part 2: the document and script engine** | |
+| CP13 | HTML parsing and the DOM | Not started |
+| CP14 | Style | Not started |
+| CP15 | Layout and paint | Not started |
+| CP16 | The JavaScript engine | Not started |
+| CP17 | WebIDL bindings | Not started |
+| CP18 | The overview refined, and the criteria check; ADRs for part 2 (Proposed); decision map, open questions, indexes, status. **Gate C** | Not started |
+| CP19 | Merge `step-5` into `main` (`--no-ff`), when the owner instructs | Not started |
+
+### 6.1 What each checkpoint decides
+
+**CP2. Dependency policy (X4; Q1):**
+- **The line between the core and supporting infrastructure.** Charter G1's mechanisms are Axiom's own; supporting infrastructure may be reused (principle 4). The policy works the line through Step 5's actual candidates: Unicode data, encodings, URL parsing, shaping, font parsing, rasterization, image codecs, the GPU interface, TLS, HTTP framing, compression, storage engines and accessibility.
+- **What each dependency records:**
+  - its purpose and class;
+  - the alternatives;
+  - its license and maintenance;
+  - precedent in Chromium or Firefox;
+  - the `unsafe` and non-Rust code inside it, and its transitive dependencies;
+  - its build cost against T1–T4;
+  - the process it runs in.
+- **`unsafe` in dependencies:** how a dependency's `unsafe` or C code counts against ADR-0002's rules 2 and 5 and the Rule of 2. One example: a font parser that contains `unsafe`, running in a renderer.
+- **The supply chain:**
+  - the pinned `Cargo.lock`;
+  - `cargo-deny` (advisories, licenses, bans, sources) and `cargo-vet` (audits), specified but not installed;
+  - a license allow-list and minimal features;
+  - how advisories reach a browser built locally. The routine itself is Step 6's (threat model §9).
+- **Apple's frameworks** as required platform facilities: which ones, from which process (SC2), always through `platform`.
+- **Enforcement:** how a check like `tools/check-unsafe-policy.sh` would cover dependencies. Designed only.
+
+**CP3. Text, fonts and Unicode (I1, the text part of P4; Q2, Q3):**
+- **Unicode for the whole engine:**
+  - properties and script itemization;
+  - segmentation (UAX #29), line breaking (UAX #14, with CSS Text's rules) and bidi (UAX #9);
+  - normalization and case mapping;
+  - IDNA for URLs.
+
+  From ICU4X, the system's ICU, or tables of our own. One source serves text, CSS, URLs and JavaScript (`Intl`, `RegExp` property escapes).
+- **The Encoding Standard's decoders and encoders,** which HTML, URLs and `TextDecoder` use. The sniffing algorithm is CP13's.
+- **Fonts:**
+  - the system font database, through CoreText or our own index;
+  - CSS Fonts' matching, generic families, and fallback per script and per character;
+  - `@font-face` loading (OpenType, WOFF, WOFF2), sanitizing, and memory;
+  - variable and color fonts, and emoji;
+  - S4's findings: system fonts and ICU's data must be readable; failures are silent, so fonts must be checked; user-installed fonts need reviewed rules.
+- **Shaping:** CoreText, a Rust shaper such as HarfRust, or our own. Also the shaped-run interface that inline layout consumes (glyphs, advances, clusters, break opportunities, bidi levels), and caches of shaped words.
+- **Glyph rasterization:**
+  - where it happens: the renderer now, and whether a GPU process later (PL8);
+  - with CoreText or a Rust rasterizer;
+  - the atlas format and its memory (PL7);
+  - subpixel positioning and font smoothing.
+- **The display list:** text items as PL7 defines them, or an amendment for the owner (SC1).
+- **Spike S5's design,** if the comparison needs measurement (§10).
+
+**CP4. Graphics: rasterization, compositing and presentation (I2; Q4):**
+- **The GPU interface:** Metal directly, through `objc2-metal` in `platform`, or a portability layer such as wgpu. Judged on the build thresholds, where the `unsafe` sits, and the later GPU process.
+- **The compositor's renderer** for display lists (PL6–PL9):
+  - property trees, rounded-rect clips and effects (opacity, blend modes, filters);
+  - shadows and gradients;
+  - glyph quads from atlases, images, and embedded child frames;
+  - batching;
+  - shaders, given that the Command Line Tools have no offline Metal compiler: [S2](s2-results.md) compiled them at run time, and macOS cached them.
+- **Path rasterization,** for borders, SVG and, later, canvas 2D: on the CPU or the GPU, in the renderer or the compositor, and the anti-aliasing quality.
+- **Color:** sRGB and Display P3, CSS Color 4's color spaces, images' ICC profiles (with CP5), and the window's color space.
+- **Presentation:**
+  - `CAMetalLayer`;
+  - damage tracking and partial presentation (§2.2, item 5);
+  - frame pacing against the browser's display link (EL19–EL22);
+  - zero cost while idle (AC3).
+- **Compositor animations** beyond `transform` and `opacity` (§2.2, item 6), with CP14.
+- **Where canvas 2D, WebGL and WebGPU will live** (the later GPU process), and video frames, with CP5.
+- **Memory:** surfaces, atlases, and the browser's budget (B1).
+- Whether anything here needs Xcode (OQ-7).
+- **Spike S6's design** (§10).
+
+**CP5. Images and media (I4; Q5):**
+- **Formats and decoders:**
+  - PNG, JPEG, GIF, WebP, AVIF, BMP and ICO, and whether to support JPEG XL;
+  - safe Rust decoders against ImageIO inside the renderer's sandbox (SC2, SC3);
+  - which formats lack a safe decoder.
+- **Decoding within budgets:**
+  - incremental and progressive decoding, and animation;
+  - decoding on demand and at display size;
+  - discarding decoded pixels under memory pressure;
+  - the decoded-image cache and its budget.
+- **Color management,** with CP4: ICC profiles and coding-independent code points (CICP).
+- **The decoder interface:** helper-pool threads (PL10), output in shared memory (PL7, PL8), and room to move decoding into its own process later.
+- **SVG as an image,** with CP15.
+- **Media, placement only:**
+  - decoding in a utility process with VideoToolbox and AVFoundation (process model §3);
+  - video frames as display-list resources (PL7);
+  - audio output on real-time threads.
+
+**CP6. Networking (I3; Q6):**
+- **URLs, origins and sites:**
+  - the WHATWG URL parser, shared by every process;
+  - the Public Suffix List and how it is updated;
+  - IDNA, with CP3.
+- **HTTP:**
+  - HTTP/1.1, HTTP/2 and HTTP/3 over QUIC;
+  - connection pooling and prioritization;
+  - the system's proxy settings;
+  - WebSockets, with room for WebTransport.
+- **TLS:**
+  - the stack: rustls, or Apple's, which ADR-0004 keeps out of the browser;
+  - certificate verification against the system's trust store, and revocation;
+  - HSTS and its preload list;
+  - session resumption.
+- **DNS:** the system resolver or our own; DNS over HTTPS; a blocking resolver on the worker pool, if chosen.
+- **The HTTP cache:** format, partitioning by top-level site (SI3), size and eviction.
+- **Cookies:**
+  - the current cookie specification (RFC 6265 and its revision);
+  - SameSite, Lax by default (SG8);
+  - partitioning, and third-party cookies blocked by default (SI3);
+  - `HttpOnly` cookies never reach a renderer (SG2).
+- **Fetch's policy, in the network process, from the browser's records** (SG4, IR2):
+  - initiator locks;
+  - CORS and preflights;
+  - ORB, CORP and COEP;
+  - mixed content and Referrer-Policy;
+  - Private Network Access-style checks;
+  - redirects;
+  - content decoding (gzip, Brotli, zstd).
+- **Bodies** streamed to renderers (FT11), with backpressure (IP16, IP17).
+- **Spike S7's design** (§10).
+
+**CP7. Storage and workers (Q7):**
+- **Web storage, IndexedDB, the Cache API and quotas:**
+  - in the network process (process model §3, note 2), keyed by storage partition (SI3);
+  - the storage engine, our own or an embedded database reused, and its file format;
+  - eviction, and the budget (B4).
+- **Service workers:** how registrations are stored, how fetches are intercepted within Fetch, and their lifetime.
+- **Where shared and service workers run** when no same-site renderer exists (§2.2, item 11).
+
+**CP8. Accessibility (I5; Q8):**
+- **The tree, in the renderer:** roles, names and states, from HTML-AAM, Core-AAM and the accessible-name computation. Built from the DOM and the box tree (PL12) and sent as incremental updates (IN9).
+- **The bridge, in the browser:**
+  - the mapping to `NSAccessibility` roles, attributes and actions, using Core-AAM's mappings;
+  - stitching trees across frames;
+  - text ranges and notifications;
+  - AccessKit or our own (ADR-0010).
+- **With the owner:**
+  - the settings list, and how the sensitive-site list and the JIT switches are presented (§2.2, item 14);
+  - which key equivalents a page may override (§2.2, item 13).
+
+**CP9. Synthesis of part 1:**
+- ADRs for part 1, Proposed.
+- Updates to the decision map (I1–I5; X4, if added), the open questions, the indexes and status.
+- **Gate B** (§7).
+
+**CP10–CP12. Spikes S5–S7,** each only if authorized at Gate B:
+- built and checked;
+- measured by the methods of S1–S4 (§10);
+- results written in `docs/research/sN-results.md`, and their ADRs updated.
+
+An ADR that the owner pre-approved pending its spike becomes Accepted once its conditions are met.
+
+**CP13. HTML parsing and the DOM (Q9):**
+- **Parsing:**
+  - the tokenizer and tree builder (WHATWG HTML), with the encoding-sniffing algorithm (with CP3);
+  - input streamed from the network (FT11), and yielding (IV10);
+  - `document.write`, fragment parsing, and speculative fetching by a preload scanner;
+  - XML parsing, for XHTML and SVG documents.
+- **The DOM in Pattern B arenas:**
+  - node kinds, and link columns as struct-of-arrays (SH8);
+  - attributes and atoms (PL11), and text storage;
+  - node identity and lendability: no interior mutability (PL2).
+- **Events:**
+  - dispatch paths and listener storage;
+  - the listener snapshot rooted as one heap array (§2.2, item 18);
+  - default actions, and user activation (IN8).
+- **The rest of the DOM:**
+  - mutation observers, ranges and selection;
+  - Shadow DOM and slots, and custom elements' reactions (their JavaScript side with CP17);
+  - forms and their controls;
+  - editing (`contenteditable`), with the IME mirror (IN7).
+- **The DOM's JavaScript facet,** left as an interface for CP17 (SH1).
+- **Oracles:** html5lib-tests, and WPT's HTML-syntax and DOM directories.
+
+**CP14. Style (Q10):**
+- **Parsing:** CSS syntax (the tokenizer, error recovery), and the model of properties and values, from specified to computed and used.
+- **Selector matching** over the DOM's columns: right-to-left matching, ancestor filters, and the invalidation sets of IV3.
+- **The cascade:**
+  - origins, layers, specificity, `!important`, Shadow DOM's scoping, and inheritance;
+  - custom properties and `var()`;
+  - the cascade's caches: the rule tree and style sharing (PL3).
+- **Invalidation,** IV3's details: what each mutation records, and what stylesheet changes do.
+- **Queries and loading:** media and container queries, `@import`, and handing `@font-face` to CP3.
+- **Animations and transitions:** timelines, and which ones run on the compositor (with CP4).
+- **The CSSOM,** and `getComputedStyle` through IV2's synchronous entry point.
+- **Atoms across threads** (PL11), and readiness for parallel style (PL2, PL10).
+
+**CP15. Layout and paint (Q11):**
+- **The layout unit,** fixed-point or float (PL5), and the coordinate model.
+- **Box construction** from the DOM and computed styles (PL4): anonymous boxes, `display: contents`, replaced elements, and child frames (FT3).
+- **Formatting contexts:**
+  - block, with margin collapsing;
+  - inline, with CP3's shaped runs, line breaking and bidi;
+  - floats and positioning;
+  - flex, grid, tables and multicolumn;
+  - writing modes and logical properties;
+  - intrinsic sizing.
+- **Fragments:**
+  - immutable, each with its constraints (PL5), reused when their inputs match (IV5), with containment;
+  - fragmentation, for multicolumn and printing;
+  - scrolling and overflow, with scroll containers as property-tree nodes (PL15).
+- **Paint:**
+  - stacking contexts and painting order (CSS 2, Appendix E);
+  - display items and property trees (PL6, PL7);
+  - backgrounds, borders and shadows;
+  - SVG rendering.
+- **Queries:** fine hit testing (IN2), and geometry for script (CSSOM View).
+- **Oracles:** WPT's CSS directories, and reference tests through the headless embedder (EM9).
+
+**CP16. The JavaScript engine (Q12):**
+- **The front end:** the parser (ECMA-262, with early errors), lazy parsing of functions, scopes, and bytecode generation.
+- **The interpreter:**
+  - a register machine, as in S3;
+  - dispatch by a `match` loop (§2.2, item 17);
+  - operations written as functions over the machine state.
+- **The value type:** NaN-boxed (SH13), and carrying the scope lifetime (§2.2, item 18), with Nova's `bind` and `unbind` design as the precedent to examine.
+- **Objects:**
+  - shapes, property storage and elements;
+  - dictionary mode, prototypes and inline caches;
+  - exotic objects: arrays, typed arrays, `Proxy`, module namespaces.
+- **Strings:** 8-bit and 16-bit (PL11), ropes and slices, atoms.
+- **Execution:**
+  - functions and closures;
+  - generators and async functions, suspended in a register machine;
+  - the job queue (SH4);
+  - modules, loaded through the host (FT11).
+- **The standard library:**
+  - builtins;
+  - `RegExp`, with an engine of our own, backtracking or automaton-based;
+  - `Intl`, over CP3's Unicode data;
+  - `Date`, and where time-zone data comes from;
+  - number formatting;
+  - `ArrayBuffer` and `SharedArrayBuffer` backing stores outside the heap (SH3, SH11), and `Atomics`.
+- **Errors and control:** errors and stack traces, the interrupt flag (SH5), and where a debugger would attach.
+- **What a Wasm engine needs from this engine** (OQ-3, as evidence; the decision stays open), and room for a JIT (SH13, J1–J7).
+- **The oracle:** test262.
+
+**CP17. WebIDL bindings (Q13):**
+- **The WebIDL compiler:** it runs at build time on the specifications' IDL, and its generated code is safe (ADR-0002 rule 7).
+- **Platform objects in the heap,** closing CP13's interface:
+  - prototypes and interface objects per realm;
+  - expando properties and `[SameObject]`;
+  - indexed and named properties.
+- **Conversions and calls:**
+  - argument conversion and overload resolution;
+  - exceptions (`DOMException`) and promises;
+  - callbacks, such as event listeners, and how they are rooted.
+- **Rooting conventions for generated code** (ADR-0003; SH6, SH7): what each method roots across calls that may allocate. The hot path of event dispatch, with S1's dispatch case as a benchmark (§2.2, item 18).
+- **Cross-origin objects:** `WindowProxy` and `Location`, and remote window proxies (FT5).
+- **Realms and global objects** for windows and workers.
+
+**CP18. The overview refined, and the synthesis of part 2:**
+- The [overview](../architecture/overview.md) refined:
+  - the crate structure and its `unsafe` map;
+  - a summary of the dependency register;
+  - end-to-end scenarios traced through the subsystems' rules;
+  - the check of SC1–SC10.
+- ADRs for part 2, Proposed. Updates to the decision map, the open questions, the indexes and status.
+- **Gate C** (§7).
+
+**CP19. Merge** `step-5` into `main` with `--no-ff`, when the owner instructs.
+
+## 7. Review gates
+
+Between gates, checkpoints run without pausing, as in Steps 2b to 4: CP2–CP9, then the authorized spikes and CP13–CP18.
+
+| Gate | After | The owner decides |
+|---|---|---|
+| A | CP1 | **This plan:** its scope, including adding X4 (§2.3); the criteria SC1–SC10 (§5); the sequence and checkpoints (§6); these gates and the cadence; the candidate spikes (§10). **Also:** pushing `step-5` to `origin` |
+| B | CP9 | **The ADRs for part 1** (Proposed). Each can be accepted, or pre-approved pending its spike, as ADR-0004 waited for S4 and ADR-0008 for S3. **Each candidate spike**, with its questions and pass criteria. **The shell's questions** from CP8: the settings, and the key equivalents |
+| C | CP18 | **The ADRs for part 2** (Proposed); any spike result that missed its condition; the refined overview; merging `step-5` into `main` |
+
+**A spike result that misses its condition doesn't stop part 2.** The affected ADR stays Proposed until Gate C. The exception is a result that undermines an input part 2 depends on: then work stops at that point, and the owner decides.
+
+## 8. Method
+
+- **Sources** follow the [research conventions](README.md): primary sources first, each dated, every claim labelled.
+- **Specifications,** dated when used:
+  - WHATWG: HTML (parsing, rendering, the event loop), DOM, URL, Fetch, Encoding, Infra;
+  - CSS: Syntax, Cascade, Selectors, Values, Display, Box, Inline, Text, Fonts, Writing Modes, Flexbox, Grid, Tables, Positioned Layout, Overflow, Fragmentation, Color, Backgrounds and Borders, Transforms, Compositing, Filters, Animations and Transitions, CSSOM and CSSOM View;
+  - Unicode: UAX #9, #14, #15 and #29, UTS #46; OpenType and WOFF2;
+  - ECMA-262 and ECMA-402; WebIDL;
+  - the IETF's HTTP, QUIC, TLS 1.3, cookie and HSTS RFCs; the Public Suffix List;
+  - W3C ARIA, Core-AAM, HTML-AAM, and the accessible-name computation.
+- **Engines,** from their documentation and source:
+  - Chromium: Blink's HTML parser, style engine, LayoutNG and paint; Skia and Viz; V8's Ignition interpreter, hidden classes and inline caches; its network stack and BoringSSL;
+  - Firefox: Stylo, WebRender, SpiderMonkey, Necko and NSS, `encoding_rs`;
+  - WebKit: WebCore, JavaScriptCore, and its use of CoreText and Apple's network frameworks;
+  - Servo: html5ever, Stylo, its layout engine, WebRender and its networking;
+  - Ladybird: LibWeb, LibJS, its graphics and its networking.
+- **Rust projects** to evaluate or study, each read in source: those the [language evaluation](../technology/language-evaluation.md) §12 lists (ICU4X, HarfRust, `png`, `jxl-rs`, wgpu, AccessKit, rustls, hyper, quinn; Boa, Nova, Brimstone), and others the checkpoints find.
+- **Apple:** developer documentation, and the SDK 27 headers on this Mac: CoreText, ImageIO, Metal, QuartzCore, Security, Network, and AppKit's accessibility protocols.
+- **Measurements:** only in authorized spikes (§10).
+
+## 9. Risks to this plan
+
+| Risk | Mitigation |
+|---|---|
+| **Breadth:** twelve design documents, each over a large specification | Design only the decisions that are expensive to reverse (§1); each document names what it leaves to implementation. Each checkpoint is committed and can be resumed on its own |
+| A subsystem needs a Step 4 interface changed | SC1: an amendment for the owner, recorded in the ADR that owns the interface; never changed silently |
+| Build-or-reuse choices among fast-moving crates | ADR-0010's rules. Every crate fact dated; precedent in Chromium or Firefox preferred; a revisit condition for each dependency |
+| The DOM's JavaScript facet spans CP13, CP16 and CP17 | CP13 states the interface it leaves, CP17 closes it, and CP18 reconciles them |
+| Spikes growing into prototypes | Each spike answers named questions against pass criteria, and its code is thrown away. The owner authorizes each scope |
+| Precedent documentation is incomplete or out of date | Date every source. Prefer source code where documentation lags. Never invent history |
+| A design question needs evidence that no source settles | Label it a hypothesis, and propose a spike at the next gate. No spike runs without authorization |
+| Results on text, images and TLS depend on the macOS version | Record the OS build with every observation, as S4 did. Step 6 decides how such checks repeat after updates (threat model §9) |
+
+## 10. Candidate spikes
+
+The owner asked which areas may need targeted validation spikes. Three candidates are planned, and a fourth only if CP16 needs it. **Nothing is authorized at Gate A.** Each candidate's design (its questions, method, pass criteria, crates and `unsafe`) is written in this section at the checkpoint named, and put to the owner at Gate B. Its code is written only after it is authorized.
+
+| Spike | Area, and the checkpoint that designs it | Draft question | Why sources can't settle it | What it decides |
+|---|---|---|---|---|
+| **S5** | The text stack (CP3) | How do CoreText and a Rust text stack (a Rust shaper such as HarfRust, a Rust font parser and rasterizer, ICU4X's segmenters) compare on a multi-script corpus, inside the renderer's sandbox, in shaping output, speed and memory per renderer? How can an untrusted web font load there safely? | [S4-Q5](s4-results.md) showed that CoreText draws correctly in the sandbox, not how it compares with anything. The [language evaluation](../technology/language-evaluation.md) §12 records HarfRust as "not a complete port". Memory per renderer on this Mac needs measuring: B2 allows 10 MB, and drawing with CoreText took S4's helper from 1.14 to 4.05 MiB | TX: shaping, font parsing and rasterization; where glyphs are rasterized |
+| **S6** | Compositing on Metal (CP4) | Can the browser's compositor draw display lists of validated primitives (property trees, rounded clips, glyph quads from an atlas, images, embedded child frames) on Metal within a 60 Hz frame budget, and with what memory and energy? Does partial presentation work? How do CPU and GPU path rasterization compare? | [S2](s2-results.md) measured an idle Metal window (20–21 MB, no wakeups while idle), not a compositing workload. No source measures these costs on an M1 | GR: the GPU interface, the compositor's renderer, path rasterization |
+| **S7** | The network process and TLS (CP6) | Does a deny-by-default network-process profile, allowing only outbound sockets, name resolution, certificate trust evaluation and its own data directory, support a TLS client that verifies against the system's trust store? Which rules does it need? What do handshakes and requests cost with each candidate stack? | S4 validated only renderer-like profiles. Which system services certificate evaluation needs inside a profile is the kind of fact S4 found only by trying: named profiles killed their process, and CoreText degraded silently without ICU's data | NW: the TLS stack and certificate verification; the network process's sandbox rules |
+| (S8) | The JavaScript engine (CP16) | Only if CP16 leaves a question that sources can't settle, such as the cost of shape-based inline caches over Pattern B arenas in safe Rust | — | Proposed at Gate C, if needed |
+
+**No spike is planned for these areas:**
+- **HTML parsing:** its algorithms are specified, and html5lib-tests is the oracle.
+- **The DOM:** S1 and S3 measured its heap pattern and node layouts.
+- **Style, layout and paint:** their designs rest on specifications and engine precedent. Their performance questions need real pages, so they belong to implementation milestones.
+- **The bindings:** generated code; S1-Q2 and S3-Q5 counted the ceremony.
+- **Storage.**
+- **The accessibility bridge:** the shell milestone first validates objc2-defined accessibility classes (EM11).
+- **Images:** they join S5 only if CP5 relies on ImageIO inside the renderer's sandbox, which S4 didn't test.
+
+**The methods are S1–S4's:**
+- release builds;
+- three process runs with cool-downs;
+- AC power, with Low Power Mode off (the lesson of Step 4's CP14);
+- a clean tree for formal runs;
+- results under `target/`, and nothing left outside the repository. Anything a spike leaves behind is cleaned up and noted.
+
+## 11. Results log
+
+### CP1 — completed 2026-10-18
+
+- Branch `step-5` created from `main` at `c642ab3`.
+- This plan written: 14 questions; the subsystem criteria SC1–SC10; 19 checkpoints in two parts, with the spikes between them; three review gates; and three candidate spikes (S5–S7), with a fourth only if CP16 needs one.
+- [Status](../status.md), the [decision map](../decision-map.md) (Step 5 in progress) and the indexes ([docs](../README.md), [research](README.md)) updated.
+- The four standard checks and the link check pass, with the code unchanged.
+
+**Gate A.** The owner reviews this plan. The decisions, with recommendations, are in [status](../status.md), "Next steps".

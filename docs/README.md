@@ -1,7 +1,7 @@
 # Axiom — Design Documentation
 
 Axiom is a from-first-principles browser engine for personal use on macOS. **The project is in Phase Zero: research, requirements and architecture.**
-- **Authorized:** design documents, now Step 4's (2026-10-17), and spike S3, authorized at Step 4's Gate B (2026-10-17). The spikes of Steps 2b and 3 (S1, S2, S4; all complete) remain in `spikes/` as throwaway code.
+- **Authorized:** design documents, now Step 5's (2026-10-18), whose plan is at Gate A. The spikes of Steps 2b to 4 (S1–S4, all complete) remain in `spikes/` as throwaway code.
 - **Not yet authorized:** production engine code.
 
 These documents are the project's source of truth. Conversation history is not.
@@ -43,6 +43,7 @@ These documents are the project's source of truth. Conversation history is not.
 | [research/s3-results.md](research/s3-results.md) | S3 results: root-stack costs (C1), rooting traffic in an interpreter, dispatch techniques, node layouts (C2), setters and write barriers (C3); recommendations for ADR-0008 | Complete (2026-10-18), with the CP16 addendum (C1's `SliceStack`) |
 | [research/macos-runtime-facilities.md](research/macos-runtime-facilities.md) | macOS facilities for the runtime: run loops, frame timing, QoS, surfaces, IME and accessibility; browser precedent | Complete (Step 4, CP2) |
 | [research/step-4-architecture-proposal.md](research/step-4-architecture-proposal.md) | Step 4 plan and checkpoint tracker: the architecture proposal v0, including spike S3's design | Done (CP1–CP17; merged 2026-10-18) |
+| [research/step-5-subsystems.md](research/step-5-subsystems.md) | Step 5 plan and checkpoint tracker: the subsystems behind Step 4's interfaces, the subsystem criteria SC1–SC10, and candidate spikes S5–S7 | CP1 (2026-10-18); at Gate A |
 | [architecture/overview.md](architecture/overview.md) | **Architecture proposal v0:** the system on one page, crates and `unsafe` map, end-to-end scenarios, criteria check, staging | **Proposed** (Step 4, CP11); its ADRs decided at Gate B |
 | [architecture/event-loop-and-threading.md](architecture/event-loop-and-threading.md) | Event loop and threading model: thread loops, the threads of each process, the HTML event loop, frame scheduling, agents and workers | Binding (ADR-0006 accepted, 2026-10-17) |
 | [architecture/ipc.md](architecture/ipc.md) | IPC: Mach transport, channels and capabilities, the IDL and generated decoders, `Untrusted<T>` validation, synchronous requests, bulk data, backpressure | Binding (ADR-0005 accepted, 2026-10-17) |
