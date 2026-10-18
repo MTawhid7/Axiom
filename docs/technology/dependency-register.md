@@ -50,9 +50,29 @@ The Step 5 checkpoints add proposed facilities (CoreText, ImageIO, Security, Net
 
 ## 3. Proposed by Step 5
 
-None yet. CP3–CP8 add entries here as their documents propose dependencies, and CP9's ADRs decide them.
+CP3–CP8 add entries here as their documents propose dependencies, and CP9's ADRs decide them. Published grades are Google's or Chromium's `cargo-vet` audits ([text and fonts](../architecture/text-and-fonts.md) §4, source A1). Each applies to the version audited, so every version adopted is audited again (DP15). Build costs are measured when a crate is first added (DP19).
 
-## 4. Spikes only (exempt, DP23)
+### From CP3: text, fonts and Unicode
+
+| Dependency | Class | Group | Published grade | Processes | Purpose, and the interface in front of it | Proposed by |
+|---|---|---|---|---|---|---|
+| **CoreText and CoreGraphics** | Required platform facility | — | — (C) | Renderer only | The system font database and fallback cascades; reading tables of system fonts; rasterizing system fonts if S5 chooses it. Never given a web font | TX6, TX7, TX12 |
+| **ICU4X 2.3:** `icu_segmenter`, `icu_properties`, `icu_normalizer`, `icu_casemap`, with `icu_provider`, `icu_collections`, `icu_locale_core`, `zerovec`, `zerotrie`, `yoke`, `potential_utf`, `utf8_iter`, `displaydoc` and `smallvec` | Foundational | `trusted` in the renderer. Browser use for less-trusted data waits for CP6 (IDNA) | Segmenter `ub-risk-1`; properties `ub-risk-0`; normalizer and provider `ub-risk-1`; `zerovec`, `zerotrie`, `yoke`, `icu_collections` `ub-risk-2` (2.0 betas; `zerovec` 0.11.1) | Renderer; others as CP6 and CP16 decide | Unicode data and algorithms for the whole engine, compiled data; behind Axiom's `unicode` interface. License Unicode-3.0. Precedent: Firefox's segmenters; vendored by Chromium and Servo | TX1, TX2, TX16 |
+| **`unicode-bidi`** 0.3.18 | Replaceable implementation detail | `trusted` | `ub-risk-1` | Renderer | UAX #9, over ICU4X's character data. "MIT OR Apache-2.0". Servo's | TX17 |
+| **HarfRust** 0.14, with `read-fonts`, `font-types`, `bytemuck`, `bitflags` and `smallvec` | Replaceable implementation detail | `trusted` in the renderer | Not graded itself. `read-fonts` `ub-risk-0` (0.27.3); `font-types` `ub-risk-1`; `bytemuck` `ub-risk-2` (1.22.0) | Renderer | Shaping, behind Axiom's shaping interface. MIT. Vendored by Chromium, at status `test` | TX9, TX11 |
+| **`read-fonts`** and **`skrifa`** (Fontations) | Replaceable implementation detail | `trusted` in the renderer | `read-fonts` `ub-risk-0` (0.27.3); `skrifa` `ub-risk-0` (0.29.0); `bytemuck` `ub-risk-2` | Renderer | Parsing every font; outlines for the Rust rasterizer. "MIT OR Apache-2.0". Chrome's web-font path on Linux, Android and ChromeOS | TX8, TX12 |
+| **`brotli-decompressor`** 6.1.0 | Replaceable implementation detail | `trusted` in the renderer, if its audit agrees | Not graded. It forbids `unsafe` unless its `unsafe` or `ffi-api` feature is on, and its default features enable neither (observed in its `lib.rs` and `Cargo.toml`) | Renderer | Brotli, for WOFF2. "BSD-3-Clause/MIT". Its allocator crates need an audit too | TX7 |
+| **A Rust rasterizer:** a candidate such as `zeno`, `vello_cpu` or `tiny-skia` | Replaceable implementation detail | `trusted` in the renderer | Not looked up | Renderer | Filling `skrifa`'s outlines; chosen in spike S5 | TX12 |
+
+**Open risk: `smallvec`,** which HarfRust and ICU4X's segmenter both require. Google graded 1.11.0 at `ub-risk-3`, and later versions carry only `safe-to-deploy` audits. Axiom grades the version it adopts; while it is graded `ub-risk-3`, DP8 bars it ([text and fonts](../architecture/text-and-fonts.md) §4).
+
+## 4. Considered and not admitted
+
+| Dependency | Reason | Recorded at |
+|---|---|---|
+| `encoding_rs` | Graded `ub-risk-3` at 0.8.33 by Google, so DP8 bars it. Axiom writes its own encodings in safe Rust and uses `encoding_rs` as a test reference (TX3). It would be reconsidered only if a newer version earns a published grade of `ub-risk-2` or better | CP3 |
+
+## 5. Spikes only (exempt, DP23)
 
 The rest of `Cargo.lock`, justified in the workspace manifest:
 - `syn`, `quote`, `proc-macro2` and `unicode-ident`, for S1's `#[derive(Trace)]` in Pattern A. Pattern B, the pattern ADR-0003 chose, needs no procedural macro.

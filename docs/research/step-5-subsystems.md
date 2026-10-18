@@ -255,7 +255,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | **CP1** | This plan; branch `step-5`; the owner's decisions recorded | ✅ 2026-10-18 (§11). **Gate A passed:** approved as written |
 | | **Part 1: the platform-facing subsystems** | |
 | CP2 | Dependency policy and build-or-reuse rules (X4) | ✅ 2026-10-18 (§11; [policy](../technology/dependency-policy.md), [register](../technology/dependency-register.md)) |
-| CP3 | Text, fonts and Unicode (I1, the text part of P4); spike S5's design | Not started |
+| CP3 | Text, fonts and Unicode (I1, the text part of P4); spike S5's design | ✅ 2026-10-18 (§11; [document](../architecture/text-and-fonts.md); S5 design §10.1) |
 | CP4 | Graphics: rasterization, compositing and presentation (I2); spike S6's design | Not started |
 | CP5 | Images and media (I4) | Not started |
 | CP6 | Networking: URLs, HTTP, TLS, DNS, cache, cookies, Fetch's policy (I3); spike S7's design | Not started |
@@ -584,7 +584,7 @@ The owner asked which areas may need targeted validation spikes. Three candidate
 
 | Spike | Area, and the checkpoint that designs it | Draft question | Why sources can't settle it | What it decides |
 |---|---|---|---|---|
-| **S5** | The text stack (CP3) | How do CoreText and a Rust text stack (a Rust shaper such as HarfRust, a Rust font parser and rasterizer, ICU4X's segmenters) compare on a multi-script corpus, inside the renderer's sandbox, in shaping output, speed and memory per renderer? How can an untrusted web font load there safely? | [S4-Q5](s4-results.md) showed that CoreText draws correctly in the sandbox, not how it compares with anything. The [language evaluation](../technology/language-evaluation.md) §12 records HarfRust as "not a complete port". Memory per renderer on this Mac needs measuring: B2 allows 10 MB, and drawing with CoreText took S4's helper from 1.14 to 4.05 MiB | TX: shaping, font parsing and rasterization; where glyphs are rasterized |
+| **S5** | The text stack (CP3; design in §10.1) | How do CoreText and a Rust text stack (a Rust shaper such as HarfRust, a Rust font parser and rasterizer, ICU4X's segmenters) compare on a multi-script corpus, inside the renderer's sandbox, in shaping output, speed and memory per renderer? How can an untrusted web font load there safely? | [S4-Q5](s4-results.md) showed that CoreText draws correctly in the sandbox, not how it compares with anything. The [language evaluation](../technology/language-evaluation.md) §12 records HarfRust as "not a complete port". Memory per renderer on this Mac needs measuring: B2 allows 10 MB, and drawing with CoreText took S4's helper from 1.14 to 4.05 MiB | TX: shaping, font parsing and rasterization; where glyphs are rasterized |
 | **S6** | Compositing on Metal (CP4) | Can the browser's compositor draw display lists of validated primitives (property trees, rounded clips, glyph quads from an atlas, images, embedded child frames) on Metal within a 60 Hz frame budget, and with what memory and energy? Does partial presentation work? How do CPU and GPU path rasterization compare? | [S2](s2-results.md) measured an idle Metal window (20–21 MB, no wakeups while idle), not a compositing workload. No source measures these costs on an M1 | GR: the GPU interface, the compositor's renderer, path rasterization |
 | **S7** | The network process and TLS (CP6) | Does a deny-by-default network-process profile, allowing only outbound sockets, name resolution, certificate trust evaluation and its own data directory, support a TLS client that verifies against the system's trust store? Which rules does it need? What do handshakes and requests cost with each candidate stack? | S4 validated only renderer-like profiles. Which system services certificate evaluation needs inside a profile is the kind of fact S4 found only by trying: named profiles killed their process, and CoreText degraded silently without ICU's data | NW: the TLS stack and certificate verification; the network process's sandbox rules |
 | (S8) | The JavaScript engine (CP16) | Only if CP16 leaves a question that sources can't settle, such as the cost of shape-based inline caches over Pattern B arenas in safe Rust | — | Proposed at Gate C, if needed |
@@ -604,6 +604,34 @@ The owner asked which areas may need targeted validation spikes. Three candidate
 - AC power, with Low Power Mode off (the lesson of Step 4's CP14);
 - a clean tree for formal runs;
 - results under `target/`, and nothing left outside the repository. Anything a spike leaves behind is cleaned up and noted.
+
+### 10.1 Spike S5: the text stack (designed at CP3)
+
+**Purpose.** Settle TX12: whether system fonts are rasterized by CoreText or by a Rust rasterizer. Also check the rest of the text design on this Mac:
+- HarfRust against CoreText, on system fonts;
+- the web-font path (TX7), entirely in safe Rust inside the renderer's sandbox;
+- the stack's memory per renderer.
+
+The design is in [text and fonts](../architecture/text-and-fonts.md). Until S5 runs, or if it isn't authorized, CoreText rasterizes system fonts (TX12).
+
+| ID | Question | Passes if |
+|---|---|---|
+| S5-Q1 | **Shaping.** The corpus covers Latin, Greek, Cyrillic, Arabic, Hebrew, Devanagari, Bengali, Tamil, Thai, Khmer, Myanmar, Han (simplified, traditional and Japanese), Hangul and emoji sequences, each in the system font CoreText's fallback chooses. Do HarfRust's glyphs, clusters, advances and offsets match CoreText's? | No script shows a shaping error in HarfRust's output, meaning wrong glyphs or misplaced marks. Errors are judged against the font's own rules and the owner's visual check of rendered pairs. Differences that both engines' rules allow are reported, not failed |
+| S5-Q2 | **Rasterization.** For the corpus's glyphs at 12–32 px, at 1× and 2×, how do a Rust rasterizer's masks compare with CoreText's, with and without macOS's font smoothing? What does a glyph cost each way? | Report: pixel differences, timings, and the owner's visual comparison. TX12's decision follows from it |
+| S5-Q3 | **Web fonts.** Inside S4's renderer profile, do WOFF and WOFF2 fonts, valid and deliberately malformed, decode, validate, shape and rasterize through the Rust path alone? | Every valid font renders. Every malformed one is rejected, or renders, without a crash or a hang. The profile needs no new rule. No CoreText call receives web-font bytes |
+| S5-Q4 | **Footprint and speed.** What does the stack add to a sandboxed helper's footprint after shaping and rasterizing the corpus, in three configurations: CoreText only; HarfRust with CoreText rasterization; all Rust? What do ICU4X's compiled data and the shaper add to the executable's size? How fast is shaping, per glyph? | Report. The configuration chosen must leave B2 achievable: a ready renderer in at most 10 MB |
+
+**What would be built** (after authorization only):
+- `spikes/s5/text` (`s5-text`):
+  - its CoreText and CoreGraphics calls in `src/platform/`, allowlisted as S4's `s4-text` is;
+  - the Rust path: `read-fonts`, `skrifa`, HarfRust, `brotli-decompressor`, and one or two rasterizers;
+  - WOFF and WOFF2 container decoding of its own, in safe Rust.
+- **Sandboxing:** S4's tooling (`s4-sandbox`, `tools/s4-sign.sh`) runs it under a renderer profile.
+- **Inputs:** a text corpus in `spikes/s5/corpus`. System fonts are used where they are, never copied. Test web fonts come under licenses the owner approves at Gate B: WPT's test fonts, for example, or fonts under the OFL.
+- **Dependencies:** these would be the first crates.io crates a spike uses beyond objc2. Each is justified in the manifest (DP23), and the owner's authorization covers them.
+- **Method:** release builds; three process runs with cool-downs; AC power with Low Power Mode off; a clean tree for formal runs; `/usr/bin/time -l` for footprints.
+
+**Outputs:** `docs/research/s5-results.md`, TX12 settled, and ADR-0011 updated.
 
 ## 11. Results log
 
@@ -656,3 +684,22 @@ CP2 starts.
 The register starts with what accepted ADRs already decided: three groups of platform facilities, and objc2 (ADR-0009). The spikes' crates are listed as exempt.
 
 Every relative link resolves; the four standard checks pass.
+
+### CP3 — completed 2026-10-18
+
+[Text, fonts and Unicode](../architecture/text-and-fonts.md) written (**Proposed**; rules TX1–TX21). Its sources: the text code of Chromium, Firefox, WebKit and Servo; Chrome's account of moving web fonts to Skrifa; the HarfRust, ICU4X, `encoding_rs` and `unicode-bidi` projects; Google's and Chromium's published audits; this Mac's SDK headers and fonts. Main proposals:
+- **ICU4X is the engine's one Unicode source,** with compiled data, for text, CSS, URLs and JavaScript. Firefox's breaking runs on it, and Chromium vendors it. The SDK has no public headers for the system ICU's segmentation, bidi or normalization (observed).
+- **Encodings are Axiom's own, in safe Rust.** Google grades `encoding_rs` at `ub-risk-3`, which DP8 bars.
+- **Web content sees system fonts and web fonts only.** User-installed fonts stay hidden, for fingerprinting and SG1.
+- **Fonts are found through CoreText's database and fallback cascades,** as Chromium does on macOS. **HarfRust shapes every font,** including the 165 AAT-only faces of this Mac's 786 system faces. Chromium and Firefox shape with HarfBuzz on macOS; Firefox's CoreText shaping is off by default (observed).
+- **Web fonts never reach CoreText:** our own WOFF and WOFF2 containers, `read-fonts`, HarfRust and a Rust rasterizer. So no C parser sees untrusted font data, where Chrome on macOS still hands web fonts to the system after OTS.
+- **Glyphs are rasterized in the renderer into atlases,** so PL7 stands unchanged. **For system fonts, S5 decides** between CoreText and a Rust rasterizer. If a GPU process ever rasterizes paths, renderers send glyph outlines, so fonts still never leave the renderer.
+- **Line breaking and segmentation come from ICU4X, and bidi from `unicode-bidi`;** hyphenation is staged.
+
+**Spike S5 designed** (§10.1): four questions, on shaping against CoreText, rasterization, web fonts in the sandbox, and footprint.
+
+**The dependency policy's DP10 refined.** CP2 required `ub-risk-1` across the whole tree for reused parsers. Google grades `bytemuck`, `zerovec` and `crc32fast` at `ub-risk-2`, and they sit under every Rust font stack, ICU4X and `png`. So the rule excluded every Rust font parser, while CoreText, which is C, stayed admissible through the exception: the reverse of its intent. DP10 now asks `ub-risk-2` across the tree in sandboxed helpers, and `ub-risk-1` in the browser, and confines the exception to C, C++ and assembly. The policy records the change.
+
+**Found:** `smallvec`, which HarfRust and ICU4X's segmenter require, was graded `ub-risk-3` by Google at 1.11.0, and later versions carry no soundness grade. It is recorded as an open risk in the register.
+
+The [register](../technology/dependency-register.md) gains CP3's proposed entries, and a section for crates considered and not admitted. Every relative link resolves; the four standard checks pass.
