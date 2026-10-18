@@ -8,9 +8,9 @@
 |---|---|
 | Phase | **Phase Zero: Step 5, subsystem design** (authorized 2026-10-18). Part 1 is complete and **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted, ADRs 0011–0013 pre-approved pending spikes S5–S7, which are authorized. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 4** (merged with `--no-ff` on 2026-10-18) and is pushed. Step 4 ran on branch `step-4`, also pushed. **Step 5 runs on branch `step-5`**, from `main` at `c642ab3`, pushed to `origin` as the owner authorized at Gate A |
-| Current checkpoint | **Step 5: CP1–CP9 ✅, Gate B passed; CP10 (spike S5) next** ([tracker](research/step-5-subsystems.md)). Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
-| Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. **S5, S6 and S7 authorized** at Step 5's Gate B. Tooling under `tools/`. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
-| Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
+| Current checkpoint | **Step 5: CP1–CP10 ✅, Gate B passed; CP11 (spike S6) next** ([tracker](research/step-5-subsystems.md)). Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
+| Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. **S5, S6 and S7 authorized** at Step 5's Gate B; S5 is complete (`spikes/s5/`, CP10). Tooling under `tools/`. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
+| Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final**, with build thresholds T1–T4 |
 | | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 |
@@ -23,11 +23,11 @@
 | | [ADR-0009](adr/0009-embedder-api-and-shell.md): engine/embedder API and the pure-Rust shell (2026-10-17, Gate B) |
 | | [ADR-0010](adr/0010-dependency-and-supply-chain-policy.md): the dependency and supply-chain policy, with DP10's refinement (2026-10-18, Step 5's Gate B) |
 | | [ADR-0014](adr/0014-accessibility.md): accessibility, with the settings list and the reserved key equivalents (2026-10-18, Step 5's Gate B) |
-| Pre-approved | [ADR-0011](adr/0011-text-fonts-and-unicode.md) once S5-Q1 and S5-Q3 pass; [ADR-0012](adr/0012-graphics-images-and-media.md) once S6-Q1, S6-Q3, S6-Q5 and S5-Q5 pass; [ADR-0013](adr/0013-networking-storage-and-workers.md) once S7-Q1, S7-Q3 and S7-Q4 pass |
+| Pre-approved | [ADR-0011](adr/0011-text-fonts-and-unicode.md) once S5-Q1 and S5-Q3 pass (S5-Q3 passed; S5-Q1 and S5-Q2 await the owner's visual check); [ADR-0012](adr/0012-graphics-images-and-media.md) once S6-Q1, S6-Q3, S6-Q5 and S5-Q5 pass (S5-Q5 missed its condition: Proposed until Gate C); [ADR-0013](adr/0013-networking-storage-and-workers.md) once S7-Q1, S7-Q3 and S7-Q4 pass |
 
 ## Next steps: spikes S5–S7 (CP10–CP12), then part 2
 
-1. **CP10, spike S5** (the text stack, with ImageIO): S5-Q1 to S5-Q5 under `spikes/s5/` ([tracker](research/step-5-subsystems.md) §10.1). ADR-0011 moves to Accepted once S5-Q1 and S5-Q3 pass, and S5-Q2 settles TX12. S5-Q5 is one of ADR-0012's conditions.
+1. ~~CP10, spike S5~~ **done** (2026-10-18, [results](research/s5-results.md)). **For the owner, when convenient:** the visual check of S5-Q1's pairs and S5-Q2's sheets (`target/s5-results/20261018-204642/sheets-q1` and `sheets-q2`), which ADR-0011's acceptance waits for. The decisions it raises for Gate C are in the tracker's CP10 entry.
 2. **CP11, spike S6** (compositing on Metal): S6-Q1 to S6-Q5 under `spikes/s6/` (§10.2), against the confirmed thresholds. Formal runs need AC power with Low Power Mode off, and the owner is asked to leave the Mac idle during them.
 3. **CP12, spike S7** (the network process and TLS): S7-Q1 to S7-Q4 under `spikes/s7/` (§10.3), with read-only requests to public test hosts.
 4. **CP13–CP18,** part 2, without pausing until Gate C. A spike result that misses its condition leaves its ADR Proposed until Gate C, unless it undermines an input part 2 depends on; then work stops there and the owner decides (§7).
@@ -56,6 +56,18 @@
 - `LICENSE-APACHE` is the Apache Software Foundation's text, unchanged: fetched from apache.org on 2026-10-18, SHA-256 `cfc7749b…bc523d30`.
 - `LICENSE-MIT` is the standard MIT text, word for word SPDX's, with "Copyright (c) 2026 Md. Tawhidul Islam".
 - The workspace manifest declares `license = "MIT OR Apache-2.0"`, which every crate inherits. The root README states the dual license and the usual contribution terms.
+
+**CP10, spike S5** ([results](research/s5-results.md); tracker §11):
+- **Code:** three crates under `spikes/s5/` (`s5-rust-text`, with no `unsafe` and no Apple framework in its web-font executable; `s5-text`; `s5-image`), 40 tests, and `tools/s5-fetch.sh`, `tools/s5-images.sh`, `tools/s5-measure.sh`. Commits `f20e7f4` and `bad07a8`.
+- **Formal runs:** `bad07a8` (primary, `target/s5-results/20261018-204642/`) and `f20e7f4` (reproduction), on AC power with Low Power Mode off, from clean trees; every deterministic output identical between them.
+- **S5-Q1:** HarfRust chose CoreText's glyphs in all 432 runs; the Hebrew niqqud differ in position, in a font with no mark-positioning data. Awaits the owner's visual check.
+- **S5-Q2:** the Rust rasterizers match CoreText above 20 px and at 2×; CoreText recommended for system fonts (TX12), pending the owner's comparison.
+- **S5-Q3: passes.** 322 WPT fonts, 4,000 mutants, no crash, hang or sandbox denial.
+- **S5-Q4:** B2 achievable; HarfRust shapes in 566 ns a glyph.
+- **S5-Q5: missed its condition.** AVIF needs VideoToolbox's decoder service, which renderers may not reach; IM3's fallback (the media utility process) recommended for Gate C. JPEG keeps the safe decoder.
+- **Findings recorded:** the PingFang stub and TX6's file-backed check; ImageIO's NULL-bundle crash (R1); CoreText's normal track against HarfRust's `trak` handling (TX10); `flate2` in `png`'s tree; ImageIO's non-deterministic JPEG pixels.
+- **The owner's visual check:** published as a private page in this session, and in the results directory.
+- **Clean-up** (outside the repository): seven crash reports left by informal S5 runs were deleted from `~/Library/Logs/DiagnosticReports/Retired`, after copies were made in the session's scratchpad. The formal runs' crash reports (six per run) were moved into their results directories by the script. Nothing else was left outside the repository.
 
 ### 2026-10-18 — Session 8 (Step 5 kickoff)
 

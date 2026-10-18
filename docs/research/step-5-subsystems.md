@@ -274,7 +274,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | CP8 | Accessibility: the tree and the bridge (I5); the shell's questions for the owner | ✅ 2026-10-18 (§11; [document](../architecture/accessibility.md)) |
 | CP9 | Synthesis of part 1: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-18 (§11). **Gate B passed** 2026-10-18 |
 | | **Spikes**, each only if authorized at Gate B | |
-| CP10 | Spike S5: the text stack | Not started |
+| CP10 | Spike S5: the text stack | ✅ 2026-10-18 (§11; [results](s5-results.md)). S5-Q3 passes; S5-Q1 and S5-Q2 await the owner's visual check; S5-Q5's condition is not met (IM3's fallback recommended for Gate C) |
 | CP11 | Spike S6: compositing on Metal | Not started |
 | CP12 | Spike S7: the network process and TLS | Not started |
 | | **Part 2: the document and script engine** | |
@@ -901,3 +901,26 @@ The owner's decisions, each as recommended, quoted in full in §2:
 - **OQ-21:** Axiom's license is "MIT OR Apache-2.0". `LICENSE-MIT` and `LICENSE-APACHE` are added at the repository root, and the workspace manifest declares the license.
 
 Recorded in the ADRs' decision histories, the design documents, the register, the [decision map](../decision-map.md), the [open questions](../open-questions.md), the indexes and [status](../status.md). CP10 starts.
+
+### CP10 — completed 2026-10-18
+
+**Spike S5, run and reported** ([S5 results](s5-results.md)), under the owner's authorization quoted in §2: "Spike S5 (Text Stack & ImageIO Sandbox): Authorized for questions S5-Q1 through S5-Q5 under spikes/s5/, including the listed candidate crates and OFL/WPT test web fonts."
+- **One deviation from §10.1:** S5 is three crates (`s5-rust-text`, `s5-text`, `s5-image`), not one, so that the web-font executable links no Apple framework and S5-Q3's last condition can be checked with `otool -L` (results §1). The authorization's scope is unchanged.
+- **Formal run** at `bad07a8`, from a clean tree, on AC power with Low Power Mode off: `target/s5-results/20261018-204642/`. It reproduced an earlier formal run at `f20e7f4` byte for byte in every deterministic output. Three timed runs after 60 s cool-downs; the Mac was in normal use, not idle (results §10).
+
+**Answers:**
+- **S5-Q1:** no shaping error in 432 runs: HarfRust chose the same glyphs as CoreText in every run. The 14 runs whose positions differ are Hebrew niqqud in Lucida Grande, which has no mark-positioning data, so both engines fall back. **The criterion includes the owner's visual check of the rendered pairs, outstanding.**
+- **S5-Q2:** reported. The Rust rasterizers match CoreText above 20 px and at every 2× size; at 12–16 px at 1×, and in smoothing and emoji, CoreText differs; it is also the fastest. **Recommended: CoreText for system fonts (TX12),** settled once the owner has compared the sheets.
+- **S5-Q3: passes.** 322 WPT fonts as expected, sandboxed and unsandboxed alike; 4,000 mutants with no crash or hang; no sandbox denial; no Apple framework linked.
+- **S5-Q4:** B2 stays achievable: a first text costs 0.75–1.31 MiB over a 1.77 MiB helper. HarfRust shapes in 566 ns a glyph, against CoreText's 1,227 on the same runs.
+- **S5-Q5: the condition is not met.** ImageIO crashes in the renderer profile until R1 is added, and AVIF then needs R2–R6, of which R4 opens VideoToolbox's decoder service, which the [process model](../security/process-model.md) §4.1 denies renderers. **Recommended for Gate C:** IM3's fallback, AVIF in the media utility process. **IM2's JPEG choice:** the safe decoder stays.
+
+**The conditional approvals** (owner's Gate B words quoted in §2):
+- **ADR-0011** ("will move to Accepted upon S5-Q1 and S5-Q3 passing, with TX12 settled by S5-Q2"): S5-Q3 has passed. S5-Q1's and S5-Q2's criteria include the owner's visual checks, so the ADR stays Proposed until the owner has looked at the sheets.
+- **ADR-0012** ("S5-Q5 validating ImageIO inside the renderer sandbox"): not met, so it stays Proposed until Gate C. Under §7's rule, this doesn't stop part 2: no part 2 input depends on where AVIF is decoded, since layout reaches images through IM9's interface (inference, results §9).
+
+**Updates:** [ADR-0011](../adr/0011-text-fonts-and-unicode.md) and [ADR-0012](../adr/0012-graphics-images-and-media.md) (decision histories); [text and fonts](../architecture/text-and-fonts.md) TX6, TX10, TX12, TX13 and its open questions 1 and 6; [images and media](../architecture/images-and-media.md) IM2 and IM3; the [register](../technology/dependency-register.md) (trees, `unsafe` and grades; `flate2` in `png`'s tree); the [decision map](../decision-map.md); the indexes; [status](../status.md). **For the owner:** a refinement of the process model's renderer row (§4.1): FontServices' `Reserved` directory and the executable directory's metadata. The model is binding, so it isn't edited.
+
+**Clean-up:** seven crash reports from informal runs, deleted from `~/Library/Logs/DiagnosticReports/Retired` after copying them to the session's scratchpad. The formal runs' crash reports are archived in their results directories.
+
+Every relative link resolves; the four standard checks pass. CP11 (spike S6) starts.
