@@ -67,10 +67,9 @@ fn node<S: RootStack>(heap: &mut Heap<'_, S>, id: u32) -> Handle<'static, Node> 
     })
 }
 
-fn unreachable_cycles_are_collected_and_dropped<S: RootStack + Default>() {
+fn unreachable_cycles_are_collected_and_dropped<S: RootStack>(stack: &S) {
     let base = live::<Nodes>();
-    let stack = S::default();
-    let mut heap = Heap::new(&stack, Pacing::default());
+    let mut heap = Heap::new(stack, Pacing::default());
     let mut globals = Globals::default();
     let (a, b, c) = (node(&mut heap, 0), node(&mut heap, 1), node(&mut heap, 2));
     heap.nodes[a].edges.push(b);
@@ -88,9 +87,8 @@ fn unreachable_cycles_are_collected_and_dropped<S: RootStack + Default>() {
     assert!(heap.nodes.is_empty());
 }
 
-fn compaction_moves_objects_and_relocates_every_handle<S: RootStack + Default>() {
-    let stack = S::default();
-    let mut heap = Heap::new(&stack, Pacing::default());
+fn compaction_moves_objects_and_relocates_every_handle<S: RootStack>(stack: &S) {
+    let mut heap = Heap::new(stack, Pacing::default());
     let mut globals = Globals::default();
     // Garbage interleaved with a chain, so compaction moves every survivor.
     let mut chain = Vec::new();
@@ -116,10 +114,9 @@ fn compaction_moves_objects_and_relocates_every_handle<S: RootStack + Default>()
     assert_eq!(ids, (0..10).collect::<Vec<_>>());
 }
 
-fn values_in_heap_data_keep_their_targets_alive_and_are_relocated<S: RootStack + Default>() {
+fn values_in_heap_data_keep_their_targets_alive_and_are_relocated<S: RootStack>(stack: &S) {
     let base = live::<Nodes>();
-    let stack = S::default();
-    let mut heap = Heap::new(&stack, Pacing::default());
+    let mut heap = Heap::new(stack, Pacing::default());
     let mut globals = Globals::default();
     node(&mut heap, 99); // garbage in front, so the target moves
     let target = node(&mut heap, 7);
@@ -144,9 +141,8 @@ fn values_in_heap_data_keep_their_targets_alive_and_are_relocated<S: RootStack +
     assert_eq!(heap.nodes[globals.roots[1]].value, Value::number(2.5));
 }
 
-fn weak_handles_are_cleared_when_the_target_dies_and_relocated_otherwise<S: RootStack + Default>() {
-    let stack = S::default();
-    let mut heap = Heap::new(&stack, Pacing::default());
+fn weak_handles_are_cleared_when_the_target_dies_and_relocated_otherwise<S: RootStack>(stack: &S) {
+    let mut heap = Heap::new(stack, Pacing::default());
     let mut globals = Globals::default();
     let (a, b, c) = (node(&mut heap, 0), node(&mut heap, 1), node(&mut heap, 2));
     heap.nodes[a].weak = Some(b.downgrade()); // b is unrooted: it will die
@@ -161,10 +157,9 @@ fn weak_handles_are_cleared_when_the_target_dies_and_relocated_otherwise<S: Root
     assert_eq!(heap.nodes.len(), 2);
 }
 
-fn scoped_roots_survive_collection_and_are_released_with_their_frame<S: RootStack + Default>() {
+fn scoped_roots_survive_collection_and_are_released_with_their_frame<S: RootStack>(stack: &S) {
     let base = live::<Nodes>();
-    let stack = S::default();
-    let mut heap = Heap::new(&stack, Pacing::default());
+    let mut heap = Heap::new(stack, Pacing::default());
     let mut globals = Globals::default();
     node(&mut heap, 99); // garbage in front, so the survivors move
     let kept = node(&mut heap, 7);
@@ -217,14 +212,13 @@ impl Model {
 }
 
 /// S1's oracle test: edges are verified by id after objects have moved.
-fn random_graphs_match_a_reachability_oracle<S: RootStack + Default>() {
+fn random_graphs_match_a_reachability_oracle<S: RootStack>(stack: &S) {
     let new_per_round: u32 = if cfg!(miri) { 12 } else { 400 };
     let rounds = if cfg!(miri) { 3 } else { 15 };
     let base = live::<Nodes>();
     let mut rng = Rng::seed_from_u64(0x00B0_B0B0);
     let mut model = Model::default();
-    let stack = S::default();
-    let mut heap = Heap::new(&stack, Pacing::default());
+    let mut heap = Heap::new(stack, Pacing::default());
     let mut globals = Globals::default();
 
     for _ in 0..rounds {
@@ -301,10 +295,9 @@ fn random_graphs_match_a_reachability_oracle<S: RootStack + Default>() {
     }
 }
 
-fn pacing_reports_when_the_budget_is_spent<S: RootStack + Default>() {
-    let stack = S::default();
+fn pacing_reports_when_the_budget_is_spent<S: RootStack>(stack: &S) {
     let mut heap = Heap::new(
-        &stack,
+        stack,
         Pacing {
             min_bytes: 4096,
             growth_percent: 100,
@@ -324,18 +317,17 @@ fn pacing_reports_when_the_budget_is_spent<S: RootStack + Default>() {
         "the budget resets after a collection"
     );
     assert_eq!(heap.core.metrics().collections, 1);
-    let stress = Heap::<S>::new(&stack, Pacing::STRESS);
+    let stress = Heap::<S>::new(stack, Pacing::STRESS);
     assert!(
         stress.core.wants_collection(),
         "stress pacing always wants one"
     );
 }
 
-fn deep_chains_neither_overflow_the_stack_nor_leak<S: RootStack + Default>() {
+fn deep_chains_neither_overflow_the_stack_nor_leak<S: RootStack>(stack: &S) {
     let depth: u32 = if cfg!(miri) { 200 } else { 200_000 };
     let base = live::<Nodes>();
-    let stack = S::default();
-    let mut heap = Heap::new(&stack, Pacing::default());
+    let mut heap = Heap::new(stack, Pacing::default());
     let mut globals = Globals::default();
     let first = node(&mut heap, 0);
     let mut tail = first;
@@ -354,13 +346,19 @@ fn deep_chains_neither_overflow_the_stack_nor_leak<S: RootStack + Default>() {
 macro_rules! on_every_stack {
     ($($test:ident),+ $(,)?) => {
         mod refcell_stack {
-            $(#[test] fn $test() { super::$test::<s3_gc::RefCellStack>(); })+
+            $(#[test] fn $test() { super::$test(&s3_gc::RefCellStack::default()); })+
         }
         mod cell_stack {
-            $(#[test] fn $test() { super::$test::<s3_gc::CellStack>(); })+
+            $(#[test] fn $test() { super::$test(&s3_gc::CellStack::default()); })+
         }
         mod raw_stack {
-            $(#[test] fn $test() { super::$test::<s3_gc::RawStack>(); })+
+            $(#[test] fn $test() { super::$test(&s3_gc::RawStack::default()); })+
+        }
+        mod slice_stack {
+            $(#[test] fn $test() {
+                let mut buffer = s3_gc::slot_buffer(s3_gc::DEFAULT_CAPACITY);
+                super::$test(&s3_gc::SliceStack::new(&mut buffer));
+            })+
         }
     };
 }

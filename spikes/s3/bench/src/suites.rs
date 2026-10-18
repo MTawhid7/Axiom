@@ -3,9 +3,9 @@
 //!
 //! | Suite | Question | Variants |
 //! |---|---|---|
-//! | `roots` | S3-Q1: frame, push and read costs | S1's stack, then `RefCellStack`, `CellStack`, `RawStack` |
+//! | `roots` | S3-Q1: frame, push and read costs | S1's stack, then `RefCellStack`, `CellStack`, `RawStack`, `SliceStackLenLast`, `SliceStack` |
 //! | `dispatch` | S3-Q1: S1's listener-dispatch case | S1's Pattern B, then the port on each stack |
-//! | `vm` | S3-Q2, S3-Q3: W1–W4 | every technique on every stack |
+//! | `vm` | S3-Q2, S3-Q3: W1–W4 | every technique on every stack but the field-order control |
 //! | `traverse` | S3-Q4: S1's traversal cases | S1's Pattern B, the port, then four layouts |
 //! | `mutate` | S3-Q5: S1's mutation case | S1's plain writes, then the port's setters without and with card marking |
 //! | `barrier` | S3-Q5: one handle write | the same three |
@@ -23,8 +23,8 @@ use s1_bench::plan::{self, Order, Plan};
 use s1_scenarios::Tag;
 use s3_gc::count::{self as root_count, Context, RootCounts};
 use s3_gc::{
-    Barrier, CardBarrier, CellStack, GcScope, GcToken, NoBarrier, Pacing, RawStack, RefCellStack,
-    RootStack,
+    Barrier, CardBarrier, CellStack, DEFAULT_CAPACITY, GcScope, GcToken, NoBarrier, Pacing,
+    RawStack, RefCellStack, RootStack, SliceStack, SliceStackLenLast, slot_buffer,
 };
 use s3_vm::workloads::{self, Size, Workload};
 use s3_vm::{Loaded, Stats, Technique, Vm};
@@ -41,8 +41,8 @@ pub const SEED: u64 = 1;
 /// The suites, in the order [`run`] runs them.
 pub const SUITES: [&str; 6] = ["roots", "dispatch", "vm", "traverse", "mutate", "barrier"];
 
-/// The root stacks of `s3-gc`, by name.
-pub const STACKS: [&str; 3] = ["refcell", "cell", "raw"];
+/// The root stacks of `s3-gc` that the `vm` suite runs, by name.
+pub const STACKS: [&str; 4] = ["refcell", "cell", "raw", "slice"];
 
 /// What to run.
 #[derive(Clone, Debug, Default)]
@@ -184,10 +184,16 @@ fn dispatch(options: &Options, report: &mut Report<'_>) {
         CellStack::default(),
         RawStack::default(),
     );
+    let (mut buffer_len_last, mut buffer) =
+        (slot_buffer(DEFAULT_CAPACITY), slot_buffer(DEFAULT_CAPACITY));
+    let slice_len_last = SliceStackLenLast::new(&mut buffer_len_last);
+    let slice = SliceStack::new(&mut buffer);
     let mut s1 = built_s1(&plan);
     let mut p_refcell: Port<'_, _> = built_port(&refcell, &plan);
     let mut p_cell: Port<'_, _> = built_port(&cell, &plan);
     let mut p_raw: Port<'_, _> = built_port(&raw, &plan);
+    let mut p_slice_len_last: Port<'_, _> = built_port(&slice_len_last, &plan);
+    let mut p_slice: Port<'_, _> = built_port(&slice, &plan);
     // The first pass must match the reference. Later passes repeat it
     // exactly: listeners only log, stop, or rewrite an attribute with the
     // value it already has.
@@ -195,12 +201,20 @@ fn dispatch(options: &Options, report: &mut Report<'_>) {
     p_refcell.apply(&plan.work);
     p_cell.apply(&plan.work);
     p_raw.apply(&plan.work);
+    p_slice_len_last.apply(&plan.work);
+    p_slice.apply(&plan.work);
     assert!(s1.log() == plan.log, "{case}: S1 logged differently");
     assert_eq!(s1.tree_digest(), plan.final_digest, "{case}: S1's tree");
     for (name, log, digest) in [
         ("refcell", p_refcell.log(), p_refcell.tree_digest()),
         ("cell", p_cell.log(), p_cell.tree_digest()),
         ("raw", p_raw.log(), p_raw.tree_digest()),
+        (
+            "slice-len-last",
+            p_slice_len_last.log(),
+            p_slice_len_last.tree_digest(),
+        ),
+        ("slice", p_slice.log(), p_slice.tree_digest()),
     ] {
         assert!(
             log == plan.log,
@@ -231,11 +245,19 @@ fn dispatch(options: &Options, report: &mut Report<'_>) {
                 p_raw.clear_log();
                 timed(|| p_raw.apply(&plan.work))
             },
+            &mut || {
+                p_slice_len_last.clear_log();
+                timed(|| p_slice_len_last.apply(&plan.work))
+            },
+            &mut || {
+                p_slice.clear_log();
+                timed(|| p_slice.apply(&plan.work))
+            },
         ],
     );
-    assert!(s1.log() == plan.log && p_raw.log() == plan.log);
+    assert!(s1.log() == plan.log && p_slice.log() == plan.log);
     let items = plan.work.len() as u64;
-    let row: Vec<_> = ["s1", "refcell", "cell", "raw"]
+    let row: Vec<_> = ["s1", "refcell", "cell", "raw", "slice-len-last", "slice"]
         .iter()
         .zip(&samples)
         .map(|(variant, s)| {
@@ -248,20 +270,22 @@ fn dispatch(options: &Options, report: &mut Report<'_>) {
 
 // ----- vm (S3-Q2, S3-Q3) -----
 
-/// One timed run of `w` on a fresh stack and machine. The result is checked
-/// after the clock stops.
-fn timed_run<S: RootStack + Default>(
+/// One timed run of `w` on a fresh machine. The stack is the workload's own,
+/// reused from run to run as an agent keeps its stack from task to task; every
+/// run leaves it empty. The result is checked after the clock stops.
+fn timed_run<S: RootStack>(
+    stack: &S,
     loaded: &Loaded<S>,
     w: &Workload,
     technique: Technique,
 ) -> Duration {
-    let stack = S::default();
-    let mut vm = Vm::new(&stack, Pacing::default());
+    let mut vm = Vm::new(stack, Pacing::default());
     let start = Instant::now();
     let result = vm.run(loaded, technique, &w.args);
     let elapsed = start.elapsed();
     let value = result.unwrap_or_else(|e| panic!("{}: {e}", w.name));
     assert_eq!(vm.digest(value), w.expected, "{} on {technique}", w.name);
+    assert_eq!(stack.height(), 0, "{}: every root frame was popped", w.name);
     elapsed
 }
 
@@ -282,27 +306,39 @@ fn vm(options: &Options, report: &mut Report<'_>) {
             "{}: the reference evaluator disagrees with the native model",
             w.name
         );
+        let (refcell_stack, cell_stack, raw_stack) = (
+            RefCellStack::default(),
+            CellStack::default(),
+            RawStack::default(),
+        );
+        let mut buffer = slot_buffer(DEFAULT_CAPACITY);
+        let slice_stack = SliceStack::new(&mut buffer);
         let refcell = Loaded::<RefCellStack>::new(w.program.clone()).expect("verified");
         let cell = Loaded::<CellStack>::new(w.program.clone()).expect("verified");
         let raw = Loaded::<RawStack>::new(w.program.clone()).expect("verified");
+        let slice = Loaded::<SliceStack<'_>>::new(w.program.clone()).expect("verified");
 
         // Heap facts, from one run outside the timing.
-        let stack = RawStack::default();
-        let mut probe = Vm::new(&stack, Pacing::default());
-        probe.run(&raw, Technique::Match, &w.args).expect("runs");
+        let mut probe = Vm::new(&slice_stack, Pacing::default());
+        probe.run(&slice, Technique::Match, &w.args).expect("runs");
         let metrics = probe.metrics();
         drop(probe);
 
-        let (refcell, cell, raw, workload) = (&refcell, &cell, &raw, &w);
+        let (refcell, cell, raw, slice, workload) = (&refcell, &cell, &raw, &slice, &w);
+        let (refcell_stack, cell_stack, raw_stack, slice_stack) =
+            (&refcell_stack, &cell_stack, &raw_stack, &slice_stack);
         let mut names = Vec::new();
         let mut runners: Vec<Box<dyn FnMut() -> Duration + '_>> = Vec::new();
         for &technique in Technique::ALL {
             for stack in STACKS {
                 names.push(format!("{technique}/{stack}"));
                 runners.push(match stack {
-                    "refcell" => Box::new(move || timed_run(refcell, workload, technique)),
-                    "cell" => Box::new(move || timed_run(cell, workload, technique)),
-                    _ => Box::new(move || timed_run(raw, workload, technique)),
+                    "refcell" => {
+                        Box::new(move || timed_run(refcell_stack, refcell, workload, technique))
+                    }
+                    "cell" => Box::new(move || timed_run(cell_stack, cell, workload, technique)),
+                    "raw" => Box::new(move || timed_run(raw_stack, raw, workload, technique)),
+                    _ => Box::new(move || timed_run(slice_stack, slice, workload, technique)),
                 });
             }
         }
@@ -561,9 +597,9 @@ fn barrier(options: &Options, report: &mut Report<'_>) {
 // ----- profiles -----
 
 /// What `s3-probe profile` can loop: `w1`…`w4` with a technique and stack
-/// (`w3/match/raw`), or S1's dispatch case on a stack (`dispatch/raw`).
-pub const PROFILE_CASES: &str =
-    "w1..w4/<technique>/<refcell|cell|raw>, dispatch/<refcell|cell|raw>";
+/// (`w3/match/slice`), or S1's dispatch case on a stack (`dispatch/slice`).
+pub const PROFILE_CASES: &str = "w1..w4/<technique>/<refcell|cell|raw|slice>, \
+     dispatch/<refcell|cell|raw|slice-len-last|slice>";
 
 /// The function every profiled iteration runs under, so that profiles can be
 /// narrowed to the timed work (`samply-summary.py --match profiled_iteration`).
@@ -581,21 +617,41 @@ pub fn profile(case: &str, seconds: f64) -> Result<u64, String> {
     let deadline = Instant::now() + Duration::from_secs_f64(seconds);
     let parts: Vec<&str> = case.split('/').collect();
     match parts[..] {
-        ["dispatch", stack] => match stack {
-            "refcell" => Ok(profile_dispatch::<RefCellStack>(deadline)),
-            "cell" => Ok(profile_dispatch::<CellStack>(deadline)),
-            "raw" => Ok(profile_dispatch::<RawStack>(deadline)),
-            _ => Err(format!("unknown stack {stack:?}")),
-        },
+        ["dispatch", stack] => {
+            let mut buffer = slot_buffer(DEFAULT_CAPACITY);
+            match stack {
+                "refcell" => Ok(profile_dispatch(&RefCellStack::default(), deadline)),
+                "cell" => Ok(profile_dispatch(&CellStack::default(), deadline)),
+                "raw" => Ok(profile_dispatch(&RawStack::default(), deadline)),
+                "slice-len-last" => Ok(profile_dispatch(
+                    &SliceStackLenLast::new(&mut buffer),
+                    deadline,
+                )),
+                "slice" => Ok(profile_dispatch(&SliceStack::new(&mut buffer), deadline)),
+                _ => Err(format!("unknown stack {stack:?}")),
+            }
+        }
         [workload, technique, stack] => {
             let w = workloads::named(workload, Size::Bench)
                 .ok_or_else(|| format!("unknown workload {workload:?}"))?;
             let technique = Technique::parse(technique)
                 .ok_or_else(|| format!("unknown technique {technique:?}"))?;
+            let mut buffer = slot_buffer(DEFAULT_CAPACITY);
             match stack {
-                "refcell" => Ok(profile_vm::<RefCellStack>(&w, technique, deadline)),
-                "cell" => Ok(profile_vm::<CellStack>(&w, technique, deadline)),
-                "raw" => Ok(profile_vm::<RawStack>(&w, technique, deadline)),
+                "refcell" => Ok(profile_vm(
+                    &RefCellStack::default(),
+                    &w,
+                    technique,
+                    deadline,
+                )),
+                "cell" => Ok(profile_vm(&CellStack::default(), &w, technique, deadline)),
+                "raw" => Ok(profile_vm(&RawStack::default(), &w, technique, deadline)),
+                "slice" => Ok(profile_vm(
+                    &SliceStack::new(&mut buffer),
+                    &w,
+                    technique,
+                    deadline,
+                )),
                 _ => Err(format!("unknown stack {stack:?}")),
             }
         }
@@ -603,14 +659,14 @@ pub fn profile(case: &str, seconds: f64) -> Result<u64, String> {
     }
 }
 
-fn profile_vm<S: RootStack + Default>(
+fn profile_vm<S: RootStack>(
+    stack: &S,
     w: &Workload,
     technique: Technique,
     deadline: Instant,
 ) -> u64 {
     let loaded = Loaded::<S>::new(w.program.clone()).expect("verified");
-    let stack = S::default();
-    let mut vm = Vm::new(&stack, Pacing::default());
+    let mut vm = Vm::new(stack, Pacing::default());
     let mut iterations = 0;
     while Instant::now() < deadline {
         let mut result = None;
@@ -627,10 +683,9 @@ fn profile_vm<S: RootStack + Default>(
     iterations
 }
 
-fn profile_dispatch<S: RootStack + Default>(deadline: Instant) -> u64 {
+fn profile_dispatch<S: RootStack>(stack: &S, deadline: Instant) -> u64 {
     let plan = plan::dispatch(20_000, 60_000, 50_000, SEED);
-    let stack = S::default();
-    let mut port: Port<'_, S> = built_port(&stack, &plan);
+    let mut port: Port<'_, S> = built_port(stack, &plan);
     let mut iterations = 0;
     while Instant::now() < deadline {
         port.clear_log();
@@ -667,8 +722,10 @@ impl Counts {
     }
 }
 
-/// Count every workload at `size` with every technique, on `RawStack` with
-/// default pacing. The counts are zero unless built with `count`.
+/// Count every workload at `size` with every technique, on C1's `SliceStack`
+/// with default pacing. The counts are zero unless built with `count`; they
+/// count the operations of frames and scoped values, which are the same on
+/// every stack.
 ///
 /// # Panics
 /// If a run fails or disagrees with its native model, or (in a `count` build)
@@ -678,9 +735,10 @@ pub fn counts(size: Size) -> Vec<Counts> {
     let mut rows = Vec::new();
     for w in workloads::all(size) {
         let reference = s3_vm::reference::run(&w.program, &w.args);
-        let loaded = Loaded::<RawStack>::new(w.program.clone()).expect("verified");
+        let mut buffer = slot_buffer(DEFAULT_CAPACITY);
+        let stack = SliceStack::new(&mut buffer);
+        let loaded = Loaded::<SliceStack<'_>>::new(w.program.clone()).expect("verified");
         for &technique in Technique::ALL {
-            let stack = RawStack::default();
             let mut vm = Vm::new(&stack, Pacing::default());
             let _ = root_count::take();
             let _ = vm.take_stats();

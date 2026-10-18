@@ -1,6 +1,6 @@
 [package]
 name = "s3-gc"
-description = "Spike S3: S1's Pattern B heap with NaN-boxed values, three interchangeable root stacks (RefCell, safe Cell chunks, and C1's raw stack) and an optional card-marking barrier. #![deny(unsafe_code)]; unsafe only in src/raw/."
+description = "Spike S3: S1's Pattern B heap with NaN-boxed values, interchangeable root stacks (RefCell, safe Cell chunks, the archived raw stack, and C1's safe contiguous stack with its field-order control) and an optional card-marking barrier. #![deny(unsafe_code)]; unsafe only in src/raw/."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

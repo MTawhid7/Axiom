@@ -9,10 +9,14 @@
 //! s3-probe roots
 //! s3-probe profile <case> <seconds>
 //! s3-probe sizes
+//! s3-probe footprint <none|cell|raw|slice> <roots>
 //! s3-count [--test]
 //! ```
 //!
 //! - `roots` prints the root stacks' unit costs, like `s1-probe roots`.
+//! - `footprint` pushes `<roots>` values onto a stack of the default capacity
+//!   and exits. Under `/usr/bin/time -l`, its peak memory footprint against
+//!   `none` shows how much of the stack the system committed.
 //! - `profile` loops one case ([`suites::PROFILE_CASES`]) for a sampling
 //!   profiler.
 //! - `s3-count`, built with the `count` feature, prints instruction, call and
@@ -68,6 +72,7 @@ pub fn probe_main() -> ExitCode {
             sizes();
             Ok(())
         }
+        "footprint" => footprint(rest),
         _ => Err(usage()),
     })
 }
@@ -85,7 +90,7 @@ pub fn count_main() -> ExitCode {
 }
 
 fn usage() -> String {
-    "usage: s3-probe <bench|aggregate|roots|profile|sizes> … (see the s3_bench::cli docs)"
+    "usage: s3-probe <bench|aggregate|roots|profile|sizes|footprint> … (see the s3_bench::cli docs)"
         .to_owned()
 }
 
@@ -207,7 +212,7 @@ fn roots() {
     for stack in crate::roots::STACKS {
         let [frame, push, get, run] = crate::roots::measure(stack, Duration::from_millis(300), 11);
         println!(
-            "{stack:<8} frame open+close {:.2} ns\tpush {:.2} ns\tget {:.2} ns\tpush-run {:.2} ns",
+            "{stack:<14} frame open+close {:.2} ns\tpush {:.2} ns\tget {:.2} ns\tpush-run {:.2} ns",
             crate::roots::per_op_ns(&frame),
             crate::roots::per_op_ns(&push),
             crate::roots::per_op_ns(&get),
@@ -231,20 +236,48 @@ fn profile(args: &[String]) -> CliResult {
     Ok(())
 }
 
+fn footprint(args: &[String]) -> CliResult {
+    use s3_gc::{CellStack, DEFAULT_CAPACITY, RawStack, SliceStack, slot_buffer};
+    let [stack, roots] = args else {
+        return Err("usage: footprint <none|cell|raw|slice> <roots>".to_owned());
+    };
+    let roots: u64 = roots
+        .parse()
+        .map_err(|e| format!("bad roots {roots:?}: {e}"))?;
+    match stack.as_str() {
+        "none" => {}
+        "cell" => fill(&CellStack::default(), roots),
+        "raw" => fill(&RawStack::default(), roots),
+        "slice" => fill(&SliceStack::new(&mut slot_buffer(DEFAULT_CAPACITY)), roots),
+        other => return Err(format!("unknown stack {other:?}")),
+    }
+    Ok(())
+}
+
+/// Push `n` values in one frame.
+fn fill<S: s3_gc::RootStack>(stack: &S, n: u64) {
+    let frame = s3_gc::RootFrame::new(stack);
+    for bits in 0..n {
+        core::hint::black_box(s3_gc::Value::from_bits(bits).scope(&frame));
+    }
+    core::hint::black_box(stack.height());
+}
+
 fn sizes() {
-    use s3_gc::{CellStack, RawStack, RefCellStack, RootStack, Value};
+    use s3_gc::{CellStack, RawStack, RefCellStack, RootStack, SliceStack, Value};
     println!(
         "Value                         {:>4} bytes",
         size_of::<Value>()
     );
     println!(
-        "root slot reference: raw {}, cell {}, refcell {} bytes",
+        "root slot reference: slice {}, raw {}, cell {}, refcell {} bytes",
+        size_of::<<SliceStack<'static> as RootStack>::Slot<'static>>(),
         size_of::<<RawStack as RootStack>::Slot<'static>>(),
         size_of::<<CellStack as RootStack>::Slot<'static>>(),
         size_of::<<RefCellStack as RootStack>::Slot<'static>>(),
     );
     println!(
-        "RawStack default capacity     {} slots ({} MiB reserved)",
+        "Default stack capacity        {} slots ({} MiB reserved)",
         s3_gc::DEFAULT_CAPACITY,
         (s3_gc::DEFAULT_CAPACITY * size_of::<Value>()) >> 20
     );

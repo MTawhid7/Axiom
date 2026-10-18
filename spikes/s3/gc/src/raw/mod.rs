@@ -1,4 +1,10 @@
-//! C1's root stack (ADR-0008 SH7): the only `unsafe` in `s3-gc`.
+//! S3's first C1 root stack, **archived**: the only `unsafe` in `s3-gc`.
+//!
+//! At Gate C (2026-10-18) the owner chose [`SliceStack`](crate::SliceStack)
+//! for C1 instead (ADR-0008 SH7): the same contiguous array of `Cell` slots,
+//! borrowed from a zeroed buffer, which compiles to the same push with no
+//! `unsafe`. This module stays as benchmark history, allowlisted and checked
+//! by Miri as before.
 //!
 //! The crate root declares `#![deny(unsafe_code)]`, and only this module
 //! re-allows it, which `tools/check-unsafe-policy.sh` enforces. Miri checks it
@@ -40,17 +46,10 @@ use core::fmt;
 use core::ptr::NonNull;
 use std::alloc;
 
-use crate::roots::RootStack;
+use crate::roots::{DEFAULT_CAPACITY, RootStack};
 use crate::value::Value;
 
-/// The default capacity, in slots.
-#[cfg(not(miri))]
-pub const DEFAULT_CAPACITY: usize = 1 << 20;
-/// Smaller under Miri, which zeroes the allocation eagerly.
-#[cfg(miri)]
-pub const DEFAULT_CAPACITY: usize = 1 << 12;
-
-/// C1's root stack. See the [module docs](self).
+/// S3's first C1 root stack, archived. See the [module docs](self).
 pub struct RawStack {
     len: Cell<usize>,
     slots: NonNull<Cell<Value>>,

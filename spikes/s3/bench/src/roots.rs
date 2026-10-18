@@ -16,11 +16,19 @@
 //! load forwarding of that length as much as the push. `push-run` is the
 //! shape of a builtin rooting its arguments on entry, where consecutive pushes
 //! keep the length in a register.
+//!
+//! **The stacks:** S1's, as the baseline; `RefCellStack`; `CellStack`; the
+//! archived `RawStack`; and C1's `SliceStack` with its control,
+//! `SliceStackLenLast`, which differs only in putting the length after the
+//! slice (the S3 addendum, `docs/research/s3-results.md` §3).
 
 use core::hint::black_box;
 use std::time::{Duration, Instant};
 
-use s3_gc::{CellStack, Pacing, RawStack, RefCellStack, RootStack};
+use s3_gc::{
+    CellStack, DEFAULT_CAPACITY, Pacing, RawStack, RefCellStack, RootStack, SliceStack,
+    SliceStackLenLast, slot_buffer,
+};
 
 use crate::dom::{Agent, NodeRef};
 use crate::harness::Samples;
@@ -34,7 +42,7 @@ const PER_FRAME: usize = 64;
 /// module docs).
 pub const PRIMITIVES: [&str; 4] = ["frame", "push", "get", "push-run"];
 /// The stacks, in report order: S1's first, as the baseline.
-pub const STACKS: [&str; 4] = ["s1", "refcell", "cell", "raw"];
+pub const STACKS: [&str; 6] = ["s1", "refcell", "cell", "raw", "slice-len-last", "slice"];
 
 /// Samples of each primitive, in [`PRIMITIVES`] order, for the named stack.
 ///
@@ -44,9 +52,17 @@ pub const STACKS: [&str; 4] = ["s1", "refcell", "cell", "raw"];
 pub fn measure(stack: &str, warmup: Duration, samples: usize) -> [Samples; 4] {
     match stack {
         "s1" => measure_s1(warmup, samples),
-        "refcell" => measure_s3::<RefCellStack>(warmup, samples),
-        "cell" => measure_s3::<CellStack>(warmup, samples),
-        "raw" => measure_s3::<RawStack>(warmup, samples),
+        "refcell" => measure_s3(&RefCellStack::default(), warmup, samples),
+        "cell" => measure_s3(&CellStack::default(), warmup, samples),
+        "raw" => measure_s3(&RawStack::default(), warmup, samples),
+        "slice-len-last" => {
+            let mut buffer = slot_buffer(DEFAULT_CAPACITY);
+            measure_s3(&SliceStackLenLast::new(&mut buffer), warmup, samples)
+        }
+        "slice" => {
+            let mut buffer = slot_buffer(DEFAULT_CAPACITY);
+            measure_s3(&SliceStack::new(&mut buffer), warmup, samples)
+        }
         _ => panic!("unknown stack {stack:?}"),
     }
 }
@@ -96,9 +112,8 @@ fn measure_s1(warmup: Duration, samples: usize) -> [Samples; 4] {
 }
 
 /// The same loops on one of `s3-gc`'s stacks, on the DOM port's heap.
-fn measure_s3<S: RootStack + Default>(warmup: Duration, samples: usize) -> [Samples; 4] {
-    let stack = S::default();
-    let agent: Agent<'_, S> = Agent::new(&stack, 1, Pacing::default());
+fn measure_s3<S: RootStack>(stack: &S, warmup: Duration, samples: usize) -> [Samples; 4] {
+    let agent: Agent<'_, S> = Agent::new(stack, 1, Pacing::default());
     let document: NodeRef<'static> = agent.globals.document;
     let core = &agent.heap.core;
 

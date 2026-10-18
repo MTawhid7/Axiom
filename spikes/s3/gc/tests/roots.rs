@@ -1,11 +1,13 @@
 //! The root stacks' behaviour, through the public API: pushes, reads,
 //! frames, out-of-order frames, marking and relocation, overflow, barriers.
-//! Miri runs this file to check `RawStack`'s `unsafe` (R1–R3).
+//! Miri runs this file to check `RawStack`'s `unsafe` (R1–R3). `SliceStack`
+//! and its field-order control have none.
 #![forbid(unsafe_code)]
 
 use s3_gc::{
     Barrier, CardBarrier, CellStack, Forwarding, Handle, Marker, Pacing, RawStack, RefCellStack,
-    RootFrame, RootStack, Roots, Trace, Value, heap, setters,
+    RootFrame, RootStack, Roots, SliceStack, SliceStackLenLast, Trace, Value, heap, setters,
+    slot_buffer,
 };
 
 struct Obj {
@@ -42,14 +44,13 @@ impl Roots for NoRoots {
     fn relocate(&mut self, _: &Forwarding) {}
 }
 
-fn pushes_and_reads_follow_the_frames<S: RootStack + Default>() {
-    let stack = S::default();
-    let outer = RootFrame::new(&stack);
+fn pushes_and_reads_follow_the_frames<S: RootStack>(stack: &S) {
+    let outer = RootFrame::new(stack);
     let values: Vec<Value> = (0..2500).map(Value::int).collect(); // crosses CellStack chunks
     let rooted: Vec<_> = values.iter().map(|v| v.scope(&outer)).collect();
     assert_eq!(stack.height(), values.len());
     {
-        let inner = RootFrame::new(&stack);
+        let inner = RootFrame::new(stack);
         let extra = Value::TRUE.scope(&inner);
         assert_eq!(extra.get(), Value::TRUE);
         assert_eq!(stack.height(), values.len() + 1);
@@ -70,15 +71,14 @@ fn pushes_and_reads_follow_the_frames<S: RootStack + Default>() {
     assert_eq!(stack.height(), 0);
 }
 
-fn out_of_order_frames_are_logic_errors_not_memory_errors<S: RootStack + Default>() {
-    let stack = S::default();
-    let outer = RootFrame::new(&stack);
+fn out_of_order_frames_are_logic_errors_not_memory_errors<S: RootStack>(stack: &S) {
+    let outer = RootFrame::new(stack);
     let _a = Value::int(1).scope(&outer);
-    let inner = RootFrame::new(&stack);
+    let inner = RootFrame::new(stack);
     let b = Value::int(2).scope(&inner);
     drop(outer); // wrong order: pops b's slot too
     assert_eq!(stack.height(), 0);
-    let replacement = RootFrame::new(&stack);
+    let replacement = RootFrame::new(stack);
     let c = Value::int(3).scope(&replacement);
     let _d = Value::int(4).scope(&replacement);
     // b's slot now holds d: a stale read, but a valid value.
@@ -90,9 +90,8 @@ fn out_of_order_frames_are_logic_errors_not_memory_errors<S: RootStack + Default
     assert_eq!(stack.height(), 0);
 }
 
-fn collection_relocates_every_rooted_value<S: RootStack + Default>() {
-    let stack = S::default();
-    let mut heap: Heap<'_, S> = Heap::new(&stack, Pacing::default());
+fn collection_relocates_every_rooted_value<S: RootStack>(stack: &S) {
+    let mut heap: Heap<'_, S> = Heap::new(stack, Pacing::default());
     let frame = heap.core.frame();
     let mut rooted = Vec::new();
     for id in 0..300 {
@@ -117,13 +116,25 @@ fn collection_relocates_every_rooted_value<S: RootStack + Default>() {
 macro_rules! on_every_stack {
     ($($test:ident),+ $(,)?) => {
         mod refcell_stack {
-            $(#[test] fn $test() { super::$test::<s3_gc::RefCellStack>(); })+
+            $(#[test] fn $test() { super::$test(&s3_gc::RefCellStack::default()); })+
         }
         mod cell_stack {
-            $(#[test] fn $test() { super::$test::<s3_gc::CellStack>(); })+
+            $(#[test] fn $test() { super::$test(&s3_gc::CellStack::default()); })+
         }
         mod raw_stack {
-            $(#[test] fn $test() { super::$test::<s3_gc::RawStack>(); })+
+            $(#[test] fn $test() { super::$test(&s3_gc::RawStack::default()); })+
+        }
+        mod slice_stack {
+            $(#[test] fn $test() {
+                let mut buffer = s3_gc::slot_buffer(s3_gc::DEFAULT_CAPACITY);
+                super::$test(&s3_gc::SliceStack::new(&mut buffer));
+            })+
+        }
+        mod slice_stack_len_last {
+            $(#[test] fn $test() {
+                let mut buffer = s3_gc::slot_buffer(s3_gc::DEFAULT_CAPACITY);
+                super::$test(&s3_gc::SliceStackLenLast::new(&mut buffer));
+            })+
         }
     };
 }
@@ -156,11 +167,43 @@ fn a_raw_stack_starts_zeroed_and_frees_its_slots() {
 }
 
 #[test]
+#[should_panic(expected = "root stack overflow")]
+fn a_full_slice_stack_panics() {
+    let mut buffer = slot_buffer(4);
+    let stack = SliceStack::new(&mut buffer);
+    let frame = RootFrame::new(&stack);
+    let _rooted: Vec<_> = (0..5).map(|i| Value::int(i).scope(&frame)).collect();
+}
+
+#[test]
+fn a_slice_stack_borrows_its_buffer_for_its_lifetime() {
+    let mut buffer = slot_buffer(3);
+    {
+        let stack = SliceStack::new(&mut buffer);
+        assert_eq!((stack.capacity(), stack.height()), (3, 0));
+        let frame = RootFrame::new(&stack);
+        let all: Vec<_> = (0..3).map(|i| Value::int(i).scope(&frame)).collect();
+        assert_eq!(all[2].get(), Value::int(2));
+    }
+    // The stack is gone, so the buffer is its owner's again, holding the
+    // last values pushed.
+    assert_eq!(buffer[2], Value::int(2).to_bits());
+}
+
+#[test]
 fn the_stacks_store_eight_byte_slots() {
     assert_eq!(size_of::<Value>(), 8);
     // What a Scoped keeps: a slot reference, or S1's (stack, index) pair.
     assert_eq!(size_of::<<RawStack as RootStack>::Slot<'static>>(), 8);
     assert_eq!(size_of::<<CellStack as RootStack>::Slot<'static>>(), 8);
+    assert_eq!(
+        size_of::<<SliceStack<'static> as RootStack>::Slot<'static>>(),
+        8
+    );
+    assert_eq!(
+        size_of::<<SliceStackLenLast<'static> as RootStack>::Slot<'static>>(),
+        8
+    );
     assert_eq!(size_of::<<RefCellStack as RootStack>::Slot<'static>>(), 16);
 }
 

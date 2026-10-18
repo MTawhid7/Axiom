@@ -10,7 +10,10 @@
     reason = "assembly style: short register names, as in the bytecode docs"
 )]
 
-use s3_gc::{CellStack, Pacing, RawStack, RefCellStack, RootStack, Value};
+use s3_gc::{
+    CellStack, DEFAULT_CAPACITY, Pacing, RawStack, RefCellStack, RootStack, SliceStack, Value,
+    slot_buffer,
+};
 use s3_vm::workloads::{self, Size};
 use s3_vm::{Builtin, FnBuilder, Loaded, Program, ProgramBuilder, Reg, Technique, Vm, VmError};
 
@@ -25,15 +28,15 @@ fn big_stack<T: Send + 'static>(f: impl FnOnce() -> T + Send + 'static) -> T {
         .expect("the test thread panicked")
 }
 
-fn run_on<S: RootStack + Default>(
+fn run_on<S: RootStack>(
+    stack: &S,
     program: &Program,
     args: &[Value],
     technique: Technique,
     pacing: Pacing,
 ) -> Result<u64, VmError> {
-    let stack = S::default();
     let loaded = Loaded::<S>::new(program.clone()).expect("verified");
-    let mut vm = Vm::new(&stack, pacing);
+    let mut vm = Vm::new(stack, pacing);
     let result = vm.run(&loaded, technique, args).map(|v| vm.digest(v));
     assert_eq!(stack.height(), 0, "every root frame was popped");
     result
@@ -46,19 +49,31 @@ fn check(program: &Program, args: &[Value]) -> Result<u64, VmError> {
         for pacing in [Pacing::default(), Pacing::STRESS] {
             let what = format!("{technique}, {pacing:?}");
             assert_eq!(
-                run_on::<RefCellStack>(program, args, technique, pacing),
+                run_on(&RefCellStack::default(), program, args, technique, pacing),
                 expected,
                 "RefCellStack, {what}"
             );
             assert_eq!(
-                run_on::<CellStack>(program, args, technique, pacing),
+                run_on(&CellStack::default(), program, args, technique, pacing),
                 expected,
                 "CellStack, {what}"
             );
             assert_eq!(
-                run_on::<RawStack>(program, args, technique, pacing),
+                run_on(&RawStack::default(), program, args, technique, pacing),
                 expected,
                 "RawStack, {what}"
+            );
+            let mut buffer = slot_buffer(DEFAULT_CAPACITY);
+            assert_eq!(
+                run_on(
+                    &SliceStack::new(&mut buffer),
+                    program,
+                    args,
+                    technique,
+                    pacing
+                ),
+                expected,
+                "SliceStack, {what}"
             );
         }
     }

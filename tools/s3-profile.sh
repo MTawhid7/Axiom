@@ -5,7 +5,8 @@
 # Usage: tools/s3-profile.sh [--seconds N] [CASE...]
 #   --seconds N   how long each case loops under the profiler (default 5)
 #   CASE          cases of `s3-probe profile` (default: w1–w4 with every
-#                 technique on every stack, then dispatch on every stack)
+#                 technique on every stack, then dispatch on every stack and
+#                 on SliceStack's field-order control)
 #
 # Builds s3-probe with the `profiling` profile (release plus line tables) and
 # a .dSYM bundle, then records each case with samply at 1 kHz. Next to each
@@ -40,10 +41,10 @@ done
 if [ -z "$cases" ]; then
   for w in w1 w2 w3 w4; do
     for t in match table threaded; do
-      for s in raw cell refcell; do cases="$cases $w/$t/$s"; done
+      for s in slice raw cell refcell; do cases="$cases $w/$t/$s"; done
     done
   done
-  cases="$cases dispatch/raw dispatch/cell dispatch/refcell"
+  cases="$cases dispatch/slice dispatch/slice-len-last dispatch/raw dispatch/cell dispatch/refcell"
 fi
 
 command -v samply >/dev/null || { echo "samply is not installed (cargo install --locked samply)" >&2; exit 1; }

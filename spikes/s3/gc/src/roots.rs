@@ -1,15 +1,17 @@
 //! Root stacks: where native code keeps values alive across a possible
 //! collection (ADR-0008 SH6, part 2).
 //!
-//! Three interchangeable implementations of [`RootStack`], for S3-Q1:
+//! Interchangeable implementations of [`RootStack`], for S3-Q1:
 //!
 //! | Stack | Storage | A rooted value is found by | `unsafe` |
 //! |---|---|---|---|
 //! | [`RefCellStack`] | `RefCell<Vec<Value>>`: S1's borrow-tracked design, with 8-byte slots | stack and index; every access borrows the `RefCell` | none |
 //! | [`CellStack`] | chunks of 1,024 `Cell<Value>` slots, allocated on demand and never moved | a reference to its slot | none |
-//! | [`RawStack`](crate::RawStack) | one lazily committed, fixed-capacity array of `Cell<Value>` slots (C1) | a reference to its slot | `src/raw/` only |
+//! | [`RawStack`](crate::RawStack) | one lazily committed, fixed-capacity array of `Cell<Value>` slots: S3's first C1 stack, archived | a reference to its slot | `src/raw/` only |
+//! | [`SliceStack`] | one contiguous array of `Cell<u64>` slots, borrowed from a zeroed buffer that its owner allocated, length first: **C1's stack** | a reference to its slot | none |
+//! | [`SliceStackLenLast`] | the same with the length last: S3's control for the field order | a reference to its slot | none |
 //!
-//! Frames and scoped handles are the same for all three. A frame borrows the
+//! Frames and scoped handles are the same for all of them. A frame borrows the
 //! stack, not the heap, so code holding a frame can still borrow the heap
 //! mutably. That is why the stack lives outside the heap (`HeapCore` holds a
 //! `&'r` reference to it), where S1 shared it through an `Rc`.
@@ -309,3 +311,152 @@ impl fmt::Debug for CellStack {
             .finish_non_exhaustive()
     }
 }
+
+// ----- SliceStack -----
+
+/// Slots in a default stack: 8 MiB of address space, committed only where
+/// pushes touch it.
+#[cfg(not(miri))]
+pub const DEFAULT_CAPACITY: usize = 1 << 20;
+/// Smaller under Miri, which zeroes allocations eagerly.
+#[cfg(miri)]
+pub const DEFAULT_CAPACITY: usize = 1 << 12;
+
+/// A zeroed buffer of `capacity` slots, for a [`SliceStack`].
+///
+/// `vec![0; n]` allocates with `alloc_zeroed`, so the system commits the
+/// buffer's pages only when pushes first touch them. That is an optimization
+/// in the standard library, not a documented guarantee: without it the whole
+/// buffer would be committed at once, which would cost memory, never
+/// soundness. The slots are `u64`s rather than [`Value`]s because the standard
+/// library allocates zeroed only for types it knows to be zero.
+#[must_use]
+pub fn slot_buffer(capacity: usize) -> Box<[u64]> {
+    vec![0; capacity].into_boxed_slice()
+}
+
+/// C1's root stack (ADR-0008 SH7), chosen at Gate C: one contiguous array of
+/// 8-byte `Cell` slots, as in [`RawStack`](crate::RawStack), but borrowed from
+/// a buffer that its owner allocated ([`slot_buffer`]), so it needs no
+/// `unsafe`. [`Cell::from_mut`] and [`Cell::as_slice_of_cells`] turn the
+/// unique borrow into shared cells: what `RawStack`'s invariants R1–R3 state
+/// in comments, the borrow checker enforces. A push is a bounds check and two
+/// stores; a [`Scoped`] keeps a reference to its slot, so reading it back is
+/// one load.
+///
+/// **The length comes first** (`repr(C)`), so that the compiler loads it on its
+/// own. After the slice, where Rust's own layout puts it, it is loaded with the
+/// slice's length in one 16-byte paired load (`ldp`), of which the previous
+/// push's 8-byte store wrote only half. On the M1 that doubles the cost of a
+/// push whose length the previous push has just stored ([`SliceStackLenLast`]
+/// measures it; S3 results §3).
+///
+/// ```
+/// use s3_gc::{DEFAULT_CAPACITY, RootFrame, RootStack, SliceStack, Value, slot_buffer};
+///
+/// let mut buffer = slot_buffer(DEFAULT_CAPACITY); // owned by whoever runs the agent
+/// let stack = SliceStack::new(&mut buffer);
+/// let frame = RootFrame::new(&stack);
+/// let rooted = Value::int(7).scope(&frame);
+/// assert_eq!((rooted.get(), stack.height()), (Value::int(7), 1));
+/// ```
+#[repr(C)]
+pub struct SliceStack<'b> {
+    len: Cell<usize>,
+    slots: &'b [Cell<u64>],
+}
+
+/// [`SliceStack`] with its length after the slice: S3's control, which
+/// measures what the field order costs. Not for use.
+#[repr(C)]
+pub struct SliceStackLenLast<'b> {
+    slots: &'b [Cell<u64>],
+    len: Cell<usize>,
+}
+
+const _: () = assert!(core::mem::offset_of!(SliceStack<'static>, len) == 0);
+const _: () = assert!(core::mem::offset_of!(SliceStackLenLast<'static>, len) == 16);
+
+/// The two field orders share every method.
+macro_rules! slice_stack {
+    ($name:ident) => {
+        impl<'b> $name<'b> {
+            /// A stack over `buffer`, whose length is its capacity. Pushing
+            /// beyond it panics, as overflowing a thread's stack does.
+            #[must_use]
+            pub fn new(buffer: &'b mut [u64]) -> Self {
+                Self {
+                    len: Cell::new(0),
+                    slots: Cell::from_mut(buffer).as_slice_of_cells(),
+                }
+            }
+
+            /// The number of slots.
+            #[must_use]
+            pub const fn capacity(&self) -> usize {
+                self.slots.len()
+            }
+        }
+
+        impl RootStack for $name<'_> {
+            type Slot<'s>
+                = &'s Cell<u64>
+            where
+                Self: 's;
+
+            #[inline]
+            fn height(&self) -> usize {
+                self.len.get()
+            }
+
+            #[inline]
+            fn push(&self, value: Value) -> &Cell<u64> {
+                let index = self.len.get();
+                let slot = self.slots.get(index).expect("root stack overflow");
+                slot.set(value.to_bits());
+                self.len.set(index + 1);
+                slot
+            }
+
+            #[inline]
+            fn read<'s>(slot: &'s Cell<u64>) -> Value
+            where
+                Self: 's,
+            {
+                Value::from_bits(slot.get())
+            }
+
+            /// Only ever shrinks, like `Vec::truncate`.
+            #[inline]
+            fn truncate(&self, height: usize) {
+                if height < self.len.get() {
+                    self.len.set(height);
+                }
+            }
+
+            fn for_each(&self, mut f: impl FnMut(Value)) {
+                for slot in &self.slots[..self.len.get()] {
+                    f(Value::from_bits(slot.get()));
+                }
+            }
+
+            fn update(&self, mut f: impl FnMut(Value) -> Value) {
+                for slot in &self.slots[..self.len.get()] {
+                    slot.set(f(Value::from_bits(slot.get())).to_bits());
+                }
+            }
+        }
+
+        impl fmt::Debug for $name<'_> {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.debug_struct(stringify!($name))
+                    .field("len", &self.len.get())
+                    .field("capacity", &self.slots.len())
+                    .finish_non_exhaustive()
+            }
+        }
+    };
+}
+
+slice_stack!(SliceStack);
+slice_stack!(SliceStackLenLast);
