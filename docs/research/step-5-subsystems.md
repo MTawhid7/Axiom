@@ -258,7 +258,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | CP3 | Text, fonts and Unicode (I1, the text part of P4); spike S5's design | ✅ 2026-10-18 (§11; [document](../architecture/text-and-fonts.md); S5 design §10.1) |
 | CP4 | Graphics: rasterization, compositing and presentation (I2); spike S6's design | ✅ 2026-10-18 (§11; [document](../architecture/graphics.md); S6 design §10.2) |
 | CP5 | Images and media (I4) | ✅ 2026-10-18 (§11; [document](../architecture/images-and-media.md); S5-Q5 added to §10.1) |
-| CP6 | Networking: URLs, HTTP, TLS, DNS, cache, cookies, Fetch's policy (I3); spike S7's design | Not started |
+| CP6 | Networking: URLs, HTTP, TLS, DNS, cache, cookies, Fetch's policy (I3); spike S7's design | ✅ 2026-10-18 (§11; [document](../architecture/networking.md); S7 design §10.3) |
 | CP7 | Storage and workers | Not started |
 | CP8 | Accessibility: the tree and the bridge (I5); the shell's questions for the owner | Not started |
 | CP9 | Synthesis of part 1: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | Not started |
@@ -586,7 +586,7 @@ The owner asked which areas may need targeted validation spikes. Three candidate
 |---|---|---|---|---|
 | **S5** | The text stack (CP3; design in §10.1), with images added at CP5 | How do CoreText and a Rust text stack (a Rust shaper such as HarfRust, a Rust font parser and rasterizer, ICU4X's segmenters) compare on a multi-script corpus, inside the renderer's sandbox, in shaping output, speed and memory per renderer? How can an untrusted web font load there safely? | [S4-Q5](s4-results.md) showed that CoreText draws correctly in the sandbox, not how it compares with anything. The [language evaluation](../technology/language-evaluation.md) §12 records HarfRust as "not a complete port". Memory per renderer on this Mac needs measuring: B2 allows 10 MB, and drawing with CoreText took S4's helper from 1.14 to 4.05 MiB | TX: shaping, font parsing and rasterization; where glyphs are rasterized |
 | **S6** | Compositing on Metal (CP4; design in §10.2) | Can the browser's compositor draw display lists of validated primitives (property trees, rounded clips, glyph quads from an atlas, images, embedded child frames) on Metal within a 60 Hz frame budget, and with what memory and energy? Does partial presentation work? How do CPU and GPU path rasterization compare? | [S2](s2-results.md) measured an idle Metal window (20–21 MB, no wakeups while idle), not a compositing workload. No source measures these costs on an M1 | GR: the GPU interface, the compositor's renderer, path rasterization |
-| **S7** | The network process and TLS (CP6) | Does a deny-by-default network-process profile, allowing only outbound sockets, name resolution, certificate trust evaluation and its own data directory, support a TLS client that verifies against the system's trust store? Which rules does it need? What do handshakes and requests cost with each candidate stack? | S4 validated only renderer-like profiles. Which system services certificate evaluation needs inside a profile is the kind of fact S4 found only by trying: named profiles killed their process, and CoreText degraded silently without ICU's data | NW: the TLS stack and certificate verification; the network process's sandbox rules |
+| **S7** | The network process and TLS (CP6; design in §10.3) | Does a deny-by-default network-process profile, allowing only outbound sockets, name resolution, certificate trust evaluation and its own data directory, support a TLS client that verifies against the system's trust store? Which rules does it need? What do handshakes and requests cost with each candidate stack? | S4 validated only renderer-like profiles. Which system services certificate evaluation needs inside a profile is the kind of fact S4 found only by trying: named profiles killed their process, and CoreText degraded silently without ICU's data | NW: the TLS stack and certificate verification; the network process's sandbox rules |
 | (S8) | The JavaScript engine (CP16) | Only if CP16 leaves a question that sources can't settle, such as the cost of shape-based inline caches over Pattern B arenas in safe Rust | — | Proposed at Gate C, if needed |
 
 **No spike is planned for these areas:**
@@ -671,6 +671,30 @@ The design is in [graphics](../architecture/graphics.md). The time thresholds be
 - **Dependencies:** objc2's framework crates, already decided, plus S6-Q4's path-rasterizer candidates, each justified in the manifest (DP23).
 
 **Outputs:** `docs/research/s6-results.md`; GR5 settled, or its amendment proposed; ADR-0012 updated.
+
+### 10.3 Spike S7: the network process and TLS (designed at CP6)
+
+**Purpose.** Validate the network process's sandbox (NW17), which S4 never tested: S4 covered only renderer-like profiles. Settle NW6 by comparing rustls, verified by Security's trust evaluation, with Apple's Network framework. Check NW1 and NW7: one I/O thread, driving every protocol from one wait. The design is in [networking](../architecture/networking.md).
+
+| ID | Question | Passes if |
+|---|---|---|
+| S7-Q1 | **Confinement.** Under a deny-by-default profile, compiled by a broker as S4's are, a helper's TLS client verifies servers through `SecTrustEvaluateWithError`. The profile allows outbound TCP and UDP, the system's DNS service, certificate trust evaluation and a data directory. Does verification work, and which rules exactly does it need? | Handshakes to public test hosts verify. Bad certificates (expired, self-signed, wrong host) are rejected. The profile needs no rule outside a reviewed list. Denials are logged and explained |
+| S7-Q2 | **TLS stacks compared.** rustls with `aws-lc-rs`, verified through Security, against Network framework's TLS, under the same profile. What do they cost in handshake latency (full and resumed), CPU per megabyte on a large download, and footprint? | Report. It settles NW6, together with how each fits NW1 |
+| S7-Q3 | **DNS-SD in the sandbox.** Do `DNSServiceGetAddrInfo` and `DNSServiceQueryRecord` (HTTPS records), driven through `DNSServiceRefSockFD` in `kqueue`, work under the profile? | Addresses and HTTPS records resolve, asynchronously, with no thread blocked |
+| S7-Q4 | **One wait.** Does one I/O thread drive rustls, `quinn-proto` (one QUIC connection), DNS-SD, a Mach port and timers from a single `kevent64` call? | Everything progresses from that one wait, and the process makes no wakeups while idle |
+
+**What would be built** (after authorization only):
+- `spikes/s7/net` (`s7-net`):
+  - a broker and a sandboxed helper, reusing S4's tooling (`s4-sandbox`, `tools/s4-sign.sh`);
+  - its calls into Security, Network framework and DNS-SD in `src/platform/`, allowlisted;
+  - rustls with the `aws-lc-rs` provider, and `quinn-proto`;
+  - a minimal HTTP/1.1 client of its own, enough to fetch.
+- **Network access:** to public test hosts, by read-only requests. That is outward-facing, so the owner's authorization covers it explicitly. No certificate is added to the system's keychain, and nothing on the Mac is reconfigured.
+- **Measurements:** Wi-Fi timings vary, so latencies are reported as medians over many handshakes, and as indicative. CPU and footprint come from the helper's own counters and `/usr/bin/time -l`.
+- **Method:** release builds; three process runs with cool-downs; AC power; a clean tree.
+- **Dependencies:** rustls, `aws-lc-rs` (which compiles C and assembly at build time, so its build cost against T1–T4 is measured as part of S7), and `quinn-proto`, each justified in the manifest (DP23).
+
+**Outputs:** `docs/research/s7-results.md`; NW6 settled; the network process's profile written down; ADR-0013 updated.
 
 ## 11. Results log
 
@@ -784,5 +808,26 @@ Every relative link resolves; the four standard checks pass.
   Firefox, Chromium and WebKit all decode media outside their content processes.
 
 **S5 gains S5-Q5** (§10.1): ImageIO under the renderer profile, compared with the safe decoders, as §10 foresaw.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP6 — completed 2026-10-18
+
+[Networking](../architecture/networking.md) written (**Proposed**; rules NW1–NW18). Its sources: Servo's, Chromium's and Firefox's network stacks; the rustls, `rustls-platform-verifier` and Quinn projects; the Fetch Standard; the IETF's cookie draft; the ORB proposal; Chrome's Local Network Access; Google's published grades; the SDK's Network, Security and DNS-SD headers. Main proposals:
+- **Every protocol is a state machine without I/O of its own,** driven by the network process's I/O thread from one `kevent64` wait. That keeps one wait per thread and deterministic tests. rustls and `quinn-proto` already have that shape; tokio, which Servo uses, is rejected.
+- **One URL parser, Axiom's own, in every process,** so that no two processes can parse a URL differently. Its IDNA goes through ICU4X in renderers, the network process and the address bar. In the browser, URLs from other processes must be canonical ASCII, which settles CP3's IDNA question.
+- **HTTP/1.1, HTTP/2, HTTP/3 framing, HPACK and QPACK are Axiom's own.** Google grades `httparse` at `ub-risk-4`, and the reusable HTTP/2 and HTTP/3 crates are async-bound. QUIC is `quinn-proto`.
+- **TLS is rustls, with the system verifying certificates** through Security's trust evaluation (SG7). Its `aws-lc-rs` crypto, which is C and assembly, is admitted under DP10's exception in the sandboxed network process, with ADR-0013.
+- **DNS is the system's, through DNS-SD,** asynchronous and with HTTPS records, so no blocking resolver is needed.
+- **Partitioning:** connections, TLS sessions, the cache and cookies are partitioned by Fetch's network partition key, and third-party cookies are blocked.
+- **Fetch's policy is enforced from the endpoint's bound facts:**
+  - CORS, CORP and COEP;
+  - ORB before any byte reaches a renderer;
+  - mixed content, Referrer-Policy, HSTS;
+  - Local Network Access, the permission model that replaced Private Network Access in Chrome.
+
+  That answers ADR-0004's questions on initiator locks, ORB and the TLS stack.
+
+**Spike S7 designed** (§10.3): four questions, on the network process's sandbox, rustls against Network framework, DNS-SD in the sandbox, and one wait for every protocol.
 
 Every relative link resolves; the four standard checks pass.

@@ -90,12 +90,29 @@ CP3–CP8 add entries here as their documents propose dependencies, and CP9's AD
 
 `zune-jpeg` is listed under §4 below. Media's demuxers and software codecs are chosen at the media milestone (IM11).
 
+### From CP6: networking
+
+| Dependency | Class | Group | Published grade | Processes | Purpose, and the interface in front of it | Proposed by |
+|---|---|---|---|---|---|---|
+| **Security: trust evaluation** | Required platform facility | — | — (C) | Network | Certificate verification against the system's trust store (SG7). Through `platform` | NW6 |
+| **DNS-SD** (`dns_sd.h`, libSystem) | Required platform facility | — | — (C) | Network | Asynchronous name resolution, and HTTPS records | NW7 |
+| **SystemConfiguration** | Required platform facility | — | — (C) | Network | The system's proxy settings | NW9 |
+| **rustls** 0.23.46 | Foundational: TLS shapes the network process | `sandboxed`, with its crypto provider | Not graded; `forbid(unsafe_code)` | Network | TLS 1.2 and 1.3, as a state machine (NW1). "Apache-2.0 OR ISC OR MIT" | NW6 |
+| **`aws-lc-rs`** 1.18.2, with `aws-lc-sys` | Replaceable implementation detail | `sandboxed`: C and assembly, under DP10's exception | — (C and assembly) | Network | rustls's crypto provider. Admitted by ADR-0013 | NW6 |
+| **`quinn-proto`** 0.11.19 | Replaceable implementation detail | `trusted` in the network process, if its audit agrees | Not graded | Network | QUIC, as a deterministic state machine. "MIT OR Apache-2.0" | NW5 |
+| **`miniz_oxide`** | Replaceable implementation detail | `trusted` in the network process and renderer | `ub-risk-0` (0.8.5) | Network, renderer | gzip and deflate (and PNG's inflate) | NW13 |
+| **`ruzstd`** 0.9.1 | Replaceable implementation detail | `trusted` in the network process | `ub-risk-2` (0.6.0) | Network | zstd. MIT | NW13 |
+
+`brotli-decompressor` is CP3's entry, shared with NW13.
+
 ## 4. Considered and not admitted
 
 | Dependency | Reason | Recorded at |
 |---|---|---|
 | `encoding_rs` | Graded `ub-risk-3` at 0.8.33 by Google, so DP8 bars it. Axiom writes its own encodings in safe Rust and uses `encoding_rs` as a test reference (TX3). It would be reconsidered only if a newer version earns a published grade of `ub-risk-2` or better | CP3 |
 | `zune-jpeg` | Graded `ub-risk-3` at 0.4.19 by Google, so DP8 bars it. JPEG uses a safe decoder instead (IM2) | CP5 |
+| `httparse` | A Google delta audit (1.8.0 → 1.9.4) graded it `ub-risk-4`, so DP8 bars it. HTTP/1.1 parsing is Axiom's own (NW3) | CP6 |
+| `flate2` | Graded `ub-risk-3` at 1.0.28 by Google (`ub-risk-2` at 1.1.0 by Chromium). Unneeded: `miniz_oxide` is used directly (NW13) | CP6 |
 
 ## 5. Spikes only (exempt, DP23)
 

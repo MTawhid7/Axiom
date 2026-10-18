@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Phase Zero: Step 5, subsystem design** (authorized 2026-10-18). Gate A passed: the plan is approved as written. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 4** (merged with `--no-ff` on 2026-10-18) and is pushed. Step 4 ran on branch `step-4`, also pushed. **Step 5 runs on branch `step-5`**, from `main` at `c642ab3`, pushed to `origin` as the owner authorized at Gate A |
-| Current checkpoint | **Step 5: CP1–CP5 ✅, Gate A passed** ([tracker](research/step-5-subsystems.md)). CP6 (networking) is next; CP2–CP9 run without pausing until Gate B. Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
+| Current checkpoint | **Step 5: CP1–CP6 ✅, Gate A passed** ([tracker](research/step-5-subsystems.md)). CP7 (storage and workers) is next; CP2–CP9 run without pausing until Gate B. Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -79,6 +79,13 @@
 - AVIF goes to ImageIO in the renderer, under DP10's exception, accepted by ADR-0012; S5 gains a question (S5-Q5) to test ImageIO in the sandbox.
 - Pixels decode at display size and are discarded when not visible. `moxcms` manages color.
 - Media runs in a sandboxed utility process, with VideoToolbox, IOSurface frames and audio output.
+
+**CP6 (completed 2026-10-18):** [networking](architecture/networking.md) (**Proposed**; NW1–NW18), and spike S7's design ([tracker](research/step-5-subsystems.md) §10.3):
+- Protocols are state machines driven from one wait on the I/O thread: no tokio.
+- One URL parser of our own in every process; in the browser, only canonical ASCII URLs from other processes, which settles CP3's IDNA question.
+- HTTP/1.1, HTTP/2 and HTTP/3 framing are our own (`httparse` is graded `ub-risk-4`). QUIC is `quinn-proto`. TLS is rustls with `aws-lc-rs`, under DP10's exception, and Security verifies certificates.
+- DNS through DNS-SD. Caches, connections, sessions and cookies are partitioned.
+- Fetch's policy is enforced from bound endpoints: CORS, ORB, CORP and COEP, mixed content, HSTS, and Local Network Access.
 
 ### 2026-10-17 to 2026-10-18 — Session 7 (Gate B; spike S3; Gate C; S3 addendum; merge)
 
