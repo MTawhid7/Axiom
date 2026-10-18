@@ -259,7 +259,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | CP4 | Graphics: rasterization, compositing and presentation (I2); spike S6's design | ✅ 2026-10-18 (§11; [document](../architecture/graphics.md); S6 design §10.2) |
 | CP5 | Images and media (I4) | ✅ 2026-10-18 (§11; [document](../architecture/images-and-media.md); S5-Q5 added to §10.1) |
 | CP6 | Networking: URLs, HTTP, TLS, DNS, cache, cookies, Fetch's policy (I3); spike S7's design | ✅ 2026-10-18 (§11; [document](../architecture/networking.md); S7 design §10.3) |
-| CP7 | Storage and workers | Not started |
+| CP7 | Storage and workers | ✅ 2026-10-18 (§11; [document](../architecture/storage-and-workers.md)) |
 | CP8 | Accessibility: the tree and the bridge (I5); the shell's questions for the owner | Not started |
 | CP9 | Synthesis of part 1: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | Not started |
 | | **Spikes**, each only if authorized at Gate B | |
@@ -829,5 +829,20 @@ Every relative link resolves; the four standard checks pass.
   That answers ADR-0004's questions on initiator locks, ORB and the TLS stack.
 
 **Spike S7 designed** (§10.3): four questions, on the network process's sandbox, rustls against Network framework, DNS-SD in the sandbox, and one wait for every protocol.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP7 — completed 2026-10-18
+
+[Storage and workers](../architecture/storage-and-workers.md) written (**Proposed**; rules SW1–SW13). Its sources: the Storage Standard; Chromium's IndexedDB-on-SQLite PSA, its `localStorage` cache and its service-worker connector; Firefox's and WebKit's storage on SQLite; the `redb` project. Main proposals:
+- **All web storage lives in the network process,** behind endpoints bound to the storage key: the origin and the top-level site.
+- **One engine:** `redb`, pure Rust, if its audit grades it `ub-risk-2` or better, with large values in files and a database per storage key. SQLite, which every other engine uses or is moving to, is the fallback, under DP10's exception. Crash tests at the first storage milestone decide between them. The HTTP cache and the cookie jar use the same engine, which settles networking's open question 2.
+- **`localStorage` is cached in the renderer,** loaded by one synchronous request, as Chromium does.
+- **IndexedDB values arrive serialized,** so the network process never parses a script value.
+- **Quotas and eviction** follow the Storage Standard's buckets.
+- **Service workers:** navigations are intercepted in Fetch's "handle fetch" step, in the network process; controlled documents reach their worker over a channel the browser creates.
+- **Shared and service workers run in a renderer locked to their site.** The browser launches one when none exists, and the site's documents then reuse it. That answers the handed-over question 11.
+
+No spike: the storage engine is decided by crash tests at its milestone, as §10 planned.
 
 Every relative link resolves; the four standard checks pass.

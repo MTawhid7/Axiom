@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Phase Zero: Step 5, subsystem design** (authorized 2026-10-18). Gate A passed: the plan is approved as written. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 4** (merged with `--no-ff` on 2026-10-18) and is pushed. Step 4 ran on branch `step-4`, also pushed. **Step 5 runs on branch `step-5`**, from `main` at `c642ab3`, pushed to `origin` as the owner authorized at Gate A |
-| Current checkpoint | **Step 5: CP1–CP6 ✅, Gate A passed** ([tracker](research/step-5-subsystems.md)). CP7 (storage and workers) is next; CP2–CP9 run without pausing until Gate B. Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
+| Current checkpoint | **Step 5: CP1–CP7 ✅, Gate A passed** ([tracker](research/step-5-subsystems.md)). CP8 (accessibility) is next; CP2–CP9 run without pausing until Gate B. Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -86,6 +86,12 @@
 - HTTP/1.1, HTTP/2 and HTTP/3 framing are our own (`httparse` is graded `ub-risk-4`). QUIC is `quinn-proto`. TLS is rustls with `aws-lc-rs`, under DP10's exception, and Security verifies certificates.
 - DNS through DNS-SD. Caches, connections, sessions and cookies are partitioned.
 - Fetch's policy is enforced from bound endpoints: CORS, ORB, CORP and COEP, mixed content, HSTS, and Local Network Access.
+
+**CP7 (completed 2026-10-18):** [storage and workers](architecture/storage-and-workers.md) (**Proposed**; SW1–SW13):
+- All web storage lives in the network process, keyed by origin and top-level site.
+- One engine: `redb` if its audit agrees, with SQLite under DP10's exception as the fallback; crash tests decide. The cache and the cookie jar share the engine.
+- `localStorage` is cached in the renderer. IndexedDB values arrive serialized, so the network process never parses script values.
+- Service workers are intercepted inside Fetch. Shared and service workers run in a renderer locked to their site, launched when none exists.
 
 ### 2026-10-17 to 2026-10-18 — Session 7 (Gate B; spike S3; Gate C; S3 addendum; merge)
 

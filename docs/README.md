@@ -59,6 +59,7 @@ These documents are the project's source of truth. Conversation history is not.
 | [architecture/graphics.md](architecture/graphics.md) | Graphics: Metal through `platform`, CoreAnimation layer trees with damage-limited tiles, our own pipelines, paths in the renderer pending S6, Display P3, compositor animations, the GPU process later | **Proposed** (Step 5, CP4); ADR-0012 at CP9 |
 | [architecture/images-and-media.md](architecture/images-and-media.md) | Images and media: safe Rust decoders in the renderer, AVIF through ImageIO, decoding at display size and discarding, color management, a sandboxed media process | **Proposed** (Step 5, CP5); ADR-0012 at CP9 |
 | [architecture/networking.md](architecture/networking.md) | Networking: state-machine protocols on one I/O thread, our own URL parser and HTTP framing, rustls with system certificate verification, DNS-SD, partitioned caches and cookies, Fetch's policy from bound endpoints | **Proposed** (Step 5, CP6); ADR-0013 at CP9 |
+| [architecture/storage-and-workers.md](architecture/storage-and-workers.md) | Storage and workers: web storage in the network process by storage key, one engine (`redb` or SQLite), a renderer cache for `localStorage`, serialized IndexedDB values, quotas, service-worker interception, worker placement | **Proposed** (Step 5, CP7); ADR-0013 at CP9 |
 | [research/](research/README.md) | Research conventions and notes | Living |
 
 **Planned documents**, each created when its Phase Zero step begins:
