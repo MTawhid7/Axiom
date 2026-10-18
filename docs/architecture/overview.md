@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 4, CP11): the architecture proposal v0. At Gate B (2026-10-17) the owner accepted ADRs 0005–0007 and 0009, and pre-approved ADR-0008 pending spike S3. The proposal as a whole is approved at the end of Phase Zero (Step 6) |
+| **Status** | **Proposed** (Step 4, CP11): the architecture proposal v0. The owner accepted ADRs 0005–0007 and 0009 at Gate B (2026-10-17), and ADR-0008 at Gate C (2026-10-18), after spike S3 and its addendum. The proposal as a whole is approved at the end of Phase Zero (Step 6) |
 | **Question** | How do the parts fit together: processes × threads × pipeline; the crate structure and its `unsafe` map; what happens end to end in common scenarios; and how does the system grow from L0 to L3 without a rewrite? |
 | **Answers** | Step 4 question Q16 ([tracker](../research/step-4-architecture-proposal.md) §3), and the check of the architecture criteria AC1–AC10 (tracker §5) |
 | **Builds on** | Step 3: [threat model](../security/threat-model.md), [process model](../security/process-model.md), [ADR-0004](../adr/0004-process-model-and-sandbox.md). Step 4: [macOS runtime note](../research/macos-runtime-facilities.md), [event loop and threading](event-loop-and-threading.md), [IPC](ipc.md), [frame tree and navigation](frame-tree-and-navigation.md), [rendering pipeline](rendering-pipeline.md), [invalidation](invalidation.md), [input and accessibility](input-and-accessibility.md), [embedder API](embedder-api.md), [script and heap](script-and-heap.md) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-18: the `gc` crate has no `unsafe` (Gate C) |
 
 Everything here is **planned**; nothing is implemented. This document adds no new rules; it assembles the rules of the documents above (EL, IP, FT, PL, IV, IN, EM, SH), which it cites.
 
@@ -48,7 +48,7 @@ A proposal for the implementation milestones. The final names and splits are set
 | Crate | Purpose | Process | `unsafe` |
 |---|---|---|---|
 | `platform` | All FFI: Mach IPC, kqueue and run loops, sandbox entry and profile compilation, `posix_spawn`, shared memory and IOSurfaces, QoS, wait-on-address, CoreText, ImageIO, Metal | All | **Yes**, in listed modules (ADR-0002 §15.3) |
-| `gc` | Pattern B heap: typed arenas, handles, scopes, the root stack, the collector | Renderer | **Only `src/raw/`**, if C1 needs it (SH7, S3) |
+| `gc` | Pattern B heap: typed arenas, handles, scopes, the root stack, the collector | Renderer | **None** (`#![forbid(unsafe_code)]`): C1's root stack is safe (SH7; the owner's decision at Gate C, 2026-10-18) |
 | `jit` | Later, only if J1's evidence calls for it | `renderer-jit` | **Yes**, under J1–J7 |
 | `shell` | The AppKit shell, through objc2 (EM11) | Browser | **Only its `platform` module** |
 | `ipc`, `idl` | Channels, the in-process transport, `Untrusted<T>`; the build-time generator | All | No |
@@ -65,7 +65,7 @@ A proposal for the implementation milestones. The final names and splits are set
 - engine crates never depend on `shell` (EM3);
 - renderer crates depend on browser crates only through the protocol crates (`ipc`, `display-list`);
 - `net` and `storage` never depend on renderer crates;
-- only `platform`, `gc`'s raw module, `jit` and the shell's `platform` module may contain `unsafe` (AC9).
+- only `platform`, `jit` and the shell's `platform` module may contain `unsafe` (AC9).
 
 ## 3. Five scenarios, end to end
 
@@ -110,7 +110,7 @@ A proposal for the implementation milestones. The final names and splits are set
 | AC6 | A deterministic, testable core | Thread loops behind an interface, with a virtual clock (EL24). In-memory channels (IP2). The headless embedder (EM9). Incremental-versus-rebuild oracles (IV14) | **Met** |
 | AC7 | Memory is designed | Each structure has an owner and a lifetime (PL13, SH14, EL §4.10). Bounded queues (IP16). Budgets measured in Step 6 | **Met** by design; budgets in Step 6 |
 | AC8 | The complete model fits | Every capability has a home without architectural change: the table below | **Met** |
-| AC9 | `unsafe` stays where ADR-0002 allows it | `platform`, `gc`'s raw module (only if C1 needs it), `jit` (later), and the shell's `platform` module (§2). Decoders and generators are safe Rust (IP8) | **Met** |
+| AC9 | `unsafe` stays where ADR-0002 allows it | `platform`, `jit` (later), and the shell's `platform` module (§2). The `gc` crate has none: C1's root stack is safe (SH7). Decoders and generators are safe Rust (IP8) | **Met** |
 | AC10 | Every decision traces to evidence | Each document cites its precedent and specifications, and labels inference. The decisions that sources can't settle are left to measurement: C1 by S3, IP20's priority boost at the first implementation milestone, C4's order on the corpus | **Met** |
 
 **The complete model (AC8):**
@@ -137,7 +137,7 @@ A proposal for the implementation milestones. The final names and splits are set
 
 ## 6. Decisions for Gate B
 
-From the documents above. ADR-0005 to ADR-0009 record them. **Outcome (the owner, 2026-10-17):** ADRs 0005, 0006, 0007 and 0009 accepted; ADR-0008 pre-approved, moving to Accepted once S3-Q1 and S3-Q2 pass.
+From the documents above. ADR-0005 to ADR-0009 record them. **Outcome (the owner, 2026-10-17):** ADRs 0005, 0006, 0007 and 0009 accepted; ADR-0008 pre-approved, moving to Accepted once S3-Q1 and S3-Q2 pass. **At Gate C (2026-10-18)** the owner accepted ADR-0008 once S3's addendum was measured, with C1 met by the safe `SliceStack`.
 
 | ADR | Decides |
 |---|---|

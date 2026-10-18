@@ -29,7 +29,7 @@ These documents are the project's source of truth. Conversation history is not.
 | ↳ [0005-ipc-transport-and-interfaces.md](adr/0005-ipc-transport-and-interfaces.md) | IPC: Mach transport, capabilities, IDL and generated decoders, `Untrusted<T>` | **Accepted** (2026-10-17, Gate B) |
 | ↳ [0006-event-loop-and-threading.md](adr/0006-event-loop-and-threading.md) | Event loop and threading model | **Accepted** (2026-10-17, Gate B) |
 | ↳ [0007-frame-tree-pipeline-and-input.md](adr/0007-frame-tree-pipeline-and-input.md) | Frame tree, rendering pipeline, invalidation and input across frames (SI4) | **Accepted** (2026-10-17, Gate B) |
-| ↳ [0008-script-agents-and-heap.md](adr/0008-script-agents-and-heap.md) | Script, agents and the heap; ADR-0003's C1–C5 | **Proposed** (2026-10-17); acceptance pre-approved, effective once spike S3-Q1 and S3-Q2 pass |
+| ↳ [0008-script-agents-and-heap.md](adr/0008-script-agents-and-heap.md) | Script, agents and the heap; ADR-0003's C1–C5 | **Accepted** (2026-10-18, Gate C), with C1 met by the safe `SliceStack` |
 | ↳ [0009-embedder-api-and-shell.md](adr/0009-embedder-api-and-shell.md) | Engine/embedder API and the shell (OQ-11) | **Accepted** (2026-10-17, Gate B) |
 | [security/threat-model.md](security/threat-model.md) | Assets, adversaries, attack surfaces, trust boundaries, security goals, security levels L0–L3 | **Accepted** (2026-10-17), amended: out-of-process iframes required for L3 |
 | [security/process-model.md](security/process-model.md) | Process types and privileges, site isolation, IPC trust rules, memory budgets | Binding (ADR-0004 accepted, 2026-10-17) |
@@ -40,9 +40,9 @@ These documents are the project's source of truth. Conversation history is not.
 | [research/step-3-security-and-process-model.md](research/step-3-security-and-process-model.md) | Step 3 plan and checkpoint tracker, including spike S4 | Complete (2026-10-17) |
 | [research/macos-process-confinement.md](research/macos-process-confinement.md) | Process confinement on macOS: Seatbelt, App Sandbox, hardened runtime, JIT, launch and IPC options; browser precedent; spike S4 design | Reviewed (2026-10-17) |
 | [research/s4-results.md](research/s4-results.md) | S4 results: custom Seatbelt profiles on macOS 27; probes; start-up, footprint and IPC cost; the JIT matrix; CoreText in a sandbox | Complete (2026-10-17) |
-| [research/s3-results.md](research/s3-results.md) | S3 results: root-stack costs (C1), rooting traffic in an interpreter, dispatch techniques, node layouts (C2), setters and write barriers (C3); recommendations for ADR-0008 | Complete (2026-10-18), for Gate C |
+| [research/s3-results.md](research/s3-results.md) | S3 results: root-stack costs (C1), rooting traffic in an interpreter, dispatch techniques, node layouts (C2), setters and write barriers (C3); recommendations for ADR-0008 | Complete (2026-10-18), with the CP16 addendum (C1's `SliceStack`) |
 | [research/macos-runtime-facilities.md](research/macos-runtime-facilities.md) | macOS facilities for the runtime: run loops, frame timing, QoS, surfaces, IME and accessibility; browser precedent | Complete (Step 4, CP2) |
-| [research/step-4-architecture-proposal.md](research/step-4-architecture-proposal.md) | Step 4 plan and checkpoint tracker: the architecture proposal v0, including spike S3's design | At Gate C (CP1–CP15 done) |
+| [research/step-4-architecture-proposal.md](research/step-4-architecture-proposal.md) | Step 4 plan and checkpoint tracker: the architecture proposal v0, including spike S3's design | Done (CP1–CP17; merged 2026-10-18) |
 | [architecture/overview.md](architecture/overview.md) | **Architecture proposal v0:** the system on one page, crates and `unsafe` map, end-to-end scenarios, criteria check, staging | **Proposed** (Step 4, CP11); its ADRs decided at Gate B |
 | [architecture/event-loop-and-threading.md](architecture/event-loop-and-threading.md) | Event loop and threading model: thread loops, the threads of each process, the HTML event loop, frame scheduling, agents and workers | Binding (ADR-0006 accepted, 2026-10-17) |
 | [architecture/ipc.md](architecture/ipc.md) | IPC: Mach transport, channels and capabilities, the IDL and generated decoders, `Untrusted<T>` validation, synchronous requests, bulk data, backpressure | Binding (ADR-0005 accepted, 2026-10-17) |
@@ -51,7 +51,7 @@ These documents are the project's source of truth. Conversation history is not.
 | [architecture/invalidation.md](architecture/invalidation.md) | Invalidation and incremental updates: the lifecycle, entry points, reuse at each stage, compositor-driven scrolling and animation, late and hidden content | Binding (ADR-0007 accepted, 2026-10-17) |
 | [architecture/input-and-accessibility.md](architecture/input-and-accessibility.md) | Input routing, gesture latching, scrolling, focus, IME mirror, user activation, accessibility cache, mediation | Binding (ADR-0007 accepted, 2026-10-17) |
 | [architecture/embedder-api.md](architecture/embedder-api.md) | Engine/embedder API and the shell: the message boundary, commands, events, decisions, hosted objects, the headless embedder, the shell's language (OQ-11) | Binding (ADR-0009 accepted, 2026-10-17) |
-| [architecture/script-and-heap.md](architecture/script-and-heap.md) | Script, agents and the heap: agents and realms, messages and transfers, `SharedArrayBuffer`, the root set, ADR-0003's obligations C1–C5, bindings, room for a JIT | **Proposed** (Step 4, CP10); ADR-0008 pre-approved pending spike S3 |
+| [architecture/script-and-heap.md](architecture/script-and-heap.md) | Script, agents and the heap: agents and realms, messages and transfers, `SharedArrayBuffer`, the root set, ADR-0003's obligations C1–C5, bindings, room for a JIT | Binding (ADR-0008 accepted, 2026-10-18) |
 | [research/](research/README.md) | Research conventions and notes | Living |
 
 **Planned documents**, each created when its Phase Zero step begins:

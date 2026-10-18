@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Status** | **Gate B passed** (2026-10-17). CP1–CP15 ✅. ADRs 0005–0007 and 0009 accepted; AC5 amended (OQ-19). **At Gate C:** spike S3 is complete ([results](s3-results.md)); the owner decides on ADR-0008 and the merge |
+| **Status** | **Done** (2026-10-18). CP1–CP17 ✅; Gates A, B and C passed. ADRs 0005–0007 and 0009 accepted at Gate B, ADR-0008 at Gate C after spike S3 and its addendum ([results](s3-results.md)); AC5 amended (OQ-19). Merged into `main` |
 | **Authorized** | 2026-10-17, by the owner: "Proceed with Step 4 design work on a new branch `step-4`." Design documents only, until Gate B. **Spike S3's code was authorized at Gate B** (2026-10-17): "Authorized for the full scope (questions S3-Q1 through S3-Q5 under spikes/s3/)" (§2) |
-| **Branch** | `step-4`, from `main` at `da79e69` |
+| **Branch** | `step-4`, from `main` at `da79e69`; merged into `main` (`--no-ff`) on 2026-10-18, as the owner instructed at Gate C |
 | **Feeds** | Decision-map items F4, P1, P2, P3 and part of P4; OQ-5, OQ-11, OQ-13, OQ-14, OQ-17; ADR-0003 obligations C1–C5; ADRs 0005–0009 (provisional, §4); Steps 5 and 6 |
 | **Last updated** | 2026-10-18 |
 
@@ -44,6 +44,10 @@ The proposal must carry the complete model that Step 3 fixed from the first line
 | OQ-19 and AC5: "Approved." "Amend criterion AC5 and rule EL11 to allow read-only scoped lending of DOM arenas to helper threads during borrow-checker-frozen rendering stages. Keep the actual parallel style/layout implementation deferred until profiling benchmarks justify it." | AC5 amended (§5); EL11, PL10 and ADRs 0006 and 0007 updated; OQ-19 resolved |
 | The S4 test fix (§11, CP3): "Approved" | No further change |
 | "Proceed with Spike S3." | CP13 starts |
+| **Gate C (2026-10-18):** "S3 Addendum Checkpoint: Authorized." "Proceed with the addendum checkpoint to integrate the length-first safe `SliceStack` into `s3-gc`, run formal 3-process benchmarks on AC power, and update Section 3 of docs/research/s3-results.md and related trackers with the store-forwarding findings." "Correct the S3-Q1 verdict in docs/adr/0008-script-agents-and-heap.md, status.md, and step-4-architecture-proposal.md." | CP16, the S3 addendum (§6, §11) |
+| "C1 Implementation: Adopt `SliceStack` (Safe Contiguous Stack)." "The `gc` crate remains strictly `#![forbid(unsafe_code)]`." "A 19% dispatch improvement (628 ns vs 779 ns) with zero `unsafe` proves that hardware-aligned data layout beats manual memory micro-optimizations. Keep `RawStack` archived in spikes/s3/ as benchmark history." | ADR-0008 decision 5, SH7, the overview's `unsafe` map (AC9), ADR-0003's decision history. `RawStack` stays in `s3-gc`'s `src/raw/` |
+| "We will formally accept ADR-0008 and merge `step-4` into `main` (with a subsequent push to origin) immediately upon completion of the formal addendum measurements." | A conditional approval: once CP16's measurements are complete, ADR-0008 is Accepted, and CP17 merges and pushes `main` |
+| "Proceed with the S3 addendum." | CP16 starts |
 
 **Binding inputs** (decision map §4; ADR-0003; ADR-0004):
 - Every future process boundary is a message interface from the start, and it also works in-process (PM6, R6).
@@ -179,8 +183,9 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 | CP12 | Synthesis: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-17 (§11). **Gate B passed** 2026-10-17 |
 | CP13 | **S3a** (authorized at Gate B): implementation and correctness | ✅ 2026-10-18 (§11) |
 | CP14 | **S3b:** measurements | ✅ 2026-10-18 (§11) |
-| CP15 | **S3c:** `docs/research/s3-results.md`; ADR-0008 updated; docs synthesis. **Gate C** | ✅ 2026-10-18 (§11). **Gate C:** the owner decides |
-| CP16 | Merge `step-4` into `main` (`--no-ff`), on the owner's instruction | |
+| CP15 | **S3c:** `docs/research/s3-results.md`; ADR-0008 updated; docs synthesis. **Gate C** | ✅ 2026-10-18 (§11). **Gate C:** the owner authorized CP16 and chose `SliceStack` for C1 |
+| CP16 | **S3 addendum** (authorized at Gate C): C1's safe `SliceStack` and its field-order control in `s3-gc`, the oracle and the benchmarks; formal runs; §3 of the S3 results and the S3-Q1 verdict corrected | ✅ 2026-10-18 (§11). **Gate C passed:** ADR-0008 accepted |
+| CP17 | Merge `step-4` into `main` (`--no-ff`) and push `main`, as the owner instructed at Gate C | ✅ 2026-10-18 (§11) |
 
 ### 6.1 What each checkpoint decides
 
@@ -285,7 +290,9 @@ The proposal is judged against these criteria. CP11 checks each one and records 
 - CP15 writes the results and updates ADR-0008.
 - **Gate C** (§7).
 
-**CP16. Merge** `step-4` into `main` with `--no-ff`, on the owner's instruction.
+**CP16. S3 addendum**, authorized at Gate C: C1's safe `SliceStack`, with its length first, and a control that differs only in field order; formal runs by S1's methods; the S3 results' §3 and the S3-Q1 verdict corrected in the documents. **ADR-0008 is Accepted** once its measurements are complete (the owner's condition).
+
+**CP17. Merge** `step-4` into `main` with `--no-ff`, and push `main`, as the owner instructed at Gate C.
 
 ## 7. Review gates
 
@@ -295,7 +302,7 @@ Between gates, checkpoints run without pausing, as in Steps 2b and 3.
 |---|---|---|
 | A | CP1 | This plan, including its scope (§2). **Passed 2026-10-17:** approved as written |
 | B | CP12 | ADRs 0005–0009 (Proposed). ADR-0008's acceptance may wait for S3, as ADR-0004's waited for S4. Also: authorizing spike S3's code. **Passed 2026-10-17:** ADRs 0005–0007 and 0009 accepted; ADR-0008 pre-approved, pending S3-Q1 and S3-Q2; S3 authorized (Q1–Q5); AC5 amended |
-| C | CP15 | ADR-0008, in the light of S3; merging `step-4` into `main`. **Reached 2026-10-18:** the decisions and recommendations are in [status](../status.md), "Next steps" |
+| C | CP15 | ADR-0008, in the light of S3; merging `step-4` into `main`. **Decided 2026-10-18:** an S3 addendum (CP16); C1 is `SliceStack`, with no `unsafe` in `gc`; ADR-0008 accepted and `step-4` merged once the addendum's measurements are complete (§2). **Passed 2026-10-18,** when CP16's measurements were complete |
 
 ## 8. Method
 
@@ -338,7 +345,7 @@ Written at CP10. At Gate B (2026-10-17) the owner authorized S3's code: "Authori
 
 ### 10.2 What gets built
 
-Refined during CP13, with reasons, in §11: a third root stack, without `unsafe`; the root stack borrowed rather than shared; a supplementary push measurement.
+Refined during CP13, with reasons, in §11: a third root stack, without `unsafe`; the root stack borrowed rather than shared; a supplementary push measurement. **The CP16 addendum** adds C1's final stack, `SliceStack`, safe and contiguous, with a field-order control.
 
 | Crate | Contents | `unsafe` |
 |---|---|---|
@@ -615,6 +622,7 @@ Recorded in the ADRs, the design documents, the decision map, the open questions
   - It puts a compiler barrier (`black_box`) after every push.
   - The stack is reachable from escaped pointers, so each push must reload the length that the previous push stored. The disassembly of `RawStack`'s loop shows that store-to-load chain.
   - A calibration on this Mac: a bare counter that has escaped costs **2.18 ns per increment** under the same barrier, against 0.67 ns when it hasn't escaped.
+  - **Corrected at CP16:** the method does force the reload, but the 2 ns is not inherent to it. `RawStack` reloads its length in one 16-byte paired load together with its capacity. A stack whose length is loaded on its own pays about half as much in the same loop (CP16, below).
 - So `s3-probe roots` adds `push-run`: 64 back-to-back pushes per frame with one barrier, the shape of a builtin rooting its arguments. Preliminary: C1 0.56 ns, `RefCellStack` 0.72 ns, S1 0.83–0.91 ns.
 - S3-Q1's criterion stays as written: "measured the way `s1-probe roots` measured S1's stack". CP14 measures both formally.
 
@@ -658,7 +666,7 @@ The analysis is CP15's, in `docs/research/s3-results.md`. The four standard chec
 **Written:** [S3 results](s3-results.md). Its answers:
 - **S3-Q1: reads yes, pushes no, as S1's method measures them.**
   - C1's stack reads in 0.51 ns, opens and closes a frame in 0.75 ns, and is Miri-clean.
-  - By S1's method a push costs 2.03 ns, S1's own figure. The method forces a store-to-load round trip on every stack. Back to back, a push costs 0.56 ns.
+  - By S1's method a push costs 2.03 ns, S1's own figure. The method forces a store-to-load round trip on every stack. Back to back, a push costs 0.56 ns. (**Corrected at CP16:** the cost of that round trip depends on the stack's field order, and C1's final stack halves it. See CP16.)
   - S1's dispatch case runs 26% faster, closing about half of Pattern B's gap to Pattern A.
   - As written, S3-Q1 does not pass.
 - **S3-Q2 passes.** Bytecode performs no root operations, and with C1's stack rooting takes 0.9–1.1% of the callback-heavy workload, against the 10% threshold. ADR-0003's assumption holds.
@@ -676,3 +684,65 @@ The analysis is CP15's, in `docs/research/s3-results.md`. The four standard chec
 The four standard checks and the link check pass.
 
 **Gate C.** The owner decides on ADR-0008 and on merging `step-4` into `main`. The recommendations are in [status](../status.md), "Next steps".
+
+### Gate C — decisions 2026-10-18
+
+The owner's decisions, quoted in full in §2:
+- **The S3 addendum (CP16):** "Authorized."
+- **C1's implementation:** "Adopt `SliceStack` (Safe Contiguous Stack)." "The `gc` crate remains strictly `#![forbid(unsafe_code)]`." "Keep `RawStack` archived in spikes/s3/ as benchmark history."
+- **ADR-0008 and the merge:** "We will formally accept ADR-0008 and merge `step-4` into `main` (with a subsequent push to origin) immediately upon completion of the formal addendum measurements."
+
+**Context.** The owner had asked whether `RawStack`'s `unsafe` was worth its 94 ns on S1's dispatch case. A probe outside the repository showed two things. A safe stack can have `RawStack`'s layout, and it compiles to the same push. Putting its length first halved S1's push and sped up dispatch (informal: 1.02 against 2.00 ns, and 19%). CP16 measures it formally.
+
+### CP16 — completed 2026-10-18 (the S3 addendum)
+
+**Built** (`17775c4`):
+- **`s3-gc`:**
+  - `SliceStack`, C1's stack: one contiguous array of `Cell<u64>` slots, borrowed from a zeroed buffer (`slot_buffer`), with its length first (`repr(C)`, checked by a compile-time assertion).
+  - `SliceStackLenLast`, the control: the same with the length last.
+  - Neither has `unsafe`. `RawStack` stays in `src/raw/`, archived, and `DEFAULT_CAPACITY` moves to `roots.rs`.
+- **Tests:** the heap and root-stack tests take the stack by reference and run on every stack, the root-stack tests on the control too; the oracle runs every technique and pacing on `SliceStack`. 197 tests pass (180 before), and the count-feature tests.
+- **`s3-bench`:**
+  - Both new stacks in the `roots` and `dispatch` suites.
+  - `SliceStack` in the `vm` suite, the profiles and the counts. The `vm` suite now keeps one stack per workload across runs.
+  - A new `s3-probe footprint` command.
+- **Tools:** `s3-profile.sh` profiles the new stacks, and `unsafe-policy.txt` marks `RawStack` as archived.
+
+**Miri** (nightly 2026-04-08, strict provenance, Stacked Borrows and Tree Borrows): `s3-gc`'s 61 tests, on every stack, find no undefined behaviour and no leak.
+
+**Formal runs** at `17775c4`, on AC power with Low Power Mode off, with no thermal warning before or after:
+
+| Run | Results (`target/`, not committed) |
+|---|---|
+| `tools/s3-bench.sh`: every suite, 3 process runs with 60 s cool-downs; `s3-count`; 3 nightly runs | `s3-results/bench-20261018-083106` |
+| S1's own `dispatch` suite, for Pattern A in the same session | `s1-results/bench-20261018-083905` |
+| `tools/s3-profile.sh`: 53 profiles, 5 s each | `s3-results/profiles-20261018-084214` |
+| `/usr/bin/time -l target/release/s3-probe footprint …`, three runs per case | [S3 results](s3-results.md) §3.4 |
+
+**Two incidents:**
+- **The Mac was in use.** The load average was 3.1–5.4 (VS Code and Chrome were running). Absolute times came out higher and noisier than CP14's: dispatch spreads reached ±20–23%. Every case rotates its variants, and the ratios within each run reproduce CP14's (`RawStack` at 0.74 of Pattern B in both runs).
+- **S1's suite and the profiles ran with uncommitted Markdown changes in the tree.** These were this checkpoint's documents, written during the runs; the code was `17775c4`.
+
+**Main results** ([S3 results](s3-results.md) §3):
+- **`SliceStack`:** frame 0.77 ns, read 0.53 ns, push by S1's method 2.12 ns, push back to back 0.58 ns. The control and `RawStack` measure the same pushes (2.10 ns).
+- **The informal 1.02 ns push did not reproduce in `s3-probe`.** In both binaries `SliceStack`'s push loads the length on its own; it is the harness's code that differs. In `s3-probe`, the handle and the rooted slot pass to `black_box` through one stack slot. So S1's method measures the loads and stores around a push as much as the push itself. CP15's explanation, a round trip that every stack keeping its top in memory pays, was wrong.
+- **Dispatch:** `SliceStack` is 13–17% faster than `RawStack`, and 14–20% faster than the control, in each run. As a ratio to Pattern B in the same process: 0.64, against 0.74 and 0.78. The informal probe had measured 19%.
+- **S3-Q1 still fails as written** (2.12 ns per push), with its explanation corrected. **S3-Q2:** rooting takes 0.8–1.0% of W3 on `SliceStack`. The counts are identical to CP14's.
+- **Footprint:** 1,000 roots add 16 KiB on `SliceStack`, and 100,000 add 784 KiB on every stack.
+
+**Documents updated:**
+- The [S3 results](s3-results.md): summary, §1–§4 and §8–§10.
+- [ADR-0008](../adr/0008-script-agents-and-heap.md), accepted below; [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md)'s decision history (C1 settled).
+- [Script and heap](../architecture/script-and-heap.md): now binding; SH7, AC9 and open question 1. The [overview](../architecture/overview.md): `gc` has no `unsafe` (AC9).
+- The [decision map](../decision-map.md) and the [open questions](../open-questions.md): OQ-5 and OQ-14 resolved, and OQ-13's design part. OQ-5's row, which broke the table, is one row again.
+- This tracker's corrections to CP13 and CP15, the indexes, the spikes README, and [status](../status.md).
+
+The four standard checks and the link check pass.
+
+### Gate C — passed 2026-10-18
+
+The owner's condition is met: CP16's formal measurements are complete. **ADR-0008 is Accepted**, and its decision history quotes the owner. [Script and heap](../architecture/script-and-heap.md) is binding with it. CP17 merges.
+
+### CP17 — completed 2026-10-18
+
+`step-4` merged into `main` with `git merge --no-ff step-4`, as the owner instructed at Gate C, and `main` pushed to `origin`.

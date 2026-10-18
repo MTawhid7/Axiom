@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 4, CP10). Decided in ADR-0008. Spike S3 (2026-10-18) passed S3-Q2, and S3-Q1 for reads but not for pushes as written; the owner decides at Gate C ([S3 results](../research/s3-results.md)) |
+| **Status** | **Binding** since ADR-0008's acceptance (2026-10-18, Gate C). Written at Step 4, CP10; C1 settled by spike S3 and its addendum (CP16), which the owner chose `SliceStack` from ([S3 results](../research/s3-results.md)) |
 | **Question** | How do agents, realms and heaps fit together; how do messages, transfers and `SharedArrayBuffer` cross between agents; how does script integrate with the event loop; and how does the engine meet ADR-0003's obligations C1–C5: cheaper rooting, heap layout, a write-barrier API, a plan for incremental or generational collection, and native interop? What must spike S3 measure? |
 | **Answers** | Step 4 questions Q4 (second half) and Q15 ([tracker](../research/step-4-architecture-proposal.md) §3); OQ-5, OQ-13, OQ-14 |
 | **Feeds** | ADR-0008; spike S3 ([tracker](../research/step-4-architecture-proposal.md) §10); Step 5 (the JavaScript engine and bindings, HTML and DOM) |
 | **Builds on** | [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md) (Pattern B, C1–C5); [ADR-0004](../adr/0004-process-model-and-sandbox.md) (J1–J7); [S1 results](../research/s1-results.md); [event loop and threading](event-loop-and-threading.md) (EL12, EL15–EL17); [IPC](ipc.md); [rendering pipeline](rendering-pipeline.md) (PL2, PL11) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-18 |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered SH1–SH14. Precedent is sourced (§2); the design is inference unless marked otherwise. The JavaScript engine's internals (parser, bytecode set, object shapes, inline caches) belong to Step 5.
 
@@ -20,7 +20,7 @@ Everything here is **planned**; nothing is implemented. Rules are numbered SH1�
   - `SharedArrayBuffer` memory is mapped into the cluster's one process, and `Atomics.wait` uses macOS's public wait-on-address primitive.
 - **Script runs only inside tasks and microtasks** (SH4, SH5). Promise jobs run in the HTML microtask queue in order, and an atomic interrupt flag lets the browser stop a runaway script.
 - **The root set** (SH6) is the interpreter's registers and frames, traced as whole regions; values that native code holds across a possible collection, on the root stack; and the realms' and the event loop's own roots.
-- **C1, cheaper rooting** (SH7): a root stack without `RefCell` borrow tracking, with 8-byte slots, in one audited module. S1 measured 2.05 ns per root and 1.58 ns per read; the target is about 1 ns. **Spike S3 measured it:** 0.51 ns per read, and 0.56 ns per push back to back but 2.03 ns by S1's method, a figure every stack shares. Bytecode roots nothing, and rooting takes about 1% of a callback-heavy workload ([S3 results](../research/s3-results.md)).
+- **C1, cheaper rooting** (SH7): `SliceStack`, a root stack without `RefCell` borrow tracking, with 8-byte slots and no `unsafe`. S1 measured 2.05 ns per root and 1.58 ns per read; the target is about 1 ns. **Spike S3 and its addendum measured it:** 0.53 ns per read; 0.58 ns per push back to back, but about 2.1 ns by S1's method on every stack, a figure that depends on how the code around the push compiles. It is the fastest stack in S1's dispatch case. Bytecode roots nothing, and rooting takes about 1% of a callback-heavy workload ([S3 results](../research/s3-results.md)).
 - **C2–C5** (SH8–SH11):
   - **C2:** hot link fields are laid out so that no index arithmetic sits in a dependent chain of loads.
   - **C3:** every write of a handle-valued field goes through generated setters, the insertion point for any future barrier.
@@ -73,7 +73,7 @@ From sources read on 2026-10-17 (Sources).
 | # | Rule |
 |---|---|
 | SH6 | **The root set has three parts.** (1) **The interpreter's registers and frames**, traced as whole regions: values are tagged, so tracing them is precise, and executing bytecode roots nothing value by value. (2) **Values native code holds across a possible collection**, on the root stack: builtins, the DOM and the bindings use Pattern B's frames and scoped handles. (3) **The agent's own roots:** each realm's intrinsics, the event loop's queues and timers, module maps. These are held from roots the collector knows |
-| SH7 | **C1: a root stack without borrow tracking.** The hypothesis from ADR-0003 is a root stack whose 8-byte slots live in storage without `RefCell` borrow tracking: an `UnsafeCell`-based stack in one allowlisted module of the `gc` crate, with stated invariants, checked by Miri. Pattern B's scope tokens, not runtime borrow checks, already prevent misuse. **Target:** about 1 ns per root and per read, against S1's 2.05 and 1.58 ns. **Validated by spike S3** (S3-Q1, S3-Q2) before the JavaScript object model is fixed. **If it fails,** ADR-0003's first revisit condition applies, and the owner decides. **Measured** (2026-10-18; [S3 results](../research/s3-results.md) §3–§4):<br>• `RawStack`, one lazily committed array of `Cell` slots whose `unsafe` is three Miri-clean blocks, reads in 0.51 ns, opens and closes a frame in 0.75 ns, and pushes in 0.56 ns back to back.<br>• By S1's method a push costs 2.03 ns, the same as S1's stack: the method forces a store-to-load round trip on any stack.<br>• `CellStack`, with no `unsafe`, equals it on reads and is 11% slower on DOM dispatch |
+| SH7 | **C1: a root stack without borrow tracking.** The hypothesis from ADR-0003 is a root stack whose 8-byte slots live in storage without `RefCell` borrow tracking: an `UnsafeCell`-based stack in one allowlisted module of the `gc` crate, with stated invariants, checked by Miri. Pattern B's scope tokens, not runtime borrow checks, already prevent misuse. **Target:** about 1 ns per root and per read, against S1's 2.05 and 1.58 ns. **Validated by spike S3** (S3-Q1, S3-Q2) before the JavaScript object model is fixed. **If it fails,** ADR-0003's first revisit condition applies, and the owner decides. **Decided at Gate C** (2026-10-18): **`SliceStack`**, one contiguous array of `Cell` slots borrowed from a zeroed buffer that the agent owns, with its length first. It needs no `unsafe`, so the `gc` crate is `#![forbid(unsafe_code)]`; the hypothesis's allowlisted module is not needed. **Measured** ([S3 results](../research/s3-results.md) §3–§4, with the CP16 addendum):<br>• `SliceStack` reads in 0.53 ns, opens and closes a frame in 0.55–0.77 ns (code alignment), and pushes in 0.58 ns back to back.<br>• By S1's method a push costs about 2.1 ns on every stack. What that method measures depends on how the loads and stores around the push compile: the same push measured 1.02 ns in another binary.<br>• In S1's dispatch case it is 13–17% faster than `RawStack` (S3's first candidate, three Miri-checked `unsafe` blocks, now archived) and 14–20% faster than the same stack with its length last |
 | SH8 | **C2: no index arithmetic in dependent chains.** Hot link fields, such as a node's parent, first child and next sibling, are `u32` columns in a struct-of-arrays layout, indexed from 1 (a dummy element 0 lets a handle's stored index + 1 index directly), so that scaling folds into the load's addressing mode and no subtraction remains. **Measured by S3-Q4** ([S3 results](../research/s3-results.md) §6): the fastest layout in every traversal case, faster than both of S1's patterns, and about three times faster after random moves. Power-of-two strides, the other candidate, cost up to 22% once the nodes outgrow the cache |
 | SH9 | **C3: a typed write-barrier API from the start.** A field that holds a handle is private to its type, and is written only through a setter that the type's derived `Trace` support generates. With the stop-the-world collector the setter is a plain store. It is the single place where an incremental barrier (marking the old or new value) or a generational barrier (recording old-to-young references) is later added, with no change at call sites. S1-Q2's ceremony is recounted with the setters in place. **Measured by S3-Q5** ([S3 results](../research/s3-results.md) §7): setters replace writes one for one and cost nothing with the barrier a no-op; card marking adds about 3% to mutation-heavy work |
 
@@ -115,14 +115,14 @@ From sources read on 2026-10-17 (Sources).
 |---|---|
 | AC5 | One heap per agent, on one thread; only copies, transfers and shared buffers between agents (SH1–SH3) |
 | AC8 | Workers, `SharedArrayBuffer`, transfers and Wasm threads, whose memory is a shared buffer (SH3), have their place |
-| AC9 | The only new `unsafe` is C1's root-stack module, allowlisted and checked by Miri (SH7) |
+| AC9 | No new `unsafe`: C1's root stack is safe, and the `gc` crate is `#![forbid(unsafe_code)]` (SH7) |
 | AC10 | C1 measured by spike S3; C4's order waits for the corpus |
 
 ## 7. Open questions
 
 | # | Question | Where it is settled |
 |---|---|---|
-| 1 | C1: does the root stack without borrow tracking reach about 1 ns per root and per read? | **Measured by spike S3** (2026-10-18): reads yes; pushes by S1's method no. The owner decides at Gate C |
+| 1 | C1: does the root stack without borrow tracking reach about 1 ns per root and per read? | **Settled at Gate C** (2026-10-18): reads yes (0.53 ns); pushes by S1's method no (about 2.1 ns on every stack). ADR-0008 is accepted with `SliceStack` (decision 5) |
 | 2 | Which bytecode dispatch technique the interpreter uses | S3-Q3 recommends a `match` loop on stable Rust; Step 5 decides |
 | 3 | The pause budget, and the order of incremental and generational collection | Step 6 (budget), then corpus measurements |
 | 4 | Where shared and service workers run when no same-site renderer exists | Step 5 (workers), as frame-tree open question 3 |
