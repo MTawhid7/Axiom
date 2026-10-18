@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Phase Zero: Step 5, subsystem design** (authorized 2026-10-18). Gate A passed: the plan is approved as written. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 4** (merged with `--no-ff` on 2026-10-18) and is pushed. Step 4 ran on branch `step-4`, also pushed. **Step 5 runs on branch `step-5`**, from `main` at `c642ab3`, pushed to `origin` as the owner authorized at Gate A |
-| Current checkpoint | **Step 5: CP1 ✅, Gate A passed** ([tracker](research/step-5-subsystems.md)). CP2–CP9 run without pausing until Gate B. Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
+| Current checkpoint | **Step 5: CP1–CP2 ✅, Gate A passed** ([tracker](research/step-5-subsystems.md)). CP3 (text, fonts and Unicode) is next; CP2–CP9 run without pausing until Gate B. Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -56,6 +56,12 @@
 5. "Push Branch: Authorized." `step-5` pushed to `origin`.
 
 **Recorded** in the tracker (§2, §7, §11), the decision map (X4 added) and this status.
+
+**CP2 (completed 2026-10-18):** the [dependency policy](technology/dependency-policy.md) (**Proposed**; DP1–DP23) and a living [register](technology/dependency-register.md):
+- The core of charter G1 is Axiom's own. The infrastructure layer may be reused behind interfaces Axiom owns. Axiom never writes its own cryptography.
+- Dependencies get soundness grades (Google's `ub-risk` scale) and groups after Chromium's (`trusted`, `sandboxed`, `build`, `test`). A reused parser of untrusted input must be pure Rust at `ub-risk-1` or better, or it counts as memory-unsafe code under the Rule of 2.
+- The supply chain: `cargo-vet` audits with Firefox's imports, `cargo-deny`, a license allow-list, minimal features, T1–T4.
+- **Found:** the repository has no license file, so Axiom's license is unchosen. It is raised for Gate B.
 
 ### 2026-10-17 to 2026-10-18 — Session 7 (Gate B; spike S3; Gate C; S3 addendum; merge)
 

@@ -34,6 +34,8 @@ These documents are the project's source of truth. Conversation history is not.
 | [security/threat-model.md](security/threat-model.md) | Assets, adversaries, attack surfaces, trust boundaries, security goals, security levels L0–L3 | **Accepted** (2026-10-17), amended: out-of-process iframes required for L3 |
 | [security/process-model.md](security/process-model.md) | Process types and privileges, site isolation, IPC trust rules, memory budgets | Binding (ADR-0004 accepted, 2026-10-17) |
 | [technology/language-evaluation.md](technology/language-evaluation.md) | Detailed language comparison and recommendation | Reviewed |
+| [technology/dependency-policy.md](technology/dependency-policy.md) | Dependency and supply-chain policy (X4): what Axiom writes and may reuse; classes, soundness grades and groups for dependencies; audits, licenses, Apple's frameworks by process | **Proposed** (Step 5, CP2); ADR-0010 at CP9 |
+| [technology/dependency-register.md](technology/dependency-register.md) | Every dependency proposed for the engine, with the record the policy requires | Living |
 | [research/step-2b-validation-spikes.md](research/step-2b-validation-spikes.md) | Step 2b plan and checkpoint tracker (spikes S1 and S2) | Complete (2026-10-17) |
 | [research/s1-results.md](research/s1-results.md) | S1 results: `unsafe` containment, ceremony, runtime, memory and build cost of the two GC patterns; recommendation for ADR-0003 | Reviewed (2026-10-17) |
 | [research/s2-results.md](research/s2-results.md) | S2 results: AppKit, Metal and CoreText through objc2 without Xcode; `unsafe` surface; build and run-time cost; proposed build thresholds for ADR-0002 | Reviewed (2026-10-17) |

@@ -254,7 +254,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 |---|---|---|
 | **CP1** | This plan; branch `step-5`; the owner's decisions recorded | ✅ 2026-10-18 (§11). **Gate A passed:** approved as written |
 | | **Part 1: the platform-facing subsystems** | |
-| CP2 | Dependency policy and build-or-reuse rules (X4) | Not started |
+| CP2 | Dependency policy and build-or-reuse rules (X4) | ✅ 2026-10-18 (§11; [policy](../technology/dependency-policy.md), [register](../technology/dependency-register.md)) |
 | CP3 | Text, fonts and Unicode (I1, the text part of P4); spike S5's design | Not started |
 | CP4 | Graphics: rasterization, compositing and presentation (I2); spike S6's design | Not started |
 | CP5 | Images and media (I4) | Not started |
@@ -626,3 +626,33 @@ The owner's decisions, each as recommended, quoted in full in §2:
 - **The branch:** `step-5` pushed to `origin`, and kept pushed as checkpoints land.
 
 CP2 starts.
+
+### CP2 — completed 2026-10-18
+
+[Dependency and supply-chain policy](../technology/dependency-policy.md) written (**Proposed**; rules DP1–DP23). Its sources: Chromium's crate groups and audit criteria, Google's auditing standards, Mozilla's `cargo-vet` and Firefox's configuration, Servo's `cargo-deny` configuration, and Ladybird's change of policy. Main proposals:
+- **The line:**
+  - charter G1's mechanisms and the security policies are Axiom's own;
+  - the decision map's infrastructure layer, Unicode data, encodings, URL parsing, compression and storage engines may be reused, behind interfaces Axiom owns;
+  - Axiom never writes its own cryptography;
+  - a dependency must save substantial, specialized work.
+- **Classes and records:** every dependency has a class (DP5) and an entry in a new [register](../technology/dependency-register.md) that covers its whole transitive tree.
+- **`unsafe` and C code in dependencies:**
+  - each crate gets a soundness grade on Google's `ub-risk` scale, where `ub-risk-3` and `ub-risk-4` are not admitted;
+  - each gets a group after Chromium's (`trusted`, `sandboxed`, `build`, `test`), inherited transitively;
+  - a reused parser of untrusted input must be pure Rust at `ub-risk-1` or better. Anything weaker is memory-unsafe code under the Rule of 2: it may run only in sandboxed helpers, only with no better option, and only with an ADR.
+- **The supply chain:**
+  - crates.io only, with `--locked` builds;
+  - `cargo-vet` audits, importing the organizations Firefox imports;
+  - `cargo-deny`'s four checks;
+  - a license allow-list that keeps Axiom's own license open;
+  - minimal features, and costs measured against T1–T4.
+- **Apple's frameworks:** a table of the processes that may use each one.
+- **Enforcement:** `cargo-deny` and `cargo-vet` become pre-commit checks once the owner authorizes installing them. A `tools/check-dependencies.py` is designed.
+
+**Found along the way:**
+- **The repository has no license file,** so Axiom's own license is unchosen (observed). It is raised for Gate B; CP9 adds it to the open questions.
+- **Chromium's `cargo-vet` audits file was last changed on 2025-03-22,** and its current import guide doesn't mention `cargo vet`. Its crate groups are current (observed through GitHub's API).
+
+The register starts with what accepted ADRs already decided: three groups of platform facilities, and objc2 (ADR-0009). The spikes' crates are listed as exempt.
+
+Every relative link resolves; the four standard checks pass.

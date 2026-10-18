@@ -46,7 +46,7 @@ X  Cross-cutting    standards baseline · conformance testing · fuzzing · perf
 | X1 | Standards baseline and support matrix | Open | Step 6 |
 | X2 | Testing and fuzzing strategy | Open | Step 6 |
 | X3 | Performance methodology and budgets | Open | Step 6 |
-| X4 | Dependency and supply-chain policy: what Axiom builds and what it may reuse; how each dependency is justified, classed and audited; how the `unsafe` and C code inside dependencies count against ADR-0002's rules and the Rule of 2 | Open: decided in Step 5, at CP2, and recorded in ADR-0010. **Added by the owner at Step 5's Gate A** (2026-10-18) | [Step 5 tracker](research/step-5-subsystems.md) |
+| X4 | Dependency and supply-chain policy: what Axiom builds and what it may reuse; how each dependency is justified, classed and audited; how the `unsafe` and C code inside dependencies count against ADR-0002's rules and the Rule of 2 | **Proposed** (Step 5, CP2, 2026-10-18): the [dependency policy](technology/dependency-policy.md), rules DP1–DP23, with a living [register](technology/dependency-register.md). ADR-0010 follows at CP9. **Added by the owner at Step 5's Gate A** (2026-10-18) | [Step 5 tracker](research/step-5-subsystems.md) |
 
 ## 2. How the decisions constrain each other
 
