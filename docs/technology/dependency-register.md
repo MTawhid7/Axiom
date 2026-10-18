@@ -75,11 +75,27 @@ CP3–CP8 add entries here as their documents propose dependencies, and CP9's AD
 
 **The compositor needs no new crate:** its pipelines are Axiom's own (GR3). wgpu was rejected for the browser's compositor by design (GR1), not by grade. It remains a candidate for WebGPU in the GPU process (GR10).
 
+### From CP5: images and media
+
+| Dependency | Class | Group | Published grade | Processes | Purpose, and the interface in front of it | Proposed by |
+|---|---|---|---|---|---|---|
+| **ImageIO** | Required platform facility | — | — (C) | Renderer only | AVIF, under DP10's exception, accepted by ADR-0012; pending S5-Q5 | IM3 |
+| **VideoToolbox, AudioToolbox, CoreAudio** | Required platform facility | — | — (C) | Media utility process only | Hardware and Apple codecs; audio output | IM11 |
+| **`png`** 0.18.1, with `fdeflate`, `miniz_oxide`, `crc32fast`, `simd-adler32`, `adler2` | Replaceable implementation detail | `trusted` in the renderer | `png` `ub-risk-0` (0.18.0-rc); `crc32fast` and `simd-adler32` `ub-risk-2` | Renderer | PNG and APNG, behind the decoder interface. Chromium's PNG decoder | IM2 |
+| **`jpeg-decoder`** 0.3.2, `platform_independent` | Replaceable implementation detail | `trusted` in the renderer | Not graded; forbids `unsafe` in this mode | Renderer | JPEG, unless S5-Q5 favours a decoder of our own. In maintenance mode | IM2 |
+| **`gif`** 0.14.2 | Replaceable implementation detail | `trusted` in the renderer | `ub-risk-1` (0.12.1) | Renderer | GIF | IM2 |
+| **`image-webp`** 0.2.4 | Replaceable implementation detail | `trusted` in the renderer | Not graded; forbids `unsafe` | Renderer | WebP | IM2 |
+| **`jxl`** 0.7.4 | Replaceable implementation detail | `trusted` in the renderer | `ub-risk-1` (0.1.1) | Renderer | JPEG XL, staged. Chromium's and Firefox's decoder | IM2 |
+| **`moxcms`** 0.9.1, with no SIMD feature | Replaceable implementation detail | `trusted` in the renderer | Not graded; forbids `unsafe` without SIMD features | Renderer | ICC and CICP color management | IM8 |
+
+`zune-jpeg` is listed under §4 below. Media's demuxers and software codecs are chosen at the media milestone (IM11).
+
 ## 4. Considered and not admitted
 
 | Dependency | Reason | Recorded at |
 |---|---|---|
 | `encoding_rs` | Graded `ub-risk-3` at 0.8.33 by Google, so DP8 bars it. Axiom writes its own encodings in safe Rust and uses `encoding_rs` as a test reference (TX3). It would be reconsidered only if a newer version earns a published grade of `ub-risk-2` or better | CP3 |
+| `zune-jpeg` | Graded `ub-risk-3` at 0.4.19 by Google, so DP8 bars it. JPEG uses a safe decoder instead (IM2) | CP5 |
 
 ## 5. Spikes only (exempt, DP23)
 

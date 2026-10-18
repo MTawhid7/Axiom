@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Phase Zero: Step 5, subsystem design** (authorized 2026-10-18). Gate A passed: the plan is approved as written. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 4** (merged with `--no-ff` on 2026-10-18) and is pushed. Step 4 ran on branch `step-4`, also pushed. **Step 5 runs on branch `step-5`**, from `main` at `c642ab3`, pushed to `origin` as the owner authorized at Gate A |
-| Current checkpoint | **Step 5: CP1–CP4 ✅, Gate A passed** ([tracker](research/step-5-subsystems.md)). CP5 (images and media) is next; CP2–CP9 run without pausing until Gate B. Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
+| Current checkpoint | **Step 5: CP1–CP5 ✅, Gate A passed** ([tracker](research/step-5-subsystems.md)). CP6 (networking) is next; CP2–CP9 run without pausing until Gate B. Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -73,6 +73,12 @@
 - The window server composites retained CoreAnimation layers, and Axiom draws damaged tiles into IOSurfaces, as Firefox does on macOS, where it measured large power savings.
 - Our own pipelines draw the display items. Paths are rasterized in the renderer until S6 reports; if GPU filling pays, an amendment adding path items to PL7 goes to the owner.
 - Display P3 at 8 bits by default. Compositor animations: the transform family and opacity, then `filter`, `backdrop-filter` and scroll-driven timelines.
+
+**CP5 (completed 2026-10-18):** [images and media](architecture/images-and-media.md) (**Proposed**; IM1–IM13):
+- Images decode in the renderer: safe Rust for PNG, JPEG, GIF, WebP and JPEG XL, and our own BMP and ICO decoders. `zune-jpeg` is graded `ub-risk-3`, so JPEG uses a safe decoder.
+- AVIF goes to ImageIO in the renderer, under DP10's exception, accepted by ADR-0012; S5 gains a question (S5-Q5) to test ImageIO in the sandbox.
+- Pixels decode at display size and are discarded when not visible. `moxcms` manages color.
+- Media runs in a sandboxed utility process, with VideoToolbox, IOSurface frames and audio output.
 
 ### 2026-10-17 to 2026-10-18 — Session 7 (Gate B; spike S3; Gate C; S3 addendum; merge)
 

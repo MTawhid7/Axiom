@@ -257,7 +257,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | CP2 | Dependency policy and build-or-reuse rules (X4) | ✅ 2026-10-18 (§11; [policy](../technology/dependency-policy.md), [register](../technology/dependency-register.md)) |
 | CP3 | Text, fonts and Unicode (I1, the text part of P4); spike S5's design | ✅ 2026-10-18 (§11; [document](../architecture/text-and-fonts.md); S5 design §10.1) |
 | CP4 | Graphics: rasterization, compositing and presentation (I2); spike S6's design | ✅ 2026-10-18 (§11; [document](../architecture/graphics.md); S6 design §10.2) |
-| CP5 | Images and media (I4) | Not started |
+| CP5 | Images and media (I4) | ✅ 2026-10-18 (§11; [document](../architecture/images-and-media.md); S5-Q5 added to §10.1) |
 | CP6 | Networking: URLs, HTTP, TLS, DNS, cache, cookies, Fetch's policy (I3); spike S7's design | Not started |
 | CP7 | Storage and workers | Not started |
 | CP8 | Accessibility: the tree and the bridge (I5); the shell's questions for the owner | Not started |
@@ -584,7 +584,7 @@ The owner asked which areas may need targeted validation spikes. Three candidate
 
 | Spike | Area, and the checkpoint that designs it | Draft question | Why sources can't settle it | What it decides |
 |---|---|---|---|---|
-| **S5** | The text stack (CP3; design in §10.1) | How do CoreText and a Rust text stack (a Rust shaper such as HarfRust, a Rust font parser and rasterizer, ICU4X's segmenters) compare on a multi-script corpus, inside the renderer's sandbox, in shaping output, speed and memory per renderer? How can an untrusted web font load there safely? | [S4-Q5](s4-results.md) showed that CoreText draws correctly in the sandbox, not how it compares with anything. The [language evaluation](../technology/language-evaluation.md) §12 records HarfRust as "not a complete port". Memory per renderer on this Mac needs measuring: B2 allows 10 MB, and drawing with CoreText took S4's helper from 1.14 to 4.05 MiB | TX: shaping, font parsing and rasterization; where glyphs are rasterized |
+| **S5** | The text stack (CP3; design in §10.1), with images added at CP5 | How do CoreText and a Rust text stack (a Rust shaper such as HarfRust, a Rust font parser and rasterizer, ICU4X's segmenters) compare on a multi-script corpus, inside the renderer's sandbox, in shaping output, speed and memory per renderer? How can an untrusted web font load there safely? | [S4-Q5](s4-results.md) showed that CoreText draws correctly in the sandbox, not how it compares with anything. The [language evaluation](../technology/language-evaluation.md) §12 records HarfRust as "not a complete port". Memory per renderer on this Mac needs measuring: B2 allows 10 MB, and drawing with CoreText took S4's helper from 1.14 to 4.05 MiB | TX: shaping, font parsing and rasterization; where glyphs are rasterized |
 | **S6** | Compositing on Metal (CP4; design in §10.2) | Can the browser's compositor draw display lists of validated primitives (property trees, rounded clips, glyph quads from an atlas, images, embedded child frames) on Metal within a 60 Hz frame budget, and with what memory and energy? Does partial presentation work? How do CPU and GPU path rasterization compare? | [S2](s2-results.md) measured an idle Metal window (20–21 MB, no wakeups while idle), not a compositing workload. No source measures these costs on an M1 | GR: the GPU interface, the compositor's renderer, path rasterization |
 | **S7** | The network process and TLS (CP6) | Does a deny-by-default network-process profile, allowing only outbound sockets, name resolution, certificate trust evaluation and its own data directory, support a TLS client that verifies against the system's trust store? Which rules does it need? What do handshakes and requests cost with each candidate stack? | S4 validated only renderer-like profiles. Which system services certificate evaluation needs inside a profile is the kind of fact S4 found only by trying: named profiles killed their process, and CoreText degraded silently without ICU's data | NW: the TLS stack and certificate verification; the network process's sandbox rules |
 | (S8) | The JavaScript engine (CP16) | Only if CP16 leaves a question that sources can't settle, such as the cost of shape-based inline caches over Pattern B arenas in safe Rust | — | Proposed at Gate C, if needed |
@@ -596,7 +596,7 @@ The owner asked which areas may need targeted validation spikes. Three candidate
 - **The bindings:** generated code; S1-Q2 and S3-Q5 counted the ceremony.
 - **Storage.**
 - **The accessibility bridge:** the shell milestone first validates objc2-defined accessibility classes (EM11).
-- **Images:** they join S5 only if CP5 relies on ImageIO inside the renderer's sandbox, which S4 didn't test.
+- **Images:** they joined S5 at CP5 (S5-Q5), because [images and media](../architecture/images-and-media.md) IM3 relies on ImageIO inside the renderer's sandbox, which S4 didn't test.
 
 **The methods are S1–S4's:**
 - release builds;
@@ -610,7 +610,8 @@ The owner asked which areas may need targeted validation spikes. Three candidate
 **Purpose.** Settle TX12: whether system fonts are rasterized by CoreText or by a Rust rasterizer. Also check the rest of the text design on this Mac:
 - HarfRust against CoreText, on system fonts;
 - the web-font path (TX7), entirely in safe Rust inside the renderer's sandbox;
-- the stack's memory per renderer.
+- the stack's memory per renderer;
+- **added at CP5:** ImageIO inside the renderer's sandbox, which [images and media](../architecture/images-and-media.md) IM3 relies on for AVIF, compared with the safe Rust image decoders.
 
 The design is in [text and fonts](../architecture/text-and-fonts.md). Until S5 runs, or if it isn't authorized, CoreText rasterizes system fonts (TX12).
 
@@ -620,11 +621,13 @@ The design is in [text and fonts](../architecture/text-and-fonts.md). Until S5 r
 | S5-Q2 | **Rasterization.** For the corpus's glyphs at 12–32 px, at 1× and 2×, how do a Rust rasterizer's masks compare with CoreText's, with and without macOS's font smoothing? What does a glyph cost each way? | Report: pixel differences, timings, and the owner's visual comparison. TX12's decision follows from it |
 | S5-Q3 | **Web fonts.** Inside S4's renderer profile, do WOFF and WOFF2 fonts, valid and deliberately malformed, decode, validate, shape and rasterize through the Rust path alone? | Every valid font renders. Every malformed one is rejected, or renders, without a crash or a hang. The profile needs no new rule. No CoreText call receives web-font bytes |
 | S5-Q4 | **Footprint and speed.** What does the stack add to a sandboxed helper's footprint after shaping and rasterizing the corpus, in three configurations: CoreText only; HarfRust with CoreText rasterization; all Rust? What do ICU4X's compiled data and the shaper add to the executable's size? How fast is shaping, per glyph? | Report. The configuration chosen must leave B2 achievable: a ready renderer in at most 10 MB |
+| S5-Q5 | **Images in the renderer's sandbox** (added at CP5). Under S4's renderer profile, does ImageIO decode AVIF, and which rules does it need? How do the safe Rust decoders (`png`, `jpeg-decoder` without its `unsafe` paths, `gif`, `image-webp`) compare with ImageIO on a set of test images, in time per megapixel and peak memory? | ImageIO decodes AVIF under the profile, with any new rule reviewed by S4's method. Otherwise AVIF waits (IM3). The comparison is reported, and settles IM2's choice for JPEG |
 
 **What would be built** (after authorization only):
 - `spikes/s5/text` (`s5-text`):
   - its CoreText and CoreGraphics calls in `src/platform/`, allowlisted as S4's `s4-text` is;
   - the Rust path: `read-fonts`, `skrifa`, HarfRust, `brotli-decompressor`, and one or two rasterizers;
+  - for S5-Q5, ImageIO's calls in `src/platform/`, and the safe Rust image decoders `png`, `jpeg-decoder`, `gif` and `image-webp`;
   - WOFF and WOFF2 container decoding of its own, in safe Rust.
 - **Sandboxing:** S4's tooling (`s4-sandbox`, `tools/s4-sign.sh`) runs it under a renderer profile.
 - **Inputs:** a text corpus in `spikes/s5/corpus`. System fonts are used where they are, never copied. Test web fonts come under licenses the owner approves at Gate B: WPT's test fonts, for example, or fonts under the OFL.
@@ -757,5 +760,29 @@ The [register](../technology/dependency-register.md) gains CP3's proposed entrie
 - **The compositor thread draws and commits,** and commits on the main thread during live resize, as Firefox does. The headless embedder composites the same tree offscreen, without CoreAnimation, so reference tests are deterministic.
 
 **Spike S6 designed** (§10.2): five questions, on compositing cost, damage, layers for scrolling and animation, CPU or GPU paths, and memory and color. Its time thresholds are for the owner to confirm.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP5 — completed 2026-10-18
+
+[Images and media](../architecture/images-and-media.md) written (**Proposed**; rules IM1–IM13). Its sources: Chromium's and Firefox's image decoders, preferences and media processes; WebKit's ImageIO decoder and GPU-process media; Ladybird; the decoder crates' `unsafe` policies; Google's published grades; the SDK's ImageIO headers. Main proposals:
+- **Images decode in the renderer,** on its helper pool, into shared memory. The browser decodes nothing, not even favicons, because the decoders' trees are graded `ub-risk-2`, below what DP9 asks of the browser.
+- **Safe Rust decodes every format with an admissible decoder:**
+  - `png`, `gif`, `image-webp` and `jxl`;
+  - a safe JPEG decoder, since `zune-jpeg` is graded `ub-risk-3`;
+  - BMP and ICO decoders of our own.
+
+  Chromium already decodes PNG and JPEG XL in Rust, and Firefox decodes JPEG XL in Rust.
+- **AVIF goes to ImageIO in the renderer,** under DP10's exception, accepted by ADR-0012, because no AV1 decoder in pure Rust meets the policy. Unlike a vendored dav1d, ImageIO is patched by macOS updates.
+- **Budgets:** incremental decoding; decoding at display size; discarding the pixels of images that aren't visible, as Firefox does; animations decoded frame by frame and only while visible; limits against hostile dimensions.
+- **Color management** during decoding, with `moxcms` built without its SIMD `unsafe`.
+- **Media** in a sandboxed utility process:
+  - demuxers in safe Rust;
+  - VideoToolbox and AudioToolbox for what the hardware and Apple's codecs cover;
+  - video frames delivered as IOSurfaces, and audio output from the same process.
+
+  Firefox, Chromium and WebKit all decode media outside their content processes.
+
+**S5 gains S5-Q5** (§10.1): ImageIO under the renderer profile, compared with the safe decoders, as §10 foresaw.
 
 Every relative link resolves; the four standard checks pass.
