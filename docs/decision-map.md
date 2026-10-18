@@ -17,6 +17,7 @@ P  Pipeline         event loop & threads · DOM → style → box tree → fragm
 I  Infrastructure   shaping/fonts · graphics backend · HTTP/TLS/DNS · decoders · accessibility bridge · Wasm
                     → swappable, if we own the interfaces in front of them
 X  Cross-cutting    standards baseline · conformance testing · fuzzing · performance methodology
+                    dependency & supply-chain policy
 ```
 
 ## 1. Decisions and status
@@ -45,6 +46,7 @@ X  Cross-cutting    standards baseline · conformance testing · fuzzing · perf
 | X1 | Standards baseline and support matrix | Open | Step 6 |
 | X2 | Testing and fuzzing strategy | Open | Step 6 |
 | X3 | Performance methodology and budgets | Open | Step 6 |
+| X4 | Dependency and supply-chain policy: what Axiom builds and what it may reuse; how each dependency is justified, classed and audited; how the `unsafe` and C code inside dependencies count against ADR-0002's rules and the Rule of 2 | Open: decided in Step 5, at CP2, and recorded in ADR-0010. **Added by the owner at Step 5's Gate A** (2026-10-18) | [Step 5 tracker](research/step-5-subsystems.md) |
 
 ## 2. How the decisions constrain each other
 
@@ -110,7 +112,7 @@ These follow from [ADR-0004](adr/0004-process-model-and-sandbox.md), accepted on
 | 2b | Validation spikes: S1 GC heap and DOM, S2 platform and build | **Done** (2026-10-17): [S1 results](research/s1-results.md), [S2 results](research/s2-results.md). ADR-0002 is final, and [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md) is accepted. Merged into `main`. S3 (the interpreter benchmark) is required, and runs in Step 4 |
 | 3 | Threat model, trust boundaries, process and sandbox model on macOS | **Done** (2026-10-17): [threat model](security/threat-model.md) and [ADR-0004](adr/0004-process-model-and-sandbox.md) accepted; [process model](security/process-model.md) binding; spike S4 passed ([S4 results](research/s4-results.md)). Merged into `main` |
 | 4 | Event loop, threading, pipeline data model, invalidation, embedder API | **Done** (2026-10-18): [architecture proposal v0](architecture/overview.md); ADRs 0005–0007 and 0009 accepted at Gate B, and ADR-0008 at Gate C after spike S3 and its addendum ([S3 results](research/s3-results.md)); AC5 amended for read-only lending (OQ-19). Merged into `main` ([tracker](research/step-4-architecture-proposal.md)) |
-| 5 | Subsystems: text & fonts → rendering/compositing → networking/TLS → style → layout; also HTML parsing and DOM, and the JavaScript engine and bindings (added by the owner at Step 4's Gate A, 2026-10-17) | **In progress** (authorized 2026-10-18): the plan is at Gate A ([tracker](research/step-5-subsystems.md)). It covers I1–I5 and the text part of P4 as well as the subsystems listed here |
+| 5 | Subsystems: text & fonts → rendering/compositing → networking/TLS → style → layout; also HTML parsing and DOM, and the JavaScript engine and bindings (added by the owner at Step 4's Gate A, 2026-10-17) | **In progress** (authorized 2026-10-18; [tracker](research/step-5-subsystems.md)). Gate A passed on 2026-10-18: the plan is approved as written, and X4 is added. It covers I1–I5, the text part of P4 and X4 as well as the subsystems listed here |
 | 6 | Standards baseline, testing, performance budgets, roadmap | Not started; ends in a design review and approval of Milestone 1 |
 
 ## Sources

@@ -6,9 +6,9 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero: Step 5, planning** (2026-10-18). Its plan is at Gate A. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
-| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 4** (merged with `--no-ff` on 2026-10-18) and is pushed. Step 4 ran on branch `step-4`, also pushed. **Step 5 runs on branch `step-5`**, from `main` at `c642ab3`, local until the owner authorizes a push |
-| Current checkpoint | **Step 5: CP1 ✅** ([tracker](research/step-5-subsystems.md)). **Gate A:** the owner reviews the plan ("Next steps"). Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
+| Phase | **Phase Zero: Step 5, subsystem design** (authorized 2026-10-18). Gate A passed: the plan is approved as written. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
+| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 4** (merged with `--no-ff` on 2026-10-18) and is pushed. Step 4 ran on branch `step-4`, also pushed. **Step 5 runs on branch `step-5`**, from `main` at `c642ab3`, pushed to `origin` as the owner authorized at Gate A |
+| Current checkpoint | **Step 5: CP1 ✅, Gate A passed** ([tracker](research/step-5-subsystems.md)). CP2–CP9 run without pausing until Gate B. Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -22,19 +22,9 @@
 | | [ADR-0008](adr/0008-script-agents-and-heap.md): script, agents and heap. C1 is met by `SliceStack`, a safe root stack, so the `gc` crate has no `unsafe` (2026-10-18, Gate C) |
 | | [ADR-0009](adr/0009-embedder-api-and-shell.md): engine/embedder API and the pure-Rust shell (2026-10-17, Gate B) |
 
-## Next steps: Gate A (Step 5's plan)
+## Next steps: Step 5, CP2–CP9
 
-**CP1 is done:** the [Step 5 plan and tracker](research/step-5-subsystems.md) is on branch `step-5`. Nothing after CP1 starts until the owner decides. Each decision below carries a recommendation and its reason (CLAUDE.md):
-
-1. **Approve the plan as written. Recommend: approve.**
-   - It covers every item the decision map and the earlier steps assign to Step 5. The 21 questions handed to Step 5 are each assigned to a checkpoint (tracker §2.2).
-   - The order puts the dependency policy and the platform-facing subsystems first: text, graphics, images, networking, storage and accessibility. They carry the dependency and sandbox decisions and the spikes, so their evidence arrives before the engine's designs need it. The document and script engine follows: HTML and the DOM, style, layout and paint, the JavaScript engine, bindings (§6).
-   - The criteria SC1–SC10 (§5) keep Step 4's interfaces fixed unless you amend them (SC1), and apply ADR-0002's `unsafe` rules to dependencies too (SC3).
-   - **Scope calls to note:** OQ-3 (WebAssembly) stays open, with CP16's assessment as evidence. No spike is planned for HTML, the DOM, style, layout or bindings (§10).
-2. **Add X4, a dependency and supply-chain policy, to the decision map,** decided at CP2 and recorded in ADR-0010. **Recommend: add it.** Step 5 is the first step to choose dependencies, and the language evaluation leaves the policy "to be finalized". ADR-0002's rule 5 (no `unsafe` in parsers) says nothing yet about code Axiom doesn't write, such as a font parser crate.
-3. **Candidate spikes:** S5, the text stack (CoreText against a Rust stack); S6, compositing on Metal; S7, the network process's sandbox and TLS (§10). There is nothing to authorize now: each is designed at its checkpoint and put to you at Gate B. **Recommend: confirm these three as the candidates.** Each covers a decision whose costs on this Mac, or whose sandbox rules, no source can supply. The rest of Step 5 can rest on specifications and precedent.
-4. **Cadence. Recommend: approve.** CP2–CP9 run without pausing until Gate B, which covers part 1's ADRs and the spikes. Then the authorized spikes and CP13–CP18 run without pausing until Gate C, which covers part 2's ADRs and the merge. Two review batches of about the size of Step 4's Gate B.
-5. **Push `step-5` to `origin`,** and keep it pushed as checkpoints land. **Recommend: authorize.** It gives a long step an off-site backup, as with `step-4`, and the repository is already public.
+**Gate A passed** (2026-10-18). CP2–CP9 run without pausing, as the owner approved, each committed and pushed on `step-5` ([tracker](research/step-5-subsystems.md) §6). **Gate B** follows CP9: the ADRs for part 1, and the code authorization of each candidate spike (S5, S6, S7).
 
 ## Session log
 
@@ -57,6 +47,15 @@
 - The plan proposes a new decision-map item, X4 (dependency and supply-chain policy), for the owner to approve. Until then the map is unchanged except for Step 5's row.
 
 **Verification:** the four standard checks and the link check pass, with the code unchanged.
+
+**Gate A, the owner's decisions** (2026-10-18), each as recommended:
+1. "Plan Approval: Approved as written." "The 19-checkpoint sequence, two-part structure, and subsystem criteria SC1–SC10 are approved." "Step 4 interfaces remain binding under SC1."
+2. "Decision Map Addition: Approved. Add X4 (Dependency and Supply-Chain Policy) to docs/decision-map.md, to be decided at CP2 in ADR-0010."
+3. "Candidate Spikes: Confirmed." S5, S6 and S7 "are approved as candidate spikes, with code authorization to be decided individually at Gate B."
+4. "Cadence: Approved. Proceed through CP2–CP9 without pausing until Gate B."
+5. "Push Branch: Authorized." `step-5` pushed to `origin`.
+
+**Recorded** in the tracker (§2, §7, §11), the decision map (X4 added) and this status.
 
 ### 2026-10-17 to 2026-10-18 — Session 7 (Gate B; spike S3; Gate C; S3 addendum; merge)
 

@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Status** | **CP1 ✅** (2026-10-18). **At Gate A:** the owner reviews this plan |
+| **Status** | **Gate A passed** (2026-10-18): the plan is approved as written, and X4 is added. CP2–CP9 run without pausing until Gate B (§6) |
 | **Authorized** | 2026-10-18, by the owner: "Step 5 Authorization: Authorized." Planning on a new branch, `step-5`, with "the Step 5 plan and checkpoint tracker first for Gate A review" (§2). Design documents only; each spike needs its own authorization |
-| **Branch** | `step-5`, from `main` at `c642ab3` (the Step 4 merge). Local until the owner authorizes a push (§7) |
+| **Branch** | `step-5`, from `main` at `c642ab3` (the Step 4 merge). Pushed to `origin` as the owner authorized at Gate A, and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items I1–I5, the text part of P4, and X4 if the owner adds it (§2.3); the questions earlier steps handed to Step 5 (§2.2); OQ-3, as evidence; ADRs from 0010 (§4); Step 6 |
 | **Last updated** | 2026-10-18 |
 
@@ -42,6 +42,12 @@ Storage and workers are designed after networking: the [process model](../securi
 | "Step 5 Authorization: Authorized." | This plan, as design work under the Phase Zero rule |
 | "Proceed with planning Phase Zero Step 5 (Subsystems) on a new branch `step-5`." | Branch `step-5`, created from `main` at `c642ab3` |
 | "Submit the Step 5 plan and checkpoint tracker first for Gate A review, defining the subsystem sequence, review gates, and identifying which areas may require targeted validation spikes." | CP1 ends at Gate A (§7). The sequence is in §6, the gates in §7, and the candidate spikes in §10. No spike is designed in detail or built before the gate that authorizes it |
+| **Gate A (2026-10-18):** "Plan Approval: Approved as written." "The 19-checkpoint sequence, two-part structure, and subsystem criteria SC1–SC10 are approved." "Step 4 interfaces remain binding under SC1." | The plan stands as written (§3–§10) |
+| "Decision Map Addition: Approved. Add X4 (Dependency and Supply-Chain Policy) to docs/decision-map.md, to be decided at CP2 in ADR-0010." | X4 added to the [decision map](../decision-map.md). CP2 writes the policy, and CP9 proposes ADR-0010 |
+| "Candidate Spikes: Confirmed. S5 (Text), S6 (Metal Compositing), and S7 (Network/TLS Sandbox) are approved as candidate spikes, with code authorization to be decided individually at Gate B." | §10. Each candidate's design is written at its checkpoint, and its code waits for Gate B |
+| "Cadence: Approved. Proceed through CP2–CP9 without pausing until Gate B." | CP2–CP9 run without pausing |
+| "Push Branch: Authorized. Please push `step-5` to GitHub origin and keep it updated." | Pushed to `origin` on 2026-10-18, and kept pushed as checkpoints land |
+| "Proceed with Checkpoint CP2." | CP2 starts |
 
 ### 2.1 Binding inputs
 
@@ -115,7 +121,7 @@ Every one of these is accepted, so Step 5 designs within them:
 
 **In scope:** the subsystems in §1, each designed to the level stated there, with its build-or-reuse decisions and the spikes the owner authorizes.
 
-**Proposed for Gate A: a new decision-map item, X4, dependency and supply-chain policy.** It would be decided in Step 5, at CP2, and recorded in ADR-0010. Three reasons:
+**A new decision-map item, X4, dependency and supply-chain policy,** proposed here and **added by the owner at Gate A** (2026-10-18). It is decided in Step 5, at CP2, and recorded in ADR-0010. Three reasons:
 - Step 5 is the first step to choose dependencies.
 - The language evaluation leaves the policy "to be finalized" (§12, §15.4).
 - ADR-0002's rule 5 (no `unsafe` in parsers) needs a rule for code Axiom doesn't write, such as a font parser crate that contains `unsafe`.
@@ -246,7 +252,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 
 | CP | Scope | Status |
 |---|---|---|
-| **CP1** | This plan; branch `step-5`; the owner's decisions recorded | ✅ 2026-10-18 (§11). **Gate A** |
+| **CP1** | This plan; branch `step-5`; the owner's decisions recorded | ✅ 2026-10-18 (§11). **Gate A passed:** approved as written |
 | | **Part 1: the platform-facing subsystems** | |
 | CP2 | Dependency policy and build-or-reuse rules (X4) | Not started |
 | CP3 | Text, fonts and Unicode (I1, the text part of P4); spike S5's design | Not started |
@@ -533,7 +539,7 @@ Between gates, checkpoints run without pausing, as in Steps 2b to 4: CP2–CP9, 
 
 | Gate | After | The owner decides |
 |---|---|---|
-| A | CP1 | **This plan:** its scope, including adding X4 (§2.3); the criteria SC1–SC10 (§5); the sequence and checkpoints (§6); these gates and the cadence; the candidate spikes (§10). **Also:** pushing `step-5` to `origin` |
+| A | CP1 | **This plan:** its scope, including adding X4 (§2.3); the criteria SC1–SC10 (§5); the sequence and checkpoints (§6); these gates and the cadence; the candidate spikes (§10). **Also:** pushing `step-5` to `origin`. **Passed 2026-10-18:** approved as written; X4 added; S5–S7 confirmed as candidates; the cadence approved; `step-5` pushed |
 | B | CP9 | **The ADRs for part 1** (Proposed). Each can be accepted, or pre-approved pending its spike, as ADR-0004 waited for S4 and ADR-0008 for S3. **Each candidate spike**, with its questions and pass criteria. **The shell's questions** from CP8: the settings, and the key equivalents |
 | C | CP18 | **The ADRs for part 2** (Proposed); any spike result that missed its condition; the refined overview; merging `step-5` into `main` |
 
@@ -609,3 +615,14 @@ The owner asked which areas may need targeted validation spikes. Three candidate
 - The four standard checks and the link check pass, with the code unchanged.
 
 **Gate A.** The owner reviews this plan. The decisions, with recommendations, are in [status](../status.md), "Next steps".
+
+### Gate A — passed 2026-10-18
+
+The owner's decisions, each as recommended, quoted in full in §2:
+- **The plan:** "Approved as written." "Step 4 interfaces remain binding under SC1."
+- **X4:** "Approved." Added to the [decision map](../decision-map.md), to be decided at CP2 and recorded in ADR-0010.
+- **Candidate spikes:** S5, S6 and S7 "are approved as candidate spikes, with code authorization to be decided individually at Gate B."
+- **Cadence:** "Proceed through CP2–CP9 without pausing until Gate B."
+- **The branch:** `step-5` pushed to `origin`, and kept pushed as checkpoints land.
+
+CP2 starts.
