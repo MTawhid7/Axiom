@@ -43,3 +43,11 @@ allow spikes/s4/text src/platform/
 # Cell<Value> slots, under invariants R1–R3 (spikes/s3/gc/src/raw/mod.rs). Archived at
 # Gate C (2026-10-18) as benchmark history: C1's stack is the safe SliceStack.
 allow spikes/s3/gc src/raw/
+
+# Spike S5 (S5-Q1, S5-Q2, S5-Q4): CoreText, CoreGraphics and CoreFoundation calls through
+# objc2, and read-only mmap of system font files, under invariants C1–C5
+# (spikes/s5/text/src/platform/mod.rs).
+allow spikes/s5/text src/platform/
+# Spike S5 (S5-Q5): ImageIO and CoreGraphics calls through objc2, under invariants I1–I3
+# (spikes/s5/image/src/platform/mod.rs).
+allow spikes/s5/image src/platform/

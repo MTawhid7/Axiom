@@ -1,0 +1,79 @@
+[package]
+name = "s5-text"
+description = "Spike S5 (S5-Q1, S5-Q2, S5-Q4): CoreText against the Rust text path on this Mac's system fonts: shaping, rasterization, footprint, speed and executable size. unsafe only in src/platform/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+# Justified in the workspace manifest.
+[dependencies]
+s4-sandbox.workspace = true
+s5-rust-text.workspace = true
+harfrust.workspace = true
+read-fonts.workspace = true
+skrifa.workspace = true
+png.workspace = true
+icu_segmenter.workspace = true
+icu_properties.workspace = true
+# The trimmed CoreText, CoreGraphics and CoreFoundation bindings S2 and S4 use, with
+# only the headers this spike calls.
+objc2-core-text = { workspace = true, features = [
+    "CTFont",
+    "CTFontDescriptor",
+    "CTLine",
+    "CTRun",
+    "CTStringAttributes",
+    "objc2-core-graphics",
+] }
+objc2-core-graphics = { workspace = true, features = [
+    "CGBitmapContext",
+    "CGColorSpace",
+    "CGContext",
+    "CGFont",
+    "CGImage",
+] }
+objc2-core-foundation = { workspace = true, features = [
+    "CFArray",
+    "CFAttributedString",
+    "CFCGTypes",
+    "CFData",
+    "CFDictionary",
+    "CFNumber",
+    "CFString",
+    "CFURL",
+] }
+
+[[bin]]
+name = "s5-text"
+path = "src/main.rs"
+
+# Executable-size probes for S5-Q4: each links one component and nothing else of
+# note, so their sizes, against s5-size-base, give each component's cost.
+[[bin]]
+name = "s5-size-base"
+path = "src/bin/s5-size-base.rs"
+
+[[bin]]
+name = "s5-size-harfrust"
+path = "src/bin/s5-size-harfrust.rs"
+
+[[bin]]
+name = "s5-size-raster"
+path = "src/bin/s5-size-raster.rs"
+
+[[bin]]
+name = "s5-size-icu-rules"
+path = "src/bin/s5-size-icu-rules.rs"
+
+[[bin]]
+name = "s5-size-icu-auto"
+path = "src/bin/s5-size-icu-auto.rs"
+
+[[bin]]
+name = "s5-size-icu-all"
+path = "src/bin/s5-size-icu-all.rs"
+
+[lints]
+workspace = true

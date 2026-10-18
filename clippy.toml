@@ -1,3 +1,3 @@
-# Apple framework names appear in prose, not as code identifiers.
+# Apple framework, font and format names appear in prose, not as code identifiers.
 # ".." keeps clippy's default list.
-doc-valid-idents = ["AArch64", "AppKit", "CoreAnimation", "CoreFoundation", "CoreGraphics", "CoreText", "LaunchServices", "QuartzCore", "WebKit", ".."]
+doc-valid-idents = ["AArch64", "AppKit", "CoreAnimation", "CoreFoundation", "CoreGraphics", "CoreText", "HarfBuzz", "HarfRust", "ImageIO", "IOSurface", "LaunchServices", "OpenType", "PingFang", "QuartzCore", "TrueType", "WebKit", "WebP", ".."]

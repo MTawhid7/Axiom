@@ -1,0 +1,14 @@
+;; Spike S5, S5-Q5: what ImageIO needs in S4's renderer profile
+;; (spikes/s4/sandbox/profiles/renderer.sb). `s5-image --profile
+;; renderer+imageio` appends this file to that profile. The rule was found by
+;; S4's method: a crash or a logged denial, then the decoded pixels compared
+;; with an unsandboxed run. tools/s5-measure.sh repeats its removal test.
+;;
+;; R1 (2026-10-18). Before decoding, ImageIO asks whether out-of-process
+;; decoding is enabled for the application (IIOIsOOPEnabled, ApplicationOptIn),
+;; which reads the main bundle's Info dictionary. Without metadata access to
+;; the executable's directory, CFBundleGetMainBundle returns NULL inside the
+;; profile and ImageIO dereferences it: SIGSEGV in __CFCheckCFInfoPACSignature
+;; (observed on macOS 27.2, build 26B5112a). The rule reveals one directory's
+;; metadata: not its listing, and no file's contents.
+(allow file-read-metadata (literal (param "EXECUTABLE_DIR")))

@@ -1,0 +1,20 @@
+;; Spike S5, S5-Q5: what ImageIO needs to decode AVIF, appended after
+;; imageio.sb by `s5-image --profile renderer+avif`. ImageIO decodes AV1
+;; through a VideoToolbox decompression session, which loads the software AV1
+;; decoder's plug-in, talks to the system's video decoder service, and passes
+;; frames in IOSurfaces. Without these rules the decode returns an all-zero
+;; image (ImageIO logs "decodeImageImp failed - NULL _blockArray"). The rules
+;; were found by S4's method, and tools/s5-measure.sh removes each in turn.
+;;
+;; R2 (2026-10-18). VideoToolbox lists the system's plug-in directory.
+(allow file-read* (literal "/System/Library/Video/Plug-Ins"))
+;; R3. The software AV1 decoder's bundle, read-only on the system volume.
+(allow file-read* (subpath "/System/Library/Video/Plug-Ins/AV1DecoderSW.bundle"))
+;; R4. The video decoder service, a system daemon: a second Mach service
+;; besides the broker's rendezvous.
+(allow mach-lookup (global-name "com.apple.coremedia.videodecoder"))
+;; R5, R6. Two IOKit user clients: IOSurface allocation, and the IOSurface
+;; accelerator (scaling and colour conversion). Both are kernel driver
+;; interfaces.
+(allow iokit-open-user-client (iokit-user-client-class "IOSurfaceRootUserClient"))
+(allow iokit-open-user-client (iokit-user-client-class "IOSurfaceAcceleratorClient"))

@@ -1,0 +1,54 @@
+;; Spike S5: S4's text profile (spikes/s4/sandbox/profiles/text.sb), unchanged,
+;; plus the rules CoreText needs to draw colour emoji (one rule) and to find
+;; PingFang, its fallback for Chinese (two rules), each marked "S5" below. S4's
+;; header follows.
+;;
+;; Spike S4: the renderer profile plus what CoreText needs to lay out and
+;; rasterize text with system fonts (S4-Q5). The window server and the font
+;; server stay denied, as in WebKit's content profile. Each rule was added
+;; because a logged denial, and a pixel comparison with an unsandboxed run,
+;; showed the text path needs it.
+(version 1)
+(deny default)
+
+(allow mach-lookup (global-name (param "RENDEZVOUS")))
+(deny dynamic-code-generation)
+
+;; System fonts, read-only. Without them CoreText silently draws last-resort
+;; glyphs instead of failing.
+(allow file-read* (subpath "/System/Library/Fonts"))
+
+;; ICU's data. Without it CoreText still draws, but places some glyphs
+;; differently (a Times New Roman line differed pixel by pixel with the same
+;; size and ink).
+(allow file-read* (subpath "/usr/share/icu"))
+
+;; S5 (2026-10-18): CoreText draws Apple Color Emoji's sbix glyphs by decoding
+;; their PNG data with ImageIO. ImageIO first asks whether out-of-process
+;; decoding is enabled for the application (IIOIsOOPEnabled, ApplicationOptIn),
+;; which reads the main bundle's Info dictionary. Without metadata access to
+;; the executable's directory, CFBundleGetMainBundle returns NULL inside the
+;; profile and ImageIO dereferences it: SIGSEGV in __CFCheckCFInfoPACSignature
+;; (observed on macOS 27.2, build 26B5112a). Metadata of that one directory is
+;; all it needs: reading the executable, or its ancestors' metadata, doesn't help.
+(allow file-read-metadata (literal (param "EXECUTABLE_DIR")))
+
+;; S5 (2026-10-18): PingFang SC and TC, CoreText's fallback for Chinese, live in
+;; FontServices' Reserved directory, not in /System/Library/Fonts. Without these
+;; rules CoreText silently substitutes a stub with PingFang's name: 2,416 bytes
+;; of tables that map every Han character to glyph 4. It needs to list the
+;; Resources directory, read Reserved, and stat every component of the path
+;; (removing any one rule brings the stub back). All of it is Apple's sealed
+;; system volume, read-only. Versions/A is this build's resolved path.
+(allow file-read*
+    (literal "/System/Library/PrivateFrameworks/FontServices.framework/Versions/A/Resources")
+    (subpath "/System/Library/PrivateFrameworks/FontServices.framework/Versions/A/Resources/Reserved"))
+(allow file-read-metadata
+    (literal "/System")
+    (literal "/System/Library")
+    (literal "/System/Library/PrivateFrameworks")
+    (literal "/System/Library/PrivateFrameworks/FontServices.framework")
+    (literal "/System/Library/PrivateFrameworks/FontServices.framework/Resources")
+    (literal "/System/Library/PrivateFrameworks/FontServices.framework/Versions")
+    (literal "/System/Library/PrivateFrameworks/FontServices.framework/Versions/A")
+    (literal "/System/Library/PrivateFrameworks/FontServices.framework/Versions/Current"))

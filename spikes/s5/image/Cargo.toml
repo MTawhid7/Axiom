@@ -1,0 +1,33 @@
+[package]
+name = "s5-image"
+description = "Spike S5 (S5-Q5): ImageIO inside the renderer's sandbox, for AVIF (IM3), against the safe Rust decoders png, jpeg-decoder, gif and image-webp (IM2). unsafe only in src/platform/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+# Justified in the workspace manifest.
+[dependencies]
+s4-sandbox.workspace = true
+png.workspace = true
+jpeg-decoder.workspace = true
+gif.workspace = true
+image-webp.workspace = true
+objc2-image-io = { workspace = true, features = ["CGImageSource", "objc2-core-graphics"] }
+objc2-core-graphics = { workspace = true, features = [
+    "CGBitmapContext",
+    "CGColorSpace",
+    "CGContext",
+    "CGImage",
+] }
+objc2-core-foundation = { workspace = true, features = [
+    "CFCGTypes",
+    "CFData",
+    "CFDictionary",
+    "CFNumber",
+    "CFString",
+] }
+
+[lints]
+workspace = true
