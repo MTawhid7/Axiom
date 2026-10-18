@@ -275,7 +275,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | CP9 | Synthesis of part 1: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-18 (§11). **Gate B passed** 2026-10-18 |
 | | **Spikes**, each only if authorized at Gate B | |
 | CP10 | Spike S5: the text stack | ✅ 2026-10-18 (§11; [results](s5-results.md)). S5-Q3 passes; S5-Q1 and S5-Q2 await the owner's visual check; S5-Q5's condition is not met (IM3's fallback recommended for Gate C) |
-| CP11 | Spike S6: compositing on Metal | Not started |
+| CP11 | Spike S6: compositing on Metal | In progress: code at `c2c8ad5`, trials run; **the formal run waits for the owner** (AC power, the Mac idle, the window visible) |
 | CP12 | Spike S7: the network process and TLS | Not started |
 | | **Part 2: the document and script engine** | |
 | CP13 | HTML parsing and the DOM | Not started |
@@ -924,3 +924,14 @@ Recorded in the ADRs' decision histories, the design documents, the register, th
 **Clean-up:** seven crash reports from informal runs, deleted from `~/Library/Logs/DiagnosticReports/Retired` after copying them to the session's scratchpad. The formal runs' crash reports are archived in their results directories.
 
 Every relative link resolves; the four standard checks pass. CP11 (spike S6) starts.
+
+### CP11 — in progress (2026-10-18)
+
+**Spike S6's code is written and committed** (`c2c8ad5`): `spikes/s6/compositor` (`s6-compositor`), with its `unsafe` in `src/platform/` under invariants K1–K9, and `tools/s6-measure.sh`. Every mode runs, and the trials (informal) are close to the thresholds:
+- S6-Q1: a typical update takes 0.1–0.2 ms on the GPU and 0.5–0.7 ms on the compositor thread (median); a full redraw of 96 tiles, 7–10 ms and 3 ms.
+- S6-Q3: animation by layers costs 0.13–0.19 ms a frame on the compositor thread; scrolling frames without new tiles 0.3–0.4 ms (median).
+
+**Two deviations from §10.2, for the results:** CoreAnimation's offscreen renderer (`CARenderer`) produced no pixels in this setting, so S6-Q5's colour check is the owner's visual comparison of the test pattern, with the surfaces' tags checked automatically; and frames are paced by a timer rather than a display link.
+
+**The formal run needs the owner,** as §10.2 plans: AC power, the Mac otherwise idle, and the window visible, which it can't be over another app in full screen. During this session the Mac was in use, with a full-screen app, and later on battery. CP12 proceeds meanwhile; S6's results and ADR-0012's S6 conditions follow its formal run.
+

@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Phase Zero: Step 5, subsystem design** (authorized 2026-10-18). Part 1 is complete and **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted, ADRs 0011–0013 pre-approved pending spikes S5–S7, which are authorized. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 4** (merged with `--no-ff` on 2026-10-18) and is pushed. Step 4 ran on branch `step-4`, also pushed. **Step 5 runs on branch `step-5`**, from `main` at `c642ab3`, pushed to `origin` as the owner authorized at Gate A |
-| Current checkpoint | **Step 5: CP1–CP10 ✅, Gate B passed; CP11 (spike S6) next** ([tracker](research/step-5-subsystems.md)). Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
+| Current checkpoint | **Step 5: CP1–CP10 ✅, Gate B passed; CP11 (spike S6) in progress: its formal run waits for the owner; CP12 (spike S7) next** ([tracker](research/step-5-subsystems.md)). Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. **S5, S6 and S7 authorized** at Step 5's Gate B; S5 is complete (`spikes/s5/`, CP10). Tooling under `tools/`. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -28,7 +28,7 @@
 ## Next steps: spikes S5–S7 (CP10–CP12), then part 2
 
 1. ~~CP10, spike S5~~ **done** (2026-10-18, [results](research/s5-results.md)). **For the owner, when convenient:** the visual check of S5-Q1's pairs and S5-Q2's sheets (`target/s5-results/20261018-204642/sheets-q1` and `sheets-q2`), which ADR-0011's acceptance waits for. The decisions it raises for Gate C are in the tracker's CP10 entry.
-2. **CP11, spike S6** (compositing on Metal): S6-Q1 to S6-Q5 under `spikes/s6/` (§10.2), against the confirmed thresholds. Formal runs need AC power with Low Power Mode off, and the owner is asked to leave the Mac idle during them.
+2. **CP11, spike S6:** code done (`c2c8ad5`); **the formal run needs the owner** (`tools/s6-measure.sh --show 30`: AC power, the Mac idle for about 25 minutes, the desktop showing, not an app in full screen). Originally: **CP11, spike S6** (compositing on Metal): S6-Q1 to S6-Q5 under `spikes/s6/` (§10.2), against the confirmed thresholds. Formal runs need AC power with Low Power Mode off, and the owner is asked to leave the Mac idle during them.
 3. **CP12, spike S7** (the network process and TLS): S7-Q1 to S7-Q4 under `spikes/s7/` (§10.3), with read-only requests to public test hosts.
 4. **CP13–CP18,** part 2, without pausing until Gate C. A spike result that misses its condition leaves its ADR Proposed until Gate C, unless it undermines an input part 2 depends on; then work stops there and the owner decides (§7).
 
