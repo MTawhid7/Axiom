@@ -56,6 +56,7 @@ These documents are the project's source of truth. Conversation history is not.
 | [architecture/embedder-api.md](architecture/embedder-api.md) | Engine/embedder API and the shell: the message boundary, commands, events, decisions, hosted objects, the headless embedder, the shell's language (OQ-11) | Binding (ADR-0009 accepted, 2026-10-17) |
 | [architecture/script-and-heap.md](architecture/script-and-heap.md) | Script, agents and the heap: agents and realms, messages and transfers, `SharedArrayBuffer`, the root set, ADR-0003's obligations C1–C5, bindings, room for a JIT | Binding (ADR-0008 accepted, 2026-10-18) |
 | [architecture/text-and-fonts.md](architecture/text-and-fonts.md) | Text, fonts and Unicode: ICU4X as the one Unicode source, our own encodings, CoreText's font database, HarfRust shaping, a Rust-only path for web fonts, glyph atlases in the renderer | **Proposed** (Step 5, CP3); ADR-0011 at CP9 |
+| [architecture/graphics.md](architecture/graphics.md) | Graphics: Metal through `platform`, CoreAnimation layer trees with damage-limited tiles, our own pipelines, paths in the renderer pending S6, Display P3, compositor animations, the GPU process later | **Proposed** (Step 5, CP4); ADR-0012 at CP9 |
 | [research/](research/README.md) | Research conventions and notes | Living |
 
 **Planned documents**, each created when its Phase Zero step begins:

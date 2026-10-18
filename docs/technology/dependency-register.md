@@ -66,6 +66,15 @@ CP3–CP8 add entries here as their documents propose dependencies, and CP9's AD
 
 **Open risk: `smallvec`,** which HarfRust and ICU4X's segmenter both require. Google graded 1.11.0 at `ub-risk-3`, and later versions carry only `safe-to-deploy` audits. Axiom grades the version it adopts; while it is graded `ub-risk-3`, DP8 bars it ([text and fonts](../architecture/text-and-fonts.md) §4).
 
+### From CP4: graphics
+
+| Dependency | Class | Group | Published grade | Processes | Purpose, and the interface in front of it | Proposed by |
+|---|---|---|---|---|---|---|
+| **Metal, QuartzCore (CoreAnimation) and IOSurface** | Required platform facility (already decided, §1) | — | — | Browser; a GPU process later | Drawing tiles, presenting through layer trees, sharing surfaces. Through `platform`, over `objc2-metal` | GR1, GR2 |
+| **A path rasterizer for the renderer:** a candidate such as `vello_cpu` 0.3.0 or `tiny-skia` 0.12.0, or the same crate TX12 adopts | Replaceable implementation detail | `trusted` in the renderer | Not looked up | Renderer | Filling SVG shapes, clip paths and complex borders into image resources; chosen in S6 | GR5 |
+
+**The compositor needs no new crate:** its pipelines are Axiom's own (GR3). wgpu was rejected for the browser's compositor by design (GR1), not by grade. It remains a candidate for WebGPU in the GPU process (GR10).
+
 ## 4. Considered and not admitted
 
 | Dependency | Reason | Recorded at |

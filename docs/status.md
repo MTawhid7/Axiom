@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Phase Zero: Step 5, subsystem design** (authorized 2026-10-18). Gate A passed: the plan is approved as written. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 4** (merged with `--no-ff` on 2026-10-18) and is pushed. Step 4 ran on branch `step-4`, also pushed. **Step 5 runs on branch `step-5`**, from `main` at `c642ab3`, pushed to `origin` as the owner authorized at Gate A |
-| Current checkpoint | **Step 5: CP1–CP3 ✅, Gate A passed** ([tracker](research/step-5-subsystems.md)). CP4 (graphics) is next; CP2–CP9 run without pausing until Gate B. Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
+| Current checkpoint | **Step 5: CP1–CP4 ✅, Gate A passed** ([tracker](research/step-5-subsystems.md)). CP5 (images and media) is next; CP2–CP9 run without pausing until Gate B. Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. Tooling under `tools/` |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -67,6 +67,12 @@
 - ICU4X is the one Unicode source. Encodings are Axiom's own, because Google grades `encoding_rs` at `ub-risk-3`.
 - CoreText's database and fallback serve system fonts. HarfRust shapes every font. Web fonts take a Rust-only path, so no C parser sees them. Glyphs are rasterized in the renderer, with CoreText or a Rust rasterizer for system fonts, as S5 decides.
 - The dependency policy's DP10 is refined: `ub-risk-2` across the tree in sandboxed helpers, `ub-risk-1` in the browser. Applying CP2's stricter rule would have excluded every Rust font stack while admitting CoreText.
+
+**CP4 (completed 2026-10-18):** [graphics](architecture/graphics.md) (**Proposed**; GR1–GR14), and spike S6's design ([tracker](research/step-5-subsystems.md) §10.2):
+- Metal directly, through `platform`, with no portability layer in the browser.
+- The window server composites retained CoreAnimation layers, and Axiom draws damaged tiles into IOSurfaces, as Firefox does on macOS, where it measured large power savings.
+- Our own pipelines draw the display items. Paths are rasterized in the renderer until S6 reports; if GPU filling pays, an amendment adding path items to PL7 goes to the owner.
+- Display P3 at 8 bits by default. Compositor animations: the transform family and opacity, then `filter`, `backdrop-filter` and scroll-driven timelines.
 
 ### 2026-10-17 to 2026-10-18 — Session 7 (Gate B; spike S3; Gate C; S3 addendum; merge)
 

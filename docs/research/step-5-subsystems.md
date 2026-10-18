@@ -256,7 +256,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | | **Part 1: the platform-facing subsystems** | |
 | CP2 | Dependency policy and build-or-reuse rules (X4) | ✅ 2026-10-18 (§11; [policy](../technology/dependency-policy.md), [register](../technology/dependency-register.md)) |
 | CP3 | Text, fonts and Unicode (I1, the text part of P4); spike S5's design | ✅ 2026-10-18 (§11; [document](../architecture/text-and-fonts.md); S5 design §10.1) |
-| CP4 | Graphics: rasterization, compositing and presentation (I2); spike S6's design | Not started |
+| CP4 | Graphics: rasterization, compositing and presentation (I2); spike S6's design | ✅ 2026-10-18 (§11; [document](../architecture/graphics.md); S6 design §10.2) |
 | CP5 | Images and media (I4) | Not started |
 | CP6 | Networking: URLs, HTTP, TLS, DNS, cache, cookies, Fetch's policy (I3); spike S7's design | Not started |
 | CP7 | Storage and workers | Not started |
@@ -585,7 +585,7 @@ The owner asked which areas may need targeted validation spikes. Three candidate
 | Spike | Area, and the checkpoint that designs it | Draft question | Why sources can't settle it | What it decides |
 |---|---|---|---|---|
 | **S5** | The text stack (CP3; design in §10.1) | How do CoreText and a Rust text stack (a Rust shaper such as HarfRust, a Rust font parser and rasterizer, ICU4X's segmenters) compare on a multi-script corpus, inside the renderer's sandbox, in shaping output, speed and memory per renderer? How can an untrusted web font load there safely? | [S4-Q5](s4-results.md) showed that CoreText draws correctly in the sandbox, not how it compares with anything. The [language evaluation](../technology/language-evaluation.md) §12 records HarfRust as "not a complete port". Memory per renderer on this Mac needs measuring: B2 allows 10 MB, and drawing with CoreText took S4's helper from 1.14 to 4.05 MiB | TX: shaping, font parsing and rasterization; where glyphs are rasterized |
-| **S6** | Compositing on Metal (CP4) | Can the browser's compositor draw display lists of validated primitives (property trees, rounded clips, glyph quads from an atlas, images, embedded child frames) on Metal within a 60 Hz frame budget, and with what memory and energy? Does partial presentation work? How do CPU and GPU path rasterization compare? | [S2](s2-results.md) measured an idle Metal window (20–21 MB, no wakeups while idle), not a compositing workload. No source measures these costs on an M1 | GR: the GPU interface, the compositor's renderer, path rasterization |
+| **S6** | Compositing on Metal (CP4; design in §10.2) | Can the browser's compositor draw display lists of validated primitives (property trees, rounded clips, glyph quads from an atlas, images, embedded child frames) on Metal within a 60 Hz frame budget, and with what memory and energy? Does partial presentation work? How do CPU and GPU path rasterization compare? | [S2](s2-results.md) measured an idle Metal window (20–21 MB, no wakeups while idle), not a compositing workload. No source measures these costs on an M1 | GR: the GPU interface, the compositor's renderer, path rasterization |
 | **S7** | The network process and TLS (CP6) | Does a deny-by-default network-process profile, allowing only outbound sockets, name resolution, certificate trust evaluation and its own data directory, support a TLS client that verifies against the system's trust store? Which rules does it need? What do handshakes and requests cost with each candidate stack? | S4 validated only renderer-like profiles. Which system services certificate evaluation needs inside a profile is the kind of fact S4 found only by trying: named profiles killed their process, and CoreText degraded silently without ICU's data | NW: the TLS stack and certificate verification; the network process's sandbox rules |
 | (S8) | The JavaScript engine (CP16) | Only if CP16 leaves a question that sources can't settle, such as the cost of shape-based inline caches over Pattern B arenas in safe Rust | — | Proposed at Gate C, if needed |
 
@@ -632,6 +632,42 @@ The design is in [text and fonts](../architecture/text-and-fonts.md). Until S5 r
 - **Method:** release builds; three process runs with cool-downs; AC power with Low Power Mode off; a clean tree for formal runs; `/usr/bin/time -l` for footprints.
 
 **Outputs:** `docs/research/s5-results.md`, TX12 settled, and ADR-0011 updated.
+
+### 10.2 Spike S6: compositing on Metal (designed at CP4)
+
+**Purpose.** Measure GR2–GR6 on this Mac before any of the compositor is written:
+- the cost of drawing display lists into tiled CoreAnimation layers with Metal;
+- what damage-limited drawing saves;
+- scrolling and animating by changing layers;
+- path filling on the CPU or the GPU, which decides whether GR5's amendment to PL7 goes to the owner;
+- memory against B1, and the color tagging of layers.
+
+The design is in [graphics](../architecture/graphics.md). The time thresholds below are proposals for the owner to confirm at Gate B, as S3-Q2's 10% threshold was confirmed at Step 4's Gate B.
+
+| ID | Question | Passes if |
+|---|---|---|
+| S6-Q1 | **Compositing cost.** Synthetic display lists shaped like pages are drawn with GR3's pipelines into tiled IOSurface layers of a 2,560 × 1,600 window. They hold text as glyph quads, rectangles, rounded clips, borders, shadows, gradients, images, and two nested frames. What do a full redraw and a typical update cost in GPU and CPU time per frame? | A typical update takes at most a quarter of a 60 Hz frame on the GPU (≤ 4 ms), and ≤ 2 ms on the compositor thread. With nothing changing, the process makes no wakeups and no commits |
+| S6-Q2 | **Damage.** For a small animated region (Firefox's spinning-square case), and for typing into a field, what do damage-limited tile redraws save over full redraws, in GPU time and in the energy impact `top` reports? | Only the tiles that damage touches are redrawn (counted), and the saving is reported |
+| S6-Q3 | **Scrolling and animation by layers.** What does scrolling a long page cost per frame, and animating transform and opacity, by changing layers (GR8)? | No tile is redrawn except newly exposed ones, and the compositor thread spends ≤ 1 ms per frame |
+| S6-Q4 | **Paths.** On path-heavy content (icons, a chart, a map tile), how do two approaches compare in time, memory and quality? CPU filling in a renderer-like process (`vello_cpu` or `tiny-skia`), uploaded as images; GPU filling in the compositor, by tessellation or by sparse strips | Report. It decides whether GR5's amendment goes to the owner |
+| S6-Q5 | **Memory and color.** What do the Metal device, the tiles and the pipelines cost for one window? Does CoreAnimation honour Display P3 tagging on the IOSurfaces (GR6)? | The compositor's footprint leaves B1 achievable: the browser at ≤ 60 MB, idle, with one window. A known test pattern displays correctly in P3 |
+
+**What would be built** (after authorization only):
+- `spikes/s6/compositor` (`s6-compositor`):
+  - an AppKit window through objc2, as S2's was; Metal through `objc2-metal`; QuartzCore and IOSurface;
+  - its `unsafe` in `src/platform/`, allowlisted;
+  - GR3's pipelines, as Metal shading language source compiled at run time;
+  - generated display lists, so that no renderer process is needed.
+- **For S6-Q4:** CPU path filling in a renderer-like process or thread, and a GPU path filler in the compositor.
+- **Measurements:**
+  - command buffers' GPU timestamps, and CPU timers;
+  - `top -stats power` for energy impact, which works without root (observed 2026-10-18);
+  - `/usr/bin/time -l` for footprints;
+  - Metal's developer HUD for spot checks.
+- **Method:** release builds; three process runs with cool-downs; AC power; a clean tree; the window visible on the built-in display. During formal runs the owner is asked to leave the Mac otherwise idle, since S3's addendum ran with the Mac in use.
+- **Dependencies:** objc2's framework crates, already decided, plus S6-Q4's path-rasterizer candidates, each justified in the manifest (DP23).
+
+**Outputs:** `docs/research/s6-results.md`; GR5 settled, or its amendment proposed; ADR-0012 updated.
 
 ## 11. Results log
 
@@ -703,3 +739,23 @@ Every relative link resolves; the four standard checks pass.
 **Found:** `smallvec`, which HarfRust and ICU4X's segmenter require, was graded `ub-risk-3` by Google at 1.11.0, and later versions carry no soundness grade. It is recorded as an open risk in the register.
 
 The [register](../technology/dependency-register.md) gains CP3's proposed entries, and a section for crates considered and not admitted. Every relative link resolves; the four standard checks pass.
+
+### CP4 — completed 2026-10-18
+
+[Graphics: rasterization, compositing and presentation](../architecture/graphics.md) written (**Proposed**; rules GR1–GR14). Its sources: Firefox's Core Animation work and its native layer code; Chrome's Skia Graphite announcement and its CALayer and animation code; WebKit's remote layer tree; Vello; Apple's guidance on tile-based rendering; the SDK's QuartzCore, Metal and IOSurface headers; this Mac's GPU and display. Main proposals:
+- **Metal directly, through `platform`.** No portability layer in the browser process: cross-platform support is a non-goal, and wgpu would bring a large `unsafe` tree into the most privileged process. wgpu remains a candidate for WebGPU in the GPU process.
+- **The window server composites retained layers; Axiom draws tiles,** with Metal, into IOSurfaces of its own:
+  - only damaged tiles are redrawn;
+  - scrollers, compositor-animated subtrees, child frames and video get layers of their own.
+
+  Firefox measured large power savings from this design on macOS (for example, an idle Google Docs at 1.6 W instead of 7.4 W, on a 2013 Intel MacBook Pro). Chromium and WebKit also present through layer trees.
+- **Our own pipelines draw display items:** few of them, compiled from source at first use and kept in a binary archive, and frugal with the M1's tile memory.
+- **Paths are rasterized in the renderer until S6 reports.** If GPU path filling in the compositor pays, an amendment adding path items to PL7 goes to the owner (SC1).
+- **Color:** Display P3 at 8 bits per channel per window by default, matching this Mac's panel; HDR later, per layer.
+- **Nothing runs while nothing changes.** Scrolling and compositor animations change layers, not pixels.
+- **Compositor animations:** the transform family and opacity first; then `filter`, `backdrop-filter` and scroll-driven timelines. This answers invalidation open question 2.
+- **The compositor thread draws and commits,** and commits on the main thread during live resize, as Firefox does. The headless embedder composites the same tree offscreen, without CoreAnimation, so reference tests are deterministic.
+
+**Spike S6 designed** (§10.2): five questions, on compositing cost, damage, layers for scrolling and animation, CPU or GPU paths, and memory and color. Its time thresholds are for the owner to confirm.
+
+Every relative link resolves; the four standard checks pass.
