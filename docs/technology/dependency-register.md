@@ -112,6 +112,14 @@ CP3–CP8 add entries here as their documents propose dependencies, and CP9's AD
 | **`redb`** 4.4.0 | Replaceable implementation detail | `trusted` in the network process, if its audit agrees | Not graded. No required dependencies; 54 mentions of `unsafe`, mostly in a vendored hash, synchronization and file locking (observed) | Network | Every structured store: web storage, IndexedDB, the Cache API's index, the cookie jar, the HTTP cache's index. Behind Axiom's storage interface. "MIT OR Apache-2.0". **Conditional:** its audit must grade it `ub-risk-2` or better, and it must pass SW13's crash tests | SW2 |
 | **SQLite** (`rusqlite`, `libsqlite3-sys` with its bundled C) | Replaceable implementation detail | `sandboxed`: C, under DP10's exception | — (C) | Network | **Fallback only,** if `redb` fails SW2's conditions; then admitted by ADR-0013. Firefox's, WebKit's and Ladybird's engine, and Chromium's for IndexedDB going forward | SW2 |
 
+### From CP8: accessibility
+
+| Dependency | Class | Group | Published grade | Processes | Purpose, and the interface in front of it | Proposed by |
+|---|---|---|---|---|---|---|
+| **AppKit's `NSAccessibility` protocols and HIServices' text markers** (`AXTextMarkerCreate`) | Required platform facility | — | — | Browser (main thread) | The accessibility bridge, through the shell's `platform` module | AX4, AX5, AX8 |
+
+AccessKit was considered and not adopted, by design rather than grade: its macOS adapter lacks rich text and hypertext (AX8).
+
 ## 4. Considered and not admitted
 
 | Dependency | Reason | Recorded at |

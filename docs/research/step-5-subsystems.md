@@ -260,7 +260,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | CP5 | Images and media (I4) | ✅ 2026-10-18 (§11; [document](../architecture/images-and-media.md); S5-Q5 added to §10.1) |
 | CP6 | Networking: URLs, HTTP, TLS, DNS, cache, cookies, Fetch's policy (I3); spike S7's design | ✅ 2026-10-18 (§11; [document](../architecture/networking.md); S7 design §10.3) |
 | CP7 | Storage and workers | ✅ 2026-10-18 (§11; [document](../architecture/storage-and-workers.md)) |
-| CP8 | Accessibility: the tree and the bridge (I5); the shell's questions for the owner | Not started |
+| CP8 | Accessibility: the tree and the bridge (I5); the shell's questions for the owner | ✅ 2026-10-18 (§11; [document](../architecture/accessibility.md)) |
 | CP9 | Synthesis of part 1: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | Not started |
 | | **Spikes**, each only if authorized at Gate B | |
 | CP10 | Spike S5: the text stack | Not started |
@@ -844,5 +844,20 @@ Every relative link resolves; the four standard checks pass.
 - **Shared and service workers run in a renderer locked to their site.** The browser launches one when none exists, and the site's documents then reuse it. That answers the handed-over question 11.
 
 No spike: the storage engine is decided by crash tests at its milestone, as §10 planned.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP8 — completed 2026-10-18
+
+[Accessibility](../architecture/accessibility.md) written (**Proposed**; rules AX1–AX12, and two questions for the owner). Its sources: Core-AAM and HTML-AAM; Chromium's, WebKit's and Firefox's macOS bridges; Chromium's reserved commands; AccessKit; the SDK's HIServices headers. Main proposals:
+- **The renderer builds each document's tree** under HTML-AAM, Core-AAM and the accessible-name computation, once an assistive technology first asks. It pushes the whole tree, then updates, Chromium's model.
+- **The browser answers every query from its cache,** stitches frames by token only to its own frame records, and routes actions as input.
+- **Text navigation uses macOS's text-marker API.** SDK 27's headers document it for "custom web browser engines", and all three engines implement it. The renderer precomputes word, sentence and line boundaries, so ICU4X never runs in the browser on a renderer's text.
+- **The bridge is Axiom's own,** in the shell's `platform` module. AccessKit's macOS adapter lacks rich text and hypertext.
+- **System accessibility settings reach pages as media features.**
+
+**For the owner at Gate B:**
+- the settings list, including how the sensitive-site list and the JIT switches appear;
+- reserved key equivalents: Chromium's reserved set, plus ⌘L and ⌘,, reserved in fullscreen too.
 
 Every relative link resolves; the four standard checks pass.
