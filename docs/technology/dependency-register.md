@@ -22,6 +22,7 @@ Placement and purpose are in the policy's table ([DP21](dependency-policy.md#8-a
 | libSystem: Mach messages, kqueue, `posix_spawn`, `os_sync_wait_on_address` | All | Decided: ADRs [0005](../adr/0005-ipc-transport-and-interfaces.md), [0006](../adr/0006-event-loop-and-threading.md), [0008](../adr/0008-script-agents-and-heap.md) |
 | libsandbox's private interfaces | Browser (compile), helpers (apply) | Decided: [ADR-0004](../adr/0004-process-model-and-sandbox.md) |
 | AppKit, Foundation, QuartzCore, Metal, IOSurface | Browser | Decided: ADRs [0007](../adr/0007-frame-tree-pipeline-and-input.md), [0009](../adr/0009-embedder-api-and-shell.md) |
+| AppKit's `NSAccessibility` protocols and HIServices' text markers | Browser (main thread) | Decided: [ADR-0014](../adr/0014-accessibility.md), accepted at Step 5's Gate B (2026-10-18) |
 
 The Step 5 checkpoints add proposed facilities (CoreText, ImageIO, Security, Network, media frameworks) as they decide them.
 
@@ -50,7 +51,7 @@ The Step 5 checkpoints add proposed facilities (CoreText, ImageIO, Security, Net
 
 ## 3. Proposed by Step 5
 
-CP3–CP8 add entries here as their documents propose dependencies, and CP9's ADRs decide them. Published grades are Google's or Chromium's `cargo-vet` audits ([text and fonts](../architecture/text-and-fonts.md) §4, source A1). Each applies to the version audited, so every version adopted is audited again (DP15). Build costs are measured when a crate is first added (DP19).
+CP3–CP8 add entries here as their documents propose dependencies, and CP9's ADRs decide them. **At Gate B** (2026-10-18) the owner accepted ADR-0010, which makes this register's format binding, and ADR-0014, whose entry (CP8) is now decided and listed in §1. ADRs 0011–0013 are pre-approved pending spikes S5–S7, so their entries stay proposed until those ADRs are accepted. Published grades are Google's or Chromium's `cargo-vet` audits ([text and fonts](../architecture/text-and-fonts.md) §4, source A1). Each applies to the version audited, so every version adopted is audited again (DP15). Build costs are measured when a crate is first added (DP19).
 
 ### From CP3: text, fonts and Unicode
 

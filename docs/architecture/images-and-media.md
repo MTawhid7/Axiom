@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 5, CP5). It becomes binding when ADR-0012 is accepted, at Step 5's Gate B. Spike S5's question S5-Q5, if authorized, settles IM3 and checks IM2 |
+| **Status** | **Proposed** (Step 5, CP5). Decided in [ADR-0012](../adr/0012-graphics-images-and-media.md), whose acceptance the owner pre-approved at Gate B (2026-10-18), effective once S6-Q1, S6-Q3 and S6-Q5 pass and S5-Q5 validates ImageIO. S5-Q5, authorized at the same gate, settles IM3 and checks IM2 |
 | **Question** | Which image formats are decoded, by safe Rust or by ImageIO inside the renderer's sandbox? How do decoding, animation and color profiles stay within memory budgets? Where do media decoding and audio output run? |
 | **Answers** | Step 5 question Q5 ([tracker](../research/step-5-subsystems.md) §3); decision-map item I4 |
 | **Feeds** | ADR-0012 (CP9); spike S5 (tracker §10.1, S5-Q5); CP6 (streamed bodies); CP15 (`<img>`, `<picture>`, SVG as an image); a later media milestone |

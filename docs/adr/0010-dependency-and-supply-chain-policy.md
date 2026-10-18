@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-18), at Step 5's CP9 |
+| **Status** | **Accepted** (2026-10-18), by the owner at Step 5's Gate B, including CP3's refinement of DP10 |
 | **Date** | 2026-10-18 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Dependency policy](../technology/dependency-policy.md) (the full rules, DP1–DP23); [dependency register](../technology/dependency-register.md); [charter](../charter.md) G1 and principle 4; [ADR-0002](0002-implementation-language.md) and the [language evaluation](../technology/language-evaluation.md) §12, §15.3–§15.4; [threat model](../security/threat-model.md) TA4, TA5, §9; [process model](../security/process-model.md) PM2; [Step 5 tracker](../research/step-5-subsystems.md); decision-map item X4 |
@@ -14,6 +14,7 @@
 | 2026-10-18 | X4 added to the decision map by the owner at Step 5's Gate A: "Add X4 (Dependency and Supply-Chain Policy) to docs/decision-map.md, to be decided at CP2 in ADR-0010" |
 | 2026-10-18 | The policy written at CP2. DP10 refined at CP3: applying it showed that a tree-wide `ub-risk-1` rule excluded every Rust font stack while admitting C through the exception |
 | 2026-10-18 | Proposed at Step 5, CP9 |
+| 2026-10-18 | **Accepted** by the owner at Gate B: "ADR-0010 (Dependency and Supply-Chain Policy): Accepted as proposed, including the DP10 refinement." The [policy](../technology/dependency-policy.md) is binding. At the same gate the owner chose Axiom's license, "MIT OR Apache-2.0" (OQ-21), which every license on DP17's allow-list is compatible with |
 
 ## Question
 
@@ -52,7 +53,7 @@ The [policy](../technology/dependency-policy.md) §2 and its Sources: Chromium's
 
 ## Decision
 
-**Recommended: accept the [dependency policy](../technology/dependency-policy.md) as binding.** In summary:
+**The [dependency policy](../technology/dependency-policy.md) is binding.** In summary:
 1. **The line** (DP1–DP4). Charter G1's mechanisms and the security policies are Axiom's own. The decision map's infrastructure layer, Unicode data, encodings, URL parsing, compression and storage engines may be reused behind interfaces Axiom owns. Axiom never writes its own cryptography. A dependency must save substantial, specialized work.
 2. **Classes and records** (DP5–DP7). Every dependency has a class and a register entry covering its whole transitive tree. A foundational dependency needs an ADR.
 3. **Grades and groups** (DP8–DP12).
@@ -65,7 +66,7 @@ The [policy](../technology/dependency-policy.md) §2 and its Sources: Chromium's
    - crates.io only, with `--locked` builds;
    - `cargo-vet` audits, importing Firefox's organizations;
    - `cargo-deny`'s four checks;
-   - a license allow-list that keeps Axiom's own license open;
+   - a license allow-list compatible with Axiom's own license, "MIT OR Apache-2.0" (chosen at Gate B);
    - minimal features, and costs measured against T1–T4.
 5. **Apple's frameworks** run only in the processes DP21 lists, through `platform`.
 6. **Enforcement** (DP22, DP23): `cargo-deny` and `cargo-vet` become checks once the owner authorizes installing them, and `tools/check-dependencies.py` is designed. The spikes are exempt from the register.
@@ -98,5 +99,5 @@ The [policy](../technology/dependency-policy.md) §2 and its Sources: Chromium's
 ## Consequences
 
 - Every Step 5 subsystem records its dependencies in the [register](../technology/dependency-register.md). CP3–CP8 already have.
-- **Open question 21** (new): Axiom's own license, which the repository lacks (observed 2026-10-18), raised for the owner.
+- **Open question 21:** Axiom's own license, which the repository lacked (observed 2026-10-18). **Resolved at Gate B:** "MIT OR Apache-2.0", with `LICENSE-MIT` and `LICENSE-APACHE` at the repository root.
 - Installing `cargo-deny` and `cargo-vet`, and building `tools/check-dependencies.py`, wait for the owner's authorization with the first engine crate.

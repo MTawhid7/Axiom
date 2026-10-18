@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **At Gate B:** ADRs 0010–0014 Proposed, and spikes S5–S7 designed for authorization (§7, §10) |
-| **Authorized** | 2026-10-18, by the owner: "Step 5 Authorization: Authorized." Planning on a new branch, `step-5`, with "the Step 5 plan and checkpoint tracker first for Gate A review" (§2). Design documents only; each spike needs its own authorization |
+| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Next: CP10, spike S5** |
+| **Authorized** | 2026-10-18, by the owner: "Step 5 Authorization: Authorized." Planning on a new branch, `step-5`, with "the Step 5 plan and checkpoint tracker first for Gate A review" (§2). Design documents only; each spike needs its own authorization. **Spikes S5, S6 and S7 authorized at Gate B** (2026-10-18), each for the questions it names (§10) |
 | **Branch** | `step-5`, from `main` at `c642ab3` (the Step 4 merge). Pushed to `origin` as the owner authorized at Gate A, and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items I1–I5, the text part of P4, and X4 if the owner adds it (§2.3); the questions earlier steps handed to Step 5 (§2.2); OQ-3, as evidence; ADRs from 0010 (§4); Step 6 |
 | **Last updated** | 2026-10-18 |
@@ -48,6 +48,17 @@ Storage and workers are designed after networking: the [process model](../securi
 | "Cadence: Approved. Proceed through CP2–CP9 without pausing until Gate B." | CP2–CP9 run without pausing |
 | "Push Branch: Authorized. Please push `step-5` to GitHub origin and keep it updated." | Pushed to `origin` on 2026-10-18, and kept pushed as checkpoints land |
 | "Proceed with Checkpoint CP2." | CP2 starts |
+| **Gate B (2026-10-18):** "ADR-0010 (Dependency and Supply-Chain Policy): Accepted as proposed, including the DP10 refinement." | [ADR-0010](../adr/0010-dependency-and-supply-chain-policy.md) Accepted; the [dependency policy](../technology/dependency-policy.md) is binding |
+| "ADR-0011 (Text, Fonts, and Unicode): Pre-approved; will move to Accepted upon S5-Q1 and S5-Q3 passing, with TX12 settled by S5-Q2." | [ADR-0011](../adr/0011-text-fonts-and-unicode.md) stays Proposed until S5 reports (§10.1) |
+| "ADR-0012 (Graphics, Images, and Media): Pre-approved; will move to Accepted upon S6-Q1, S6-Q3, and S6-Q5 passing, and S5-Q5 validating ImageIO inside the renderer sandbox." | [ADR-0012](../adr/0012-graphics-images-and-media.md) stays Proposed until S6 and S5-Q5 report (§10.1, §10.2) |
+| "ADR-0013 (Networking, Storage, and Workers): Pre-approved; will move to Accepted upon S7-Q1, S7-Q3, and S7-Q4 passing." | [ADR-0013](../adr/0013-networking-storage-and-workers.md) stays Proposed until S7 reports (§10.3) |
+| "ADR-0014 (Accessibility): Accepted as proposed." | [ADR-0014](../adr/0014-accessibility.md) Accepted; the [accessibility design](../architecture/accessibility.md) is binding |
+| "Spike S5 (Text Stack & ImageIO Sandbox): Authorized for questions S5-Q1 through S5-Q5 under spikes/s5/, including the listed candidate crates and OFL/WPT test web fonts." | CP10 (§10.1) |
+| "Spike S6 (Metal Compositing): Authorized for questions S6-Q1 through S6-Q5 under spikes/s6/. The performance thresholds are confirmed: typical update ≤ 4 ms GPU / ≤ 2 ms compositor thread; scrolling/transforms ≤ 1 ms." | CP11 (§10.2), with the thresholds confirmed |
+| "Spike S7 (Network Process & TLS): Authorized for questions S7-Q1 through S7-Q4 under spikes/s7/, including read-only outbound network requests to public test hosts." | CP12 (§10.3) |
+| "Settings List: Approved as written in docs/architecture/accessibility.md §6.1." "Reserved Key Equivalents: Approved as written in docs/architecture/accessibility.md §6.2 (Chromium reserved set, plus ⌘L, ⌘,, and Esc un-overridable even in fullscreen)." | Handed-over questions 13 and 14 (§2.2) answered; [accessibility](../architecture/accessibility.md) §6 |
+| "OQ-21 (Axiom License): Approved as 'MIT OR Apache-2.0'. Please add the standard LICENSE-MIT and LICENSE-APACHE files to the repository root." | Both files added; the workspace manifest declares the license; [OQ-21](../open-questions.md) resolved; DP17 updated |
+| "Proceed with executing Spikes S5, S6, and S7 as planned." | CP10–CP12, then CP13–CP18 without pausing until Gate C (§7) |
 
 ### 2.1 Binding inputs
 
@@ -261,7 +272,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | CP6 | Networking: URLs, HTTP, TLS, DNS, cache, cookies, Fetch's policy (I3); spike S7's design | ✅ 2026-10-18 (§11; [document](../architecture/networking.md); S7 design §10.3) |
 | CP7 | Storage and workers | ✅ 2026-10-18 (§11; [document](../architecture/storage-and-workers.md)) |
 | CP8 | Accessibility: the tree and the bridge (I5); the shell's questions for the owner | ✅ 2026-10-18 (§11; [document](../architecture/accessibility.md)) |
-| CP9 | Synthesis of part 1: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-18 (§11). **At Gate B** |
+| CP9 | Synthesis of part 1: ADRs (Proposed); decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-18 (§11). **Gate B passed** 2026-10-18 |
 | | **Spikes**, each only if authorized at Gate B | |
 | CP10 | Spike S5: the text stack | Not started |
 | CP11 | Spike S6: compositing on Metal | Not started |
@@ -540,7 +551,7 @@ Between gates, checkpoints run without pausing, as in Steps 2b to 4: CP2–CP9, 
 | Gate | After | The owner decides |
 |---|---|---|
 | A | CP1 | **This plan:** its scope, including adding X4 (§2.3); the criteria SC1–SC10 (§5); the sequence and checkpoints (§6); these gates and the cadence; the candidate spikes (§10). **Also:** pushing `step-5` to `origin`. **Passed 2026-10-18:** approved as written; X4 added; S5–S7 confirmed as candidates; the cadence approved; `step-5` pushed |
-| B | CP9 | **The ADRs for part 1** (Proposed). Each can be accepted, or pre-approved pending its spike, as ADR-0004 waited for S4 and ADR-0008 for S3. **Each candidate spike**, with its questions and pass criteria. **The shell's questions** from CP8: the settings, and the key equivalents |
+| B | CP9 | **The ADRs for part 1** (Proposed). Each can be accepted, or pre-approved pending its spike, as ADR-0004 waited for S4 and ADR-0008 for S3. **Each candidate spike**, with its questions and pass criteria. **The shell's questions** from CP8: the settings, and the key equivalents. **Passed 2026-10-18:** ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved pending their spikes; S5, S6 and S7 authorized, with S6's thresholds confirmed; both shell questions approved as written; Axiom's license chosen (OQ-21) |
 | C | CP18 | **The ADRs for part 2** (Proposed); any spike result that missed its condition; the refined overview; merging `step-5` into `main` |
 
 **A spike result that misses its condition doesn't stop part 2.** The affected ADR stays Proposed until Gate C. The exception is a result that undermines an input part 2 depends on: then work stops at that point, and the owner decides.
@@ -580,7 +591,7 @@ Between gates, checkpoints run without pausing, as in Steps 2b to 4: CP2–CP9, 
 
 ## 10. Candidate spikes
 
-The owner asked which areas may need targeted validation spikes. Three candidates are planned, and a fourth only if CP16 needs it. **Nothing is authorized at Gate A.** Each candidate's design (its questions, method, pass criteria, crates and `unsafe`) is written in this section at the checkpoint named, and put to the owner at Gate B. Its code is written only after it is authorized.
+The owner asked which areas may need targeted validation spikes. Three candidates are planned, and a fourth only if CP16 needs it. **Nothing was authorized at Gate A. At Gate B (2026-10-18) the owner authorized S5, S6 and S7,** each for the questions it names (§2). Each candidate's design (its questions, method, pass criteria, crates and `unsafe`) is written in this section at the checkpoint named, and put to the owner at Gate B. Its code is written only after it is authorized.
 
 | Spike | Area, and the checkpoint that designs it | Draft question | Why sources can't settle it | What it decides |
 |---|---|---|---|---|
@@ -645,7 +656,7 @@ The design is in [text and fonts](../architecture/text-and-fonts.md). Until S5 r
 - path filling on the CPU or the GPU, which decides whether GR5's amendment to PL7 goes to the owner;
 - memory against B1, and the color tagging of layers.
 
-The design is in [graphics](../architecture/graphics.md). The time thresholds below are proposals for the owner to confirm at Gate B, as S3-Q2's 10% threshold was confirmed at Step 4's Gate B.
+The design is in [graphics](../architecture/graphics.md). The time thresholds below were proposed for the owner to confirm, as S3-Q2's 10% threshold was confirmed at Step 4's Gate B. **The owner confirmed them at Gate B** (2026-10-18): "typical update ≤ 4 ms GPU / ≤ 2 ms compositor thread; scrolling/transforms ≤ 1 ms."
 
 | ID | Question | Passes if |
 |---|---|---|
@@ -879,3 +890,14 @@ Every relative link resolves; the four standard checks pass.
 Every relative link resolves; the four standard checks pass.
 
 **Gate B.** The owner decides on the five ADRs, the three spikes, the two shell questions and OQ-21, as listed with recommendations in [status](../status.md), "Next steps".
+
+### Gate B — passed 2026-10-18
+
+The owner's decisions, each as recommended, quoted in full in §2:
+- **ADR-0010** (the dependency policy) and **ADR-0014** (accessibility): accepted. The [policy](../technology/dependency-policy.md) and the [accessibility design](../architecture/accessibility.md) are binding.
+- **ADRs 0011, 0012 and 0013:** pre-approved, each to move to Accepted once its spike conditions pass (S5-Q1 and S5-Q3; S6-Q1, S6-Q3, S6-Q5 and S5-Q5; S7-Q1, S7-Q3 and S7-Q4).
+- **Spikes S5, S6 and S7:** authorized for their full scopes (§10.1–§10.3), including S5's crates and test fonts under the OFL or WPT's licenses, and S7's read-only requests to public test hosts. S6's thresholds are confirmed.
+- **The shell's questions:** the settings list and the reserved key equivalents, approved as written.
+- **OQ-21:** Axiom's license is "MIT OR Apache-2.0". `LICENSE-MIT` and `LICENSE-APACHE` are added at the repository root, and the workspace manifest declares the license.
+
+Recorded in the ADRs' decision histories, the design documents, the register, the [decision map](../decision-map.md), the [open questions](../open-questions.md), the indexes and [status](../status.md). CP10 starts.

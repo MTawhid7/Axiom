@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 5, CP4). It becomes binding when ADR-0012 is accepted, at Step 5's Gate B. Spike S6, if authorized, settles GR5 and checks GR2–GR4 |
+| **Status** | **Proposed** (Step 5, CP4). Decided in [ADR-0012](../adr/0012-graphics-images-and-media.md), whose acceptance the owner pre-approved at Gate B (2026-10-18), effective once S6-Q1, S6-Q3 and S6-Q5 pass and S5-Q5 validates ImageIO. Spike S6, authorized at the same gate with its thresholds confirmed, settles GR5 and checks GR2–GR4 |
 | **Question** | What draws the display list: the GPU interface, path and glyph rasterization, compositing of property trees and effects, color management, damage tracking and partial presentation? Which animations run on the compositor, and how does all of it move into a GPU process later? |
 | **Answers** | Step 5 question Q4 ([tracker](../research/step-5-subsystems.md) §3); decision-map item I2; the tracker's handed-over questions 3–6 (§2.2); [rendering pipeline](rendering-pipeline.md) open question 3; [invalidation](invalidation.md) open questions 2 and 3 |
 | **Feeds** | ADR-0012 (CP9); spike S6 (tracker §10); CP5 (images, video, color profiles); CP14 (animations); CP15 (paint) |

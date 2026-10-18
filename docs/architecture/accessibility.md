@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 5, CP8). It becomes binding when ADR-0014 is accepted, at Step 5's Gate B. §6 holds two questions for the owner, with recommendations |
+| **Status** | **Binding** since [ADR-0014](../adr/0014-accessibility.md)'s acceptance (2026-10-18, Gate B). Written at Step 5, CP8. The owner approved §6's two answers as written |
 | **Question** | How is the accessibility tree built in the renderer, and how does the browser expose it through `NSAccessibility`? With the owner: the settings list, and the key equivalents a page may override |
 | **Answers** | Step 5 question Q8 ([tracker](../research/step-5-subsystems.md) §3); decision-map item I5; the tracker's handed-over questions 12–14 (§2.2); [input and accessibility](input-and-accessibility.md) open questions 2 and 3; [embedder API](embedder-api.md) open question 2 |
 | **Feeds** | ADR-0014 (CP9); CP13 (the DOM's accessibility hooks); CP14 (media features from system settings); CP15 (geometry and text runs); the shell milestone (EM11) |
@@ -17,7 +17,7 @@ Everything here is **planned**; nothing is implemented. Rules are numbered AX1�
 - **Text navigation uses macOS's text-marker API,** which the SDK 27 headers document for "custom web browser engines" (AX5). Chromium, WebKit and Firefox all implement text markers. The renderer precomputes word, sentence and line boundaries, so the browser never runs Unicode segmentation on a renderer's text.
 - **The bridge is Axiom's own,** implemented in the shell's `platform` module (AX8). AccessKit's macOS adapter doesn't yet support "rich text or hypertext", which web content needs.
 - **System settings reach pages as media features** (AX10): reduced motion, increased contrast, reduced transparency, and appearance.
-- **Two questions for the owner** (§6): the settings list, with how the sensitive-site list and the JIT switches appear; and which key equivalents a page may never override. The recommendation follows Chromium's reserved commands: tab, window and quit commands, and the address bar, are never delivered to pages.
+- **Two questions for the owner** (§6): the settings list, with how the sensitive-site list and the JIT switches appear; and which key equivalents a page may never override. The recommendation follows Chromium's reserved commands: tab, window and quit commands, and the address bar, are never delivered to pages. **The owner approved both as written at Gate B** (2026-10-18).
 
 ## 1. Binding inputs
 
@@ -98,7 +98,7 @@ Read on 2026-10-18; dates in brackets are the last commits to each file, from Gi
 
 ## 6. Questions for the owner
 
-These were handed to Step 5 "with the owner" ([embedder API](embedder-api.md) open question 2; [input and accessibility](input-and-accessibility.md) open question 2). They are put to the owner at Gate B, with these recommendations.
+These were handed to Step 5 "with the owner" ([embedder API](embedder-api.md) open question 2; [input and accessibility](input-and-accessibility.md) open question 2). They were put to the owner at Gate B, with these recommendations. **Both were approved as written** (2026-10-18): "Settings List: Approved as written in docs/architecture/accessibility.md §6.1." "Reserved Key Equivalents: Approved as written in docs/architecture/accessibility.md §6.2 (Chromium reserved set, plus ⌘L, ⌘,, and Esc un-overridable even in fullscreen)."
 
 **6.1 The settings list, and how the sensitive-site list and the JIT switches appear.** Recommended for the shell's first milestone, with defaults; everything else waits until it is needed:
 
@@ -163,8 +163,8 @@ These were handed to Step 5 "with the owner" ([embedder API](embedder-api.md) op
 
 | # | Question | Where it is settled |
 |---|---|---|
-| 1 | The settings list (§6.1) | The owner, at Gate B |
-| 2 | Reserved key equivalents (§6.2) | The owner, at Gate B |
+| 1 | The settings list (§6.1) | **Resolved:** approved as written by the owner at Gate B (2026-10-18) |
+| 2 | Reserved key equivalents (§6.2) | **Resolved:** approved as written by the owner at Gate B (2026-10-18) |
 | 3 | The memory cost of trees and the cache | The shell milestone |
 
 ## Sources

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-18), at Step 5's CP9. Recommended for acceptance once spike S6's conditions are met and S5-Q5 has checked ImageIO, as ADR-0008 waited for S3 |
+| **Status** | **Proposed** (2026-10-18). **Acceptance pre-approved** by the owner at Step 5's Gate B, effective once S6-Q1, S6-Q3 and S6-Q5 pass and S5-Q5 validates ImageIO inside the renderer's sandbox, as ADR-0008 waited for S3 |
 | **Date** | 2026-10-18 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Graphics](../architecture/graphics.md) (GR1–GR14); [images and media](../architecture/images-and-media.md) (IM1–IM13); [rendering pipeline](../architecture/rendering-pipeline.md) PL6–PL9; [invalidation](../architecture/invalidation.md) IV7–IV12; [ADR-0007](0007-frame-tree-pipeline-and-input.md); [ADR-0010](0010-dependency-and-supply-chain-policy.md); [Step 5 tracker](../research/step-5-subsystems.md) §10.1–§10.2 (spikes S5, S6); decision-map items I2 and I4 |
@@ -12,6 +12,7 @@
 | Date | Event |
 |---|---|
 | 2026-10-18 | Proposed at Step 5, CP9 |
+| 2026-10-18 | **Owner's Gate B decision:** "Pre-approved; will move to Accepted upon S6-Q1, S6-Q3, and S6-Q5 passing, and S5-Q5 validating ImageIO inside the renderer sandbox." Spike S6 is "Authorized for questions S6-Q1 through S6-Q5 under spikes/s6/". "The performance thresholds are confirmed: typical update ≤ 4 ms GPU / ≤ 2 ms compositor thread; scrolling/transforms ≤ 1 ms." S5-Q5 is authorized with S5 |
 
 ## Question
 

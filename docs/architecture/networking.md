@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 5, CP6). It becomes binding when ADR-0013 is accepted, at Step 5's Gate B. Spike S7, if authorized, settles NW6 and checks NW1, NW7 and the network process's sandbox |
+| **Status** | **Proposed** (Step 5, CP6). Decided in [ADR-0013](../adr/0013-networking-storage-and-workers.md), whose acceptance the owner pre-approved at Gate B (2026-10-18), effective once S7-Q1, S7-Q3 and S7-Q4 pass. Spike S7, authorized at the same gate, settles NW6 and checks NW1, NW7 and the network process's sandbox |
 | **Question** | How does the network process fetch: URLs and sites, HTTP/1.1, HTTP/2 and HTTP/3, TLS and certificate verification against the system's trust store, DNS, connections, the HTTP cache and cookies? How does it enforce Fetch's policy from the browser's records? |
 | **Answers** | Step 5 question Q6 ([tracker](../research/step-5-subsystems.md) §3); decision-map item I3; the tracker's handed-over questions 7–10 (§2.2); [text and fonts](text-and-fonts.md) open question 5 (IDNA in the browser) |
 | **Feeds** | ADR-0013 (CP9); spike S7 (tracker §10); CP7 (storage, service workers); CP13 (the parser's input streams); CP16 (`URL`, `fetch`) |

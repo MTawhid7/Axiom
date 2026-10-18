@@ -14,6 +14,9 @@ version = "0.0.0"
 edition = "2024"
 rust-version = "1.94"
 publish = false
+# Axiom's license, chosen by the owner at Step 5's Gate B (OQ-21): LICENSE-MIT,
+# LICENSE-APACHE.
+license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
 s1-scenarios = { path = "spikes/s1/scenarios" }

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 5, CP7). It becomes binding when ADR-0013 is accepted, at Step 5's Gate B |
+| **Status** | **Proposed** (Step 5, CP7). Decided in [ADR-0013](../adr/0013-networking-storage-and-workers.md), whose acceptance the owner pre-approved at Gate B (2026-10-18), effective once S7-Q1, S7-Q3 and S7-Q4 pass |
 | **Question** | Where and how are web storage, IndexedDB, the Cache API and quotas stored? How do service workers intercept fetches, and where do shared and service workers run when no same-site renderer exists? |
 | **Answers** | Step 5 question Q7 ([tracker](../research/step-5-subsystems.md) §3); the tracker's handed-over question 11 (§2.2); [networking](networking.md) open question 2 (the storage format of the cache and the cookie jar) |
 | **Feeds** | ADR-0013 (CP9); CP16 (the storage and worker APIs in JavaScript); CP17 (bindings) |

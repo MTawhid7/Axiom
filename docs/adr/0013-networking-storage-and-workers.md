@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-18), at Step 5's CP9. Recommended for acceptance once spike S7's conditions are met, as ADR-0004 waited for S4 |
+| **Status** | **Proposed** (2026-10-18). **Acceptance pre-approved** by the owner at Step 5's Gate B, effective once S7-Q1, S7-Q3 and S7-Q4 pass, as ADR-0004 waited for S4 |
 | **Date** | 2026-10-18 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Networking](../architecture/networking.md) (NW1–NW18); [storage and workers](../architecture/storage-and-workers.md) (SW1–SW13); [threat model](../security/threat-model.md) SG2, SG4, SG7, SG8, SG10; [process model](../security/process-model.md) SI3, B4; [frame tree](../architecture/frame-tree-and-navigation.md) FT6, FT10, FT11; [ADR-0004](0004-process-model-and-sandbox.md); [ADR-0010](0010-dependency-and-supply-chain-policy.md); [Step 5 tracker](../research/step-5-subsystems.md) §10.3 (spike S7); decision-map item I3 |
@@ -12,6 +12,7 @@
 | Date | Event |
 |---|---|
 | 2026-10-18 | Proposed at Step 5, CP9 |
+| 2026-10-18 | **Owner's Gate B decision:** "Pre-approved; will move to Accepted upon S7-Q1, S7-Q3, and S7-Q4 passing." Spike S7 is "Authorized for questions S7-Q1 through S7-Q4 under spikes/s7/, including read-only outbound network requests to public test hosts" |
 
 ## Question
 

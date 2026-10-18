@@ -5,6 +5,7 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 publish.workspace = true
+license.workspace = true
 
 # No dependencies beyond std: libsandbox, Mach, posix_spawn and libbsm are
 # reached through hand-written declarations in src/platform/, checked against

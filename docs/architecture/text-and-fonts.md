@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 5, CP3). It becomes binding when ADR-0011 is accepted, at Step 5's Gate B. Spike S5, if authorized, settles TX12 |
+| **Status** | **Proposed** (Step 5, CP3). Decided in [ADR-0011](../adr/0011-text-fonts-and-unicode.md), whose acceptance the owner pre-approved at Gate B (2026-10-18), effective once S5-Q1 and S5-Q3 pass. Spike S5, authorized at the same gate, settles TX12 (S5-Q2) |
 | **Question** | How does the engine handle Unicode: properties, segmentation, line breaking, bidi, normalization, encodings? How are fonts found, matched and fallen back to, how are web fonts loaded safely, how is text shaped, and where and how are glyphs rasterized? |
 | **Answers** | Step 5 questions Q2 and Q3 ([tracker](../research/step-5-subsystems.md) §3); decision-map item I1, and the text part of P4; the tracker's handed-over questions 2 and 3 (§2.2) |
 | **Feeds** | ADR-0011 (CP9); spike S5 (tracker §10); CP4 (the glyph atlas); CP6 (IDNA); CP13 (decoders, sniffing); CP14 (font properties, `@font-face`); CP15 (inline layout); CP16 (`Intl`, `RegExp`, identifiers) |

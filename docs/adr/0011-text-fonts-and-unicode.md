@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-18), at Step 5's CP9. Recommended for acceptance once spike S5's conditions are met, as ADR-0008 waited for S3 |
+| **Status** | **Proposed** (2026-10-18). **Acceptance pre-approved** by the owner at Step 5's Gate B, effective once S5-Q1 and S5-Q3 pass, with TX12 settled by S5-Q2, as ADR-0008 waited for S3 |
 | **Date** | 2026-10-18 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Text, fonts and Unicode](../architecture/text-and-fonts.md) (the full design, TX1–TX21); [rendering pipeline](../architecture/rendering-pipeline.md) PL7, PL8, PL11; [S4 results](../research/s4-results.md); [ADR-0010](0010-dependency-and-supply-chain-policy.md); [Step 5 tracker](../research/step-5-subsystems.md) §10.1 (spike S5); decision-map items I1 and P4 |
@@ -12,6 +12,7 @@
 | Date | Event |
 |---|---|
 | 2026-10-18 | Proposed at Step 5, CP9 |
+| 2026-10-18 | **Owner's Gate B decision:** "Pre-approved; will move to Accepted upon S5-Q1 and S5-Q3 passing, with TX12 settled by S5-Q2." Spike S5 is "Authorized for questions S5-Q1 through S5-Q5 under spikes/s5/, including the listed candidate crates and OFL/WPT test web fonts" |
 
 ## Question
 
