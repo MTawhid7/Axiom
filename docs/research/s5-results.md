@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | Complete (2026-10-18). The owner's visual checks of S5-Q1 and S5-Q2 are outstanding: both questions' criteria include them |
+| **Status** | Complete (2026-10-18). **The owner's visual checks of S5-Q1 and S5-Q2 were made at Gate C** (2026-10-20): "I have visually inspected the S5 sheets and verified the Hebrew niqqud and Apple Color Emoji differences. CoreText is approved for system font rasterization under TX12." So S5-Q1 passes, and TX12 is settled; ADR-0011 is accepted. S5-Q5's recommendation, AVIF in the media utility process, was approved at the same gate |
 | **Question** | Does HarfRust shape like CoreText on this Mac's system fonts (S5-Q1)? How do Rust rasterizers' glyphs compare with CoreText's, and at what cost (S5-Q2)? Do valid and malformed web fonts go through a Rust-only path inside S4's renderer profile, with no new rule (S5-Q3)? What does each text stack add to a sandboxed helper's footprint and executable, and how fast is shaping (S5-Q4)? Does ImageIO decode AVIF under the renderer profile, and how do the safe image decoders compare with ImageIO (S5-Q5)? |
 | **Feeds** | [ADR-0011](../adr/0011-text-fonts-and-unicode.md) (its acceptance conditions: S5-Q1, S5-Q3, and TX12 from S5-Q2); [ADR-0012](../adr/0012-graphics-images-and-media.md) (its S5-Q5 condition); [text and fonts](../architecture/text-and-fonts.md) TX6, TX10, TX12, TX13; [images and media](../architecture/images-and-media.md) IM2, IM3; the [dependency register](../technology/dependency-register.md); a refinement of the [process model](../security/process-model.md) §4.1 for the owner |
 | **Plan** | [Step 5 tracker](step-5-subsystems.md) §10.1, authorized at Gate B (2026-10-18) |
 | **Code** | `spikes/s5/rust-text` (`s5-rust-text`), `spikes/s5/text` (`s5-text`) and `spikes/s5/image` (`s5-image`), on branch `step-5`. Formal run at commit `bad07a8`, reproduced at `f20e7f4` (§2) |
-| **Last updated** | 2026-10-18 |
+| **Last updated** | 2026-10-20: the owner's checks at Gate C, in the status above |
 
 **Evidence labels** follow the [research conventions](README.md):
 - **Measured** facts come from S5's binaries and scripts, in the formal run named in §2 unless stated otherwise.
@@ -313,7 +313,7 @@ Recorded in the [register](../technology/dependency-register.md); trees from `ca
    - **For the owner at Gate C:** ADR-0012's condition "S5-Q5 validating ImageIO inside the renderer sandbox" is not met, so it stays Proposed. Accepting it with this amendment to IM3 is one decision.
    - **Inference:** it doesn't undermine an input part 2 depends on. Layout gets an image's size and pixels through IM9's interface wherever the decoding runs.
 7. **The process model's renderer row (§4.1) needs refining:** "System fonts: `/System/Library/Fonts` and ICU's data" should add FontServices' `Reserved` directory and the metadata of the executable's directory (R1). The model is binding, so this is for the owner.
-8. **ADR-0011:** S5-Q3 passes. S5-Q1 shows no shaping error but its criterion includes the owner's visual check, and TX12 follows S5-Q2's report, which includes the owner's comparison. So the ADR stays Proposed until those checks, then moves to Accepted under the owner's pre-approval.
+8. **ADR-0011:** S5-Q3 passes. S5-Q1 shows no shaping error but its criterion includes the owner's visual check, and TX12 follows S5-Q2's report, which includes the owner's comparison. So the ADR stays Proposed until those checks, then moves to Accepted under the owner's pre-approval. **The owner made the checks and accepted ADR-0011 at Gate C** (2026-10-20), with CoreText for system fonts.
 
 ## 10. Threats to validity
 

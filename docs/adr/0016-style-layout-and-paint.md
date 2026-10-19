@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 5, CP18), for the owner at Gate C. ST25 and ST31 depend on the amendment to [ADR-0007](0007-frame-tree-pipeline-and-input.md) proposed with it |
+| **Status** | **Accepted** (2026-10-20), by the owner at Step 5's Gate C, as proposed, with the amendment to [ADR-0007](0007-frame-tree-pipeline-and-input.md) that ST25 and ST31 need, and `:visited` by partitioned history (ST10) |
 | **Date** | 2026-10-19 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Style](../architecture/style.md) (ST1–ST36); [layout and paint](../architecture/layout-and-paint.md) (LY1–LY32); [ADR-0007](0007-frame-tree-pipeline-and-input.md) (the ST25 and ST31 amendment); [ADR-0011](0011-text-fonts-and-unicode.md); [ADR-0012](0012-graphics-images-and-media.md) (GR5, GR9); [ADR-0015](0015-html-parsing-and-the-dom.md); [ADR-0010](0010-dependency-and-supply-chain-policy.md); decision-map item P6 |
@@ -12,6 +12,7 @@
 | Date | Event |
 |---|---|
 | 2026-10-19 | Proposed at Step 5, CP18, with the amendment to ADR-0007 (ST25, ST31) and the `:visited` policy (ST10) for the owner |
+| 2026-10-20 | **Accepted** by the owner at Step 5's Gate C: "ADR-0016 (Style, Layout, and Paint): Accepted as proposed." In the same decisions: "ADR-0007 Amendment (ST25, ST31): Accepted. Nested lifecycle phases for size container queries are adopted." And: ":visited Policy (ST10): Accepted. Partitioned history by top-level site is approved." **S6 reported the same day** ([S6 results](../research/s6-results.md) §6, §8): GPU path filling pays in time and memory, not in quality, so GR5's amendment, which would change LY23, is put to the owner; GR5 and LY23 stand as written meanwhile |
 
 ## Question
 
@@ -22,7 +23,7 @@ How is CSS parsed and the cascade computed, with its caches and invalidation? Ho
 - **DP1 (a), (b):** parsing CSS, and style, layout and paint, are Axiom's own.
 - **PL1–PL7, PL10, PL14–PL16:** computed styles immutable and shared in a side table; immutable fragments with their constraints; per-frame display lists of validated primitives with property trees; style and layout on the event loop's thread for now.
 - **IV1–IV14:** a compiler-checked lifecycle with two entry points; pending, selector-driven invalidation; reuse at each stage; compositor-driven scrolling and animation; incremental equals from scratch.
-- **GR5, GR9:** paths as renderer images until S6 reports; GR9's list of compositor animations.
+- **GR5, GR9:** paths as renderer images until the owner decides GR5's amendment; GR9's list of compositor animations.
 - **TX6–TX20, IM5, IM9, AX10:** text's interface; images through IM9; system preferences as media features.
 - **J3:** no dynamic code generation outside `renderer-jit`.
 
@@ -60,12 +61,12 @@ Sourced in [style](../architecture/style.md) §3 and [layout and paint](../archi
 
 ## Decision
 
-**Recommended: accept ST1–ST36 and LY1–LY32.** In summary:
+**Accepted: ST1–ST36 and LY1–LY32** (2026-10-20), with the amendment to ADR-0007 and ST10's `:visited` policy. In summary:
 1. **CSS parsing** is Axiom's own, generic over PL11's code units, with one property table generating parsers, computed-style groups, impact classes and the CSSOM's accessors (ST1–ST6).
 2. **Matching** right to left over the DOM's lent columns, with rule buckets, an ancestor Bloom filter and `:has()` invalidation; **no selector JIT** (ST7–ST11).
 3. **The cascade** of Cascade 5 and 6, custom properties with the required expansion limit, and immutable, grouped computed styles shared through a rule tree, a sharing cache and an evictable cascade cache, with a cache-free path as the oracle (ST12–ST22).
-4. **Container queries resolved during layout,** in nested lifecycles, which needs **the amendment to ADR-0007** proposed in its decision history (IV1's nested lifecycles; IV2's examples gain `getComputedStyle` reads that need layout) (ST25, ST31).
-5. **`:visited` by partitioned history** (Selectors 4, Appendix C), the browser keeping the history and each renderer receiving only its own partitions; never matching until that history service exists (ST10).
+4. **Container queries resolved during layout,** in nested lifecycles, under **the amendment to ADR-0007** the owner accepted (IV1's nested lifecycles; IV2's examples gain `getComputedStyle` reads that need layout) (ST25, ST31).
+5. **`:visited` by partitioned history** (Selectors 4, Appendix C), as the owner approved: the browser keeps the history and each renderer receives only its own partitions; never matching until that history service exists (ST10).
 6. **Animations** on Web Animations' model, compositor animations exactly as GR9 lists them; the CSSOM as a view over immutable contents (ST27–ST31).
 7. **The layout unit: 1/64 of a CSS pixel in an `i32`,** saturating (LY1); LayoutNG's contract for every algorithm; Axiom's own formatting contexts, **with tables marked approximate** (LY6–LY15).
 8. **Scrolling** through scroll nodes that carry snap areas, sticky constraints and compositor-moved scrollbar thumbs, within PL6 and PL7 (LY16–LY18).
@@ -83,7 +84,7 @@ Sourced in [style](../architecture/style.md) §3 and [layout and paint](../archi
 
 - Stylo's measured cache sizes, and Blink's budgets, are sound starting points (Step 6 tunes them on the corpus).
 - ±33.5 million CSS pixels is enough range for real pages; beyond it, results saturate as in Blink and Ladybird.
-- S6 doesn't overturn GR5; if it does, path items enter PL7 by an amendment, and LY23 changes only where paths are filled.
+- GR5 holds until the owner decides its amendment. S6-Q4 found GPU filling faster and smaller but coarser at the edges ([S6 results](../research/s6-results.md) §6); if the owner accepts the amendment, path items enter PL7, and LY23 changes only where paths are filled.
 
 ## Risks and unresolved issues
 
@@ -92,11 +93,11 @@ Sourced in [style](../architecture/style.md) §3 and [layout and paint](../archi
 | Nested container-query lifecycles add complexity to IV1's tokens | Medium | Medium | Confined to size containers, whose containment rules out cycles; tested by IV14's rebuild comparison |
 | Table layout differs from other engines on real pages | Medium | Medium | Approximate by design, following the engines where WPT shows they agree (LY10) |
 | Style or layout limit frame production on large pages | Medium | Medium | Parallel style and layout over lent arenas (ST33, LY30), built when profiling shows it (PL10) |
-| The owner rejects the ADR-0007 amendment | Low | High | Size container queries would have no conforming place in the lifecycle; the alternative is a separate style pass after layout, repeated until stable, as Ladybird's extra passes do |
+| The owner rejects the ADR-0007 amendment | Retired at Gate C | — | The owner accepted it (2026-10-20) |
 
 ## Conditions for revisiting
 
-- S6 shows GPU path filling pays: the PL7 amendment, and LY23's path images change.
+- The owner accepts GR5's amendment, which S6-Q4's results put to the owner ([S6 results](../research/s6-results.md) §8): path items enter PL7, and LY23's path images change.
 - Profiling shows style or layout limiting frames: build ST33's and LY30's parallel paths.
 - Ladybird's dependency-program style engine proves its memory and incrementality over a longer period: revisit ST14–ST17 at the implementation milestone.
 

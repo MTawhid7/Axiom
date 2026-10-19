@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 5, CP18), for the owner at Gate C. HD11 depends on the amendment to [ADR-0008](0008-script-agents-and-heap.md) proposed with it |
+| **Status** | **Accepted** (2026-10-20), by the owner at Step 5's Gate C, as proposed, with the amendment to [ADR-0008](0008-script-agents-and-heap.md) that HD11 needs, and XSLT deferred ([OQ-22](../open-questions.md)) |
 | **Date** | 2026-10-19 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [HTML and the DOM](../architecture/html-and-dom.md) (HD1–HD33); [ADR-0003](0003-gc-handle-and-rooting-pattern.md); [ADR-0007](0007-frame-tree-pipeline-and-input.md); [ADR-0008](0008-script-agents-and-heap.md) (the HD11 amendment); [ADR-0010](0010-dependency-and-supply-chain-policy.md); [ADR-0011](0011-text-fonts-and-unicode.md) (TX3); [ADR-0013](0013-networking-storage-and-workers.md) (NW12, NW14); decision-map item P5; [OQ-22](../open-questions.md) |
@@ -12,6 +12,7 @@
 | Date | Event |
 |---|---|
 | 2026-10-19 | Proposed at Step 5, CP18, with the amendment to ADR-0008 (HD11) and XSLT ([OQ-22](../open-questions.md)) for the owner |
+| 2026-10-20 | **Accepted** by the owner at Step 5's Gate C: "ADR-0015 (HTML Parsing and the DOM): Accepted as proposed." In the same decisions: "ADR-0008 Amendment (HD11): Accepted. Node slots in the arena never move; node identity remains stable." And: "XSLT (OQ-22): Confirmed. Defer planning XSLT until a concrete use case arises." |
 
 ## Question
 
@@ -58,10 +59,10 @@ Sourced in [HTML and the DOM](../architecture/html-and-dom.md) §3.
 
 ## Decision
 
-**Recommended: accept HD1–HD33.** In summary:
+**Accepted: HD1–HD33** (2026-10-20), with the amendment to ADR-0008. In summary:
 1. **Axiom's own HTML parser** (HD1–HD8): the standard's tokenizer and tree builder; sniffing as HTML §13.2.3 specifies, decoding straight into PL11's strings; budgeted tasks on the event loop's thread, with a preload scanner on the helper pool; fragments and the `setHTML` family through one tree builder that sanitizes while parsing.
-2. **Axiom's own XML parser** (HD9), non-validating, fetching no external entity. XPath staged. **XSLT not planned** until a use requires it ([OQ-22](../open-questions.md)).
-3. **One node arena of `u32` columns, 36 bytes a node,** with per-kind arenas and rare data (HD10, HD12, HD13). **Node slots never move** (HD11), which needs **the amendment to ADR-0008** proposed in its decision history: SH10's compaction skips the node arena.
+2. **Axiom's own XML parser** (HD9), non-validating, fetching no external entity. XPath staged. **XSLT deferred** until a concrete use case arises, as the owner decided ([OQ-22](../open-questions.md)).
+3. **One node arena of `u32` columns, 36 bytes a node,** with per-kind arenas and rare data (HD10, HD12, HD13). **Node slots never move** (HD11), under **the amendment to ADR-0008** the owner accepted: SH10's compaction skips the node arena.
 4. **One mutation path** with a fixed, ordered list of hooks (HD15); live collections cached against a tree version (HD16).
 5. **Events** (HD17–HD21): listeners in a side table; the event path and each listener snapshot rooted as one heap array; trust and activation only from the browser.
 6. **The rest of the DOM** (HD22–HD29): mutation observers, live ranges and selection, Shadow DOM, custom elements with scoped registries, forms submitted through the browser, editing through Input Events and the IME mirror, the top layer. `execCommand` is approximate.
@@ -87,7 +88,7 @@ Sourced in [HTML and the DOM](../architecture/html-and-dom.md) §3.
 | The node arena fragments on long-lived, churning pages | Medium | Medium | Measured in Step 6; fallback: compact one document's nodes while remapping its side tables (HD11) |
 | Parsing on the event loop's thread delays input on huge documents | Low | Medium | Budgeted tasks with input first (EL16); the sink interface keeps a parser thread possible (HD5) |
 | `execCommand`'s behaviour diverges from sites' expectations | Medium | Low | Follow the engines where they agree; marked approximate (HD28) |
-| The owner rejects the ADR-0008 amendment | Low | Medium | HD11 would then need identities remapped at every compaction, with the browser told (alternative C) |
+| The owner rejects the ADR-0008 amendment | Retired at Gate C | — | The owner accepted it (2026-10-20) |
 
 ## Conditions for revisiting
 

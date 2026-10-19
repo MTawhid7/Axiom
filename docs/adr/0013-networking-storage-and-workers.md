@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-19). The owner pre-approved its acceptance at Step 5's Gate B, effective once S7-Q1, S7-Q3 and S7-Q4 passed. They passed on 2026-10-19 ([S7 results](../research/s7-results.md)), and S7-Q2 confirmed NW6's stack. S7's proposal to move certificate verification off the I/O thread (NW6) awaits the owner at Gate C |
+| **Status** | **Accepted** (2026-10-19). The owner pre-approved its acceptance at Step 5's Gate B, effective once S7-Q1, S7-Q3 and S7-Q4 passed. They passed on 2026-10-19 ([S7 results](../research/s7-results.md)), and S7-Q2 confirmed NW6's stack. **Verification in the worker pool, off the I/O thread** (NW6), was confirmed by the owner at Step 5's Gate C (2026-10-20) |
 | **Date** | 2026-10-18 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Networking](../architecture/networking.md) (NW1–NW18); [storage and workers](../architecture/storage-and-workers.md) (SW1–SW13); [threat model](../security/threat-model.md) SG2, SG4, SG7, SG8, SG10; [process model](../security/process-model.md) SI3, B4; [frame tree](../architecture/frame-tree-and-navigation.md) FT6, FT10, FT11; [ADR-0004](0004-process-model-and-sandbox.md); [ADR-0010](0010-dependency-and-supply-chain-policy.md); [Step 5 tracker](../research/step-5-subsystems.md) §10.3 (spike S7); [S7 results](../research/s7-results.md); decision-map item I3 |
@@ -15,6 +15,7 @@
 | 2026-10-18 | **Owner's Gate B decision:** "Pre-approved; will move to Accepted upon S7-Q1, S7-Q3, and S7-Q4 passing." Spike S7 is "Authorized for questions S7-Q1 through S7-Q4 under spikes/s7/, including read-only outbound network requests to public test hosts" |
 | 2026-10-19 | **Spike S7: S7-Q1, S7-Q3 and S7-Q4 pass; S7-Q2 reported** ([S7 results](../research/s7-results.md), formal run at `4840d7d`).<br>• S7-Q1: under a broker-compiled deny-by-default profile, rustls verified through Security gave the expected verdict for every host it reached, the same as unsandboxed and as Network framework. The profile has eight rules, two of them metadata rules found by failure (`/var`; the executable's directory); each opening rule S7 uses was checked by removal, and every denial is explained.<br>• S7-Q2: rustls retired 2.4–3.3× fewer instructions per handshake than Network framework, and 1.6× fewer per byte; it settles NW6 as designed.<br>• S7-Q3: DNS-SD resolved addresses and HTTPS records from kqueue, with one thread.<br>• S7-Q4: one I/O thread drove every source from one `kevent64` per turn, and woke only for real deadlines when idle.<br>S7 also refines NW6: rustls's `prefer-post-quantum` feature is required; and it **proposes**, for the owner at Gate C, that verification run in the worker pool, because `SecTrustEvaluateWithError` blocks its caller (8.4 ms median; 1.0–1.5 s in three informal cases), which EL1 forbids on the I/O thread |
 | 2026-10-19 | **Accepted,** the owner's condition met: S7-Q1, S7-Q3 and S7-Q4 pass |
+| 2026-10-20 | **NW6's verification confirmed** by the owner at Step 5's Gate C: "NW6 TLS Verification: Confirmed. Certificate evaluation must run on worker pool threads to keep the network I/O thread non-blocking." [Networking](../architecture/networking.md) NW6 records it. In the same decisions, the network profile's two metadata rules go into the process model's change record: "Process Model: Approved. Record the S5 and S7 sandbox metadata rules in the process model change record." |
 
 ## Question
 
@@ -99,7 +100,7 @@ Sourced in [networking](../architecture/networking.md) §3 and [storage and work
 |---|---|---|---|
 | Our own HTTP/2 and HTTP/3 take longer than reusing | High | Medium | Staging: HTTP/1.1 and HTTP/2 first, HTTP/3 later; the protocols are fully specified |
 | Trust evaluation needs broad sandbox rules | **Resolved** by S7-Q1 | — | Two metadata rules beyond NW17's four kinds: `/var`, and the executable's directory ([S7 results](../research/s7-results.md) §3.1) |
-| Trust evaluation blocks the I/O thread | Certain: 8.4 ms median, up to 1.5 s seen (S7) | Medium: every connection, message and timer waits meanwhile | Verification in the worker pool (EL8), proposed in NW6 for the owner at Gate C |
+| Trust evaluation blocks the I/O thread | Certain: 8.4 ms median, up to 1.5 s seen (S7) | Medium: every connection, message and timer waits meanwhile | Verification in the worker pool (EL8), confirmed in NW6 by the owner at Gate C |
 | Each network process's first TLS use costs 29–43 ms of CPU, for AWS-LC's entropy source | Certain (S7) | Low: once per process | Decided at the network milestone, possibly building without the jitter source ([S7 results](../research/s7-results.md) §4.3) |
 | `redb` fails its audit or crash tests | Medium | Low | SQLite, already accepted here as the fallback (SW2) |
 | ORB's specification shifts before it settles in Fetch | Medium | Low | Follow the upstreaming pull request |

@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 5, CP17). To be decided with part 2's ADRs at CP18, for the owner at Gate C. No Step 4 interface changes (SC1) |
+| **Status** | **Binding** since [ADR-0017](../adr/0017-javascript-engine-and-bindings.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP17. No Step 4 interface changes (SC1) |
 | **Question** | How are the WebIDL bindings generated: platform objects in the heap, argument conversion, rooting conventions, prototypes and realms, exceptions, cross-origin objects, and the hot path of event dispatch? |
 | **Answers** | Step 5 question Q13 ([tracker](../research/step-5-subsystems.md) §3); the bindings part of the handed-over question 18 (§2.2); closes [HTML and the DOM](html-and-dom.md)'s JavaScript facet (HD30) |
 | **Feeds** | Part 2's ADRs (CP18); every subsystem that exposes an interface to script |
 | **Builds on** | [Script and heap](script-and-heap.md) (SH1, SH2, SH6, SH7, SH9, SH12); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [ADR-0002](../adr/0002-implementation-language.md) (rule 7); [the JavaScript engine](javascript-engine.md) (JE8–JE11, JE16, JE18, JE32); [HTML and the DOM](html-and-dom.md) (HD10, HD16–HD18, HD25, HD30); the [frame tree](frame-tree-and-navigation.md) (FT3–FT7); the [event loop](event-loop-and-threading.md) (EL14); the [dependency policy](../technology/dependency-policy.md) (DP1, DP2) |
-| **Last updated** | 2026-10-19 |
+| **Last updated** | 2026-10-20: binding |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered WB1–WB23. Precedent is sourced (§3); the design is inference unless marked otherwise.
 

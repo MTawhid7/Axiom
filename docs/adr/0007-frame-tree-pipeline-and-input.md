@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B |
+| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B. **IV1 and IV2 amended** at Step 5's Gate C (2026-10-20), for size container queries ([style](../architecture/style.md) ST25, ST31) |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Frame tree and navigation](../architecture/frame-tree-and-navigation.md) (FT1–FT14); [rendering pipeline](../architecture/rendering-pipeline.md) (PL1–PL16); [invalidation](../architecture/invalidation.md) (IV1–IV14); [input and accessibility](../architecture/input-and-accessibility.md) (IN1–IN12); [process model](../security/process-model.md) §5 (SI1–SI7, SI4); [threat model](../security/threat-model.md) §8 (V9); [overview](../architecture/overview.md); decision-map items P2, P3 and part of P4 |
@@ -14,6 +14,7 @@
 | 2026-10-17 | Proposed at Step 4, CP12. It decides SI4 as a whole: the browser-owned frame tree, per-frame display lists and browser-routed input that the owner required "from the first line of code" |
 | 2026-10-17 | **Accepted** by the owner at Gate B: "ADR-0007 (Frame Tree, Pipeline, Input): Accepted." The open question in its consequences was decided at the same time (OQ-19): "Amend criterion AC5 and rule EL11 to allow read-only scoped lending of DOM arenas to helper threads during borrow-checker-frozen rendering stages. Keep the actual parallel style/layout implementation deferred until profiling benchmarks justify it." Decision 6 records it |
 | 2026-10-19 | **Amendment proposed, for the owner at Step 5's Gate C** ([style](../architecture/style.md) ST25, ST31). (1) **IV1 gains nested lifecycles:** a size container's subtree is styled during layout, once the container's size is known, then gets its own box construction and layout, each phase with its own token, and runs again if a later layout pass resizes the container. Phase outputs still never change once produced; what is new is that style's output can have deferred subtrees. Reason: size container queries depend on the container's laid-out size, and Blink resolves them the same way. (2) **IV2's examples:** `getComputedStyle` reads that resolve to used values (CSSOM §9), and reads inside deferred subtrees, need layout; IV2's rule, to run only the phases a query needs, is unchanged. Until the owner decides, IV1 and IV2 stand as written |
+| 2026-10-20 | **Amendment accepted** by the owner at Step 5's Gate C: "ADR-0007 Amendment (ST25, ST31): Accepted. Nested lifecycle phases for size container queries are adopted." IV1 and IV2 are amended in [invalidation](../architecture/invalidation.md), and decision 9 records it |
 
 ## Question
 
@@ -65,7 +66,7 @@ The Sources sections of the four architecture documents: the WHATWG HTML text of
 6. **The pipeline has five owned stages** (PL1–PL5): the DOM in the heap, then computed styles, the box tree and immutable fragments outside it. DOM arenas are built to be lendable. **As amended at Gate B** (AC5, EL11, OQ-19), they may be lent read-only to helper threads for a rendering stage frozen by the borrow checker. Parallel style and layout are built only when profiling justifies them (PL10).
 7. **Each frame has a display list of validated primitives over property trees.** Glyphs are rasterized in the renderer. Child frames are embedded by token, and the browser validates every reference (PL6–PL9, PL14–PL16).
 8. **Strings use one 8-bit or 16-bit representation** for JavaScript and the DOM, and names are atoms (PL11).
-9. **An explicit lifecycle checked by the compiler,** with two entry points and no synchronous flush across agents. Reuse at every stage, and compositor-driven scrolling and animation (IV1–IV13). Every incremental update is checked against a rebuild in tests (IV14).
+9. **An explicit lifecycle checked by the compiler,** with two entry points and no synchronous flush across agents. Reuse at every stage, and compositor-driven scrolling and animation (IV1–IV13). Every incremental update is checked against a rebuild in tests (IV14). **As amended at Step 5's Gate C** (ST25, ST31): a size container's subtree runs a nested lifecycle inside layout, each phase with its own token, and `getComputedStyle` reads that resolve to used values need layout (IV1, IV2).
 10. **Input enters at the compositor and is routed by hit testing.** Gestures latch, and focus, capture and activation are browser records. IME is served from a mirror, and accessibility from a browser-side cache (IN1–IN12).
 
 ## Rationale
@@ -98,3 +99,4 @@ The Sources sections of the four architecture documents: the WHATWG HTML text of
 - V9's tests are specified (FT14, IN12).
 - Step 5 designs the algorithms behind the stages, and where glyphs are rasterized in the long run.
 - **AC5 and EL11 were amended at Gate B** (OQ-19): read-only lending of DOM arenas during frozen rendering stages is allowed, so parallel style and layout need no further architectural decision. They are built only when profiling justifies them ([rendering pipeline](../architecture/rendering-pipeline.md) PL10).
+- **IV1 and IV2 were amended at Step 5's Gate C** (2026-10-20): nested lifecycles for size-container subtrees, and the `getComputedStyle` reads that need layout ([style](../architecture/style.md) ST25, ST31; [ADR-0016](0016-style-layout-and-paint.md)).

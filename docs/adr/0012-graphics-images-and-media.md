@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-18). **Acceptance pre-approved** by the owner at Step 5's Gate B, effective once S6-Q1, S6-Q3 and S6-Q5 pass and S5-Q5 validates ImageIO inside the renderer's sandbox, as ADR-0008 waited for S3. **S5-Q5 reported** on 2026-10-18 ([results](../research/s5-results.md)): its condition is not met, because AVIF needs a rule the process model forbids renderers. The ADR stays Proposed until Gate C, with an amendment to IM3 recommended |
+| **Status** | **Accepted** (2026-10-20), by the owner at Step 5's Gate C, with IM3's fallback: AVIF decoded in the media utility process. Of the Gate B conditions, S6-Q1 and S6-Q3 pass at the median; S6-Q5's colour condition rests on the owner's visual check, and its memory condition is not met as measured; S5-Q5's was not met ([S6 results](../research/s6-results.md); [S5 results](../research/s5-results.md) §7) |
 | **Date** | 2026-10-18 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Graphics](../architecture/graphics.md) (GR1–GR14); [images and media](../architecture/images-and-media.md) (IM1–IM13); [rendering pipeline](../architecture/rendering-pipeline.md) PL6–PL9; [invalidation](../architecture/invalidation.md) IV7–IV12; [ADR-0007](0007-frame-tree-pipeline-and-input.md); [ADR-0010](0010-dependency-and-supply-chain-policy.md); [Step 5 tracker](../research/step-5-subsystems.md) §10.1–§10.2 (spikes S5, S6); decision-map items I2 and I4 |
@@ -14,6 +14,8 @@
 | 2026-10-18 | Proposed at Step 5, CP9 |
 | 2026-10-18 | **Owner's Gate B decision:** "Pre-approved; will move to Accepted upon S6-Q1, S6-Q3, and S6-Q5 passing, and S5-Q5 validating ImageIO inside the renderer sandbox." Spike S6 is "Authorized for questions S6-Q1 through S6-Q5 under spikes/s6/". "The performance thresholds are confirmed: typical update ≤ 4 ms GPU / ≤ 2 ms compositor thread; scrolling/transforms ≤ 1 ms." S5-Q5 is authorized with S5 |
 | 2026-10-18 | **S5-Q5 reported** (Step 5, CP10; [results](../research/s5-results.md) §7). ImageIO crashes under S4's renderer profile on every format until it may read the executable's directory's metadata (R1). AVIF then needs five more rules, and one of them (R4) opens VideoToolbox's decoder service, which the [process model](../security/process-model.md) §4.1 denies renderers. **The condition is not met.** Recommended for Gate C: amend IM3 to decode AVIF in the media utility process through IM9's interface. **IM2's JPEG choice:** the safe decoder stays (1.1–1.8× ImageIO's time, and deterministic, where ImageIO's JPEG pixels varied). The ADR stays Proposed until Gate C; S6's conditions are pending in any case |
+| 2026-10-20 | **S6 reported** ([S6 results](../research/s6-results.md)), from the owner's formal run of 2026-10-19 at `45bff95`.<br>• **S6-Q1 passes at the median:** a typical update took 0.17–0.28 ms on the GPU and 0.67–1.84 ms on the compositor thread. In run 1, which began on a busy Mac, 192 of 600 updates exceeded 2 ms.<br>• **S6-Q3 passes at the median:** moving layers took 0.19–0.40 ms a frame; 2–7 of 1,085 scrolling frames per run exceeded 1 ms.<br>• **S6-Q5:** the surfaces carry their colour tags, and whether CoreAnimation honours them is the owner's visual check. **Its memory condition is not met as measured:** one window's compositor state, trimmed, leaves about 4 MB of B1 for the rest of the browser, so B1 needs revising in Step 6.<br>• **S6-Q4:** GPU path filling pays in time and memory, not in quality, so GR5's amendment goes to the owner, recommended for the graphics milestone with a GPU filler of analytic quality. GR5 stands meanwhile |
+| 2026-10-20 | **Accepted** by the owner at Step 5's Gate C: "ADR-0012 (Graphics, Images, and Media): Accepted. The formal S6 benchmark run is complete (target/s6-results/20261019-201443/summary.txt) and easily meets all frame time thresholds. IM3's fallback (AVIF in the media utility process) is approved." **IM3 is amended accordingly:** ImageIO decodes AVIF in the media utility process, through IM9's interface (decision 9). The [process model](../security/process-model.md)'s change record notes ImageIO's place |
 
 ## Question
 
@@ -61,20 +63,20 @@ Sourced in [graphics](../architecture/graphics.md) §3 and [images and media](..
 
 ## Evidence and sources
 
-[Graphics](../architecture/graphics.md) and [images and media](../architecture/images-and-media.md), §3–§4, and their Sources. Observations: this Mac's GPU and display; SDK 27's QuartzCore, Metal, IOSurface and ImageIO headers.
+[Graphics](../architecture/graphics.md) and [images and media](../architecture/images-and-media.md), §3–§4, and their Sources. Observations: this Mac's GPU and display; SDK 27's QuartzCore, Metal, IOSurface and ImageIO headers. Measurements: [S5 results](../research/s5-results.md) §7 (ImageIO in the renderer's profile; the safe decoders) and [S6 results](../research/s6-results.md) (compositing, damage, layers, paths, memory and colour).
 
 ## Decision
 
-**Recommended: accept GR1–GR14 and IM1–IM13, once S6-Q1, S6-Q3 and S6-Q5 pass, and S5-Q5 shows ImageIO working under the renderer's profile.** S6-Q4 decides whether GR5's amendment goes to the owner. In summary:
+**Accepted: GR1–GR14 and IM1–IM13** (2026-10-20), with IM3's fallback: AVIF in the media utility process. S6-Q4 put GR5's amendment to the owner ([S6 results](../research/s6-results.md) §8); GR5 stands as written until the owner decides. In summary:
 1. **Metal directly, through `platform`;** no portability layer in the browser (GR1).
 2. **The window server composites retained CoreAnimation layers.** Axiom draws damaged tiles into its own IOSurfaces, with layers for scrollers, animated subtrees, child frames and video (GR2, GR7, GR8).
 3. **Our own pipelines,** compiled at first use and kept in a binary archive; tile-memory aware (GR3, GR4).
-4. **Paths are rasterized in the renderer** until S6 reports. GPU path filling would need **an amendment adding path items to PL7,** which is a separate decision for the owner (GR5, SC1).
+4. **Paths are rasterized in the renderer.** S6-Q4 found GPU filling in the compositor faster and smaller, but coarser at the edges. It would need **an amendment adding path items to PL7,** a separate decision for the owner (GR5, SC1).
 5. **Display P3 at 8 bits by default;** HDR later, per layer (GR6).
 6. **Compositor animations:** the transform family and opacity, then `filter`, `backdrop-filter` and scroll-driven timelines (GR9).
 7. **Canvas 2D in the renderer.** WebGL and WebGPU only in a GPU process. Video in layers of its own (GR10, GR14).
 8. **Images decode in the renderer,** into shared memory; the browser decodes nothing (IM1).
-9. **Safe Rust decoders.** ImageIO handles AVIF under DP10's exception, which this ADR accepts (IM2, IM3).
+9. **Safe Rust decoders.** ImageIO handles AVIF under DP10's exception, which this ADR accepts, **in the media utility process,** as the owner amended IM3 at Gate C (IM2, IM3, IM9).
 10. **Budgets:** incremental decoding, decoding at display size, discarding, bounded animation, limits; color management with `moxcms` (IM4–IM10).
 11. **Media in a sandboxed utility process,** with VideoToolbox and AudioToolbox (IM11–IM13).
 
@@ -85,26 +87,28 @@ Sourced in [graphics](../architecture/graphics.md) §3 and [images and media](..
 
 ## Assumptions
 
-- CoreAnimation honours IOSurface contents and their color tagging as the SDK header suggests (S6-Q5).
-- The safe decoders are fast enough on this Mac (S5-Q5).
+- CoreAnimation honours IOSurface contents and their color tagging as the SDK header suggests. S6-Q5: the surfaces carry their tags; whether CoreAnimation honours them is the owner's visual check.
+- The safe decoders are fast enough on this Mac. S5-Q5: PNG, GIF and WebP decode faster than ImageIO, and JPEG in 1.1–1.8× its time.
 
 ## Risks and unresolved issues
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| The compositor misses its frame budget | Low | High | S6-Q1 before any compositor code; few pipelines; depth-tested overdraw |
-| ImageIO won't run under the renderer's profile | Medium | Medium | S5-Q5; otherwise AVIF waits, or gets its own helper (IM9) |
+| The compositor misses its frame budget | Low (S6-Q1 and S6-Q3 pass at the median) | High | Few pipelines; depth-tested overdraw; damage-limited tiles. S6's slowest frames allocated surfaces, so surfaces are allocated ahead of need ([S6 results](../research/s6-results.md) §8) |
+| ImageIO won't run under the renderer's profile | Occurred (S5-Q5) | Medium | IM3's fallback, approved at Gate C: AVIF in the media utility process, through IM9's interface |
 | `jpeg-decoder` stays in maintenance mode | Medium | Low | A JPEG decoder of our own (IM2) |
-| Tiles exceed B1 | Medium | Medium | Display ports, purgeable surfaces, release on hide (GR12); S6-Q5 |
+| Tiles exceed B1 | Occurred (S6-Q5) | Medium | B1 revised in Step 6, with a window's tiles counted apart; display ports, purgeable surfaces and release on hide (GR12) |
 
 ## Conditions for revisiting
 
 - A GPU process arrives (GR14): rasterization moves, and the interfaces stay.
-- S6 shows that GPU path filling pays: GR5's amendment.
+- The owner accepts GR5's amendment, which S6-Q4 put to the owner: path items enter PL7 (GR5, SC1).
 - A safe AV1 decoder meets ADR-0010: ImageIO's exception ends.
 
 ## Consequences
 
 - `platform` gains Metal, QuartzCore, IOSurface and ImageIO calls, in allowlisted modules.
-- The [register](../technology/dependency-register.md) records `png`, `jpeg-decoder`, `gif`, `image-webp`, `jxl`, `moxcms` and ImageIO.
+- The [register](../technology/dependency-register.md) records `png`, `jpeg-decoder`, `gif`, `image-webp`, `jxl`, `moxcms` and ImageIO, decided with this ADR; ImageIO runs in the media utility process.
 - CP15 paints into GR3's primitives. CP14 marks the GR9 animations for the compositor.
+- The [process model](../security/process-model.md) records ImageIO in the media utility process (its change record, 2026-10-20).
+- Step 6 revises B1 from S6-Q5's breakdown; the process model is binding, so B1 is the owner's ([S6 results](../research/s6-results.md) §7, §8).

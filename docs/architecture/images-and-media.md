@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 5, CP5). Decided in [ADR-0012](../adr/0012-graphics-images-and-media.md), whose acceptance the owner pre-approved at Gate B (2026-10-18), effective once S6-Q1, S6-Q3 and S6-Q5 pass and S5-Q5 validates ImageIO. S5-Q5, authorized at the same gate, settles IM3 and checks IM2. **S5-Q5 reported** on 2026-10-18 ([results](../research/s5-results.md) §7): IM2's safe JPEG decoder stays; ImageIO needs a rule the process model forbids renderers to decode AVIF, so IM3's fallback is recommended to the owner |
+| **Status** | **Binding** since [ADR-0012](../adr/0012-graphics-images-and-media.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP5. **IM3 amended at Gate C:** ImageIO decodes AVIF in the media utility process, as the owner approved after S5-Q5 found that in the renderer it needs a rule the process model forbids renderers ([results](../research/s5-results.md) §7). IM2's safe JPEG decoder stays |
 | **Question** | Which image formats are decoded, by safe Rust or by ImageIO inside the renderer's sandbox? How do decoding, animation and color profiles stay within memory budgets? Where do media decoding and audio output run? |
 | **Answers** | Step 5 question Q5 ([tracker](../research/step-5-subsystems.md) §3); decision-map item I4 |
 | **Feeds** | ADR-0012 (CP9); spike S5 (tracker §10.1, S5-Q5); CP6 (streamed bodies); CP15 (`<img>`, `<picture>`, SVG as an image); a later media milestone |
 | **Builds on** | [Rendering pipeline](rendering-pipeline.md) PL7, PL8, PL10, PL13; [invalidation](invalidation.md) IV10–IV12; the [process model](../security/process-model.md) §3 and §7; [graphics](graphics.md) GR6, GR10, GR12; the [dependency policy](../technology/dependency-policy.md) DP8–DP10, DP21 |
-| **Last updated** | 2026-10-18 |
+| **Last updated** | 2026-10-20: binding; IM3 amended |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered IM1–IM13. Precedent is sourced (§3); the design is inference unless marked otherwise.
 
@@ -20,7 +20,7 @@ Everything here is **planned**; nothing is implemented. Rules are numbered IM1�
   - BMP and ICO get small decoders of our own.
 
   JPEG uses a safe Rust decoder, either `jpeg-decoder` without its `unsafe` paths or one of our own. `zune-jpeg` is graded `ub-risk-3`, so the policy bars it. WebP in safe Rust matters: the 2023 libwebp vulnerability was exploited in the wild.
-- **AVIF has no decoder in safe Rust that meets the policy** (IM3). It goes to ImageIO in the renderer, under the dependency policy's exception for memory-unsafe code, with an ADR. **S5 gains a question** (S5-Q5), because S4 never tested ImageIO in a sandbox.
+- **AVIF has no decoder in safe Rust that meets the policy** (IM3). It goes to ImageIO, under the dependency policy's exception for memory-unsafe code, **in the media utility process.** S5-Q5 found that in the renderer ImageIO needs VideoToolbox's decoder service, which the process model denies renderers, and the owner approved IM3's fallback at Gate C.
 - **Decoding stays within budgets** (IM4–IM7):
   - images decode incrementally, and at the size they are displayed;
   - pixels of images that aren't visible are discarded and decoded again on demand, as Firefox does;
@@ -96,7 +96,7 @@ Grades are Google's published audits (google/supply-chain [2026-09-17]), for the
 |---|---|
 | IM1 | **Images are decoded in the renderer, on its helper pool** (PL10), from bytes streamed by the document's loader (FT11), into shared memory, or into IOSurfaces for large images. The results are registered as the renderer's resources (PL8). **The browser never decodes an image** (AC4). Images that the browser's own interface shows, such as favicons, are decoded in a renderer and arrive as validated pixels, because the decoders' trees are graded `ub-risk-2`, below the `ub-risk-1` DP9 asks of the browser |
 | IM2 | **Safe Rust decodes every format that has a decoder meeting DP10** (§4): `png`, `gif`, `image-webp` and `jxl`; a safe JPEG decoder; and BMP and ICO decoders of our own. Each sits behind Axiom's decoder interface (IM9), so it can be replaced. **S5-Q5 checked it** (2026-10-18): in the renderer's sandbox, `png`, `gif` and `image-webp` decode faster than ImageIO and use less memory. `jpeg-decoder` takes 1.1–1.8× ImageIO's time, 5–10 ms per megapixel, with the same memory, and gives the same pixels every time, where ImageIO's JPEG pixels varied between decodes. **The safe JPEG decoder stays** ([S5 results](../research/s5-results.md) §7) |
-| IM3 | **AVIF goes to ImageIO, in the renderer.** No AV1 decoder in pure Rust meets DP10 (§4), so ImageIO is admitted under DP10's exception: it runs in a sandboxed helper, no pure-Rust alternative meets the requirement, and ADR-0012 is the ADR that accepts it. ImageIO is a platform facility (DP21), and macOS updates patch it, where a vendored dav1d would wait for a rebuild (threat model §9). **S4 never tested ImageIO in a sandbox,** so S5 gains S5-Q5, which checks it under the renderer profile and finds the rules it needs. If ImageIO can't work there, AVIF waits for a decoder that meets DP10, or for a separate decoding helper with its own profile (IM9). **S5-Q5's result** (2026-10-18): ImageIO crashes under the renderer profile on every format until it may read its executable's directory's metadata (R1, which CoreText needs too). AVIF then needs five more rules, and one of them opens VideoToolbox's decoder service, `VTDecoderXPCService`, which launchd starts for the decoding process: a Mach service the [process model](../security/process-model.md) §4.1 denies renderers. **Recommended, for the owner at Gate C:** decode AVIF in the media utility process (IM11), whose profile admits media services and hardware decoding, through IM9's interface, which callers can't tell apart ([S5 results](../research/s5-results.md) §7, §9) |
+| IM3 | **AVIF goes to ImageIO, in the media utility process** (amended at Gate C, as below; written at CP5 as "in the renderer"). No AV1 decoder in pure Rust meets DP10 (§4), so ImageIO is admitted under DP10's exception: it runs in a sandboxed helper, no pure-Rust alternative meets the requirement, and ADR-0012 is the ADR that accepts it. ImageIO is a platform facility (DP21), and macOS updates patch it, where a vendored dav1d would wait for a rebuild (threat model §9). **S4 never tested ImageIO in a sandbox,** so S5 gains S5-Q5, which checks it under the renderer profile and finds the rules it needs. If ImageIO can't work there, AVIF waits for a decoder that meets DP10, or for a separate decoding helper with its own profile (IM9). **S5-Q5's result** (2026-10-18): ImageIO crashes under the renderer profile on every format until it may read its executable's directory's metadata (R1, which CoreText needs too). AVIF then needs five more rules, and one of them opens VideoToolbox's decoder service, `VTDecoderXPCService`, which launchd starts for the decoding process: a Mach service the [process model](../security/process-model.md) §4.1 denies renderers. **Amended at Gate C** (2026-10-20), by the owner: "IM3's fallback (AVIF in the media utility process) is approved." AVIF is decoded in the media utility process (IM11), whose profile admits media services and hardware decoding, through IM9's interface, which callers can't tell apart ([S5 results](../research/s5-results.md) §7, §9). The [process model](../security/process-model.md) records ImageIO's place in its change record |
 
 ### 5.2 Budgets
 
@@ -117,7 +117,7 @@ Grades are Google's published audits (google/supply-chain [2026-09-17]), for the
 
 | # | Rule |
 |---|---|
-| IM9 | **One decoder interface, shaped like a message boundary.** Bytes go in; metadata, rows and frames come out; errors are values. Callers can't tell where a decoder runs, so a decoder can move into its own helper process without changing them, as Ladybird decodes out of process (§3). The candidates for moving are ImageIO's formats, if S5-Q5 or the threat model ever ask for more isolation than the renderer's |
+| IM9 | **One decoder interface, shaped like a message boundary.** Bytes go in; metadata, rows and frames come out; errors are values. Callers can't tell where a decoder runs, so a decoder can move into its own helper process without changing them, as Ladybird decodes out of process (§3). The candidates for moving are ImageIO's formats, if S5-Q5 or the threat model ever ask for more isolation than the renderer's. **AVIF has moved,** to the media utility process (IM3, amended at Gate C) |
 | IM10 | **Hostile inputs are bounded.** Each image has limits on its dimensions, pixel count, frame count and decoded memory. An image past a limit is a decode error and shows as a broken image, never a crash. Decoders are fuzzed, and decoded results are compared against reference decoders (Step 6, X2) |
 
 ### 5.5 Media
@@ -149,7 +149,7 @@ Grades are Google's published audits (google/supply-chain [2026-09-17]), for the
 | Stage | What exists |
 |---|---|
 | First image milestone | PNG, JPEG, GIF, WebP; incremental decoding; decoding at display size; discarding; color management |
-| Later | AVIF through ImageIO, after S5-Q5 and ADR-0012; JPEG XL; animated formats in full |
+| Later | AVIF through ImageIO in the media utility process (IM3); JPEG XL; animated formats in full |
 | Media milestone | The media utility process: demuxers, VideoToolbox and AudioToolbox, video layers, audio output, Media Source Extensions |
 | L0–L3 | No change: decoding stays in renderers and media helpers at every level |
 
@@ -168,10 +168,11 @@ Grades are Google's published audits (google/supply-chain [2026-09-17]), for the
 
 | # | Question | Where it is settled |
 |---|---|---|
-| 1 | Whether ImageIO decodes AVIF under the renderer's profile, with which rules, and how its speed and memory compare with the safe decoders | S5-Q5 |
-| 2 | `jpeg-decoder`, or a JPEG decoder of our own | S5-Q5's measurements, then the first image milestone |
+| 1 | Whether ImageIO decodes AVIF under the renderer's profile, with which rules, and how its speed and memory compare with the safe decoders | S5-Q5. **Answered** (2026-10-18): not without a rule the process model forbids renderers; AVIF goes to the media utility process (IM3, amended at Gate C) |
+| 2 | `jpeg-decoder`, or a JPEG decoder of our own | S5-Q5's measurements (the safe decoder stays), then the first image milestone |
 | 3 | The demuxers and software codecs for media | The media milestone |
 | 4 | The limits of IM10 | The first image milestone, with Step 6's budgets |
+| 5 | Whether one media utility process decodes AVIF for every site, or each site lock gets its own instance from L2 (IM3, IM11). A shared instance would expose images decoded for other sites if ImageIO were compromised there (inference) | The media milestone, with the threat model |
 
 ## Sources
 

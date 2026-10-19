@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed: v1** (Step 5, CP18, 2026-10-19), refining v0 (Step 4, CP11). The owner accepted ADRs 0005–0007 and 0009 at Step 4's Gate B (2026-10-17) and ADR-0008 at its Gate C (2026-10-18); at Step 5's Gate B, ADRs 0010 and 0014 (2026-10-18), then ADR-0013 once spike S7 met its condition (2026-10-19). ADRs 0011, 0012 and 0015–0017 await Step 5's Gate C. The proposal as a whole is approved at the end of Phase Zero (Step 6) |
+| **Status** | **Proposed: v1** (Step 5, CP18, 2026-10-19), refining v0 (Step 4, CP11). The owner accepted ADRs 0005–0007 and 0009 at Step 4's Gate B (2026-10-17) and ADR-0008 at its Gate C (2026-10-18); at Step 5's Gate B, ADRs 0010 and 0014 (2026-10-18), then ADR-0013 once spike S7 met its condition (2026-10-19); and at Step 5's Gate C (2026-10-20), ADRs 0011, 0012 and 0015–0017, with the amendments to ADR-0007 and ADR-0008. The proposal as a whole is approved at the end of Phase Zero (Step 6) |
 | **Question** | How do the parts fit together: processes × threads × pipeline; the crate structure, its `unsafe` map and its dependencies; what happens end to end in common scenarios; and how does the system grow from L0 to L3 without a rewrite? |
 | **Answers** | Step 4 question Q16 ([Step 4 tracker](../research/step-4-architecture-proposal.md) §3) and the check of AC1–AC10; Step 5's CP18 ([Step 5 tracker](../research/step-5-subsystems.md) §6.1): the crates refined, a summary of the [register](../technology/dependency-register.md), scenarios traced through the subsystems' rules, and the check of SC1–SC10 |
 | **Builds on** | Step 3: [threat model](../security/threat-model.md), [process model](../security/process-model.md), [ADR-0004](../adr/0004-process-model-and-sandbox.md). Step 4: [event loop and threading](event-loop-and-threading.md), [IPC](ipc.md), [frame tree and navigation](frame-tree-and-navigation.md), [rendering pipeline](rendering-pipeline.md), [invalidation](invalidation.md), [input and accessibility](input-and-accessibility.md), [embedder API](embedder-api.md), [script and heap](script-and-heap.md). Step 5: the [dependency policy](../technology/dependency-policy.md), [text and fonts](text-and-fonts.md), [graphics](graphics.md), [images and media](images-and-media.md), [networking](networking.md), [storage and workers](storage-and-workers.md), [accessibility](accessibility.md), [HTML and the DOM](html-and-dom.md), [style](style.md), [layout and paint](layout-and-paint.md), [the JavaScript engine](javascript-engine.md), [WebIDL bindings](bindings.md) |
-| **Last updated** | 2026-10-19: v1, Step 5's subsystems assembled (CP18) |
+| **Last updated** | 2026-10-20: Step 5's Gate C decisions and S6's results recorded (CP19). v1, Step 5's subsystems assembled, on 2026-10-19 (CP18) |
 
 Everything here is **planned**; nothing is implemented. This document adds no new rules; it assembles the rules of the documents above, which it cites: Step 4's EL, IP, FT, PL, IV, IN, EM and SH, and Step 5's DP, TX, GR, IM, NW, SW, AX, HD, ST, LY, JE and WB.
 
@@ -48,14 +48,14 @@ A proposal for the implementation milestones; final names and splits are set whe
 
 | Crate | Purpose | Process | Dependencies | `unsafe` |
 |---|---|---|---|---|
-| `platform` | All FFI: Mach IPC, kqueue and run loops, sandbox entry and profile compilation, `posix_spawn`, shared memory and IOSurfaces, QoS, wait-on-address; CoreText and CoreGraphics; Security's trust evaluation, DNS-SD, SystemConfiguration; Metal and CoreAnimation; ImageIO, where Gate C places it | All | `objc2` and its framework crates, `block2`, `dispatch2` | **Yes**, in listed modules (ADR-0002 §15.3), under stated invariants |
+| `platform` | All FFI: Mach IPC, kqueue and run loops, sandbox entry and profile compilation, `posix_spawn`, shared memory and IOSurfaces, QoS, wait-on-address; CoreText and CoreGraphics; Security's trust evaluation, DNS-SD, SystemConfiguration; Metal and CoreAnimation; ImageIO, in the media utility process | All | `objc2` and its framework crates, `block2`, `dispatch2` | **Yes**, in listed modules (ADR-0002 §15.3), under stated invariants |
 | `gc` | Pattern B heap: typed arenas, handles, scopes, `SliceStack`, the collector | Renderer | — | **None** (SH7) |
 | `js` | The JavaScript engine: parser, compiled scripts, bytecode, interpreter, objects, strings, builtins, `RegExp`, `Intl`, Temporal (JE1–JE32) | Renderer | ICU4X (TX2) | No |
 | `webidl`, `bindings` | The WebIDL compiler (a build tool) and its generated glue (WB1–WB23) | Build; renderer | — (webref's IDL as data) | No: generated code is safe (WB2) |
 | `html`, `xml`, `dom` | The parsers and the DOM (HD1–HD33) | Renderer | — | No (rule 5) |
 | `css`, `style` | The CSS parser, matching, the cascade and its caches (ST1–ST36) | Renderer | — | No |
-| `layout`, `paint` | Boxes, fragments, property trees, display items, hit testing (LY1–LY32) | Renderer | A path rasterizer (GR5) | No |
-| `text` | Encodings, segmentation and bidi, font matching, web fonts, shaping, glyph atlases (TX1–TX21) | Renderer | ICU4X, `unicode-bidi`, HarfRust, `read-fonts`, `skrifa`, `brotli-decompressor`, a glyph rasterizer | No |
+| `layout`, `paint` | Boxes, fragments, property trees, display items, hit testing (LY1–LY32) | Renderer | A path rasterizer (GR5): the renderer's one Rust rasterizer, `vello_cpu` recommended | No |
+| `text` | Encodings, segmentation and bidi, font matching, web fonts, shaping, glyph atlases (TX1–TX21) | Renderer | ICU4X, `unicode-bidi`, HarfRust, `read-fonts`, `skrifa`, `brotli-decompressor`, a Rust rasterizer for web fonts (`vello_cpu` recommended); CoreText rasterizes system fonts (TX12) | No |
 | `image` | Image decoding behind IM9's interface, colour management (IM1–IM10) | Renderer | `png`, `gif`, `image-webp`, `jxl`, `jpeg-decoder`, `moxcms` | No |
 | `jit` | Later, only if J1's evidence calls for it | `renderer-jit` | — | **Yes**, under J1–J7 |
 | `shell` | The AppKit shell through objc2 (EM11), with the accessibility bridge (AX8) | Browser | `objc2` crates | **Only its `platform` module** |
@@ -76,13 +76,13 @@ A proposal for the implementation milestones; final names and splits are set whe
 
 ## 3. The dependency register, summarized
 
-From the [register](../technology/dependency-register.md), as of 2026-10-19:
+From the [register](../technology/dependency-register.md), as of 2026-10-20:
 
 | Class (DP5) | Entries | Status |
 |---|---|---|
-| **Required platform facilities** | libSystem and libsandbox; AppKit, Foundation, QuartzCore, Metal, IOSurface, and AppKit's accessibility with HIServices' text markers (browser); CoreText and CoreGraphics (renderer); Security's trust evaluation, DNS-SD and SystemConfiguration (network process); ImageIO for AVIF, and VideoToolbox, AudioToolbox and CoreAudio (the media utility process) | Decided by ADRs 0004–0009, 0013 and 0014; CoreText and ImageIO with ADRs 0011 and 0012, at Gate C |
-| **Foundational dependencies** | `objc2` and its framework crates; ICU4X; rustls | `objc2` decided (ADR-0009), rustls decided (ADR-0013); ICU4X with ADR-0011 |
-| **Replaceable implementation details** | Text: HarfRust, `read-fonts`, `skrifa`, `unicode-bidi`, `brotli-decompressor`, a glyph rasterizer (`zeno` or `vello_cpu`). Graphics: a path rasterizer (S6). Images: `png` (with `flate2`), `gif`, `image-webp`, `jxl`, `jpeg-decoder`, `moxcms`. Network: `aws-lc-rs`, `quinn-proto`, `miniz_oxide`, `ruzstd`. Storage: `redb`, with SQLite as the fallback | Network and storage decided (ADR-0013); the rest with ADRs 0011 and 0012 |
+| **Required platform facilities** | libSystem and libsandbox; AppKit, Foundation, QuartzCore, Metal, IOSurface, and AppKit's accessibility with HIServices' text markers (browser); CoreText and CoreGraphics (renderer); Security's trust evaluation, DNS-SD and SystemConfiguration (network process); ImageIO for AVIF, and VideoToolbox, AudioToolbox and CoreAudio (the media utility process) | Decided by ADRs 0004–0009 and 0011–0014 |
+| **Foundational dependencies** | `objc2` and its framework crates; ICU4X; rustls | Decided: `objc2` (ADR-0009), ICU4X (ADR-0011), rustls (ADR-0013) |
+| **Replaceable implementation details** | Text and graphics: HarfRust, `read-fonts`, `skrifa`, `unicode-bidi`, `brotli-decompressor`, and one Rust rasterizer for glyphs and paths (`vello_cpu` recommended by S6-Q4; `zeno` the alternative). Images: `png` (with `flate2`), `gif`, `image-webp`, `jxl`, `jpeg-decoder`, `moxcms`. Network: `aws-lc-rs`, `quinn-proto`, `miniz_oxide`, `ruzstd`. Storage: `redb`, with SQLite as the fallback | Decided by ADRs 0011–0013; each crate is adopted at its milestone, after its audit and grade (DP8, DP15) |
 | **Considered and not admitted** | `encoding_rs`, `zune-jpeg`, `httparse` (grades below DP8's bar); Network framework for TLS (S7-Q2); wgpu in the browser (GR1); AccessKit (AX8) | Recorded with reasons |
 
 **Part 2 (CP13–CP17) adds no runtime dependency.** It names test references (`html5ever`, `xml5ever`, `regress`, `temporal_rs`, `num-bigint`, and Taffy as a candidate) and data (webref's IDL, html5lib-tests, css-parsing-tests, test262), each recorded in the register when a test or build first uses it (DP2). **Open risk:** `smallvec`, which HarfRust and ICU4X require, carries a published `ub-risk-3` grade on an old version; Axiom grades the version it adopts before admitting it (DP8).
@@ -134,14 +134,14 @@ From the [register](../technology/dependency-register.md), as of 2026-10-19:
 |---|---|---|---|
 | AC1 | No rewrite from L0 to L3 | Every agent interaction goes through the browser even in one process (FT6). Frames subscribe, paint and receive input individually (EL20, FT12, IN1). No synchronous flush crosses an agent (IV2). Remote window proxies already shape cross-agent script (WB20). L3 changes only process selection (FT10) | **Met** |
 | AC2 | The browser is the authority | One authoritative frame tree from the browser's own facts (FT1–FT3). Navigation, focus, capture, activation, visited history and Fetch's policy are browser records (FT7, IN5–IN8, ST10, NW12) | **Met** |
-| AC3 | Idle costs nothing | One wait per thread (EL1–EL3), demonstrated for the network process by S7-Q4. Display links pause (EL19); idle documents unsubscribe (IV12); no Metal work without damage (GR7); style, layout and animations idle without polling (ST35, LY30) | **Met** by design; measured when built |
+| AC3 | Idle costs nothing | One wait per thread (EL1–EL3), demonstrated for the network process by S7-Q4. Display links pause (EL19); idle documents unsubscribe (IV12); no Metal work without damage (GR7), and S6-Q1's idle compositor window made no package idle wakeups and no commits in 10 s; style, layout and animations idle without polling (ST35, LY30) | **Met** by design; measured when built |
 | AC4 | The browser never decodes images or parses web fonts | Display lists carry validated primitives only (PL7–PL9); glyphs are rasterized in the renderer (TX12, TX14), images decoded there or in the media process (IM1, IM3) | **Met** |
 | AC5 | One single-threaded heap per agent; DOM arenas lent read-only only for a frozen stage | SH1, EL15; parallel style and layout use that lending only (ST33, LY30) | **Met** |
 | AC6 | A deterministic, testable core | EL24's virtual clock; the headless embedder (EM9, GR11); IV14's oracles, extended by ST22's cache-free path and LY29's exact comparison | **Met** |
 | AC7 | Memory is designed | Each subsystem names its owners and estimates (TX21, GR12, IM6, NW16, HD32, ST34, LY31, JE28) | **Met** by design; budgets in Step 6 |
 | AC8 | The complete model fits | The table below, and each Step 5 document's complete-model section | **Met** |
-| AC9 | `unsafe` stays where ADR-0002 allows it | §2's map; spikes S5 and S7 kept theirs in `platform` modules under stated invariants; the register records each dependency's `unsafe` and grade | **Met**, with `smallvec`'s grade open (§3) |
-| AC10 | Every decision traces to evidence | Each document cites dated sources and labels inference; spikes S5 and S7 settled what sources couldn't, and S6 settles GR5 | **Met** |
+| AC9 | `unsafe` stays where ADR-0002 allows it | §2's map; spikes S5, S6 and S7 kept theirs in `platform` modules under stated invariants; the register records each dependency's `unsafe` and grade | **Met**, with `smallvec`'s grade open (§3) |
+| AC10 | Every decision traces to evidence | Each document cites dated sources and labels inference; spikes S5, S6 and S7 measured what sources couldn't, and S6 put GR5's amendment to the owner | **Met** |
 
 **The complete model (AC8):**
 
@@ -161,8 +161,8 @@ From the [register](../technology/dependency-register.md), as of 2026-10-19:
 
 | # | Criterion | Evidence | Verdict |
 |---|---|---|---|
-| SC1 | Step 4's interfaces hold; any change is an amendment for the owner | Two amendments are proposed and recorded in their ADRs: ADR-0008 (HD11, node slots never move) and ADR-0007 (ST25 and ST31, nested lifecycles for size containers, and IV2's examples). Refinements for the binding process model are noted for the owner, not edited (S5's and S7's metadata rules). GR5 would amend PL7 only if S6 shows GPU path filling pays. Nothing changed silently | **Met** |
-| SC2 | Untrusted input is parsed only where the Rule of 2 allows | Every parser of web content is safe Rust in a renderer or the network process (HD1, HD9, ST1, JE1, TX7, IM2, NW3); Apple's parsers run only in sandboxed helpers: CoreText on system fonts in renderers, Security in the network process, ImageIO in the media utility process as S5-Q5 recommends | **Met**; ImageIO's placement is decided at Gate C |
+| SC1 | Step 4's interfaces hold; any change is an amendment for the owner | Two amendments, recorded in their ADRs, were accepted by the owner at Gate C: ADR-0008 (HD11, node slots never move) and ADR-0007 (ST25 and ST31, nested lifecycles for size containers, and IV2's examples). The binding process model was refined only with the owner's approval, in its change record (S5's and S7's metadata rules; ImageIO's place). GR5's amendment to PL7, which S6-Q4 put to the owner, is undecided, and PL7 stands as written. Nothing changed silently | **Met** |
+| SC2 | Untrusted input is parsed only where the Rule of 2 allows | Every parser of web content is safe Rust in a renderer or the network process (HD1, HD9, ST1, JE1, TX7, IM2, NW3); Apple's parsers run only in sandboxed helpers: CoreText on system fonts in renderers, Security in the network process, ImageIO in the media utility process (IM3, as the owner amended it) | **Met** |
 | SC3 | `unsafe` stays where ADR-0002 allows it, dependencies included | §2 and the register | **Met**, with `smallvec` open |
 | SC4 | Build or reuse follows the charter | Each document's §4; the core of DP1 is Axiom's own; reused infrastructure is justified and classed in the register | **Met** |
 | SC5 | Standards first, and testable | Each document names dated specifications and its suites; approximate behaviour is kept apart: `execCommand` (HD28), automatic table layout (LY10), `Error.prototype.stack` and `Date.parse`'s legacy formats (JE25, JE22) | **Met** |
@@ -170,7 +170,7 @@ From the [register](../technology/dependency-register.md), as of 2026-10-19:
 | SC7 | Incremental by design | Each pipeline document states its caches, invalidation and oracle (HD33, ST19–ST22, LY29, TX20, IM6) | **Met** |
 | SC8 | Deterministic and headless | EL24, EM9 and GR11; system fonts, system settings and the environment injected in tests (TX21, ST36, LY32) | **Met** |
 | SC9 | The complete model fits | Each document's complete-model section; §5.1's table | **Met** |
-| SC10 | Every decision traces to evidence | Dated primary sources in every document; spikes S5 and S7 measured; S6 pending | **Met** |
+| SC10 | Every decision traces to evidence | Dated primary sources in every document; spikes S5, S6 and S7 measured | **Met** |
 
 ## 6. Staging from L0 to L3
 
@@ -185,21 +185,25 @@ From the [register](../technology/dependency-register.md), as of 2026-10-19:
 
 From the documents above, recorded in ADR-0005 to ADR-0009. **The owner, 2026-10-17:** ADRs 0005, 0006, 0007 and 0009 accepted; ADR-0008 pre-approved, then **accepted at Gate C (2026-10-18)** once S3's addendum was measured, with C1 met by the safe `SliceStack`. Also decided: spike S3's authorization with its 10% threshold; AC5 amended for read-only lending (OQ-19); the pure-Rust shell (EM11).
 
-## 8. Decisions for Step 5's Gate C
+## 8. Decisions at Step 5's gates
 
-Each with a recommendation; the [tracker](../research/step-5-subsystems.md)'s Gate C section gives the rationale in full.
+Recorded in ADR-0010 to ADR-0017, the [tracker](../research/step-5-subsystems.md) and the [open questions](../open-questions.md). **Gate B (2026-10-18):** ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending spikes S5–S7, which were authorized; the shell's settings list and reserved keys approved; Axiom's license chosen (OQ-21). ADR-0013 was accepted on 2026-10-19, once S7 met its condition.
 
-| # | Decision | Recommendation |
+**Gate C (2026-10-20),** each as recommended:
+
+| # | Decision | The owner's decision |
 |---|---|---|
-| 1 | [ADR-0015](../adr/0015-html-parsing-and-the-dom.md), HTML parsing and the DOM | Accept |
-| 2 | The amendment to [ADR-0008](../adr/0008-script-agents-and-heap.md): SH10's compaction skips the node arena (HD11) | Accept |
-| 3 | [ADR-0016](../adr/0016-style-layout-and-paint.md), style, layout and paint | Accept |
-| 4 | The amendment to [ADR-0007](../adr/0007-frame-tree-pipeline-and-input.md): nested lifecycles for size containers (IV1), and IV2's examples (ST25, ST31) | Accept |
-| 5 | `:visited` by partitioned history (ST10) | Accept |
-| 6 | [ADR-0017](../adr/0017-javascript-engine-and-bindings.md), the JavaScript engine and bindings | Accept |
-| 7 | XSLT ([OQ-22](../open-questions.md)) | Not planned until a use requires it |
-| 8 | [ADR-0011](../adr/0011-text-fonts-and-unicode.md): the visual check of S5-Q1's and S5-Q2's sheets, then TX12 | Check the sheets; CoreText for system fonts |
-| 9 | [ADR-0012](../adr/0012-graphics-images-and-media.md): S5-Q5 missed its condition; S6's formal run waits for the owner | AVIF in the media utility process (IM3's fallback); run S6 formally |
-| 10 | Verification in the network process's worker pool (NW6) | Confirm |
-| 11 | The process model's refinements from S5 and S7 (metadata rules) | Note them in the process model's change record |
-| 12 | Merging `step-5` into `main` | After the decisions above, once S6's results are recorded or deferred by the owner |
+| 1 | [ADR-0015](../adr/0015-html-parsing-and-the-dom.md), HTML parsing and the DOM | Accepted as proposed |
+| 2 | The amendment to [ADR-0008](../adr/0008-script-agents-and-heap.md): SH10's compaction skips the node arena (HD11) | Accepted |
+| 3 | [ADR-0016](../adr/0016-style-layout-and-paint.md), style, layout and paint | Accepted as proposed |
+| 4 | The amendment to [ADR-0007](../adr/0007-frame-tree-pipeline-and-input.md): nested lifecycles for size containers (IV1), and IV2's examples (ST25, ST31) | Accepted |
+| 5 | `:visited` by partitioned history (ST10) | Approved |
+| 6 | [ADR-0017](../adr/0017-javascript-engine-and-bindings.md), the JavaScript engine and bindings | Accepted as proposed |
+| 7 | XSLT ([OQ-22](../open-questions.md)) | Deferred until a concrete use case arises |
+| 8 | [ADR-0011](../adr/0011-text-fonts-and-unicode.md), after the visual check of S5's sheets | Accepted; CoreText rasterizes system fonts (TX12) |
+| 9 | [ADR-0012](../adr/0012-graphics-images-and-media.md), after S6's formal run | Accepted; AVIF in the media utility process (IM3) |
+| 10 | Verification in the network process's worker pool (NW6) | Confirmed |
+| 11 | The process model's refinements from S5 and S7 (metadata rules) | Approved, and recorded in its change record |
+| 12 | Merging `step-5` into `main` | Authorized, with `main` and `step-5` pushed |
+
+**Open after Gate C,** from [S6's results](../research/s6-results.md) §8: B1 against the compositor's measured footprint ([OQ-23](../open-questions.md), Step 6); GR5's amendment, path items in PL7 ([OQ-24](../open-questions.md), recommended for the graphics milestone); and the renderer's one Rust rasterizer, `vello_cpu`, recommended subject to grading.

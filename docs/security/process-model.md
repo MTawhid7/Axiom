@@ -2,13 +2,24 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0004's acceptance (2026-10-17). The owner accepted SI1–SI7 as staged (SI3 limited to L1 and non-sensitive L2; out-of-process iframes required for L3) and B1–B7 as initial baselines. Spike S4 measurements are folded in ([S4 results](../research/s4-results.md)) |
+| **Status** | **Binding** since ADR-0004's acceptance (2026-10-17). The owner accepted SI1–SI7 as staged (SI3 limited to L1 and non-sensitive L2; out-of-process iframes required for L3) and B1–B7 as initial baselines. Spike S4 measurements are folded in ([S4 results](../research/s4-results.md)). **Refined at Step 5's Gate C** (2026-10-20), with the owner's approval: S5's and S7's metadata rules, and ImageIO's place (change record below) |
 | **Question** | Into which processes is Axiom split? What may each one do, how are sites assigned to processes, which rules govern IPC, and how much memory may each process use on the 8 GB M1? |
 | **Feeds** | ADR-0004; the architecture proposal (Step 4): event loop, pipeline, embedder API; Step 5 subsystems; Step 6 budgets and roadmap |
 | **Builds on** | [Threat model](threat-model.md); [macOS confinement note](../research/macos-process-confinement.md); [ADR-0001](../adr/0001-scope-and-target.md); [ADR-0002](../adr/0002-implementation-language.md); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [S2 results](../research/s2-results.md) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-20: the change record's first entries |
 
 Everything here is **planned**; nothing is implemented. Claims about other browsers are sourced (§11). Budgets are **targets**, to be validated (§7).
+
+## Change record
+
+The model is binding, so it changes only with the owner's approval. Changes since it became binding with ADR-0004 (2026-10-17):
+
+| Date | Change | Evidence | The owner's approval |
+|---|---|---|---|
+| 2026-10-20 | **Renderers, system fonts** (§4.1): read-only access also covers FontServices' `Resources` directory and its `Reserved` subtree, where PingFang, CoreText's fallback for Chinese, lives, with the metadata of each component of their path, symbolic links included. Without them CoreText silently resolves a stub font with no file | [S5 results](../research/s5-results.md) §3, by removal tests (informal for these rules) | Step 5's Gate C: "Process Model: Approved. Record the S5 and S7 sandbox metadata rules in the process model change record." |
+| 2026-10-20 | **Renderers and the network process, the executable's directory** (§4.1): the metadata of the helper's own executable directory, one directory with no listing and no contents. Without it, `CFBundleGetMainBundle` fails inside the profile: in renderers ImageIO crashes, and CoreText does when it draws colour emoji; in the network process `SecPolicyCreateSSL` returns NULL, and verification fails closed. The kernel logs no denial for it | [S5 results](../research/s5-results.md) §7 (rule R1); [S7 results](../research/s7-results.md) §3.1, checked by removal | As above |
+| 2026-10-20 | **The network process, `/var`** (§4.1): the metadata of the `/var` symlink, which DNS-SD's client needs to reach `/var/run/mDNSResponder`. The kernel logs no denial for it | [S7 results](../research/s7-results.md) §3.1, §5, checked by removal | As above |
+| 2026-10-20 | **ImageIO in the media utility process** (§3, note 3; §4.2): ImageIO decodes AVIF there rather than in a renderer, because in a renderer it needs VideoToolbox's decoder service, a Mach service §4.1 denies renderers | [S5 results](../research/s5-results.md) §7; [images and media](../architecture/images-and-media.md) IM3 | Step 5's Gate C: "IM3's fallback (AVIF in the media utility process) is approved." |
 
 ---
 
@@ -59,7 +70,7 @@ Everything here is **planned**; nothing is implemented. Claims about other brows
 2. **Web storage lives with the cookie jar, in the network process,** as in WebKit, whose Networking process also hosts storage. That keeps renderer-supplied structured data out of the browser process. Step 4 may split storage into its own process if crash isolation or memory requires it.
 3. **Images and fonts are decoded in the renderer,** with no separate decoder process per image (contrast Ladybird [10]).
    - A compromised decoder there yields only that site's data (from L2).
-   - Safe Rust decoders are preferred. A system decoder (ImageIO) or CoreText runs only inside a renderer or the GPU process.
+   - Safe Rust decoders are preferred. A system decoder (ImageIO) or CoreText runs only inside a renderer, the GPU process or, for ImageIO's AVIF, the media utility process (change record, 2026-10-20).
    - Images that the browser itself shows, such as favicons, are decoded with safe Rust decoders or in a renderer.
 4. **Where glyphs are rasterized** (renderer or GPU process) is a Step 5 decision (I1, I2). S4-Q5 tests whether CoreText works inside a renderer's sandbox.
 
@@ -76,7 +87,8 @@ Everything here is **planned**; nothing is implemented. Claims about other brows
 | Network sockets | Not used | **No** | Outbound TCP and UDP; the system DNS and certificate-trust services | **No** | **No** |
 | Window server, AppKit | Yes | **No** | **No** | **No** | **No** |
 | GPU (Metal, IOKit) | Yes, until a GPU process exists | IOSurface allocation only, if needed (rules from S4) | **No** | Yes | Hardware decode only |
-| System fonts | Yes | Read-only: `/System/Library/Fonts` and ICU's data in `/usr/share/icu` (S4-Q5) | **No** | Only if it rasterizes text | **No** |
+| System fonts | Yes | Read-only: `/System/Library/Fonts`, FontServices' `Resources` directory and `Reserved` subtree, and ICU's data in `/usr/share/icu` (S4-Q5; S5, change record) | **No** | Only if it rasterizes text | **No** |
+| Metadata of paths outside its own files | Yes | The executable's directory (S5, change record) | The executable's directory and `/var` (S7, change record) | Rules from S4 | Rules from S4; ImageIO needs the executable's directory (S5) |
 | Pasteboard; camera, microphone, location, screen | Yes, mediated and prompted | **No** | **No** | **No** | **No** |
 | Launch processes | Yes, its own helpers only | **No** | **No** | **No** | **No** |
 | Executable memory (JIT) | **No** | **No**. Only the JIT renderer variant, under the JIT policy in ADR-0004 | **No** | **No** | **No** |
@@ -88,7 +100,7 @@ Everything here is **planned**; nothing is implemented. Claims about other brows
 | Work | Untrusted input | Memory-unsafe code | High privilege | Where it may run |
 |---|---|---|---|---|
 | Parsing web content and running script (safe Rust) | Yes | No (yes once a JIT exists) | — | Renderer |
-| System image and font parsers (ImageIO, CoreText) | Yes | Yes | **Must not** | Renderer (or GPU process) |
+| System image and font parsers (ImageIO, CoreText) | Yes | Yes | **Must not** | Renderer (or GPU process); ImageIO's AVIF in the media utility process (change record) |
 | HTTP, TLS and DNS parsing | Yes | No if our Rust; yes if Apple's TLS stack | Medium | Network process: sandboxed either way |
 | Decoding IPC in the browser | Yes | **No** (ADR-0002 rule 5) | Yes | Browser (two of three) |
 | Consuming display lists in the browser | Yes | No; the Metal driver receives only our commands | Yes | Browser, until web-supplied GPU work exists |

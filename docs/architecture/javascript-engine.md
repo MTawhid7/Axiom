@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 5, CP16). To be decided with part 2's ADRs at CP18, for the owner at Gate C. No Step 4 interface changes (SC1) |
+| **Status** | **Binding** since [ADR-0017](../adr/0017-javascript-engine-and-bindings.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP16. No Step 4 interface changes (SC1) |
 | **Question** | How is Axiom's own JavaScript engine built: the front end, the bytecode and its interpreter, the value type, objects and strings, execution of functions, generators and modules, the standard library with `RegExp`, `Intl` and dates, errors and interrupts, and room for a JIT? What would a WebAssembly engine need from it? |
 | **Answers** | Step 5 question Q12 ([tracker](../research/step-5-subsystems.md) §3); the handed-over questions 17 (dispatch), 18 (the value type, rooting, the benchmark) and 19 (ropes and slices), and evidence for 21 (OQ-3) (§2.2); [script and heap](script-and-heap.md) open question 2 |
 | **Feeds** | Part 2's ADRs (CP18); CP17 (bindings: the value type, conversions, platform objects); [OQ-3](../open-questions.md), as evidence |
 | **Builds on** | [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md) (Pattern B); [script and heap](script-and-heap.md) (SH1–SH14); [ADR-0004](../adr/0004-process-model-and-sandbox.md) (J1–J7); [S3 results](../research/s3-results.md); the [rendering pipeline](rendering-pipeline.md) (PL11); the [event loop](event-loop-and-threading.md) (EL9, EL14, EL17, EL24); the [frame tree](frame-tree-and-navigation.md) (FT11); [text and fonts](text-and-fonts.md) (TX1, TX2); [HTML and the DOM](html-and-dom.md) (HD18, HD30); [style](style.md) (ST30); the [dependency policy](../technology/dependency-policy.md) (DP1, DP2, DP5) |
-| **Last updated** | 2026-10-19 |
+| **Last updated** | 2026-10-20: binding |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered JE1–JE32. Precedent is sourced (§3); the design is inference unless marked otherwise.
 

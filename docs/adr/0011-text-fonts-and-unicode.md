@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-18). **Acceptance pre-approved** by the owner at Step 5's Gate B, effective once S5-Q1 and S5-Q3 pass, with TX12 settled by S5-Q2, as ADR-0008 waited for S3. **S5 reported** on 2026-10-18 ([results](../research/s5-results.md)): S5-Q3 passes; S5-Q1 and S5-Q2 await the owner's visual checks, which their criteria include |
+| **Status** | **Accepted** (2026-10-20), by the owner at Step 5's Gate C, after the visual check of S5's sheets that S5-Q1's and S5-Q2's criteria include. The owner had pre-approved it at Gate B, effective once S5-Q1 and S5-Q3 passed, with TX12 settled by S5-Q2 ([S5 results](../research/s5-results.md)). **TX12: CoreText rasterizes system fonts** |
 | **Date** | 2026-10-18 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Text, fonts and Unicode](../architecture/text-and-fonts.md) (the full design, TX1–TX21); [rendering pipeline](../architecture/rendering-pipeline.md) PL7, PL8, PL11; [S4 results](../research/s4-results.md); [ADR-0010](0010-dependency-and-supply-chain-policy.md); [Step 5 tracker](../research/step-5-subsystems.md) §10.1 (spike S5); decision-map items I1 and P4 |
@@ -14,6 +14,7 @@
 | 2026-10-18 | Proposed at Step 5, CP9 |
 | 2026-10-18 | **Owner's Gate B decision:** "Pre-approved; will move to Accepted upon S5-Q1 and S5-Q3 passing, with TX12 settled by S5-Q2." Spike S5 is "Authorized for questions S5-Q1 through S5-Q5 under spikes/s5/, including the listed candidate crates and OFL/WPT test web fonts" |
 | 2026-10-18 | **S5 reported** (Step 5, CP10; [results](../research/s5-results.md)). **S5-Q3 passes** on all four conditions. **S5-Q1:** no shaping error in 432 runs (no glyph differences), but its criterion includes the owner's visual check of the rendered pairs, outstanding. **S5-Q2:** reported, with the recommendation that CoreText rasterizes system fonts (TX12); TX12 follows once the owner has compared the sheets. S5 also refines TX6 (PingFang's directory; a file-backed check), confirms TX10, and answers TX13's question. The ADR stays Proposed until the owner's checks |
+| 2026-10-20 | **Accepted** by the owner at Step 5's Gate C: "ADR-0011 (Text, Fonts, and Unicode): Accepted. I have visually inspected the S5 sheets and verified the Hebrew niqqud and Apple Color Emoji differences. CoreText is approved for system font rasterization under TX12." With that check, S5-Q1 passes, and S5-Q2 settles TX12: CoreText for system fonts. **S6-Q4 reported the same day** ([S6 results](../research/s6-results.md) §6) the evidence S5 left for the renderer's one Rust rasterizer: `vello_cpu` filled paths 2.1–6.8× faster than `zeno`, at the same quality. It is recommended for web fonts and paths, subject to grading its tree when it is adopted (DP8, DP15) |
 
 ## Question
 
@@ -59,14 +60,14 @@ All sourced and dated in [text and fonts](../architecture/text-and-fonts.md) §3
 
 ## Decision
 
-**Recommended: accept TX1–TX21, once S5-Q1 and S5-Q3 pass.** S5-Q2 settles TX12. If S5 isn't authorized, accept with TX12's default, CoreText for system fonts. In summary:
+**Accepted: TX1–TX21** (2026-10-20), with S5-Q1 and S5-Q3 passed, and TX12 settled by S5-Q2: CoreText rasterizes system fonts. In summary:
 1. **ICU4X is the one Unicode source,** with compiled data, for text, CSS, URLs and JavaScript (TX1, TX2).
 2. **Encodings are Axiom's own, in safe Rust** (TX3). `encoding_rs` is graded `ub-risk-3`.
 3. **Web content sees system fonts and web fonts,** never user-installed fonts (TX5).
 4. **CoreText's database and fallback cascades serve system fonts** (TX6).
 5. **Web fonts never reach CoreText.** Our own containers, `read-fonts`, HarfRust and a Rust rasterizer handle them (TX7, TX8).
 6. **HarfRust shapes every run** (TX9–TX11).
-7. **Glyphs are rasterized in the renderer, into atlases** (TX12–TX15). For system fonts the rasterizer is CoreText or a Rust one, as S5 decides. A GPU process would receive outlines, never fonts.
+7. **Glyphs are rasterized in the renderer, into atlases** (TX12–TX15). **CoreText rasterizes system fonts,** as S5-Q2 recommended and the owner approved; web fonts use a Rust rasterizer. A GPU process would receive outlines, never fonts.
 8. **ICU4X segments text; `unicode-bidi` runs bidi;** hyphenation is staged (TX16–TX18).
 
 ## Rationale
@@ -85,8 +86,8 @@ All sourced and dated in [text and fonts](../architecture/text-and-fonts.md) §3
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
 | `smallvec` stays graded `ub-risk-3`, barring HarfRust and the segmenter | Medium | High | Grade the adopted version; work with upstream; recorded in the register |
-| HarfRust differs from CoreText visibly on some scripts | Medium | Medium | S5-Q1; HarfRust passes most of HarfBuzz's suite; report upstream |
-| A Rust rasterizer looks unlike macOS text | Medium | Low | S5-Q2; CoreText stays available for system fonts |
+| HarfRust differs from CoreText visibly on some scripts | Low (S5-Q1: the same glyphs in 432 runs; the owner checked the pairs) | Medium | HarfRust passes most of HarfBuzz's suite; report upstream |
+| A Rust rasterizer looks unlike macOS text | Medium | Low | CoreText rasterizes system fonts (TX12). Web fonts differ mainly in smoothing, which TX13 emulates at the text milestone |
 | On-demand system fonts unreadable in the sandbox | Medium | Low | TX5 treats them as absent until a reviewed rule exists |
 
 ## Conditions for revisiting

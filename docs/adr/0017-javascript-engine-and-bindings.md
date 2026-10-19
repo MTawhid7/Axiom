@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 5, CP18), for the owner at Gate C |
+| **Status** | **Accepted** (2026-10-20), by the owner at Step 5's Gate C, as proposed |
 | **Date** | 2026-10-19 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [The JavaScript engine](../architecture/javascript-engine.md) (JE1–JE32); [WebIDL bindings](../architecture/bindings.md) (WB1–WB23); [ADR-0001](0001-scope-and-target.md) (R2); [ADR-0003](0003-gc-handle-and-rooting-pattern.md); [ADR-0004](0004-process-model-and-sandbox.md) (J1–J7); [ADR-0008](0008-script-agents-and-heap.md); [ADR-0011](0011-text-fonts-and-unicode.md) (TX1, TX2); [ADR-0015](0015-html-parsing-and-the-dom.md); [S3 results](../research/s3-results.md); decision-map item P7; [OQ-3](../open-questions.md) |
@@ -12,6 +12,7 @@
 | Date | Event |
 |---|---|
 | 2026-10-19 | Proposed at Step 5, CP18 |
+| 2026-10-20 | **Accepted** by the owner at Step 5's Gate C: "ADR-0017 (JavaScript Engine and Bindings): Accepted as proposed." |
 
 ## Question
 
@@ -59,7 +60,7 @@ Sourced in [the JavaScript engine](../architecture/javascript-engine.md) §3 and
 
 ## Decision
 
-**Recommended: accept JE1–JE32 and WB1–WB23.** In summary:
+**Accepted: JE1–JE32 and WB1–WB23** (2026-10-20). In summary:
 1. **The whole engine is Axiom's own** (DP1 (g)): parser, bytecode, interpreter, object model, builtins, `RegExp` and collector, on ICU4X and Rust's standard library (JE1–JE24).
 2. **Heap-free compiled scripts,** so compilation runs on the helper pool and functions compile lazily (JE2, JE3).
 3. **A register machine with an accumulator, dispatched by a `match` loop** (handed-over question 17; script and heap's open question 2), with explicit tail calls once `become` is stable (JE5–JE7).

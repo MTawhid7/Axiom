@@ -7,7 +7,7 @@
 | **Feeds** | [ADR-0013](../adr/0013-networking-storage-and-workers.md) (its acceptance conditions: S7-Q1, S7-Q3 and S7-Q4); [networking](../architecture/networking.md) NW1, NW5, NW6, NW7, NW17 and its open question 1; the [dependency register](../technology/dependency-register.md); a refinement of the [process model](../security/process-model.md) §4.1 for the owner |
 | **Plan** | [Step 5 tracker](step-5-subsystems.md) §10.3, authorized at Gate B (2026-10-18) |
 | **Code** | `spikes/s7/net` (`s7-net`) and `tools/s7-measure.sh`, on branch `step-5`. Formal run at commit `4840d7d` (§2) |
-| **Last updated** | 2026-10-19 |
+| **Last updated** | 2026-10-20: the owner's Gate C decisions on §9's items 3 and 5 |
 
 **Evidence labels** follow the [research conventions](README.md):
 - **Measured** facts come from S7's binary and script, in the formal run named in §2 unless stated otherwise.
@@ -296,14 +296,14 @@ Trees from `cargo tree -p s7-net` for this Mac's target; `unsafe` counts are lin
 
 1. **ADR-0013's condition is met.** The owner's Gate B decision: "Pre-approved; will move to Accepted upon S7-Q1, S7-Q3, and S7-Q4 passing." All three pass (§3, §5, §6), so ADR-0013 is accepted, as of 2026-10-19, with this report as its evidence.
 2. **NW6 is settled as designed:** rustls on `aws-lc-rs`, with its `prefer-post-quantum` default, verified by Security's trust evaluation (§4.5).
-3. **Verification leaves the I/O thread** (EL1; proposed in NW6, for the owner at Gate C). `SecTrustEvaluateWithError` waits on `trustd` for 8.4 ms at the median and up to 1.5 s in the informal runs. Waiting there is a second place to block, which EL1 forbids, and while it lasts every other connection, message and timer waits too. rustls's verifier is synchronous, so the inference is:
+3. **Verification leaves the I/O thread** (EL1; proposed in NW6, for the owner at Gate C; **confirmed by the owner** on 2026-10-20). `SecTrustEvaluateWithError` waits on `trustd` for 8.4 ms at the median and up to 1.5 s in the informal runs. Waiting there is a second place to block, which EL1 forbids, and while it lasts every other connection, message and timer waits too. rustls's verifier is synchronous, so the inference is:
    - while a connection is still in its handshake, the I/O thread hands the rustls connection (which is `Send`) and the records it has read to the worker pool (EL8), which processes them, and so verifies;
    - the pool returns it with an `EVFILT_USER` wakeup;
    - connections past their handshakes are processed on the I/O thread.
 
    The sockets, timers and wait stay the I/O thread's, as NW1 has them. The detail is designed at the network milestone, and tested under the deterministic scheduler (EL24).
 4. **NW17's profile is written down:** `profiles/network.sb`'s eight rules (§3.1) are the network process's profile at L1, with the removal tests and the reporting runs as its regression check. A feature that needs more (proxies, client certificates, path monitoring) adds its rule with its own evidence.
-5. **The process model's network column** (§4.1) lists only the data directory among files. The profile adds the metadata of two paths: `/var`, a system symlink, and the executable's own directory, in Axiom's bundle. Neither is a user file, a service or a capability. **For the owner at Gate C:** note them in the model, with S5's same refinement for renderers. The model is binding, so it is not edited here.
+5. **The process model's network column** (§4.1) lists only the data directory among files. The profile adds the metadata of two paths: `/var`, a system symlink, and the executable's own directory, in Axiom's bundle. Neither is a user file, a service or a capability. **For the owner at Gate C:** note them in the model, with S5's same refinement for renderers. The model is binding, so it is not edited here. **Recorded** in the process model's change record, with the owner's approval at Gate C (2026-10-20).
 6. **`platform` must treat `SecPolicyCreateSSL` as fallible:** its header promises a policy, but it returns NULL when the main bundle can't be created. objc2-security's binding panics on that NULL. S7 declares the function with a nullable result and fails closed, and Axiom's `platform` does the same.
 7. **NW7 holds,** with one obligation from §5: on a shared DNS-SD connection, `kDNSServiceFlagsMoreComing` speaks for all queries, so the resolver settles queries when a batch ends.
 8. **NW1, EL2 and EL18 hold in a sandbox:** one `kevent64` per turn received Mach messages in the wait itself, merged every deadline into one timer with leeway, and woke for nothing else when idle (§6).
