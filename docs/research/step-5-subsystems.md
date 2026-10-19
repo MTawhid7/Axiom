@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Spikes:** S5 reported (CP10 ✅); S6's formal run waits for the owner (CP11); S7 reported and **ADR-0013 accepted** (CP12 ✅, 2026-10-19). **Part 2:** CP13–CP15 ✅. **Next: CP16,** the JavaScript engine |
+| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Spikes:** S5 reported (CP10 ✅); S6's formal run waits for the owner (CP11); S7 reported and **ADR-0013 accepted** (CP12 ✅, 2026-10-19). **Part 2:** CP13–CP16 ✅. **Next: CP17,** WebIDL bindings |
 | **Authorized** | 2026-10-18, by the owner: "Step 5 Authorization: Authorized." Planning on a new branch, `step-5`, with "the Step 5 plan and checkpoint tracker first for Gate A review" (§2). Design documents only; each spike needs its own authorization. **Spikes S5, S6 and S7 authorized at Gate B** (2026-10-18), each for the questions it names (§10) |
 | **Branch** | `step-5`, from `main` at `c642ab3` (the Step 4 merge). Pushed to `origin` as the owner authorized at Gate A, and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items I1–I5, the text part of P4, and X4 if the owner adds it (§2.3); the questions earlier steps handed to Step 5 (§2.2); OQ-3, as evidence; ADRs from 0010 (§4); Step 6 |
@@ -281,7 +281,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | CP13 | HTML parsing and the DOM | ✅ 2026-10-19 (§11; [document](../architecture/html-and-dom.md)). An amendment to ADR-0008 proposed for Gate C (HD11) |
 | CP14 | Style | ✅ 2026-10-19 (§11; [document](../architecture/style.md)). An amendment to ADR-0007 proposed for Gate C (ST25, ST31) |
 | CP15 | Layout and paint | ✅ 2026-10-19 (§11; [document](../architecture/layout-and-paint.md)). No amendment needed |
-| CP16 | The JavaScript engine | Not started |
+| CP16 | The JavaScript engine | ✅ 2026-10-19 (§11; [document](../architecture/javascript-engine.md)). No amendment needed |
 | CP17 | WebIDL bindings | Not started |
 | CP18 | The overview refined, and the criteria check; ADRs for part 2 (Proposed); decision map, open questions, indexes, status. **Gate C** | Not started |
 | CP19 | Merge `step-5` into `main` (`--no-ff`), when the owner instructs | Not started |
@@ -1019,3 +1019,21 @@ Every relative link resolves; the four standard checks pass. CP15 (layout and pa
 **For the owner at Gate C:** nothing new from CP15; its open questions (printing without fonts in the browser, 3D sorting, Taffy as a test oracle, parallel layout, limits for hostile documents) belong to later milestones and Step 6.
 
 Every relative link resolves; the four standard checks pass. CP16 (the JavaScript engine) starts.
+
+### CP16 — completed 2026-10-19
+
+**[The JavaScript engine](../architecture/javascript-engine.md)** (Proposed; JE1–JE32), answering Q12, the handed-over questions 17, 18 and 19, and script and heap's open question 2, with evidence for OQ-3:
+- **All of it is Axiom's own** (DP1 (g)): parser, bytecode, interpreter, object model, builtins, `RegExp` and collector, on ICU4X's data and Rust's standard library.
+- **Front end:** a parser over PL11's 8- and 16-bit text; lazy compilation; **heap-free compiled scripts,** as SpiderMonkey's Stencil, so compilation runs on the helper pool and a bytecode cache stays possible.
+- **Interpreter** (questions 17 and script and heap's 2): a register machine with an accumulator, as Ignition; **a `match` loop,** S3's fastest technique on stable Rust; explicit tail calls once `become` is stable; frames as windows of one register file, traced as one region; generators suspended by moving their registers into the heap.
+- **Values** (question 18): NaN-boxed, carrying the scope lifetime as Pattern B's handles do, after Nova's `bind` and `unbind`; many values rooted as one heap array; S1's dispatch case kept as a benchmark.
+- **Objects and strings** (question 19): shapes, inline caches as data in the interpreter, element kinds, dictionary mode; ropes and slices from 13 code units, as V8's minimums, with the collector copying out slices whose parents would otherwise die.
+- **Library:** ECMAScript 2026 and the 2027 draft's finished proposals, Temporal among them. `RegExp` is a fast backtracking interpreter with a linear-time fallback past a backtracking budget, never machine code; `Intl` runs on ICU4X; Temporal is Axiom's own over ICU4X's calendars and compiled-in time zone data. Differential references: `regress`, `temporal_rs` (which V8 and Boa use) and `num-bigint`.
+- **Control:** stack traces rendered lazily; the interrupt flag on back edges, calls and long matches; bounded re-entry; a JIT left to J1–J7, with the interpreter's feedback as its input.
+- **OQ-3 evidence:** what a WebAssembly engine would need from this one, including a shared collected heap if WasmGC is supported. The decision stays open.
+
+**Precedent read** on 2026-10-19 from primary sources: ECMA-262 (the 2026 edition and the 2027 draft), ECMA-402's 2027 draft, TC39's finished proposals, test262, V8's design posts and sources, SpiderMonkey's `Value.h` and `Stencil.h`, Nova 1.0, Boa, `regress`, Brimstone and Ladybird's LibJS, whose new optimizing JIT keeps its interpreter's caches as its only baseline. V8's jitless figures (Speedometer 2.0 about 40% slower, half of it from the `RegExp` interpreter) are recorded for J1's evidence.
+
+**For the owner at Gate C:** nothing new from CP16. Its open questions (the accumulator's encoding, tail calls, rope and slice thresholds, the bytecode cache, OQ-3) belong to the first script milestone, Step 6 and OQ-3.
+
+Every relative link resolves; the four standard checks pass. CP17 (WebIDL bindings) starts.
