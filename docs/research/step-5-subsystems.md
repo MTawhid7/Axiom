@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Spikes:** S5 reported (CP10 ✅); S6's formal run waits for the owner (CP11); S7 reported and **ADR-0013 accepted** (CP12 ✅, 2026-10-19). **Part 2:** CP13–CP16 ✅. **Next: CP17,** WebIDL bindings |
+| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Spikes:** S5 reported (CP10 ✅); S6's formal run waits for the owner (CP11); S7 reported and **ADR-0013 accepted** (CP12 ✅, 2026-10-19). **Part 2:** CP13–CP17 ✅. **Next: CP18,** the overview, part 2's ADRs and Gate C |
 | **Authorized** | 2026-10-18, by the owner: "Step 5 Authorization: Authorized." Planning on a new branch, `step-5`, with "the Step 5 plan and checkpoint tracker first for Gate A review" (§2). Design documents only; each spike needs its own authorization. **Spikes S5, S6 and S7 authorized at Gate B** (2026-10-18), each for the questions it names (§10) |
 | **Branch** | `step-5`, from `main` at `c642ab3` (the Step 4 merge). Pushed to `origin` as the owner authorized at Gate A, and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items I1–I5, the text part of P4, and X4 if the owner adds it (§2.3); the questions earlier steps handed to Step 5 (§2.2); OQ-3, as evidence; ADRs from 0010 (§4); Step 6 |
@@ -282,7 +282,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | CP14 | Style | ✅ 2026-10-19 (§11; [document](../architecture/style.md)). An amendment to ADR-0007 proposed for Gate C (ST25, ST31) |
 | CP15 | Layout and paint | ✅ 2026-10-19 (§11; [document](../architecture/layout-and-paint.md)). No amendment needed |
 | CP16 | The JavaScript engine | ✅ 2026-10-19 (§11; [document](../architecture/javascript-engine.md)). No amendment needed |
-| CP17 | WebIDL bindings | Not started |
+| CP17 | WebIDL bindings | ✅ 2026-10-19 (§11; [document](../architecture/bindings.md)). No amendment needed |
 | CP18 | The overview refined, and the criteria check; ADRs for part 2 (Proposed); decision map, open questions, indexes, status. **Gate C** | Not started |
 | CP19 | Merge `step-5` into `main` (`--no-ff`), when the owner instructs | Not started |
 
@@ -1037,3 +1037,18 @@ Every relative link resolves; the four standard checks pass. CP16 (the JavaScrip
 **For the owner at Gate C:** nothing new from CP16. Its open questions (the accumulator's encoding, tail calls, rope and slice thresholds, the bytecode cache, OQ-3) belong to the first script milestone, Step 6 and OQ-3.
 
 Every relative link resolves; the four standard checks pass. CP17 (WebIDL bindings) starts.
+
+### CP17 — completed 2026-10-19
+
+**[WebIDL bindings](../architecture/bindings.md)** (Proposed; WB1–WB23), answering Q13 and the bindings part of the handed-over question 18, and closing HD30's interface:
+- **The generator** is Axiom's own (DP1 (h)), in Rust, run at build time over webref's curated IDL extracts, the files WPT's `interfaces/` copies daily, plus a configuration of implementing types; generated code is safe, readable Rust (ADR-0002 rule 7). Only implemented members are exposed.
+- **Platform objects are heap entries, not wrappers** (SH1): brand checks are range checks on interface IDs; interface objects and prototypes are created per realm on first use; `[LegacyUnforgeable]` members are reported without being stored; legacy platform objects get Web IDL's internal methods.
+- **Calls and conversions:** the interpreter calls generated functions with its argument registers; conversions and overload resolution follow Web IDL; **the generator roots an argument only when a later conversion may run script,** and the scope tokens make a missed root a compile error.
+- **Exceptions, `[CEReactions]`, callbacks** as specified; callbacks are handles held by their owners. **Event dispatch** roots two heap arrays, with S1's dispatch case as the benchmark.
+- **Cross-origin objects:** `WindowProxy` and `Location` checks within an agent; remote window proxies for frames in other agents, offering only HTML's `CrossOriginProperties`, each operation a message to the browser; a proxy keeps its identity when its frame moves between agents.
+
+**Precedent read** on 2026-10-19 from primary sources: Web IDL (2026-10-10), HTML (2026-10-19), Blink's and Gecko's bindings documentation, WebKit's and Servo's generators, Ladybird's platform objects (now wrappers built as host objects, since 2026-10-05), webref and WPT's interface tests.
+
+**For the owner at Gate C:** nothing new from CP17.
+
+Every relative link resolves; the four standard checks pass. CP18 (the overview and part 2's ADRs) starts.
