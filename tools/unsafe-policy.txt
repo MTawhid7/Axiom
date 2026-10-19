@@ -56,3 +56,8 @@ allow spikes/s5/image src/platform/
 # (GR1: Metal through `platform`), under invariants K1–K9
 # (spikes/s6/compositor/src/platform/mod.rs).
 allow spikes/s6/compositor src/platform/
+
+# Spike S7: Security's trust evaluation, Network framework, DNS-SD, kqueue,
+# Mach ports, sockets and libproc for the network helper (NW1, NW6, NW7),
+# under invariants N1–N9 (spikes/s7/net/src/platform/mod.rs).
+allow spikes/s7/net src/platform/

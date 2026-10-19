@@ -1,0 +1,34 @@
+[package]
+name = "s7-net"
+description = "Spike S7: a network helper under a deny-by-default profile compiled by a broker, verifying rustls's certificates with Security's trust evaluation, against Network framework's TLS; DNS-SD and QUIC driven from one kevent64 wait. unsafe only in src/platform/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+# Justified in the workspace manifest.
+[dependencies]
+s4-sandbox.workspace = true
+rustls.workspace = true
+quinn-proto.workspace = true
+bytes.workspace = true
+objc2.workspace = true
+objc2-core-foundation = { workspace = true, features = [
+    "CFArray",
+    "CFData",
+    "CFDate",
+    "CFError",
+    "CFString",
+] }
+objc2-security = { workspace = true, features = [
+    "SecBase",
+    "SecCertificate",
+    "SecPolicy",
+    "SecTrust",
+] }
+block2.workspace = true
+dispatch2.workspace = true
+
+[lints]
+workspace = true

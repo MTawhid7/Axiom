@@ -1,0 +1,43 @@
+;; Spike S7: the network process's profile (NW17), grown by S4's method: deny
+;; by default, run, read the logged denials, add only what a failure shows is
+;; needed, with its reason, and check each rule by removing it.
+(version 1)
+(deny default)
+
+;; The browser's rendezvous service, as every helper has it (S4).
+(allow mach-lookup (global-name (param "RENDEZVOUS")))
+
+;; No code generation (JIT rule J3), as in S4's renderer profile.
+(deny dynamic-code-generation)
+
+;; Outbound TCP and UDP to remote hosts.
+(allow network-outbound (remote tcp) (remote udp))
+
+;; The system's DNS service: DNS-SD's socket to mDNSResponder.
+(allow network-outbound (literal "/private/var/run/mDNSResponder"))
+
+;; S7 (2026-10-19): libsystem_dnssd connects to /var/run/mDNSResponder, and
+;; resolving the /var symlink needs its metadata. Without this rule the
+;; connect fails with EPERM, DNSServiceCreateConnection returns
+;; kDNSServiceErr_ServiceNotRunning, and the kernel logs no denial. Metadata of
+;; /var alone suffices: /private, /private/var, /private/var/run or the socket
+;; itself does not.
+(allow file-read-metadata (literal "/var"))
+
+;; Certificate trust evaluation: the per-user trustd agent. Without it every
+;; chain is rejected, good ones included, with OSStatus -26276 (a code SecBase.h
+;; doesn't define, and `security error` calls unknown): the evaluation fails
+;; closed. The system daemon, com.apple.trustd, is never looked up (S7,
+;; 2026-10-19).
+(allow mach-lookup (global-name "com.apple.trustd.agent"))
+
+;; S7 (2026-10-19): SecPolicyCreateSSL returns NULL, although its header
+;; promises a policy, when CFBundleGetMainBundle can't create the main bundle:
+;; the log says "Unable to create bundle at URL (<private>): unable to create
+;; file system representation of URL", and the kernel logs no denial.
+;; Metadata of the executable's directory is all it needs, as S5 found for
+;; ImageIO (spikes/s5/text/profiles/text.sb).
+(allow file-read-metadata (literal (param "EXECUTABLE_DIR")))
+
+;; The network process's own data directory.
+(allow file-read* file-write* (subpath (param "DATA_DIR")))

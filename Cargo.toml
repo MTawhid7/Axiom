@@ -1,13 +1,13 @@
 # Axiom workspace.
 #
 # Phase Zero: only validation spikes live here (spikes/, throwaway): S1 and S2
-# from Step 2b, S4 from Step 3, S3 from Step 4, S5 and S6 from Step 5. Engine crates will live
+# from Step 2b, S4 from Step 3, S3 from Step 4, S5 to S7 from Step 5. Engine crates will live
 # under crates/ once the architecture is approved; the lints, profiles and toolchain pin
 # below are meant to carry over.
 
 [workspace]
 resolver = "3"
-members = ["spikes/s1/*", "spikes/s2/*", "spikes/s3/*", "spikes/s4/*", "spikes/s5/*", "spikes/s6/*"]
+members = ["spikes/s1/*", "spikes/s2/*", "spikes/s3/*", "spikes/s4/*", "spikes/s5/*", "spikes/s6/*", "spikes/s7/*"]
 # S5's text corpus and font list are data, not a crate.
 exclude = ["spikes/s5/corpus"]
 
@@ -58,6 +58,24 @@ objc2-image-io = { version = "0.3.2", default-features = false, features = ["std
 #   with it), for S6's tiles: IOSurfaces drawn by Metal and shown as CoreAnimation
 #   layer contents (GR2), and their colour tagging (GR6).
 objc2-io-surface = { version = "0.3.2", default-features = false, features = ["std"] }
+# Spike S7's candidates, authorized at Step 5's Gate B (2026-10-18) with "read-only
+# outbound network requests to public test hosts"; each is in the register (CP6).
+# - rustls: TLS 1.2 and 1.3 as a state machine (NW1, NW6), without its logging, on the
+#   aws-lc-rs provider (NW6), whose C and assembly the build compiles (S7 measures it).
+#   `prefer-post-quantum`, a default feature, offers X25519MLKEM768 first: without it,
+#   servers that prefer it answer with a HelloRetryRequest, a round trip more (S7).
+rustls = { version = "0.23.46", default-features = false, features = ["std", "tls12", "aws_lc_rs", "prefer-post-quantum"] }
+# - quinn-proto: QUIC as a state machine (NW5), over rustls and the same provider.
+quinn-proto = { version = "0.11.19", default-features = false, features = ["rustls-aws-lc-rs"] }
+# - objc2-security: Security's trust evaluation (NW6), from the objc2 family.
+objc2-security = { version = "0.3.2", default-features = false, features = ["std"] }
+# - block2, dispatch2: blocks and dispatch queues for Network framework's C API, the
+#   TLS stack S7-Q2 compares (no objc2 crate binds it); both from the objc2 family.
+block2 = "0.6.2"
+dispatch2 = { version = "0.3.1", default-features = false, features = ["std", "block2"] }
+# - bytes: already in the tree through quinn-proto, whose API takes and returns
+#   datagrams and close reasons as bytes's types.
+bytes = { version = "1.12.1", default-features = false, features = ["std"] }
 s5-rust-text = { path = "spikes/s5/rust-text" }
 # Spike S5's candidates, authorized at Step 5's Gate B (2026-10-18) "including the
 # listed candidate crates". Each is a candidate for the engine under the dependency
