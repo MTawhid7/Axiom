@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0008's acceptance (2026-10-18, Gate C). Written at Step 4, CP10; C1 settled by spike S3 and its addendum (CP16), which the owner chose `SliceStack` from ([S3 results](../research/s3-results.md)) |
+| **Status** | **Binding** since ADR-0008's acceptance (2026-10-18, Gate C). Written at Step 4, CP10; C1 settled by spike S3 and its addendum (CP16), which the owner chose `SliceStack` from ([S3 results](../research/s3-results.md)). SH10 amended at Step 5's Gate C (2026-10-20; [HTML and the DOM](html-and-dom.md) HD11) |
 | **Question** | How do agents, realms and heaps fit together; how do messages, transfers and `SharedArrayBuffer` cross between agents; how does script integrate with the event loop; and how does the engine meet ADR-0003's obligations C1–C5: cheaper rooting, heap layout, a write-barrier API, a plan for incremental or generational collection, and native interop? What must spike S3 measure? |
 | **Answers** | Step 4 questions Q4 (second half) and Q15 ([tracker](../research/step-4-architecture-proposal.md) §3); OQ-5, OQ-13, OQ-14 |
 | **Feeds** | ADR-0008; spike S3 ([tracker](../research/step-4-architecture-proposal.md) §10); Step 5 (the JavaScript engine and bindings, HTML and DOM) |
 | **Builds on** | [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md) (Pattern B, C1–C5); [ADR-0004](../adr/0004-process-model-and-sandbox.md) (J1–J7); [S1 results](../research/s1-results.md); [event loop and threading](event-loop-and-threading.md) (EL12, EL15–EL17); [IPC](ipc.md); [rendering pipeline](rendering-pipeline.md) (PL2, PL11) |
-| **Last updated** | 2026-10-18 |
+| **Last updated** | 2026-10-20: SH10 amended |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered SH1–SH14. Precedent is sourced (§2); the design is inference unless marked otherwise. The JavaScript engine's internals (parser, bytecode set, object shapes, inline caches) belong to Step 5.
 
@@ -81,7 +81,7 @@ From sources read on 2026-10-17 (Sources).
 
 | # | Rule |
 |---|---|
-| SH10 | **C4: the collection plan.** Version 0 is ADR-0003's stop-the-world mark–compact collector. S1 measured about 4 ms at 130,000 live nodes, and 15 ms at 333,000 objects. Step 6 sets the pause budget. Two additions are then taken in the order measurements on the corpus demand: **incremental marking** in idle periods (EL16), using SH9's barrier, and **a generational nursery** with bump allocation and a remembered set from the same barrier. V8 and SpiderMonkey both combine the two [V1, M1]. Compaction stays a full, rarer step, as in SpiderMonkey [M1]. Collection is also triggered by memory pressure and idle time, and V8's idle tasks show the memory this saves [V1] |
+| SH10 | **C4: the collection plan.** Version 0 is ADR-0003's stop-the-world mark–compact collector. S1 measured about 4 ms at 130,000 live nodes, and 15 ms at 333,000 objects. Step 6 sets the pause budget. Two additions are then taken in the order measurements on the corpus demand: **incremental marking** in idle periods (EL16), using SH9's barrier, and **a generational nursery** with bump allocation and a remembered set from the same barrier. V8 and SpiderMonkey both combine the two [V1, M1]. Compaction stays a full, rarer step, as in SpiderMonkey [M1]. Collection is also triggered by memory pressure and idle time, and V8's idle tasks show the memory this saves [V1].<br>**Amended at Step 5's Gate C** (2026-10-20; [HTML and the DOM](html-and-dom.md) HD11): **compaction skips the DOM's node arena,** whose slots never move and are reused with a new generation. So the identities of nodes held outside the heap (side tables, the browser's accessibility IDs, hit-test results, messages) stay valid for each node's life. Step 6 measures the arena's density on the corpus; if it degrades, the fallback compacts one document's nodes while remapping its side tables (HD11) |
 | SH11 | **C5: memory that reaches platform APIs lives outside the heap, and never moves.** This covers `ArrayBuffer` and `SharedArrayBuffer` backing stores, canvas pixels, decoded images, glyph atlases (PL7, PL8), and buffers that WebGL or Web Audio hand to the system. These are non-moving, reference-counted allocations, and heap objects refer to them by handle, so compaction never relocates memory that a platform API holds. S2 already found that glyph and pixel buffers need not live in the GC heap. Mark-worklist entries are 8 bytes |
 
 ### 3.5 Bindings, the JIT and memory

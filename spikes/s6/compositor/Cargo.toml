@@ -1,0 +1,80 @@
+[package]
+name = "s6-compositor"
+description = "Spike S6: synthetic display lists drawn by Axiom's own Metal pipelines into tiled IOSurface layers of an AppKit window; damage, scrolling and animation by layers; CPU against GPU path filling; memory and Display P3 tagging. unsafe only in src/platform/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+# Justified in the workspace manifest. Only the framework headers used are enabled.
+[dependencies]
+objc2.workspace = true
+objc2-foundation = { workspace = true, features = [
+    "NSDate",
+    "NSError",
+    "NSGeometry",
+    "NSObjCRuntime",
+    "NSRunLoop",
+    "NSString",
+    "NSValue",
+] }
+objc2-app-kit = { workspace = true, features = [
+    "NSApplication",
+    "NSEvent",
+    "NSGraphics",
+    "NSResponder",
+    "NSRunningApplication",
+    "NSScreen",
+    "NSView",
+    "NSWindow",
+    "objc2-core-foundation",
+    "objc2-quartz-core",
+] }
+objc2-quartz-core = { workspace = true, features = [
+    "CALayer",
+    "CATransaction",
+    "CATransform3D",
+    "objc2-core-foundation",
+] }
+objc2-metal = { workspace = true, features = [
+    "MTLAllocation",
+    "MTLBlitCommandEncoder",
+    "MTLBuffer",
+    "MTLCommandBuffer",
+    "MTLCommandEncoder",
+    "MTLCommandQueue",
+    "MTLDepthStencil",
+    "MTLDevice",
+    "MTLLibrary",
+    "MTLPixelFormat",
+    "MTLRenderCommandEncoder",
+    "MTLRenderPass",
+    "MTLRenderPipeline",
+    "MTLResource",
+    "MTLTexture",
+    "MTLTypes",
+    "objc2-core-foundation",
+    "objc2-io-surface",
+] }
+objc2-io-surface = { workspace = true, features = [
+    "IOSurfaceRef",
+    "IOSurfaceTypes",
+    "objc2",
+    "objc2-core-foundation",
+] }
+objc2-core-graphics = { workspace = true, features = ["CGColorSpace"] }
+objc2-core-foundation = { workspace = true, features = [
+    "CFCGTypes",
+    "CFDate",
+    "CFDictionary",
+    "CFNumber",
+    "CFString",
+] }
+s5-rust-text.workspace = true
+skrifa.workspace = true
+vello_cpu.workspace = true
+zeno.workspace = true
+
+[lints]
+workspace = true

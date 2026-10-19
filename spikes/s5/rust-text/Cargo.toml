@@ -1,0 +1,27 @@
+[package]
+name = "s5-rust-text"
+description = "Spike S5: the Rust-only text path (TX7, TX8, TX12): WOFF and WOFF2 containers of our own, validation with read-fonts, shaping with HarfRust, skrifa's outlines filled by zeno or vello_cpu. No unsafe and no Apple framework: s5-webfont links neither CoreText nor CoreGraphics."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+# Justified in the workspace manifest.
+[dependencies]
+s4-sandbox.workspace = true
+harfrust.workspace = true
+read-fonts.workspace = true
+skrifa.workspace = true
+brotli-decompressor.workspace = true
+miniz_oxide.workspace = true
+zeno.workspace = true
+vello_cpu.workspace = true
+png.workspace = true
+
+[[bin]]
+name = "s5-webfont"
+path = "src/bin/s5-webfont.rs"
+
+[lints]
+workspace = true

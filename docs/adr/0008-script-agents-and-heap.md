@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-18), by the owner at Step 4's Gate C, once the S3 addendum's formal measurements were complete ([S3 results](../research/s3-results.md)) |
+| **Status** | **Accepted** (2026-10-18), by the owner at Step 4's Gate C, once the S3 addendum's formal measurements were complete ([S3 results](../research/s3-results.md)). **SH10 amended** at Step 5's Gate C (2026-10-20): compaction skips the DOM's node arena ([HTML and the DOM](../architecture/html-and-dom.md) HD11) |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Script and heap](../architecture/script-and-heap.md) (SH1–SH14); [ADR-0003](0003-gc-handle-and-rooting-pattern.md) (C1–C5); [ADR-0004](0004-process-model-and-sandbox.md) (J1–J7); [S1 results](../research/s1-results.md); [S3 results](../research/s3-results.md); [Step 4 tracker](../research/step-4-architecture-proposal.md) §10 (spike S3's design); OQ-5, OQ-13, OQ-14 |
@@ -17,6 +17,8 @@
 | 2026-10-18 | **Owner's Gate C decisions.**<br>• "S3 Addendum Checkpoint: Authorized." It adds "the length-first safe `SliceStack`" to `s3-gc`, measures it formally, and corrects "the S3-Q1 verdict".<br>• "C1 Implementation: Adopt `SliceStack` (Safe Contiguous Stack). The `gc` crate remains strictly `#![forbid(unsafe_code)]`. A 19% dispatch improvement (628 ns vs 779 ns) with zero `unsafe` proves that hardware-aligned data layout beats manual memory micro-optimizations. Keep `RawStack` archived in spikes/s3/ as benchmark history."<br>• "We will formally accept ADR-0008 and merge `step-4` into `main` (with a subsequent push to origin) immediately upon completion of the formal addendum measurements." |
 | 2026-10-18 | **The S3 addendum's results** (CP16; [S3 results](../research/s3-results.md) §3).<br>• `SliceStack` reads in 0.53 ns and has no `unsafe`. By S1's method a push costs 2.12 ns, as on every stack, so S3-Q1 still fails as written.<br>• **The explanation recorded above was wrong.** S1's method does force each push to reload the length, but the cost of that reload depends on how the loads and stores around it compile. Reloading the length in one paired load with a neighbouring field costs about 2 ns. The same `SliceStack` push measured 1.02 ns in an informal probe whose harness compiled differently.<br>• **In S1's dispatch case,** formally and run by run, `SliceStack` is 13–17% faster than `RawStack`, and 14–20% faster than its field-order control. The 19% quoted above came from the informal probe |
 | 2026-10-18 | **Accepted,** the owner's condition met: the addendum's formal measurements are complete. Decision 5 names `SliceStack` |
+| 2026-10-19 | **Amendment proposed, for the owner at Step 5's Gate C** ([HTML and the DOM](../architecture/html-and-dom.md) HD11): the mark–compact collector of SH10 compacts every arena except the DOM's node arena, whose slots never move and are reused with a new generation. Reason: PL2 and PL12 make a node's identity (handle and generation) stable for its life, and AX2 sends it to the browser, so a moving node would invalidate identities held outside the heap. Until the owner decides, SH10 stands as written |
+| 2026-10-20 | **Amendment accepted** by the owner at Step 5's Gate C: "ADR-0008 Amendment (HD11): Accepted. Node slots in the arena never move; node identity remains stable." SH10 is amended in [script and heap](../architecture/script-and-heap.md), and decision 8 records it |
 
 ## Question
 
@@ -69,7 +71,7 @@ See [script and heap](../architecture/script-and-heap.md) §3. **C1 is the one o
 5. **C1: `SliceStack`, a root stack without borrow tracking, with 8-byte slots** (SH7). It is one contiguous array of `Cell` slots, borrowed from a zeroed buffer that the agent owns, with its length first. It has no `unsafe`, so **the `gc` crate is `#![forbid(unsafe_code)]`** (the owner's decision at Gate C). It reads in 0.53 ns and pushes in 0.58 ns back to back, or 2.12 ns by S1's method, and it is the fastest stack in S1's dispatch case. `RawStack`, whose `unsafe` was three Miri-checked blocks, stays in the spike as benchmark history.
 6. **C2: one-based struct-of-arrays `u32` columns for hot link fields** (SH8), the fastest layout in every case S3 measured.
 7. **C3:** generated setters for every handle-valued field, the single place for any future barrier (SH9). S3 measured them as free without a barrier, and card marking at about 3%.
-8. **C4:** stop-the-world mark–compact now. Then incremental marking in idle periods and a generational nursery, ordered by corpus measurements, with the pause budget from Step 6 (SH10).
+8. **C4:** stop-the-world mark–compact now. Then incremental marking in idle periods and a generational nursery, ordered by corpus measurements, with the pause budget from Step 6 (SH10). **As amended at Step 5's Gate C** (HD11): compaction skips the DOM's node arena, whose slots never move, so a node's identity stays stable for its life.
 9. **C5:** memory that reaches platform APIs lives outside the heap and never moves; mark-worklist entries are 8 bytes (SH11).
 10. **Generated, safe bindings.** Room for a JIT under J1–J7 (SH12–SH13). S3-Q3's evidence for the interpreter: a `match` loop on stable Rust, with operations written as functions over the machine state so that the technique can change. Heaps are budgeted (SH14).
 
@@ -103,3 +105,4 @@ See [script and heap](../architecture/script-and-heap.md) §3. **C1 is the one o
 - **Accepted at Gate C** (2026-10-18), with S3-Q2 passed and S3-Q1's push criterion not met as written.
 - **The `gc` crate has no `unsafe`** (`#![forbid(unsafe_code)]`): C1's stack is safe.
 - OQ-5, OQ-14 and OQ-13's design part are resolved by this ADR; OQ-13's budget is set in Step 6.
+- **SH10 was amended at Step 5's Gate C** (2026-10-20): the node arena is excluded from compaction ([HTML and the DOM](../architecture/html-and-dom.md) HD11; [ADR-0015](0015-html-parsing-and-the-dom.md)). Step 6 measures the arena's density on the corpus.

@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP7 |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP7. IV1 and IV2 amended at Step 5's Gate C (2026-10-20; [style](style.md) ST25, ST31) |
 | **Question** | What is the rendering lifecycle? How does a change propagate from a DOM mutation through style, layout, paint and compositing, reusing work at each stage? How are synchronous queries such as `offsetWidth` bounded? Which updates bypass the renderer's main thread, and how does that work across processes? |
 | **Answers** | Step 4 questions Q3, Q11 and Q12 ([tracker](../research/step-4-architecture-proposal.md) §3): P3 |
 | **Feeds** | ADR-0007; CP8 (input routing for scrolling); Step 5 (style, layout and graphics algorithms); Step 6 (budgets) |
 | **Builds on** | [Event loop and threading](event-loop-and-threading.md) (EL16, EL19–EL22); [frame tree](frame-tree-and-navigation.md) (FT12); [rendering pipeline](rendering-pipeline.md) (PL1–PL16) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-20: IV1 and IV2 amended |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered IV1–IV14. Precedent is sourced (§2); the design is inference unless marked otherwise.
 
@@ -77,8 +77,8 @@ mutations ─▶ StyleDirty ─style─▶ StyleClean ─boxes─▶ BoxTreeClea
 
 | # | Rule |
 |---|---|
-| IV1 | **An explicit lifecycle per document** (§3). Each phase is a function with declared inputs and outputs, which stay immutable for the rest of the update (BlinkNG [C1]). **The compiler checks the order:** code that reads layout output takes a `LayoutClean` token, which only completing layout produces, and likewise for the other phases. Chromium enforces the same contract with runtime assertions |
-| IV2 | **Two entry points only** (BlinkNG [C1]). (1) **The rendering update**, at an offered frame (EL21), runs every phase that has work. (2) **A synchronous query** runs only the phases it needs, from the first dirty one up to the one it reads, and for that document only. `getComputedStyle` needs style; `offsetWidth`, `getBoundingClientRect`, `elementFromPoint` and scroll positions need layout. **No synchronous flush crosses an agent.** A same-agent parent (a same-origin `iframe` on the same event loop) can be laid out on demand. A frame whose parent is another agent, in another process or (under SI3) on another event loop, uses the viewport size the browser last sent it (IV13). So moving a frame out of process doesn't change what a query can see (AC1) |
+| IV1 | **An explicit lifecycle per document** (§3). Each phase is a function with declared inputs and outputs, which stay immutable for the rest of the update (BlinkNG [C1]). **The compiler checks the order:** code that reads layout output takes a `LayoutClean` token, which only completing layout produces, and likewise for the other phases. Chromium enforces the same contract with runtime assertions.<br>**Amended at Step 5's Gate C** (2026-10-20; [style](style.md) ST25): **nested lifecycles for size containers.** During style, the subtree of a size container is deferred when rules in scope use size queries, or its descendants use container-relative units. Once layout has sized the container, it runs a nested lifecycle for that subtree (style with the container's size as input, then box construction, then layout), each phase with its own token, and runs it again if a later layout pass resizes the container. Outputs still never change once produced: style's output can have deferred subtrees, and reading the style of an element in one takes the nested phase's token, or `LayoutClean` |
+| IV2 | **Two entry points only** (BlinkNG [C1]). (1) **The rendering update**, at an offered frame (EL21), runs every phase that has work. (2) **A synchronous query** runs only the phases it needs, from the first dirty one up to the one it reads, and for that document only. `getComputedStyle` needs style, and layout for values that resolve to used values (CSSOM §9) or for elements in a deferred container subtree (**amended at Step 5's Gate C**, 2026-10-20; [style](style.md) ST31); `offsetWidth`, `getBoundingClientRect`, `elementFromPoint` and scroll positions need layout. **No synchronous flush crosses an agent.** A same-agent parent (a same-origin `iframe` on the same event loop) can be laid out on demand. A frame whose parent is another agent, in another process or (under SI3) on another event loop, uses the viewport size the browser last sent it (IV13). So moving a frame out of process doesn't change what a query can see (AC1) |
 
 ### 4.2 Reuse at each stage
 

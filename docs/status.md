@@ -2,33 +2,220 @@
 
 > **Read this first when resuming work.** Then check the documents it links to against the actual state of the repository (`git log`, `git status`, and the checkpoint tracker). Don't assume earlier work is still accurate.
 
-## Current state (2026-10-18)
+## Current state (2026-10-20)
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero: Step 4 is complete** (2026-10-18). ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
-| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 4** (merged with `--no-ff` on 2026-10-18) and is pushed. Step 4 ran on branch `step-4`, also pushed |
-| Current checkpoint | **Step 4: CP1–CP17 ✅** ([tracker](research/step-4-architecture-proposal.md)). Step 5 starts when the owner decides ("Next steps") |
-| Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. Tooling under `tools/` |
-| Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
+| Phase | **Phase Zero: Step 5, subsystem design, is done** (2026-10-20): Gate C passed, and `step-5` is merged into `main`. ADRs 0010–0017 are accepted, with amendments to ADR-0007 (IV1, IV2) and ADR-0008 (SH10), and the process model was refined in its change record. All seven spikes are complete. **Step 6** (standards baseline, testing, performance budgets, roadmap) is next, and needs the owner's authorization. Production engine code is **not** authorized |
+| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 5** (merged with `--no-ff` on 2026-10-20) and is pushed. Step 5 ran on branch `step-5`, also pushed; Steps 2b to 4 ran on `step-2b`, `step-3` and `step-4` |
+| Current checkpoint | **Step 5: CP1–CP19 ✅** ([tracker](research/step-5-subsystems.md)); Gates A, B and C passed. Step 6: not started |
+| Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3), S3 (Step 4), and S5, S6 and S7 (Step 5), all complete. S1 stays as the baseline for S3. Tooling under `tools/`. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
+| Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md), [S6](research/s6-results.md), [S7](research/s7-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final**, with build thresholds T1–T4 |
 | | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 |
 | | [ADR-0004](adr/0004-process-model-and-sandbox.md): process model, sandbox and JIT policy (2026-10-17), validated by spike S4. The owner confirmed S4's refinements |
 | | [Threat model](security/threat-model.md) (2026-10-17), amended: out-of-process iframes are required for L3 |
+| | [Process model](security/process-model.md), binding with ADR-0004 (2026-10-17); refined at Step 5's Gate C (2026-10-20) in its change record: S5's and S7's metadata rules, and ImageIO's place |
 | | [ADR-0005](adr/0005-ipc-transport-and-interfaces.md): IPC, Mach transport, capabilities, IDL, `Untrusted<T>` (2026-10-17, Gate B) |
 | | [ADR-0006](adr/0006-event-loop-and-threading.md): event loop and threading, with EL11 amended for read-only lending of DOM arenas (2026-10-17, Gate B) |
-| | [ADR-0007](adr/0007-frame-tree-pipeline-and-input.md): frame tree, rendering pipeline, invalidation and input across frames (2026-10-17, Gate B) |
-| | [ADR-0008](adr/0008-script-agents-and-heap.md): script, agents and heap. C1 is met by `SliceStack`, a safe root stack, so the `gc` crate has no `unsafe` (2026-10-18, Gate C) |
+| | [ADR-0007](adr/0007-frame-tree-pipeline-and-input.md): frame tree, rendering pipeline, invalidation and input across frames (2026-10-17, Gate B); IV1 and IV2 amended for size container queries (2026-10-20, Step 5's Gate C) |
+| | [ADR-0008](adr/0008-script-agents-and-heap.md): script, agents and heap. C1 is met by `SliceStack`, a safe root stack, so the `gc` crate has no `unsafe` (2026-10-18, Gate C); SH10 amended: the DOM's node arena is never compacted (2026-10-20, Step 5's Gate C) |
 | | [ADR-0009](adr/0009-embedder-api-and-shell.md): engine/embedder API and the pure-Rust shell (2026-10-17, Gate B) |
+| | [ADR-0010](adr/0010-dependency-and-supply-chain-policy.md): the dependency and supply-chain policy, with DP10's refinement (2026-10-18, Step 5's Gate B) |
+| | [ADR-0011](adr/0011-text-fonts-and-unicode.md): text, fonts and Unicode; CoreText rasterizes system fonts (2026-10-20, Step 5's Gate C) |
+| | [ADR-0012](adr/0012-graphics-images-and-media.md): graphics, images and media; AVIF in the media utility process (2026-10-20, Step 5's Gate C) |
+| | [ADR-0013](adr/0013-networking-storage-and-workers.md): networking, storage and workers (2026-10-19), the owner's Gate B condition met by S7; verification in the worker pool confirmed at Gate C |
+| | [ADR-0014](adr/0014-accessibility.md): accessibility, with the settings list and the reserved key equivalents (2026-10-18, Step 5's Gate B) |
+| | [ADR-0015](adr/0015-html-parsing-and-the-dom.md): HTML parsing and the DOM (2026-10-20, Step 5's Gate C); XSLT deferred (OQ-22) |
+| | [ADR-0016](adr/0016-style-layout-and-paint.md): style, layout and paint, with `:visited` by partitioned history (2026-10-20, Step 5's Gate C) |
+| | [ADR-0017](adr/0017-javascript-engine-and-bindings.md): the JavaScript engine and bindings (2026-10-20, Step 5's Gate C) |
+| Open for the owner | [OQ-23](open-questions.md): B1 against S6-Q5's measured footprint, in Step 6. [OQ-24](open-questions.md): GR5's amendment, path items in PL7, at the graphics milestone. The renderer's one Rust rasterizer: `vello_cpu`, recommended subject to grading |
 
-## Next steps: Step 5
+## Next steps: Step 6
 
-**Step 4 is complete and merged** ([tracker](research/step-4-architecture-proposal.md)). Step 5 has not started ([decision map](decision-map.md)): the subsystems (text and fonts, rendering and compositing, networking and TLS, style, layout), HTML parsing and the DOM, and the JavaScript engine and bindings. Each decision below carries a recommendation and its reason (CLAUDE.md):
+**Step 5 is done.** Step 6 (standards baseline, testing, performance budgets and the roadmap; it ends in a design review and the approval of Milestone 1) needs the owner's authorization. Its plan would be committed as CP1 on a new branch, `step-6`, from `main`, for Gate A, as each step's plan has been. **Decisions for the owner,** each with a recommendation:
+1. **Authorize Step 6** and its planning on `step-6`. Recommended: authorize. It turns Step 5's inputs (B1–B7, the subsystem designs and the spikes' measurements) into budgets, a test strategy and a roadmap.
+2. **The site corpus** (OQ-2). Step 6's budgets and acceptance criteria are measured on the sites the owner actually uses. Recommended: provide the list with Step 6's authorization, or at its Gate A.
+3. **B1 against S6-Q5** (OQ-23). Recommended: in Step 6, count a visible window's tile surfaces apart from the browser's own memory, budgeted by the window's pixels, and keep 60 MB for the rest. One window's tiles took 25.2 MB, and its compositor state left about 4 MB of B1 for everything else.
+4. **GR5's amendment** (OQ-24). Recommended: decide it at the graphics milestone, with a GPU filler of analytic quality measured on S6-Q4's contents. GPU filling was faster and smaller, but its 4× multisampled edges are coarser; GR5 stands meanwhile.
+5. **The renderer's Rust rasterizer.** Recommended: `vello_cpu` as the one rasterizer for web fonts and paths (2.1–6.8× faster than `zeno` on paths, at the same quality), subject to grading its tree at the text milestone.
 
-1. **Start Step 5. Recommend: authorize planning it on a new branch, `step-5`, plan first (CP1, then Gate A), as Steps 3 and 4 did.** The plan sets the order of the subsystems, which ones need design documents or spikes, and where the review gates fall. Step 4 left inputs for it: S3's recommendations for the interpreter and the root stack ([S3 results](research/s3-results.md) §9), the overview's crate map, and the open questions assigned to Step 5.
+Informational: AWS-LC's jitter entropy source is decided at the network milestone (CP12).
 
 ## Session log
+
+### 2026-10-20 — Session 12 (Gate C; spike S6 reported; Step 5 merged)
+
+**Gate C, the owner's decisions** (2026-10-20), each as recommended:
+1. "ADR-0015 (HTML Parsing and the DOM): Accepted as proposed."
+2. "ADR-0008 Amendment (HD11): Accepted. Node slots in the arena never move; node identity remains stable."
+3. "ADR-0016 (Style, Layout, and Paint): Accepted as proposed."
+4. "ADR-0007 Amendment (ST25, ST31): Accepted. Nested lifecycle phases for size container queries are adopted."
+5. ":visited Policy (ST10): Accepted. Partitioned history by top-level site is approved."
+6. "ADR-0017 (JavaScript Engine and Bindings): Accepted as proposed."
+7. "XSLT (OQ-22): Confirmed. Defer planning XSLT until a concrete use case arises."
+8. "ADR-0011 (Text, Fonts, and Unicode): Accepted. I have visually inspected the S5 sheets and verified the Hebrew niqqud and Apple Color Emoji differences. CoreText is approved for system font rasterization under TX12."
+9. "ADR-0012 (Graphics, Images, and Media): Accepted. The formal S6 benchmark run is complete (target/s6-results/20261019-201443/summary.txt) and easily meets all frame time thresholds. IM3's fallback (AVIF in the media utility process) is approved."
+10. "NW6 TLS Verification: Confirmed. Certificate evaluation must run on worker pool threads to keep the network I/O thread non-blocking."
+11. "Process Model: Approved. Record the S5 and S7 sandbox metadata rules in the process model change record."
+12. "CP19 (Merge to main): Authorized. Please record S6's formal results, update the documents and indexes, and merge step-5 into main with --no-ff, followed by pushing main and step-5 to origin."
+
+**CP11, spike S6, reported** ([results](research/s6-results.md)), from the owner's formal run on 2026-10-19 (`45bff95`, a clean tree, AC power with Low Power Mode off, the window visible in every run):
+- **S6-Q1 and S6-Q3 pass at the median.** A typical update took 0.17–0.28 ms on the GPU and 0.67–1.84 ms on the compositor thread; moving layers took 0.19–0.40 ms a frame. S6-Q2: damage-limited tiles cost a spinner 47–49× less GPU time and 7–9× less energy impact than full redraws.
+- **Checked against the criteria, not only the summary.** The thresholds hold at the median in every run, as the owner's words say, and the tails are recorded. Run 1 began on a busy Mac (load averages 103.80, 59.25 and 24.79, with no build to explain them): 192 of its 600 typical updates exceeded 2 ms on the compositor thread, against 0 and 2 in runs 2 and 3. In each run, 2–7 of 1,085 scrolling frames that only moved layers exceeded 1 ms.
+- **S6-Q5's memory condition is not met as measured:** one window's compositor state, trimmed, leaves about 4 MB of B1 (OQ-23). The owner's words don't describe the Display P3 comparison, which S6-Q5's colour condition rests on. ADR-0012's acceptance is the owner's explicit decision, and is recorded with these results beside it.
+- **S6-Q4:** GPU path filling pays in time (3.9–4.8× sooner) and memory (31–62× less), not in quality, so GR5's amendment goes to the owner (OQ-24). `vello_cpu` filled paths 2.1–6.8× faster than `zeno`.
+
+**Recorded** (the CP19 documentation commit):
+- the ADRs' statuses and decision histories: 0007, 0008, 0011, 0012, 0013 and 0015–0017;
+- the designs, now binding, with IV1, IV2 and SH10 amended, and TX12, IM3, NW6, GR2, GR5, GR6, GR8 and GR12 updated;
+- the process model's new change record: S5's and S7's metadata rules, and ImageIO in the media utility process;
+- the register (CP3's to CP5's entries decided); the open questions (OQ-22 resolved; OQ-23 and OQ-24 raised); the decision map; the overview (§2, §3, §5, §8); S5's results' status; the tracker; the indexes.
+
+**CP19:** `step-5` merged into `main` with `--no-ff`, and `main` and `step-5` pushed to `origin`.
+
+**Clean-up:** nothing to clean. This session ran only analyses of the run's files and the five checks, and the formal run left no crash reports.
+
+### 2026-10-19 — Session 11 (part 2: CP13–CP18; Gate C reached)
+
+**Part 2 of Step 5, run without pausing as planned** (the owner's Gate B instruction: "Proceed with executing Spikes S5, S6, and S7 as planned"; the plan runs CP13–CP18 until Gate C):
+- **CP13, [HTML and the DOM](architecture/html-and-dom.md)** (HD1–HD33, `4b81d95`): our own HTML and XML parsers; decoding straight into the DOM's 8- and 16-bit strings; a node arena of `u32` columns whose slots never move, which needs an amendment to ADR-0008 (HD11); one mutation path with fixed hooks.
+- **CP14, [style](architecture/style.md)** (ST1–ST36, `3581d47`): our own CSS parser over 8- and 16-bit text; shared, grouped computed styles with a rule tree, a sharing cache and evictable caches; invalidation sets; container queries in nested lifecycles during layout, which needs an amendment to ADR-0007 (ST25, ST31); `:visited` by partitioned history.
+- **CP15, [layout and paint](architecture/layout-and-paint.md)** (LY1–LY32, `8a5ede7`): a 1/64-pixel fixed-point layout unit; LayoutNG's contract; tables marked approximate; scroll nodes with snap areas, sticky constraints and compositor-moved scrollbar thumbs; paint into PL7's primitives.
+- **CP16, [the JavaScript engine](architecture/javascript-engine.md)** (JE1–JE32, `48bc182`): heap-free compiled scripts; a register machine dispatched by a `match` loop; NaN-boxed values carrying the scope lifetime; `RegExp` interpreted with a linear-time fallback; `Intl` on ICU4X; Temporal of our own; evidence for OQ-3.
+- **CP17, [WebIDL bindings](architecture/bindings.md)** (WB1–WB23, `04527fc`): our own generator over webref's curated IDL, emitting safe Rust; platform objects as heap entries, not wrappers; rooting only where a later conversion may collect; remote window proxies.
+- **CP18:** [the overview, v1](architecture/overview.md); [ADR-0015](adr/0015-html-parsing-and-the-dom.md), [ADR-0016](adr/0016-style-layout-and-paint.md) and [ADR-0017](adr/0017-javascript-engine-and-bindings.md), Proposed; the decision map (P5–P7), the open questions (OQ-3's evidence; OQ-22, XSLT), the register (part 2 adds no runtime dependency) and the indexes.
+- **Precedent** was read from primary sources at their latest commits on 2026-10-19. Notable current facts: Ladybird moved style (2026-08-13) and layout (2026-07-28) to Rust, put style and layout and paint on their own threads (2026-10-03), switched its DOM to wrappers built as host objects (2026-10-05), and gained an optimizing JIT; SVG 2 published a new Candidate Recommendation Snapshot (2026-10-06); Temporal is finished for ECMAScript 2027, and V8 builds it on `temporal_rs`.
+- **Gate C reached:** the decisions are listed in the tracker's Gate C entry, each with a recommendation. No code was written, nothing was installed, and no crash reports or other side effects outside the repository were produced.
+
+### 2026-10-19 — Session 10 (spike S7; ADR-0013 accepted)
+
+**CP12, spike S7** ([results](research/s7-results.md); tracker §11), under the owner's Gate B authorization: "Spike S7 (Network Process & TLS): Authorized for questions S7-Q1 through S7-Q4 under spikes/s7/, including read-only outbound network requests to public test hosts."
+- **Code:** `spikes/s7/net` (`s7-net`): a broker that compiles the network profile, and a sandboxed helper with modes for each question; its `unsafe` in `src/platform/` (Security, Network framework, DNS-SD, kqueue, Mach, sockets, libproc) under invariants N1–N9; 8 offline tests; `tools/s7-measure.sh`. Commits `4840d7d` and `13daa44`.
+- **Network access:** read-only GETs to public test hosts and DNS queries through the system's resolver. No certificate was added to a keychain, and nothing on the Mac was reconfigured.
+- **Formal run:** `4840d7d`, from a clean tree, on AC power with Low Power Mode off (`target/s7-results/20261019-071313/`); three runs, the Mac in normal use. Supplementary `startup` runs at `13daa44`.
+- **S7-Q1: passes.** In the broker-compiled profile, rustls verified through `SecTrustEvaluateWithError` gave the expected verdict for every host it reached, the same as unsandboxed and as Network framework. The profile has eight rules; two metadata rules were found by failures the kernel didn't log (`/var`, for DNS-SD; the executable's directory, without which `SecPolicyCreateSSL` returns NULL). Every denial is explained, using reporting runs that log every attempted operation.
+- **S7-Q2: reported; NW6 settled as designed.** rustls retired 2.4–3.3× fewer instructions per handshake than Network framework, 1.6× fewer per byte. rustls needs its `prefer-post-quantum` default feature (without it, Cloudflare answered every full handshake with a HelloRetryRequest). A process's first TLS use costs 29–43 ms of CPU, for AWS-LC's jitter entropy source.
+- **S7-Q3: passes.** DNS-SD resolved nine queries on one shared connection, from kqueue, with one thread.
+- **S7-Q4: passes.** One I/O thread drove rustls, `quinn-proto` (an HTTP/3 GET), DNS-SD, Mach messages received in the wait, a timer and a user event from one `kevent64` per turn, and woke only for real deadlines when idle.
+- **ADR-0013 accepted** (2026-10-19), under the owner's Gate B words: "Pre-approved; will move to Accepted upon S7-Q1, S7-Q3, and S7-Q4 passing." The networking and storage designs are now binding; the register's CP6 and CP7 entries are decided.
+- **For Gate C:** verification in the worker pool, off the I/O thread (NW6, because `SecTrustEvaluateWithError` blocks its caller and EL1 allows one place to block); noting the two metadata rules in the process model's network column; AWS-LC's jitter entropy, at the network milestone.
+- **Clean-up:** no crash reports. One empty helper data directory in `target/release/`, left by an informal run cut short by `head`, was removed.
+
+### 2026-10-18 — Session 9 (Gate B; spikes S5–S7)
+
+**Gate B, the owner's decisions** (2026-10-18), each as recommended:
+1. "ADR-0010 (Dependency and Supply-Chain Policy): Accepted as proposed, including the DP10 refinement."
+2. "ADR-0011 (Text, Fonts, and Unicode): Pre-approved; will move to Accepted upon S5-Q1 and S5-Q3 passing, with TX12 settled by S5-Q2."
+3. "ADR-0012 (Graphics, Images, and Media): Pre-approved; will move to Accepted upon S6-Q1, S6-Q3, and S6-Q5 passing, and S5-Q5 validating ImageIO inside the renderer sandbox."
+4. "ADR-0013 (Networking, Storage, and Workers): Pre-approved; will move to Accepted upon S7-Q1, S7-Q3, and S7-Q4 passing."
+5. "ADR-0014 (Accessibility): Accepted as proposed."
+6. "Spike S5 (Text Stack & ImageIO Sandbox): Authorized for questions S5-Q1 through S5-Q5 under spikes/s5/, including the listed candidate crates and OFL/WPT test web fonts."
+7. "Spike S6 (Metal Compositing): Authorized for questions S6-Q1 through S6-Q5 under spikes/s6/. The performance thresholds are confirmed: typical update ≤ 4 ms GPU / ≤ 2 ms compositor thread; scrolling/transforms ≤ 1 ms."
+8. "Spike S7 (Network Process & TLS): Authorized for questions S7-Q1 through S7-Q4 under spikes/s7/, including read-only outbound network requests to public test hosts."
+9. "Settings List: Approved as written in docs/architecture/accessibility.md §6.1."
+10. "Reserved Key Equivalents: Approved as written in docs/architecture/accessibility.md §6.2 (Chromium reserved set, plus ⌘L, ⌘,, and Esc un-overridable even in fullscreen)."
+11. "OQ-21 (Axiom License): Approved as 'MIT OR Apache-2.0'. Please add the standard LICENSE-MIT and LICENSE-APACHE files to the repository root."
+12. "Proceed with executing Spikes S5, S6, and S7 as planned."
+
+**Recorded** in ADRs 0010–0014's decision histories, the six design documents (the policy and the accessibility design are now binding), the register, the decision map, the open questions (OQ-21 resolved), the indexes, the tracker (§2, §6, §7, §10, §11) and this status.
+
+**The license:**
+- `LICENSE-APACHE` is the Apache Software Foundation's text, unchanged: fetched from apache.org on 2026-10-18, SHA-256 `cfc7749b…bc523d30`.
+- `LICENSE-MIT` is the standard MIT text, word for word SPDX's, with "Copyright (c) 2026 Md. Tawhidul Islam".
+- The workspace manifest declares `license = "MIT OR Apache-2.0"`, which every crate inherits. The root README states the dual license and the usual contribution terms.
+
+**CP10, spike S5** ([results](research/s5-results.md); tracker §11):
+- **Code:** three crates under `spikes/s5/` (`s5-rust-text`, with no `unsafe` and no Apple framework in its web-font executable; `s5-text`; `s5-image`), 40 tests, and `tools/s5-fetch.sh`, `tools/s5-images.sh`, `tools/s5-measure.sh`. Commits `f20e7f4` and `bad07a8`.
+- **Formal runs:** `bad07a8` (primary, `target/s5-results/20261018-204642/`) and `f20e7f4` (reproduction), on AC power with Low Power Mode off, from clean trees; every deterministic output identical between them.
+- **S5-Q1:** HarfRust chose CoreText's glyphs in all 432 runs; the Hebrew niqqud differ in position, in a font with no mark-positioning data. Awaits the owner's visual check.
+- **S5-Q2:** the Rust rasterizers match CoreText above 20 px and at 2×; CoreText recommended for system fonts (TX12), pending the owner's comparison.
+- **S5-Q3: passes.** 322 WPT fonts, 4,000 mutants, no crash, hang or sandbox denial.
+- **S5-Q4:** B2 achievable; HarfRust shapes in 566 ns a glyph.
+- **S5-Q5: missed its condition.** AVIF needs VideoToolbox's decoder service, which renderers may not reach; IM3's fallback (the media utility process) recommended for Gate C. JPEG keeps the safe decoder.
+- **Findings recorded:** the PingFang stub and TX6's file-backed check; ImageIO's NULL-bundle crash (R1); CoreText's normal track against HarfRust's `trak` handling (TX10); `flate2` in `png`'s tree; ImageIO's non-deterministic JPEG pixels.
+- **The owner's visual check:** published as a private page in this session, and in the results directory.
+- **Clean-up** (outside the repository): seven crash reports left by informal S5 runs were deleted from `~/Library/Logs/DiagnosticReports/Retired`, after copies were made in the session's scratchpad. The formal runs' crash reports (six per run) were moved into their results directories by the script. Nothing else was left outside the repository.
+
+### 2026-10-18 — Session 8 (Step 5 kickoff)
+
+**The owner's decisions:**
+1. "Step 4 is formally accepted."
+2. "Step 5 Authorization: Authorized."
+3. "Proceed with planning Phase Zero Step 5 (Subsystems) on a new branch `step-5`."
+4. "Submit the Step 5 plan and checkpoint tracker first for Gate A review, defining the subsystem sequence, review gates, and identifying which areas may require targeted validation spikes."
+
+**Done:**
+- Branch `step-5` created from `main` at `c642ab3`. It is not pushed.
+- **CP1:** the [Step 5 plan and tracker](research/step-5-subsystems.md):
+  - 14 questions; the 21 questions earlier steps handed to Step 5, each assigned to a checkpoint;
+  - the subsystem criteria SC1–SC10;
+  - 19 checkpoints: the dependency policy and six platform-facing subsystems (text, graphics, images, networking, storage, accessibility); then the spikes; then the document and script engine (HTML and the DOM, style, layout and paint, the JavaScript engine, bindings), the overview and the merge;
+  - three gates: A, the plan; B, part 1's ADRs and the spikes; C, part 2's ADRs and the merge;
+  - three candidate spikes: S5 (text stack), S6 (compositing on Metal), S7 (the network process and TLS).
+- The plan proposes a new decision-map item, X4 (dependency and supply-chain policy), for the owner to approve. Until then the map is unchanged except for Step 5's row.
+
+**Verification:** the four standard checks and the link check pass, with the code unchanged.
+
+**Gate A, the owner's decisions** (2026-10-18), each as recommended:
+1. "Plan Approval: Approved as written." "The 19-checkpoint sequence, two-part structure, and subsystem criteria SC1–SC10 are approved." "Step 4 interfaces remain binding under SC1."
+2. "Decision Map Addition: Approved. Add X4 (Dependency and Supply-Chain Policy) to docs/decision-map.md, to be decided at CP2 in ADR-0010."
+3. "Candidate Spikes: Confirmed." S5, S6 and S7 "are approved as candidate spikes, with code authorization to be decided individually at Gate B."
+4. "Cadence: Approved. Proceed through CP2–CP9 without pausing until Gate B."
+5. "Push Branch: Authorized." `step-5` pushed to `origin`.
+
+**Recorded** in the tracker (§2, §7, §11), the decision map (X4 added) and this status.
+
+**CP2 (completed 2026-10-18):** the [dependency policy](technology/dependency-policy.md) (**Proposed**; DP1–DP23) and a living [register](technology/dependency-register.md):
+- The core of charter G1 is Axiom's own. The infrastructure layer may be reused behind interfaces Axiom owns. Axiom never writes its own cryptography.
+- Dependencies get soundness grades (Google's `ub-risk` scale) and groups after Chromium's (`trusted`, `sandboxed`, `build`, `test`). A reused parser of untrusted input must be pure Rust at `ub-risk-1` or better, or it counts as memory-unsafe code under the Rule of 2.
+- The supply chain: `cargo-vet` audits with Firefox's imports, `cargo-deny`, a license allow-list, minimal features, T1–T4.
+- **Found:** the repository has no license file, so Axiom's license is unchosen. It is raised for Gate B.
+
+**CP3 (completed 2026-10-18):** [text, fonts and Unicode](architecture/text-and-fonts.md) (**Proposed**; TX1–TX21), and spike S5's design ([tracker](research/step-5-subsystems.md) §10.1):
+- ICU4X is the one Unicode source. Encodings are Axiom's own, because Google grades `encoding_rs` at `ub-risk-3`.
+- CoreText's database and fallback serve system fonts. HarfRust shapes every font. Web fonts take a Rust-only path, so no C parser sees them. Glyphs are rasterized in the renderer, with CoreText or a Rust rasterizer for system fonts, as S5 decides.
+- The dependency policy's DP10 is refined: `ub-risk-2` across the tree in sandboxed helpers, `ub-risk-1` in the browser. Applying CP2's stricter rule would have excluded every Rust font stack while admitting CoreText.
+
+**CP4 (completed 2026-10-18):** [graphics](architecture/graphics.md) (**Proposed**; GR1–GR14), and spike S6's design ([tracker](research/step-5-subsystems.md) §10.2):
+- Metal directly, through `platform`, with no portability layer in the browser.
+- The window server composites retained CoreAnimation layers, and Axiom draws damaged tiles into IOSurfaces, as Firefox does on macOS, where it measured large power savings.
+- Our own pipelines draw the display items. Paths are rasterized in the renderer until S6 reports; if GPU filling pays, an amendment adding path items to PL7 goes to the owner.
+- Display P3 at 8 bits by default. Compositor animations: the transform family and opacity, then `filter`, `backdrop-filter` and scroll-driven timelines.
+
+**CP5 (completed 2026-10-18):** [images and media](architecture/images-and-media.md) (**Proposed**; IM1–IM13):
+- Images decode in the renderer: safe Rust for PNG, JPEG, GIF, WebP and JPEG XL, and our own BMP and ICO decoders. `zune-jpeg` is graded `ub-risk-3`, so JPEG uses a safe decoder.
+- AVIF goes to ImageIO in the renderer, under DP10's exception, accepted by ADR-0012; S5 gains a question (S5-Q5) to test ImageIO in the sandbox.
+- Pixels decode at display size and are discarded when not visible. `moxcms` manages color.
+- Media runs in a sandboxed utility process, with VideoToolbox, IOSurface frames and audio output.
+
+**CP6 (completed 2026-10-18):** [networking](architecture/networking.md) (**Proposed**; NW1–NW18), and spike S7's design ([tracker](research/step-5-subsystems.md) §10.3):
+- Protocols are state machines driven from one wait on the I/O thread: no tokio.
+- One URL parser of our own in every process; in the browser, only canonical ASCII URLs from other processes, which settles CP3's IDNA question.
+- HTTP/1.1, HTTP/2 and HTTP/3 framing are our own (`httparse` is graded `ub-risk-4`). QUIC is `quinn-proto`. TLS is rustls with `aws-lc-rs`, under DP10's exception, and Security verifies certificates.
+- DNS through DNS-SD. Caches, connections, sessions and cookies are partitioned.
+- Fetch's policy is enforced from bound endpoints: CORS, ORB, CORP and COEP, mixed content, HSTS, and Local Network Access.
+
+**CP7 (completed 2026-10-18):** [storage and workers](architecture/storage-and-workers.md) (**Proposed**; SW1–SW13):
+- All web storage lives in the network process, keyed by origin and top-level site.
+- One engine: `redb` if its audit agrees, with SQLite under DP10's exception as the fallback; crash tests decide. The cache and the cookie jar share the engine.
+- `localStorage` is cached in the renderer. IndexedDB values arrive serialized, so the network process never parses script values.
+- Service workers are intercepted inside Fetch. Shared and service workers run in a renderer locked to their site, launched when none exists.
+
+**CP8 (completed 2026-10-18):** [accessibility](architecture/accessibility.md) (**Proposed**; AX1–AX12):
+- Renderers push trees built under HTML-AAM and Core-AAM, once an assistive technology first asks. The browser answers from its cache.
+- Text markers, public in SDK 27, carry text navigation, with boundaries computed in the renderer. The bridge is our own.
+- Two questions for the owner at Gate B: the settings list, and reserved key equivalents.
+
+**CP9 (completed 2026-10-18):** ADRs [0010](adr/0010-dependency-and-supply-chain-policy.md)–[0014](adr/0014-accessibility.md) Proposed:
+- the dependency policy;
+- text, fonts and Unicode, pending S5;
+- graphics, images and media, pending S6 and S5-Q5;
+- networking, storage and workers, pending S7;
+- accessibility.
+
+The decision map has I1–I5 Proposed. The open questions gain OQ-21 (Axiom's license), and OQ-7 notes that the graphics design needs no Xcode. **Gate B** is listed under "Next steps".
 
 ### 2026-10-17 to 2026-10-18 — Session 7 (Gate B; spike S3; Gate C; S3 addendum; merge)
 
