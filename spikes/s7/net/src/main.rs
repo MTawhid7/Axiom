@@ -25,6 +25,7 @@
 //! ```text
 //! s7-net [--profile network|none|FILE] MODE [ARGS...]
 //!   ready                          the helper's footprint, doing nothing
+//!   startup [--host HOST] [--path P]  one-time costs, stage by stage
 //!   probe [--home DIR]             what the profile allows and denies
 //!   verify [--stack rustls|nw] [HOST[:PORT]...]
 //!   handshakes --stack rustls|nw --host HOST[:PORT] [--path P] [--count N] [--pause-ms M]
@@ -196,6 +197,7 @@ fn helper(args: &[String]) -> Result<ExitCode, String> {
     let context = scenarios::Context::new(rest.to_vec(), data_dir);
     match mode.as_str() {
         "ready" => scenarios::ready(&context),
+        "startup" => scenarios::startup(&context),
         "probe" => scenarios::probe(&context),
         "verify" => scenarios::verify(&context),
         "handshakes" => scenarios::handshakes(&context),

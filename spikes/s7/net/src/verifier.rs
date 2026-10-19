@@ -13,6 +13,7 @@ use rustls::pki_types::{CertificateDer, ServerName, UnixTime};
 use rustls::{CertificateError, DigitallySignedStruct, Error, OtherError, SignatureScheme};
 
 use crate::platform::trust::{self, Rejection};
+use crate::platform::usage::Usage;
 
 // `SecBase.h`: the codes mapped to rustls's own certificate errors, so that
 // rustls sends the matching alert.
@@ -31,6 +32,9 @@ pub(crate) struct Evaluation {
     pub(crate) certificates: usize,
     pub(crate) stapled_ocsp: bool,
     pub(crate) rejection: Option<Rejection>,
+    /// Instructions this process retired during the evaluation (all its
+    /// threads); `trustd`'s own work is not counted.
+    pub(crate) instructions: u64,
 }
 
 #[derive(Debug)]
@@ -73,14 +77,17 @@ impl ServerCertVerifier for SystemVerifier {
             .chain(intermediates.iter().map(AsRef::as_ref))
             .collect();
         let ocsp = (!ocsp_response.is_empty()).then_some(ocsp_response);
+        let before = Usage::now();
         let start = Instant::now();
         let result = trust::evaluate(&chain, host, ocsp, now.as_secs());
+        let took = start.elapsed();
         let evaluation = Evaluation {
             host: host.to_owned(),
-            took: start.elapsed(),
+            took,
             certificates: chain.len(),
             stapled_ocsp: ocsp.is_some(),
             rejection: result.clone().err(),
+            instructions: Usage::now().since(&before).instructions,
         };
         self.evaluations
             .lock()

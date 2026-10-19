@@ -25,7 +25,8 @@
 #          comparison; probe
 #   S7-Q2  handshakes: --count full and resumed, per stack, to
 #          www.cloudflare.com and www.apple.com; download: --megabytes per
-#          stack, after a warm-up; ready: the idle helper's footprint
+#          stack, after a warm-up; ready: the idle helper's footprint; startup:
+#          one-time costs, stage by stage
 #   S7-Q3  dns: addresses and HTTPS records
 #   S7-Q4  one-wait: everything from one kevent64 wait, then --idle seconds idle
 # Once, after the runs:
@@ -51,7 +52,7 @@ while [ $# -gt 0 ]; do
     --idle) idle=$2; shift 2 ;;
     --allow-battery) battery=yes; shift ;;
     --quick) quick=yes; shift ;;
-    -h | --help) sed -n '2,37p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h | --help) sed -n '2,39p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown argument: $1 (see --help)" >&2; exit 2 ;;
   esac
 done
@@ -123,6 +124,7 @@ for r in $(seq 1 "$runs"); do
       --url "https://speed.cloudflare.com/__down?bytes=$bytes"
   done
   run "q2-ready-run$r" ready
+  run "q2-startup-run$r" startup
   run "q3-dns-run$r" dns
   run "q4-one-wait-run$r" one-wait --idle "$idle"
 done
@@ -235,6 +237,8 @@ median() {
   echo "  rustls handshake kinds seen: $(cat "$out"/q2-handshakes-rustls-*-run*.txt | awk -F'\t' '$1 == "handshakes" { print $4 "=" $12 }' | sort | uniq -c | tr '\n' ' ')"
   echo "  downloads (bytes wall-ms cpu-ms cpu-ms-per-MB instructions/byte cycles/byte MB/s):"
   grep -h '^download	' "$out"/q2-download-*-run*.txt | cut -f2,4-10 | sed 's/^/    /'
+  echo "  startup stages (cpu-us instructions cycles detail), run 1:"
+  grep -h '^startup	' "$out/q2-startup-run1.txt" | cut -f2- | cut -c1-200 | sed 's/^/    /'
   echo "  ready footprint (bytes):"
   grep -h '^ready-usage' "$out"/q2-ready-run*.txt | sed 's/.*\tfootprint=\([0-9]*\).*/\1/' | sed 's/^/    /'
   echo

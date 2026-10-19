@@ -320,6 +320,90 @@ pub(crate) fn probe(context: &Context) -> Result<(), String> {
     Ok(())
 }
 
+/// `startup`: S7-Q2's one-time costs, stage by stage, in a fresh helper:
+/// the crypto provider and a client configuration; the first use of each
+/// key-exchange group; and two handshakes to `--host` (fetching `--path`),
+/// the first of which pays the first trust evaluation.
+pub(crate) fn startup(context: &Context) -> Result<(), String> {
+    let (host, port) = host_port(context.option("--host").unwrap_or("www.cloudflare.com"));
+    let path = context
+        .option("--path")
+        .unwrap_or("/cdn-cgi/trace")
+        .to_owned();
+    println!("# startup\tstage\tcpu-us\tinstructions\tcycles\tdetail");
+    let stage = |name: &str, before: &Usage, detail: &str| {
+        let used = Usage::now().since(before);
+        println!(
+            "startup\t{name}\t{}\t{}\t{}\t{detail}",
+            used.cpu.as_micros(),
+            used.instructions,
+            used.cycles
+        );
+    };
+    let before = Usage::now();
+    let verifier = context.verifier();
+    let config = Arc::new(context.tls(&verifier, false, b"http/1.1", false)?);
+    stage("provider-and-config", &before, "");
+    for i in 0..2 {
+        let before = Usage::now();
+        let mut bytes = [0_u8; 32];
+        context
+            .provider
+            .secure_random
+            .fill(&mut bytes)
+            .map_err(|e| format!("{e:?}"))?;
+        stage(
+            &format!("random-{i}"),
+            &before,
+            "32 bytes from the provider's random generator",
+        );
+    }
+    for group in &context.provider.kx_groups {
+        let before = Usage::now();
+        let started = group.start().map_err(|e| e.to_string())?;
+        drop(started);
+        stage("kx-first-use", &before, &format!("{:?}", group.name()));
+    }
+    for group in &context.provider.kx_groups {
+        let before = Usage::now();
+        drop(group.start().map_err(|e| e.to_string())?);
+        stage("kx-second-use", &before, &format!("{:?}", group.name()));
+    }
+    let before = Usage::now();
+    let mut driver = Driver::new(config, None)?;
+    stage("driver", &before, "kqueue and DNS-SD connection");
+    for i in 0..2 {
+        let before = Usage::now();
+        let index = driver.add(
+            Job::Tls {
+                host: host.clone(),
+                port,
+                path: path.clone(),
+                keep_alive: false,
+            },
+            Duration::from_secs(20),
+        );
+        driver.run_until(|d| d.tasks[index].finished())?;
+        let task = driver.retire(index).ok_or("no task")?;
+        let evaluations = verifier.take();
+        let detail = match (&task.state, evaluations.first()) {
+            (State::Tls(fetch), Some(e)) => format!(
+                "{:?} {} trust-eval-ms={:.3} trust-eval-instructions={}",
+                fetch.phase,
+                fetch.negotiated(),
+                e.took.as_secs_f64() * 1e3,
+                e.instructions
+            ),
+            (State::Tls(fetch), None) => format!("{:?}", fetch.phase),
+            (State::Failed(e), _) => format!("failed: {e}"),
+            _ => "unfinished".to_owned(),
+        };
+        stage(&format!("handshake-{i}"), &before, &detail);
+    }
+    usage_line("startup", "end", &Usage::now());
+    Ok(())
+}
+
 /// `verify`: S7-Q1. Handshakes to good and bad hosts, each verified by
 /// Security (rustls) or by Network framework itself (`--stack nw`).
 pub(crate) fn verify(context: &Context) -> Result<(), String> {
@@ -364,7 +448,9 @@ pub(crate) fn verify(context: &Context) -> Result<(), String> {
                             ),
                             fetch.times.done,
                         ),
-                        crate::tls::Phase::Failed(e) if fetch.times.connected.is_some() => {
+                        // A rejection is the verifier's; anything else,
+                        // such as a timeout, is a failure.
+                        crate::tls::Phase::Failed(e) if e.contains("invalid peer certificate") => {
                             ("rejected", e.clone(), fetch.times.done)
                         }
                         crate::tls::Phase::Failed(e) => ("failed", e.clone(), fetch.times.done),
