@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 5, CP7). Decided in [ADR-0013](../adr/0013-networking-storage-and-workers.md), whose acceptance the owner pre-approved at Gate B (2026-10-18), effective once S7-Q1, S7-Q3 and S7-Q4 pass |
+| **Status** | **Binding** since [ADR-0013](../adr/0013-networking-storage-and-workers.md)'s acceptance (2026-10-19), which the owner pre-approved at Gate B (2026-10-18), effective once S7-Q1, S7-Q3 and S7-Q4 passed ([S7 results](../research/s7-results.md)). Written at Step 5, CP7. The storage engine is still settled at its milestone, by SW2's conditions |
 | **Question** | Where and how are web storage, IndexedDB, the Cache API and quotas stored? How do service workers intercept fetches, and where do shared and service workers run when no same-site renderer exists? |
 | **Answers** | Step 5 question Q7 ([tracker](../research/step-5-subsystems.md) §3); the tracker's handed-over question 11 (§2.2); [networking](networking.md) open question 2 (the storage format of the cache and the cookie jar) |
 | **Feeds** | ADR-0013 (CP9); CP16 (the storage and worker APIs in JavaScript); CP17 (bindings) |
 | **Builds on** | The [process model](../security/process-model.md) §3, note 2, SI1–SI3 and B4–B5; [frame tree and navigation](frame-tree-and-navigation.md) FT6, FT9–FT11; [event loop and threading](event-loop-and-threading.md) EL8 and §4.6; [script and heap](script-and-heap.md) SH1–SH2; [IPC](ipc.md) IP4, IP13, IP15; [networking](networking.md) NW10–NW12; the [dependency policy](../technology/dependency-policy.md) |
-| **Last updated** | 2026-10-18 |
+| **Last updated** | 2026-10-19 |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered SW1–SW13. Precedent is sourced (§3); the design is inference unless marked otherwise.
 

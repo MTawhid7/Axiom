@@ -4,7 +4,7 @@
 |---|---|
 | **Status** | Living document. Started at Step 5, CP2 |
 | **Purpose** | Every dependency proposed for the engine, with the record the [dependency policy](dependency-policy.md) requires (DP6). Nothing listed here is added to the workspace until its approval (DP5) and, for code, an authorized milestone |
-| **Last updated** | 2026-10-18 |
+| **Last updated** | 2026-10-19 |
 
 **How to read it.** Each entry gives the fields of DP6. The values used are:
 - **class:** required platform facility, replaceable implementation detail, or foundational dependency (DP5);
@@ -32,7 +32,7 @@ The Step 5 checkpoints add proposed facilities (CoreText, ImageIO, Security, Net
 
 | Field | Value |
 |---|---|
-| **Crates** | `objc2` 0.6.5; the framework crates `objc2-foundation`, `objc2-app-kit`, `objc2-quartz-core`, `objc2-metal`, `objc2-core-text`, `objc2-core-graphics`, `objc2-core-foundation`, `objc2-io-surface` and `objc2-image-io` (S5), 0.3.2; transitively `block2` 0.6.2, `dispatch2` 0.3.1, `objc2-encode` 4.1.0 and `bitflags` 2.13.2 (the versions in `Cargo.lock`) |
+| **Crates** | `objc2` 0.6.5; the framework crates `objc2-foundation`, `objc2-app-kit`, `objc2-quartz-core`, `objc2-metal`, `objc2-core-text`, `objc2-core-graphics`, `objc2-core-foundation`, `objc2-io-surface`, `objc2-image-io` (S5) and `objc2-security` (S7), 0.3.2; transitively `block2` 0.6.2, `dispatch2` 0.3.1, `objc2-encode` 4.1.0 and `bitflags` 2.13.2 (the versions in `Cargo.lock`) |
 | **Source and license** | crates.io; `objc2`, `block2` and `objc2-encode` MIT; the framework crates and `dispatch2` "Zlib OR Apache-2.0 OR MIT"; `bitflags` "MIT OR Apache-2.0" (crates.io, 2026-10-18) |
 | **Purpose** | The Objective-C runtime, and generated bindings to Apple's frameworks |
 | **Used by** | `platform`, and the shell's `platform` module ([overview](../architecture/overview.md) §2) |
@@ -51,7 +51,7 @@ The Step 5 checkpoints add proposed facilities (CoreText, ImageIO, Security, Net
 
 ## 3. Proposed by Step 5
 
-CP3–CP8 add entries here as their documents propose dependencies, and CP9's ADRs decide them. **At Gate B** (2026-10-18) the owner accepted ADR-0010, which makes this register's format binding, and ADR-0014, whose entry (CP8) is now decided and listed in §1. ADRs 0011–0013 are pre-approved pending spikes S5–S7, so their entries stay proposed until those ADRs are accepted. Published grades are Google's or Chromium's `cargo-vet` audits ([text and fonts](../architecture/text-and-fonts.md) §4, source A1). Each applies to the version audited, so every version adopted is audited again (DP15). Build costs are measured when a crate is first added (DP19).
+CP3–CP8 add entries here as their documents propose dependencies, and CP9's ADRs decide them. **At Gate B** (2026-10-18) the owner accepted ADR-0010, which makes this register's format binding, and ADR-0014, whose entry (CP8) is now decided and listed in §1. ADRs 0011 and 0012 are pre-approved pending spikes S5 and S6, so their entries stay proposed until those ADRs are accepted. **ADR-0013 was accepted on 2026-10-19,** once S7's conditions passed, so CP6's and CP7's entries are decided as ADR-0013 records them (below). Published grades are Google's or Chromium's `cargo-vet` audits ([text and fonts](../architecture/text-and-fonts.md) §4, source A1). Each applies to the version audited, so every version adopted is audited again (DP15). Build costs are measured when a crate is first added (DP19).
 
 ### From CP3: text, fonts and Unicode
 
@@ -93,20 +93,25 @@ CP3–CP8 add entries here as their documents propose dependencies, and CP9's AD
 
 ### From CP6: networking
 
+**Decided** by ADR-0013's acceptance (2026-10-19), with spike S7's evidence ([S7 results](../research/s7-results.md)). Network framework, S7-Q2's comparison, is rejected for TLS.
+
 | Dependency | Class | Group | Published grade | Processes | Purpose, and the interface in front of it | Proposed by |
 |---|---|---|---|---|---|---|
-| **Security: trust evaluation** | Required platform facility | — | — (C) | Network | Certificate verification against the system's trust store (SG7). Through `platform` | NW6 |
-| **DNS-SD** (`dns_sd.h`, libSystem) | Required platform facility | — | — (C) | Network | Asynchronous name resolution, and HTTPS records | NW7 |
+| **Security: trust evaluation** | Required platform facility | — | — (C) | Network | Certificate verification against the system's trust store (SG7). Through `platform`, over `objc2-security`. **S7:** works in the network profile with one Mach lookup (`com.apple.trustd.agent`) and the executable directory's metadata; `SecPolicyCreateSSL` returns NULL without the latter, despite its header, so `platform` treats it as fallible. Each evaluation blocks its caller (8.4 ms median) and costs about 1.3 M instructions in-process ([S7 results](../research/s7-results.md) §3, §4.3) | NW6 |
+| **DNS-SD** (`dns_sd.h`, libSystem) | Required platform facility | — | — (C) | Network | Asynchronous name resolution, and HTTPS records. **S7-Q3:** works from kqueue in the network profile, with the metadata of `/var` beside the socket's rule ([S7 results](../research/s7-results.md) §5) | NW7 |
 | **SystemConfiguration** | Required platform facility | — | — (C) | Network | The system's proxy settings | NW9 |
-| **rustls** 0.23.46 | Foundational: TLS shapes the network process | `sandboxed`, with its crypto provider | Not graded; `forbid(unsafe_code)` | Network | TLS 1.2 and 1.3, as a state machine (NW1). "Apache-2.0 OR ISC OR MIT" | NW6 |
-| **`aws-lc-rs`** 1.18.2, with `aws-lc-sys` | Replaceable implementation detail | `sandboxed`: C and assembly, under DP10's exception | — (C and assembly) | Network | rustls's crypto provider. Admitted by ADR-0013 | NW6 |
-| **`quinn-proto`** 0.11.19 | Replaceable implementation detail | `trusted` in the network process, if its audit agrees | Not graded | Network | QUIC, as a deterministic state machine. "MIT OR Apache-2.0" | NW5 |
+| **rustls** 0.23.46, with `rustls-webpki` 0.103.15, `rustls-pki-types` 1.15.1, `subtle`, `zeroize` and `once_cell` (S7, observed) | Foundational: TLS shapes the network process | `sandboxed`, with its crypto provider | Not graded; `forbid(unsafe_code)`; `rustls-webpki` has no `unsafe` either | Network | TLS 1.2 and 1.3, as a state machine (NW1). "Apache-2.0 OR ISC OR MIT". **Its `prefer-post-quantum` default feature is required** (S7). **S7-Q2:** 2.4–3.3× fewer instructions per handshake than Network framework, 1.6× fewer per byte ([S7 results](../research/s7-results.md) §4, §8) | NW6 |
+| **`aws-lc-rs`** 1.18.2, with `aws-lc-sys` 0.46.0 | Replaceable implementation detail | `sandboxed`: C and assembly, under DP10's exception | — (C and assembly) | Network | rustls's crypto provider. Admitted by ADR-0013. **S7:** built through `cc`, within T1–T4 (17.7 s for the crate's clean dev tree). Its CPU-jitter entropy source costs 29–43 ms of CPU on a process's first random bytes, once; `AWS_LC_SYS_NO_JITTER_ENTROPY` leaves it out, a decision for the network milestone ([S7 results](../research/s7-results.md) §4.3, §7) | NW6 |
+| **`quinn-proto`** 0.11.19, with `tracing` 0.1.44 (unconditional), `rand` 0.10.3, `chacha20`, `getrandom`, `rand_pcg`, `slab`, `lru-slab`, `tinyvec`, `rustc-hash`, `thiserror` and `bytes` (S7, observed) | Replaceable implementation detail | `trusted` in the network process, if its audit agrees | Not graded. Four `unsafe` uses, all `VarInt::from_u64_unchecked` on bounded values. `tracing` is graded `ub-risk-4` at 0.1.39 and `ub-risk-2` for the 0.1.40→0.1.41 delta; `tinyvec` `ub-risk-0` | Network | QUIC, as a deterministic state machine. "MIT OR Apache-2.0". **S7-Q4:** driven from the I/O thread's wait, with an HTTP/3 GET ([S7 results](../research/s7-results.md) §6, §8) | NW5 |
+| **Network framework** (`Network/connection.h`) | Required platform facility, if used | — | — (C) | Network | **Rejected for TLS by S7-Q2:** S7's comparison only. It needs no rule beyond the network profile, but costs 2.4–3.3× rustls's instructions per handshake and 1.6× per byte, runs its own threads, and didn't resume sessions in the configuration tried ([S7 results](../research/s7-results.md) §4) | NW6 |
 | **`miniz_oxide`** | Replaceable implementation detail | `trusted` in the network process and renderer | `ub-risk-0` (0.8.5) | Network, renderer | gzip and deflate (and PNG's inflate) | NW13 |
 | **`ruzstd`** 0.9.1 | Replaceable implementation detail | `trusted` in the network process | `ub-risk-2` (0.6.0) | Network | zstd. MIT | NW13 |
 
 `brotli-decompressor` is CP3's entry, shared with NW13.
 
 ### From CP7: storage
+
+**Decided** by ADR-0013's acceptance (2026-10-19), on SW2's terms: `redb` if its audit and SW13's crash tests pass at the storage milestone, otherwise SQLite.
 
 | Dependency | Class | Group | Published grade | Processes | Purpose, and the interface in front of it | Proposed by |
 |---|---|---|---|---|---|---|

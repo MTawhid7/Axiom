@@ -2,15 +2,15 @@
 
 > **Read this first when resuming work.** Then check the documents it links to against the actual state of the repository (`git log`, `git status`, and the checkpoint tracker). Don't assume earlier work is still accurate.
 
-## Current state (2026-10-18)
+## Current state (2026-10-19)
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero: Step 5, subsystem design** (authorized 2026-10-18). Part 1 is complete and **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted, ADRs 0011–0013 pre-approved pending spikes S5–S7, which are authorized. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
+| Phase | **Phase Zero: Step 5, subsystem design** (authorized 2026-10-18). Part 1 is complete and **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted, ADRs 0011–0013 pre-approved pending spikes S5–S7, which are authorized. **ADR-0013 accepted** on 2026-10-19, once S7 met its condition. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 4** (merged with `--no-ff` on 2026-10-18) and is pushed. Step 4 ran on branch `step-4`, also pushed. **Step 5 runs on branch `step-5`**, from `main` at `c642ab3`, pushed to `origin` as the owner authorized at Gate A |
-| Current checkpoint | **Step 5: CP1–CP10 ✅, Gate B passed; CP11 (spike S6) in progress: its formal run waits for the owner; CP12 (spike S7) next** ([tracker](research/step-5-subsystems.md)). Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
-| Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. **S5, S6 and S7 authorized** at Step 5's Gate B; S5 is complete (`spikes/s5/`, CP10). Tooling under `tools/`. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
-| Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
+| Current checkpoint | **Step 5: CP1–CP10 and CP12 ✅, Gate B passed; CP11 (spike S6): its formal run waits for the owner; CP13 (HTML parsing and the DOM) next** ([tracker](research/step-5-subsystems.md)). Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
+| Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. **S5, S6 and S7 authorized** at Step 5's Gate B; S5 and S7 are complete (`spikes/s5/`, CP10; `spikes/s7/`, CP12); S6's code is written (`spikes/s6/`). Tooling under `tools/`. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
+| Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md), [S7](research/s7-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final**, with build thresholds T1–T4 |
 | | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 |
@@ -23,16 +23,31 @@
 | | [ADR-0009](adr/0009-embedder-api-and-shell.md): engine/embedder API and the pure-Rust shell (2026-10-17, Gate B) |
 | | [ADR-0010](adr/0010-dependency-and-supply-chain-policy.md): the dependency and supply-chain policy, with DP10's refinement (2026-10-18, Step 5's Gate B) |
 | | [ADR-0014](adr/0014-accessibility.md): accessibility, with the settings list and the reserved key equivalents (2026-10-18, Step 5's Gate B) |
-| Pre-approved | [ADR-0011](adr/0011-text-fonts-and-unicode.md) once S5-Q1 and S5-Q3 pass (S5-Q3 passed; S5-Q1 and S5-Q2 await the owner's visual check); [ADR-0012](adr/0012-graphics-images-and-media.md) once S6-Q1, S6-Q3, S6-Q5 and S5-Q5 pass (S5-Q5 missed its condition: Proposed until Gate C); [ADR-0013](adr/0013-networking-storage-and-workers.md) once S7-Q1, S7-Q3 and S7-Q4 pass |
+| | [ADR-0013](adr/0013-networking-storage-and-workers.md): networking, storage and workers (2026-10-19), the owner's Gate B condition met by S7 |
+| Pre-approved | [ADR-0011](adr/0011-text-fonts-and-unicode.md) once S5-Q1 and S5-Q3 pass (S5-Q3 passed; S5-Q1 and S5-Q2 await the owner's visual check); [ADR-0012](adr/0012-graphics-images-and-media.md) once S6-Q1, S6-Q3, S6-Q5 and S5-Q5 pass (S5-Q5 missed its condition: Proposed until Gate C) |
 
 ## Next steps: spikes S5–S7 (CP10–CP12), then part 2
 
 1. ~~CP10, spike S5~~ **done** (2026-10-18, [results](research/s5-results.md)). **For the owner, when convenient:** the visual check of S5-Q1's pairs and S5-Q2's sheets (`target/s5-results/20261018-204642/sheets-q1` and `sheets-q2`), which ADR-0011's acceptance waits for. The decisions it raises for Gate C are in the tracker's CP10 entry.
 2. **CP11, spike S6:** code done (`c2c8ad5`); **the formal run needs the owner** (`tools/s6-measure.sh --show 30`: AC power, the Mac idle for about 25 minutes, the desktop showing, not an app in full screen). Originally: **CP11, spike S6** (compositing on Metal): S6-Q1 to S6-Q5 under `spikes/s6/` (§10.2), against the confirmed thresholds. Formal runs need AC power with Low Power Mode off, and the owner is asked to leave the Mac idle during them.
-3. **CP12, spike S7** (the network process and TLS): S7-Q1 to S7-Q4 under `spikes/s7/` (§10.3), with read-only requests to public test hosts.
+3. ~~CP12, spike S7~~ **done** (2026-10-19, [results](research/s7-results.md)): S7-Q1, S7-Q3 and S7-Q4 pass, so ADR-0013 is accepted. Its proposals for Gate C are in the tracker's CP12 entry.
 4. **CP13–CP18,** part 2, without pausing until Gate C. A spike result that misses its condition leaves its ADR Proposed until Gate C, unless it undermines an input part 2 depends on; then work stops there and the owner decides (§7).
 
 ## Session log
+
+### 2026-10-19 — Session 10 (spike S7; ADR-0013 accepted)
+
+**CP12, spike S7** ([results](research/s7-results.md); tracker §11), under the owner's Gate B authorization: "Spike S7 (Network Process & TLS): Authorized for questions S7-Q1 through S7-Q4 under spikes/s7/, including read-only outbound network requests to public test hosts."
+- **Code:** `spikes/s7/net` (`s7-net`): a broker that compiles the network profile, and a sandboxed helper with modes for each question; its `unsafe` in `src/platform/` (Security, Network framework, DNS-SD, kqueue, Mach, sockets, libproc) under invariants N1–N9; 8 offline tests; `tools/s7-measure.sh`. Commits `4840d7d` and `13daa44`.
+- **Network access:** read-only GETs to public test hosts and DNS queries through the system's resolver. No certificate was added to a keychain, and nothing on the Mac was reconfigured.
+- **Formal run:** `4840d7d`, from a clean tree, on AC power with Low Power Mode off (`target/s7-results/20261019-071313/`); three runs, the Mac in normal use. Supplementary `startup` runs at `13daa44`.
+- **S7-Q1: passes.** In the broker-compiled profile, rustls verified through `SecTrustEvaluateWithError` gave the expected verdict for every host it reached, the same as unsandboxed and as Network framework. The profile has eight rules; two metadata rules were found by failures the kernel didn't log (`/var`, for DNS-SD; the executable's directory, without which `SecPolicyCreateSSL` returns NULL). Every denial is explained, using reporting runs that log every attempted operation.
+- **S7-Q2: reported; NW6 settled as designed.** rustls retired 2.4–3.3× fewer instructions per handshake than Network framework, 1.6× fewer per byte. rustls needs its `prefer-post-quantum` default feature (without it, Cloudflare answered every full handshake with a HelloRetryRequest). A process's first TLS use costs 29–43 ms of CPU, for AWS-LC's jitter entropy source.
+- **S7-Q3: passes.** DNS-SD resolved nine queries on one shared connection, from kqueue, with one thread.
+- **S7-Q4: passes.** One I/O thread drove rustls, `quinn-proto` (an HTTP/3 GET), DNS-SD, Mach messages received in the wait, a timer and a user event from one `kevent64` per turn, and woke only for real deadlines when idle.
+- **ADR-0013 accepted** (2026-10-19), under the owner's Gate B words: "Pre-approved; will move to Accepted upon S7-Q1, S7-Q3, and S7-Q4 passing." The networking and storage designs are now binding; the register's CP6 and CP7 entries are decided.
+- **For Gate C:** verification in the worker pool, off the I/O thread (NW6, because `SecTrustEvaluateWithError` blocks its caller and EL1 allows one place to block); noting the two metadata rules in the process model's network column; AWS-LC's jitter entropy, at the network milestone.
+- **Clean-up:** no crash reports. One empty helper data directory in `target/release/`, left by an informal run cut short by `head`, was removed.
 
 ### 2026-10-18 — Session 9 (Gate B; spikes S5–S7)
 

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | Living document |
-| **Last updated** | 2026-10-18 |
+| **Last updated** | 2026-10-19 |
 
 This folder holds research notes on design history, modern alternatives, and experimental results. They feed the ADRs and the architecture documents.
 
@@ -66,4 +66,5 @@ This folder holds research notes on design history, modern alternatives, and exp
 | [macOS runtime facilities](macos-runtime-facilities.md) | Run loops, frame timing, QoS on the M1, surfaces across processes, IME and accessibility on macOS 27; browser precedent | Complete (Step 4, CP2) |
 | [Step 4 plan](step-4-architecture-proposal.md) | Plan and checkpoint tracker for Step 4: the architecture proposal v0 (event loop, threads, IPC, frame tree, pipeline, invalidation, embedder API, script and heap) and spike S3 | Done (CP1–CP17; merged 2026-10-18) |
 | [S5 results](s5-results.md) | The text stack against CoreText on macOS 27 (shaping, rasterization, footprint, speed, size), web fonts through a Rust-only path in the renderer's sandbox, and ImageIO in that sandbox against the safe image decoders | Complete (2026-10-18), with the owner's visual checks of S5-Q1 and S5-Q2 outstanding |
+| [S7 results](s7-results.md) | The network process on macOS 27: its deny-by-default profile and the rules trust evaluation and DNS-SD need, rustls verified by Security against Network framework's TLS, DNS-SD from kqueue, and one `kevent64` wait driving TLS, QUIC, DNS-SD, Mach and timers | Complete (2026-10-19): S7-Q1, S7-Q3 and S7-Q4 pass; S7-Q2 settles NW6 |
 | [Step 5 plan](step-5-subsystems.md) | Plan and checkpoint tracker for Step 5: the subsystems behind Step 4's interfaces (text and fonts, graphics, images and media, networking, storage and workers, accessibility, HTML and the DOM, style, layout and paint, the JavaScript engine, bindings), criteria SC1–SC10, and spikes S5–S7 | In progress: Gate B passed (2026-10-18); spikes S5–S7 (CP10–CP12): S5 reported (CP10) |

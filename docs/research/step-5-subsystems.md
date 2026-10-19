@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Next: CP10, spike S5** |
+| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Spikes:** S5 reported (CP10 ✅); S6's formal run waits for the owner (CP11); S7 reported and **ADR-0013 accepted** (CP12 ✅, 2026-10-19). **Next: CP13,** part 2 |
 | **Authorized** | 2026-10-18, by the owner: "Step 5 Authorization: Authorized." Planning on a new branch, `step-5`, with "the Step 5 plan and checkpoint tracker first for Gate A review" (§2). Design documents only; each spike needs its own authorization. **Spikes S5, S6 and S7 authorized at Gate B** (2026-10-18), each for the questions it names (§10) |
 | **Branch** | `step-5`, from `main` at `c642ab3` (the Step 4 merge). Pushed to `origin` as the owner authorized at Gate A, and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items I1–I5, the text part of P4, and X4 if the owner adds it (§2.3); the questions earlier steps handed to Step 5 (§2.2); OQ-3, as evidence; ADRs from 0010 (§4); Step 6 |
-| **Last updated** | 2026-10-18 |
+| **Last updated** | 2026-10-19 |
 
 > **Resuming in a new session?**
 > 1. Read §6 to find the first checkpoint that isn't ✅.
@@ -51,11 +51,11 @@ Storage and workers are designed after networking: the [process model](../securi
 | **Gate B (2026-10-18):** "ADR-0010 (Dependency and Supply-Chain Policy): Accepted as proposed, including the DP10 refinement." | [ADR-0010](../adr/0010-dependency-and-supply-chain-policy.md) Accepted; the [dependency policy](../technology/dependency-policy.md) is binding |
 | "ADR-0011 (Text, Fonts, and Unicode): Pre-approved; will move to Accepted upon S5-Q1 and S5-Q3 passing, with TX12 settled by S5-Q2." | [ADR-0011](../adr/0011-text-fonts-and-unicode.md) stays Proposed until S5 reports (§10.1) |
 | "ADR-0012 (Graphics, Images, and Media): Pre-approved; will move to Accepted upon S6-Q1, S6-Q3, and S6-Q5 passing, and S5-Q5 validating ImageIO inside the renderer sandbox." | [ADR-0012](../adr/0012-graphics-images-and-media.md) stays Proposed until S6 and S5-Q5 report (§10.1, §10.2) |
-| "ADR-0013 (Networking, Storage, and Workers): Pre-approved; will move to Accepted upon S7-Q1, S7-Q3, and S7-Q4 passing." | [ADR-0013](../adr/0013-networking-storage-and-workers.md) stays Proposed until S7 reports (§10.3) |
+| "ADR-0013 (Networking, Storage, and Workers): Pre-approved; will move to Accepted upon S7-Q1, S7-Q3, and S7-Q4 passing." | [ADR-0013](../adr/0013-networking-storage-and-workers.md) **accepted** 2026-10-19: S7-Q1, S7-Q3 and S7-Q4 passed (CP12, §11) |
 | "ADR-0014 (Accessibility): Accepted as proposed." | [ADR-0014](../adr/0014-accessibility.md) Accepted; the [accessibility design](../architecture/accessibility.md) is binding |
 | "Spike S5 (Text Stack & ImageIO Sandbox): Authorized for questions S5-Q1 through S5-Q5 under spikes/s5/, including the listed candidate crates and OFL/WPT test web fonts." | CP10 (§10.1) |
 | "Spike S6 (Metal Compositing): Authorized for questions S6-Q1 through S6-Q5 under spikes/s6/. The performance thresholds are confirmed: typical update ≤ 4 ms GPU / ≤ 2 ms compositor thread; scrolling/transforms ≤ 1 ms." | CP11 (§10.2), with the thresholds confirmed |
-| "Spike S7 (Network Process & TLS): Authorized for questions S7-Q1 through S7-Q4 under spikes/s7/, including read-only outbound network requests to public test hosts." | CP12 (§10.3) |
+| "Spike S7 (Network Process & TLS): Authorized for questions S7-Q1 through S7-Q4 under spikes/s7/, including read-only outbound network requests to public test hosts." | CP12 (§10.3): ✅ 2026-10-19 ([results](s7-results.md)) |
 | "Settings List: Approved as written in docs/architecture/accessibility.md §6.1." "Reserved Key Equivalents: Approved as written in docs/architecture/accessibility.md §6.2 (Chromium reserved set, plus ⌘L, ⌘,, and Esc un-overridable even in fullscreen)." | Handed-over questions 13 and 14 (§2.2) answered; [accessibility](../architecture/accessibility.md) §6 |
 | "OQ-21 (Axiom License): Approved as 'MIT OR Apache-2.0'. Please add the standard LICENSE-MIT and LICENSE-APACHE files to the repository root." | Both files added; the workspace manifest declares the license; [OQ-21](../open-questions.md) resolved; DP17 updated |
 | "Proceed with executing Spikes S5, S6, and S7 as planned." | CP10–CP12, then CP13–CP18 without pausing until Gate C (§7) |
@@ -276,7 +276,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | | **Spikes**, each only if authorized at Gate B | |
 | CP10 | Spike S5: the text stack | ✅ 2026-10-18 (§11; [results](s5-results.md)). S5-Q3 passes; S5-Q1 and S5-Q2 await the owner's visual check; S5-Q5's condition is not met (IM3's fallback recommended for Gate C) |
 | CP11 | Spike S6: compositing on Metal | In progress: code at `c2c8ad5`, trials run; **the formal run waits for the owner** (AC power, the Mac idle, the window visible) |
-| CP12 | Spike S7: the network process and TLS | Not started |
+| CP12 | Spike S7: the network process and TLS | ✅ 2026-10-19 (§11; [results](s7-results.md)). S7-Q1, S7-Q3 and S7-Q4 pass, so ADR-0013 is accepted under the owner's Gate B approval; S7-Q2 settles NW6; verification off the I/O thread proposed for Gate C |
 | | **Part 2: the document and script engine** | |
 | CP13 | HTML parsing and the DOM | Not started |
 | CP14 | Style | Not started |
@@ -935,3 +935,29 @@ Every relative link resolves; the four standard checks pass. CP11 (spike S6) sta
 
 **The formal run needs the owner,** as §10.2 plans: AC power, the Mac otherwise idle, and the window visible, which it can't be over another app in full screen. During this session the Mac was in use, with a full-screen app, and later on battery. CP12 proceeds meanwhile; S6's results and ADR-0012's S6 conditions follow its formal run.
 
+### CP12 — completed 2026-10-19
+
+**Spike S7, run and reported** ([S7 results](s7-results.md)), under the owner's authorization quoted in §2: "Spike S7 (Network Process & TLS): Authorized for questions S7-Q1 through S7-Q4 under spikes/s7/, including read-only outbound network requests to public test hosts."
+- **Code:** `spikes/s7/net` (`s7-net`), its `unsafe` in `src/platform/` under invariants N1–N9, and `tools/s7-measure.sh` (`4840d7d`); then a `startup` mode and a corrected verdict label (`13daa44`).
+- **Network access:** read-only GETs to badssl.com's test hosts, example.com, www.wikipedia.org, www.apple.com, www.cloudflare.com, github.com, speed.cloudflare.com and cloudflare-quic.com, and DNS queries through the system's resolver. No certificate was added to a keychain, and nothing on the Mac was reconfigured.
+- **Three deviations from §10.3,** within the authorization: the QUIC connection makes an HTTP/3 GET, with framing and QPACK of the spike's own; the Mach messages come from a second thread in the helper, not from the broker; Network framework needed no rule beyond the network profile, so there is no second profile (results §1).
+- **Formal run** at `4840d7d`, from a clean tree, on AC power with Low Power Mode off: `target/s7-results/20261019-071313/`. Three runs after 30 s cool-downs; the Mac was in normal use (results §2, §10). Supplementary `startup` runs at `13daa44`: `target/s7-results/20261019-073956-startup/`.
+
+**Answers:**
+- **S7-Q1: passes.** rustls, verified through `SecTrustEvaluateWithError` in the broker-compiled profile, gave the expected verdict for every host it reached, in every run: the ten good hosts verify, and the expired, self-signed, wrong-host, untrusted-root and SHA-1-intermediate certificates are rejected with Security's codes, as unsandboxed and as with Network framework. Five of 162 attempts failed before verification, on badssl.com's servers (2 resets, 3 timeouts). **The profile has eight rules,** each opening rule S7 uses checked by removal. Two were found by failures the kernel didn't log: the metadata of `/var`, for DNS-SD's socket, and of the executable's directory, without which `SecPolicyCreateSSL` returns NULL. The system `trustd` service, in the draft, was never used and was dropped. Every denial is explained, from the denial log and from reporting runs that log every attempted operation.
+- **S7-Q2: reported; NW6 settled as designed.** rustls retired 2.4–3.3× fewer instructions per handshake than Network framework and 1.6× fewer per byte, with fewer threads; Network framework never resumed a session in the configuration tried. rustls needs its `prefer-post-quantum` default feature, without which Cloudflare answered every full handshake with a HelloRetryRequest. A process's first TLS use costs 29–43 ms of CPU, for AWS-LC's jitter entropy source.
+- **S7-Q3: passes.** Nine DNS-SD queries on one shared connection resolved from kqueue in 17–23 ms, with one thread throughout.
+- **S7-Q4: passes.** One I/O thread drove rustls, `quinn-proto` with an HTTP/3 GET, DNS-SD, a Mach port set received in the wait, a timer with leeway and a user event, from one `kevent64` per turn. Idle for 30 s, it woke only for QUIC's idle-timeout deadline and the window's end.
+
+**The conditional approval** (owner's Gate B words, quoted in §2): ADR-0013 "will move to Accepted upon S7-Q1, S7-Q3, and S7-Q4 passing". All three pass, so **ADR-0013 is accepted** (2026-10-19), and the networking and storage designs are binding.
+
+**Proposed for Gate C,** each recorded where it belongs:
+- **Verification in the worker pool** (NW6): `SecTrustEvaluateWithError` blocks its caller (8.4 ms median; 1.0–1.5 s in three informal cases), and EL1 gives the I/O thread one place to block.
+- **The process model's network column:** note the two metadata rules, beside S5's refinement for renderers. The model is binding, so it isn't edited.
+- **AWS-LC's jitter entropy source:** whether to build without it is decided at the network milestone.
+
+**Updates:** [ADR-0013](../adr/0013-networking-storage-and-workers.md) (status, decision history, assumptions, risks, consequences); [networking](../architecture/networking.md) (status; NW1, NW5, NW6, NW7, NW17; alternatives; open question 1); [storage and workers](../architecture/storage-and-workers.md) (status); the [register](../technology/dependency-register.md) (Security, DNS-SD, rustls, `aws-lc-rs`, `quinn-proto` and Network framework; CP6's and CP7's entries decided); the [decision map](../decision-map.md); the indexes; [status](../status.md); `spikes/README.md`.
+
+**Clean-up:** no helper crashed, so there were no crash reports. One empty helper data directory, in `target/release/`, was left by an informal run whose output was cut short by `head`: the broker panicked on the closed pipe before removing it. It was removed by hand.
+
+Every relative link resolves; the four standard checks pass. CP13 (HTML parsing and the DOM) starts.
