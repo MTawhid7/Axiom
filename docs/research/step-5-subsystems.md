@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Spikes:** S5 reported (CP10 ✅); S6's formal run waits for the owner (CP11); S7 reported and **ADR-0013 accepted** (CP12 ✅, 2026-10-19). **Part 2:** CP13 and CP14 ✅. **Next: CP15,** layout and paint |
+| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Spikes:** S5 reported (CP10 ✅); S6's formal run waits for the owner (CP11); S7 reported and **ADR-0013 accepted** (CP12 ✅, 2026-10-19). **Part 2:** CP13–CP15 ✅. **Next: CP16,** the JavaScript engine |
 | **Authorized** | 2026-10-18, by the owner: "Step 5 Authorization: Authorized." Planning on a new branch, `step-5`, with "the Step 5 plan and checkpoint tracker first for Gate A review" (§2). Design documents only; each spike needs its own authorization. **Spikes S5, S6 and S7 authorized at Gate B** (2026-10-18), each for the questions it names (§10) |
 | **Branch** | `step-5`, from `main` at `c642ab3` (the Step 4 merge). Pushed to `origin` as the owner authorized at Gate A, and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items I1–I5, the text part of P4, and X4 if the owner adds it (§2.3); the questions earlier steps handed to Step 5 (§2.2); OQ-3, as evidence; ADRs from 0010 (§4); Step 6 |
@@ -280,7 +280,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | | **Part 2: the document and script engine** | |
 | CP13 | HTML parsing and the DOM | ✅ 2026-10-19 (§11; [document](../architecture/html-and-dom.md)). An amendment to ADR-0008 proposed for Gate C (HD11) |
 | CP14 | Style | ✅ 2026-10-19 (§11; [document](../architecture/style.md)). An amendment to ADR-0007 proposed for Gate C (ST25, ST31) |
-| CP15 | Layout and paint | Not started |
+| CP15 | Layout and paint | ✅ 2026-10-19 (§11; [document](../architecture/layout-and-paint.md)). No amendment needed |
 | CP16 | The JavaScript engine | Not started |
 | CP17 | WebIDL bindings | Not started |
 | CP18 | The overview refined, and the criteria check; ADRs for part 2 (Proposed); decision map, open questions, indexes, status. **Gate C** | Not started |
@@ -1002,3 +1002,20 @@ Every relative link resolves; the four standard checks pass. CP14 (style) starts
 - **`:visited`** (open question 2): partitioned history once the browser's history service exists, never matching until then. **Recommended:** accept. A renderer never holds the global history, and Selectors 4 calls the older restrictions "an arms race that can't be won".
 
 Every relative link resolves; the four standard checks pass. CP15 (layout and paint) starts.
+
+### CP15 — completed 2026-10-19
+
+**[Layout and paint](../architecture/layout-and-paint.md)** (Proposed; LY1–LY32), answering Q11, the layout-unit half of the handed-over question 16, and the rendering pipeline's open question 4:
+- **The layout unit** is fixed-point, 1/64 of a CSS pixel in an `i32`, saturating, as in Blink, WebKit and Ladybird (Firefox counts 1/60). Integer arithmetic makes fragment cache keys exact and lets IV14 compare incremental and full layouts bit for bit. Text runs use 1/65536 internally, as Blink's do.
+- **Boxes** as CSS Display generates them, from the flat tree, rebuilt only where box-affecting values changed.
+- **LayoutNG's contract** for every algorithm: a box, a constraint space and a break token in, an immutable fragment out, nothing else read; fragments cached by constraint space; fragmentation through break tokens.
+- **Formatting contexts** of Axiom's own: block, inline (through text's interface, reshaping line edges only where HarfRust's `UNSAFE_TO_BREAK` flag requires, which adds that flag to text's shaped runs), flex, grid, positioning, multi-column, writing modes, containment. **Tables are marked approximate:** CSS 2.1 doesn't require its automatic table layout, and CSS Table 3 says it "is not yet ready for implementation".
+- **Scrolling:** scroll nodes carry snap areas, sticky constraints and overscroll behaviour; scrollbar thumbs are spatial nodes the compositor moves, so they don't lag compositor scrolling. These use PL6's spatial nodes and PL7's items, so no amendment is needed.
+- **Paint:** pre-paint builds the property trees; CSS 2.1's painting order over fragments; display items keyed by box identity and reused, with whole stacking contexts reused as Blink's subsequence caching does; paths, complex borders, clip paths and masks as images in the renderer, as GR5 decides until S6 reports; form controls drawn by Axiom's own theme.
+- **Queries:** hit testing finishes in the renderer; hit-test regions recorded during paint, as Blink records them; CSSOM View through IV2; ResizeObserver and IntersectionObserver where HTML's rendering update puts them, with each frame's visible rectangle sent by the browser.
+
+**Precedent read** on 2026-10-19 from primary sources: the W3C layout and painting reports listed in the document's §2 (SVG 2 published a new Candidate Recommendation Snapshot on 2026-10-06), HTML's rendering update, and Blink, Firefox, WebKit, Servo, Ladybird, Taffy and HarfRust at their latest commits. **Ladybird moved layout to Rust on 2026-07-28,** and on 2026-10-03 put style and layout, and paint, on one thread each over copied-on-write render state; that is alternative E, rejected for now because it copies DOM-derived state that Axiom's lending avoids.
+
+**For the owner at Gate C:** nothing new from CP15; its open questions (printing without fonts in the browser, 3D sorting, Taffy as a test oracle, parallel layout, limits for hostile documents) belong to later milestones and Step 6.
+
+Every relative link resolves; the four standard checks pass. CP16 (the JavaScript engine) starts.
