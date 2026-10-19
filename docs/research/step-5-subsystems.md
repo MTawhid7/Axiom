@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Spikes:** S5 reported (CP10 ✅); S6's formal run waits for the owner (CP11); S7 reported and **ADR-0013 accepted** (CP12 ✅, 2026-10-19). **Part 2:** CP13 ✅. **Next: CP14,** style |
+| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Spikes:** S5 reported (CP10 ✅); S6's formal run waits for the owner (CP11); S7 reported and **ADR-0013 accepted** (CP12 ✅, 2026-10-19). **Part 2:** CP13 and CP14 ✅. **Next: CP15,** layout and paint |
 | **Authorized** | 2026-10-18, by the owner: "Step 5 Authorization: Authorized." Planning on a new branch, `step-5`, with "the Step 5 plan and checkpoint tracker first for Gate A review" (§2). Design documents only; each spike needs its own authorization. **Spikes S5, S6 and S7 authorized at Gate B** (2026-10-18), each for the questions it names (§10) |
 | **Branch** | `step-5`, from `main` at `c642ab3` (the Step 4 merge). Pushed to `origin` as the owner authorized at Gate A, and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items I1–I5, the text part of P4, and X4 if the owner adds it (§2.3); the questions earlier steps handed to Step 5 (§2.2); OQ-3, as evidence; ADRs from 0010 (§4); Step 6 |
@@ -279,7 +279,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | CP12 | Spike S7: the network process and TLS | ✅ 2026-10-19 (§11; [results](s7-results.md)). S7-Q1, S7-Q3 and S7-Q4 pass, so ADR-0013 is accepted under the owner's Gate B approval; S7-Q2 settles NW6; verification off the I/O thread proposed for Gate C |
 | | **Part 2: the document and script engine** | |
 | CP13 | HTML parsing and the DOM | ✅ 2026-10-19 (§11; [document](../architecture/html-and-dom.md)). An amendment to ADR-0008 proposed for Gate C (HD11) |
-| CP14 | Style | Not started |
+| CP14 | Style | ✅ 2026-10-19 (§11; [document](../architecture/style.md)). An amendment to ADR-0007 proposed for Gate C (ST25, ST31) |
 | CP15 | Layout and paint | Not started |
 | CP16 | The JavaScript engine | Not started |
 | CP17 | WebIDL bindings | Not started |
@@ -981,3 +981,24 @@ Every relative link resolves; the four standard checks pass. CP13 (HTML parsing 
 - **XSLT** (open question 2). **Recommended:** not planned until a use requires it.
 
 Every relative link resolves; the four standard checks pass. CP14 (style) starts.
+
+### CP14 — completed 2026-10-19
+
+**[Style](../architecture/style.md)** (Proposed; ST1–ST36), answering Q10 and the handed-over questions 15 and 16, with 6 confirmed:
+- **Parsing:** CSS Syntax 3's tokenizer and parser, Axiom's own under DP1 (a), generic over the DOM's 8- and 16-bit code units, so nothing passes through UTF-8; `cssparser` and Stylo parse UTF-8 text. Fetched sheets are decoded as CSS Syntax §3.2 specifies and parsed on the helper pool. **One property table** generates the parsers, the computed-style groups, the impact table and the CSSOM's accessors.
+- **Matching:** right to left over the DOM's columns, lent read-only; rules bucketed by their rightmost compound; a counting Bloom filter of ancestors; `:has()` with relative-selector invalidation. Matching writes nothing into the DOM. **No selector JIT:** WebKit's needs dynamic code generation, which J3 denies to every renderer but `renderer-jit`.
+- **The cascade:** Cascade 5's and 6's order, including shadow-tree context, layers and `@scope` proximity; custom properties with cycle detection and the expansion limit Custom Properties §3.3 requires.
+- **Computed styles,** immutable and shared (PL3): reference-counted groups shared with the parent or the initial style; a rule tree for the identity of what matched; Stylo's style sharing cache (32 candidates per depth); a cascade cache keyed by rule node. The caches are budgeted, evictable and never needed for a correct answer, and a cache-free path is the test oracle, the two principles of Ladybird's new engine.
+- **Invalidation (IV3's details):** invalidation sets from every selector, fed by HD15's hook, pending until style is needed; restyling stops where no inherited group changed; each change classified as box tree, layout, paint, composite only or nothing visible.
+- **Queries:** media queries over an environment the browser sends, including AX10's preferences; **size container queries resolved during layout,** in a nested lifecycle per container, as Blink resolves them.
+- **Animations:** Web Animations as the one timing model, timed by EL22's frame times; compositor animations exactly as GR9 lists them, from a description, with the renderer keeping the authoritative model.
+- **The CSSOM** as a view over immutable contents, edited by copying only the path to the change.
+- **`:visited`** by partitioned history (Selectors 4, Appendix C): the browser keeps it, and a renderer receives only its own partitions.
+
+**Precedent read** on 2026-10-19 from primary sources: the W3C CSS reports listed in the document's §2, the HTML, Compatibility and Quirks Mode standards, and Blink, Stylo, WebKit and Ladybird at their latest commits. **Ladybird switched style resolution to a new engine in Rust on 2026-08-13,** built around bounded, evictable memory; its design is alternative E.
+
+**For the owner at Gate C:**
+- **An amendment to ADR-0007** (ST25, ST31): IV1's lifecycle gains nested lifecycles for size-container subtrees, and IV2's examples gain the `getComputedStyle` reads that need layout (CSSOM §9's used values). Recorded in ADR-0007's decision history; IV1 and IV2 stand until the owner decides. **Recommended:** accept. Container queries can't be implemented under IV1 as written, and the nested phases keep its compiler-checked order.
+- **`:visited`** (open question 2): partitioned history once the browser's history service exists, never matching until then. **Recommended:** accept. A renderer never holds the global history, and Selectors 4 calls the older restrictions "an arms race that can't be won".
+
+Every relative link resolves; the four standard checks pass. CP15 (layout and paint) starts.

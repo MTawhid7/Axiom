@@ -13,6 +13,7 @@
 |---|---|
 | 2026-10-17 | Proposed at Step 4, CP12. It decides SI4 as a whole: the browser-owned frame tree, per-frame display lists and browser-routed input that the owner required "from the first line of code" |
 | 2026-10-17 | **Accepted** by the owner at Gate B: "ADR-0007 (Frame Tree, Pipeline, Input): Accepted." The open question in its consequences was decided at the same time (OQ-19): "Amend criterion AC5 and rule EL11 to allow read-only scoped lending of DOM arenas to helper threads during borrow-checker-frozen rendering stages. Keep the actual parallel style/layout implementation deferred until profiling benchmarks justify it." Decision 6 records it |
+| 2026-10-19 | **Amendment proposed, for the owner at Step 5's Gate C** ([style](../architecture/style.md) ST25, ST31). (1) **IV1 gains nested lifecycles:** a size container's subtree is styled during layout, once the container's size is known, then gets its own box construction and layout, each phase with its own token, and runs again if a later layout pass resizes the container. Phase outputs still never change once produced; what is new is that style's output can have deferred subtrees. Reason: size container queries depend on the container's laid-out size, and Blink resolves them the same way. (2) **IV2's examples:** `getComputedStyle` reads that resolve to used values (CSSOM §9), and reads inside deferred subtrees, need layout; IV2's rule, to run only the phases a query needs, is unchanged. Until the owner decides, IV1 and IV2 stand as written |
 
 ## Question
 
