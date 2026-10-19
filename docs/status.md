@@ -6,9 +6,9 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero: Step 5, subsystem design** (authorized 2026-10-18). Part 1 is complete and **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted, ADRs 0011–0013 pre-approved pending spikes S5–S7, which are authorized. **ADR-0013 accepted** on 2026-10-19, once S7 met its condition. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
+| Phase | **Phase Zero: Step 5, subsystem design** (authorized 2026-10-18), **at Gate C** (2026-10-19). Part 1 is complete and **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted, ADRs 0011–0013 pre-approved pending spikes S5–S7, which are authorized. **ADR-0013 accepted** on 2026-10-19, once S7 met its condition. **Part 2 is complete** (CP13–CP18): five subsystem designs and ADRs 0015–0017, Proposed, with amendments to ADR-0007 and ADR-0008 for the owner. Step 4 is complete: ADRs 0005–0009 are accepted, and spike S3 is complete with its addendum ([results](research/s3-results.md)). Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 4** (merged with `--no-ff` on 2026-10-18) and is pushed. Step 4 ran on branch `step-4`, also pushed. **Step 5 runs on branch `step-5`**, from `main` at `c642ab3`, pushed to `origin` as the owner authorized at Gate A |
-| Current checkpoint | **Step 5: CP1–CP10 and CP12 ✅, Gate B passed; CP11 (spike S6): its formal run waits for the owner; CP13 (HTML parsing and the DOM) next** ([tracker](research/step-5-subsystems.md)). Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
+| Current checkpoint | **Step 5: CP1–CP10 and CP12–CP18 ✅; Gate C reached** (2026-10-19), waiting for the owner's decisions ([tracker](research/step-5-subsystems.md) §11). CP11 (spike S6): its formal run waits for the owner. CP19 (the merge) on the owner's instruction. Step 4: CP1–CP17 ✅ ([tracker](research/step-4-architecture-proposal.md)) |
 | Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3); S3 (Step 4), authorized at Gate B, with an addendum authorized at Gate C. S1 stays as the baseline for S3. **S5, S6 and S7 authorized** at Step 5's Gate B; S5 and S7 are complete (`spikes/s5/`, CP10; `spikes/s7/`, CP12); S6's code is written (`spikes/s6/`). Tooling under `tools/`. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md), [S7](research/s7-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -25,15 +25,34 @@
 | | [ADR-0014](adr/0014-accessibility.md): accessibility, with the settings list and the reserved key equivalents (2026-10-18, Step 5's Gate B) |
 | | [ADR-0013](adr/0013-networking-storage-and-workers.md): networking, storage and workers (2026-10-19), the owner's Gate B condition met by S7 |
 | Pre-approved | [ADR-0011](adr/0011-text-fonts-and-unicode.md) once S5-Q1 and S5-Q3 pass (S5-Q3 passed; S5-Q1 and S5-Q2 await the owner's visual check); [ADR-0012](adr/0012-graphics-images-and-media.md) once S6-Q1, S6-Q3, S6-Q5 and S5-Q5 pass (S5-Q5 missed its condition: Proposed until Gate C) |
+| Proposed, for Gate C | [ADR-0015](adr/0015-html-parsing-and-the-dom.md), HTML parsing and the DOM, with an amendment to ADR-0008 (HD11); [ADR-0016](adr/0016-style-layout-and-paint.md), style, layout and paint, with an amendment to ADR-0007 (ST25, ST31); [ADR-0017](adr/0017-javascript-engine-and-bindings.md), the JavaScript engine and bindings |
 
-## Next steps: spikes S5–S7 (CP10–CP12), then part 2
+## Next steps: Gate C
 
-1. ~~CP10, spike S5~~ **done** (2026-10-18, [results](research/s5-results.md)). **For the owner, when convenient:** the visual check of S5-Q1's pairs and S5-Q2's sheets (`target/s5-results/20261018-204642/sheets-q1` and `sheets-q2`), which ADR-0011's acceptance waits for. The decisions it raises for Gate C are in the tracker's CP10 entry.
-2. **CP11, spike S6:** code done (`c2c8ad5`); **the formal run needs the owner** (`tools/s6-measure.sh --show 30`: AC power, the Mac idle for about 25 minutes, the desktop showing, not an app in full screen). Originally: **CP11, spike S6** (compositing on Metal): S6-Q1 to S6-Q5 under `spikes/s6/` (§10.2), against the confirmed thresholds. Formal runs need AC power with Low Power Mode off, and the owner is asked to leave the Mac idle during them.
-3. ~~CP12, spike S7~~ **done** (2026-10-19, [results](research/s7-results.md)): S7-Q1, S7-Q3 and S7-Q4 pass, so ADR-0013 is accepted. Its proposals for Gate C are in the tracker's CP12 entry.
-4. **CP13–CP18,** part 2, without pausing until Gate C. A spike result that misses its condition leaves its ADR Proposed until Gate C, unless it undermines an input part 2 depends on; then work stops there and the owner decides (§7).
+**Work stops for the owner's Gate C decisions,** listed with recommendations in the [tracker](research/step-5-subsystems.md)'s Gate C entry and in the [overview](architecture/overview.md) §8:
+1. ADR-0015, with the amendment to ADR-0008 (HD11): accept both.
+2. ADR-0016, with the amendment to ADR-0007 (ST25, ST31) and `:visited` by partitioned history: accept all three.
+3. ADR-0017: accept.
+4. XSLT (OQ-22): not planned until a use requires it.
+5. ADR-0011: the visual check of S5's sheets (`target/s5-results/20261018-204642/sheets-q1` and `sheets-q2`); then CoreText for system fonts (TX12).
+6. ADR-0012: AVIF in the media utility process (IM3's fallback); S6's formal run when convenient (`tools/s6-measure.sh --show 30`: AC power, the Mac idle for about 25 minutes, the desktop showing).
+7. Verification in the network process's worker pool (NW6): confirm.
+8. The process model's metadata refinements from S5 and S7: record them, with the owner's approval.
+9. CP19, merging `step-5` into `main` with `--no-ff`: after these decisions, preferably once S6 is recorded.
 
 ## Session log
+
+### 2026-10-19 — Session 11 (part 2: CP13–CP18; Gate C reached)
+
+**Part 2 of Step 5, run without pausing as planned** (the owner's Gate B instruction: "Proceed with executing Spikes S5, S6, and S7 as planned"; the plan runs CP13–CP18 until Gate C):
+- **CP13, [HTML and the DOM](architecture/html-and-dom.md)** (HD1–HD33, `4b81d95`): our own HTML and XML parsers; decoding straight into the DOM's 8- and 16-bit strings; a node arena of `u32` columns whose slots never move, which needs an amendment to ADR-0008 (HD11); one mutation path with fixed hooks.
+- **CP14, [style](architecture/style.md)** (ST1–ST36, `3581d47`): our own CSS parser over 8- and 16-bit text; shared, grouped computed styles with a rule tree, a sharing cache and evictable caches; invalidation sets; container queries in nested lifecycles during layout, which needs an amendment to ADR-0007 (ST25, ST31); `:visited` by partitioned history.
+- **CP15, [layout and paint](architecture/layout-and-paint.md)** (LY1–LY32, `8a5ede7`): a 1/64-pixel fixed-point layout unit; LayoutNG's contract; tables marked approximate; scroll nodes with snap areas, sticky constraints and compositor-moved scrollbar thumbs; paint into PL7's primitives.
+- **CP16, [the JavaScript engine](architecture/javascript-engine.md)** (JE1–JE32, `48bc182`): heap-free compiled scripts; a register machine dispatched by a `match` loop; NaN-boxed values carrying the scope lifetime; `RegExp` interpreted with a linear-time fallback; `Intl` on ICU4X; Temporal of our own; evidence for OQ-3.
+- **CP17, [WebIDL bindings](architecture/bindings.md)** (WB1–WB23, `04527fc`): our own generator over webref's curated IDL, emitting safe Rust; platform objects as heap entries, not wrappers; rooting only where a later conversion may collect; remote window proxies.
+- **CP18:** [the overview, v1](architecture/overview.md); [ADR-0015](adr/0015-html-parsing-and-the-dom.md), [ADR-0016](adr/0016-style-layout-and-paint.md) and [ADR-0017](adr/0017-javascript-engine-and-bindings.md), Proposed; the decision map (P5–P7), the open questions (OQ-3's evidence; OQ-22, XSLT), the register (part 2 adds no runtime dependency) and the indexes.
+- **Precedent** was read from primary sources at their latest commits on 2026-10-19. Notable current facts: Ladybird moved style (2026-08-13) and layout (2026-07-28) to Rust, put style and layout and paint on their own threads (2026-10-03), switched its DOM to wrappers built as host objects (2026-10-05), and gained an optimizing JIT; SVG 2 published a new Candidate Recommendation Snapshot (2026-10-06); Temporal is finished for ECMAScript 2027, and V8 builds it on `temporal_rs`.
+- **Gate C reached:** the decisions are listed in the tracker's Gate C entry, each with a recommendation. No code was written, nothing was installed, and no crash reports or other side effects outside the repository were produced.
 
 ### 2026-10-19 — Session 10 (spike S7; ADR-0013 accepted)
 

@@ -4,7 +4,7 @@
 |---|---|
 | **Status** | Living document. Started at Step 5, CP2 |
 | **Purpose** | Every dependency proposed for the engine, with the record the [dependency policy](dependency-policy.md) requires (DP6). Nothing listed here is added to the workspace until its approval (DP5) and, for code, an authorized milestone |
-| **Last updated** | 2026-10-19 |
+| **Last updated** | 2026-10-19 (CP18: part 2's note) |
 
 **How to read it.** Each entry gives the fields of DP6. The values used are:
 - **class:** required platform facility, replaceable implementation detail, or foundational dependency (DP5);
@@ -125,6 +125,12 @@ CP3–CP8 add entries here as their documents propose dependencies, and CP9's AD
 | **AppKit's `NSAccessibility` protocols and HIServices' text markers** (`AXTextMarkerCreate`) | Required platform facility | — | — | Browser (main thread) | The accessibility bridge, through the shell's `platform` module | AX4, AX5, AX8 |
 
 AccessKit was considered and not adopted, by design rather than grade: its macOS adapter lacks rich text and hypertext (AX8).
+
+### From CP13–CP17: part 2
+
+**No runtime dependency.** The parsers, the DOM, style, layout, paint, the JavaScript engine and the WebIDL generator are Axiom's own (DP1 (a), (b), (g), (h)); `Intl` uses ICU4X, already proposed at CP3 (TX2, JE21). The part 2 documents name **test references** and **data**, each recorded here, with its group (`test` or `build`) and license, when a test or the build first uses it:
+- test references: `html5ever` and `xml5ever` (HD33), `regress`, `temporal_rs` and `num-bigint` (JE32), and Taffy as a candidate (LY32);
+- data: webref's curated IDL (WB1), html5lib-tests (HD33), css-parsing-tests (ST36) and test262 (JE32).
 
 ## 4. Considered and not admitted
 

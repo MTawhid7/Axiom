@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Spikes:** S5 reported (CP10 ✅); S6's formal run waits for the owner (CP11); S7 reported and **ADR-0013 accepted** (CP12 ✅, 2026-10-19). **Part 2:** CP13–CP17 ✅. **Next: CP18,** the overview, part 2's ADRs and Gate C |
+| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Spikes:** S5 reported (CP10 ✅); S6's formal run waits for the owner (CP11); S7 reported and **ADR-0013 accepted** (CP12 ✅, 2026-10-19). **Part 2:** CP13–CP18 ✅. **At Gate C** (2026-10-19): the owner's decisions are listed in §11 |
 | **Authorized** | 2026-10-18, by the owner: "Step 5 Authorization: Authorized." Planning on a new branch, `step-5`, with "the Step 5 plan and checkpoint tracker first for Gate A review" (§2). Design documents only; each spike needs its own authorization. **Spikes S5, S6 and S7 authorized at Gate B** (2026-10-18), each for the questions it names (§10) |
 | **Branch** | `step-5`, from `main` at `c642ab3` (the Step 4 merge). Pushed to `origin` as the owner authorized at Gate A, and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items I1–I5, the text part of P4, and X4 if the owner adds it (§2.3); the questions earlier steps handed to Step 5 (§2.2); OQ-3, as evidence; ADRs from 0010 (§4); Step 6 |
@@ -283,7 +283,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | CP15 | Layout and paint | ✅ 2026-10-19 (§11; [document](../architecture/layout-and-paint.md)). No amendment needed |
 | CP16 | The JavaScript engine | ✅ 2026-10-19 (§11; [document](../architecture/javascript-engine.md)). No amendment needed |
 | CP17 | WebIDL bindings | ✅ 2026-10-19 (§11; [document](../architecture/bindings.md)). No amendment needed |
-| CP18 | The overview refined, and the criteria check; ADRs for part 2 (Proposed); decision map, open questions, indexes, status. **Gate C** | Not started |
+| CP18 | The overview refined, and the criteria check; ADRs for part 2 (Proposed); decision map, open questions, indexes, status. **Gate C** | ✅ 2026-10-19 (§11; [overview v1](../architecture/overview.md); ADRs 0015–0017). **Gate C reached:** the owner's decisions pending |
 | CP19 | Merge `step-5` into `main` (`--no-ff`), when the owner instructs | Not started |
 
 ### 6.1 What each checkpoint decides
@@ -552,7 +552,7 @@ Between gates, checkpoints run without pausing, as in Steps 2b to 4: CP2–CP9, 
 |---|---|---|
 | A | CP1 | **This plan:** its scope, including adding X4 (§2.3); the criteria SC1–SC10 (§5); the sequence and checkpoints (§6); these gates and the cadence; the candidate spikes (§10). **Also:** pushing `step-5` to `origin`. **Passed 2026-10-18:** approved as written; X4 added; S5–S7 confirmed as candidates; the cadence approved; `step-5` pushed |
 | B | CP9 | **The ADRs for part 1** (Proposed). Each can be accepted, or pre-approved pending its spike, as ADR-0004 waited for S4 and ADR-0008 for S3. **Each candidate spike**, with its questions and pass criteria. **The shell's questions** from CP8: the settings, and the key equivalents. **Passed 2026-10-18:** ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved pending their spikes; S5, S6 and S7 authorized, with S6's thresholds confirmed; both shell questions approved as written; Axiom's license chosen (OQ-21) |
-| C | CP18 | **The ADRs for part 2** (Proposed); any spike result that missed its condition; the refined overview; merging `step-5` into `main` |
+| C | CP18 | **The ADRs for part 2** (Proposed); any spike result that missed its condition; the refined overview; merging `step-5` into `main`. **Reached 2026-10-19:** the decisions are listed in §11 |
 
 **A spike result that misses its condition doesn't stop part 2.** The affected ADR stays Proposed until Gate C. The exception is a result that undermines an input part 2 depends on: then work stops at that point, and the owner decides.
 
@@ -1052,3 +1052,30 @@ Every relative link resolves; the four standard checks pass. CP17 (WebIDL bindin
 **For the owner at Gate C:** nothing new from CP17.
 
 Every relative link resolves; the four standard checks pass. CP18 (the overview and part 2's ADRs) starts.
+
+### CP18 — completed 2026-10-19
+
+**The synthesis of part 2:**
+- **[The overview, v1](../architecture/overview.md):** the system on one page with Step 5's subsystems; the crates with their `unsafe` map and dependencies; the [register](../technology/dependency-register.md) summarized; seven end-to-end scenarios traced through the subsystems' rules (two new: late fonts and images, and a click handled by script); the checks of AC1–AC10 and SC1–SC10, all met, with `smallvec`'s grade open and ImageIO's placement for Gate C; and the decisions below.
+- **ADRs for part 2, Proposed,** grouped by coupling as planned: [ADR-0015](../adr/0015-html-parsing-and-the-dom.md), HTML parsing and the DOM (HD1–HD33); [ADR-0016](../adr/0016-style-layout-and-paint.md), style, layout and paint (ST1–ST36, LY1–LY32), coupled through container queries and impact classes; [ADR-0017](../adr/0017-javascript-engine-and-bindings.md), the JavaScript engine and bindings (JE1–JE32, WB1–WB23).
+- **Updates:** the [decision map](../decision-map.md) (P5–P7; the Step 5 row); the [open questions](../open-questions.md) (OQ-3's evidence; OQ-22, XSLT); the [register](../technology/dependency-register.md) (part 2 adds no runtime dependency; its test references and data are listed); the indexes; [status](../status.md). `spikes/README.md` is unchanged: part 2 added no spike.
+
+### Gate C — reached 2026-10-19
+
+**The owner's decisions,** each with a recommendation:
+1. **[ADR-0015](../adr/0015-html-parsing-and-the-dom.md), HTML parsing and the DOM.** **Recommended:** accept. The parsers and the DOM are core (DP1 (a)); decoding straight into PL11's strings avoids converting every text node; one mutation path makes every reaction to the DOM visible and checkable.
+2. **The amendment to [ADR-0008](../adr/0008-script-agents-and-heap.md)** (HD11): SH10's compaction skips the node arena, whose slots never move. **Recommended:** accept. PL2 and PL12 make node identity stable for a node's life and AX2 sends it to the browser; the cost, fragmentation after churn, is measured in Step 6, with a stated fallback.
+3. **[ADR-0016](../adr/0016-style-layout-and-paint.md), style, layout and paint.** **Recommended:** accept. All of it is core (DP1); shared, grouped styles with evictable caches fit an 8 GB machine; fixed point makes IV14's comparison exact.
+4. **The amendment to [ADR-0007](../adr/0007-frame-tree-pipeline-and-input.md)** (ST25, ST31): IV1 gains nested lifecycles for size-container subtrees, and IV2's examples gain the `getComputedStyle` reads that need layout. **Recommended:** accept. Size container queries can't be implemented under IV1 as written, and the nested phases keep its compiler-checked order, as Blink's interleaving keeps its own.
+5. **`:visited` by partitioned history** (ST10): the browser keeps visited triples and sends each renderer only its own partitions; never matching until that history service exists. **Recommended:** accept. No renderer ever holds the global history, and Selectors 4 calls the older restrictions "an arms race that can't be won".
+6. **[ADR-0017](../adr/0017-javascript-engine-and-bindings.md), the JavaScript engine and bindings.** **Recommended:** accept. It settles dispatch (a `match` loop, from S3), the value type (carrying the scope lifetime), ropes and slices, and the bindings without wrappers; it keeps a JIT under J1–J7.
+7. **XSLT** ([OQ-22](../open-questions.md)). **Recommended:** not planned until a use requires it; it would need an XSLT processor of Axiom's own for a rarely used feature.
+8. **[ADR-0011](../adr/0011-text-fonts-and-unicode.md):** the owner's visual check of S5-Q1's pairs and S5-Q2's sheets (`target/s5-results/20261018-204642/sheets-q1` and `sheets-q2`), which the Gate B condition includes. **Recommended:** check them; then TX12 adopts CoreText for system fonts, as S5-Q2 recommends, and ADR-0011 moves to Accepted under the owner's Gate B words.
+9. **[ADR-0012](../adr/0012-graphics-images-and-media.md):** S5-Q5 missed its condition, and S6's formal run waits for the owner. **Recommended:** adopt IM3's fallback, AVIF through ImageIO in the media utility process, since in the renderer it needs VideoToolbox's decoder service, which the process model denies renderers; and run S6 formally when convenient (`tools/s6-measure.sh --show 30`: AC power, the Mac idle for about 25 minutes, the desktop showing). ADR-0012 then closes on S6-Q1, S6-Q3 and S6-Q5.
+10. **Verification in the network process's worker pool** (NW6's proposed sentence). **Recommended:** confirm. `SecTrustEvaluateWithError` blocks its caller (8.4 ms median sandboxed, and 1.0–1.5 s in three informal cases), and EL1 gives the I/O thread one place to block.
+11. **The process model's refinements** from S5 (FontServices' `Reserved` directory and the executable directory's metadata, for renderers) and S7 (the metadata of `/var` and of the executable directory, for the network process). **Recommended:** record them in the process model's change record, with the owner's approval, since the model is binding.
+12. **Merging `step-5` into `main`** (CP19). **Recommended:** merge once the decisions above are made, preferably after S6's formal run so that ADR-0012 can close in Step 5; if the owner prefers, S6 can follow the merge on its own branch.
+
+Informational, no decision needed now: AWS-LC's jitter entropy source is decided at the network milestone (CP12).
+
+Every relative link resolves; the four standard checks pass. **Work stops here for the owner's Gate C decisions.**
