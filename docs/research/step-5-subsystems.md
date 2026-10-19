@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Spikes:** S5 reported (CP10 ✅); S6's formal run waits for the owner (CP11); S7 reported and **ADR-0013 accepted** (CP12 ✅, 2026-10-19). **Next: CP13,** part 2 |
+| **Status** | **Part 1 complete: CP1–CP9 ✅** (2026-10-18). **Gate B passed** (2026-10-18): ADRs 0010 and 0014 accepted; ADRs 0011–0013 pre-approved, pending their spikes; spikes S5–S7 authorized (§2, §7, §10). **Spikes:** S5 reported (CP10 ✅); S6's formal run waits for the owner (CP11); S7 reported and **ADR-0013 accepted** (CP12 ✅, 2026-10-19). **Part 2:** CP13 ✅. **Next: CP14,** style |
 | **Authorized** | 2026-10-18, by the owner: "Step 5 Authorization: Authorized." Planning on a new branch, `step-5`, with "the Step 5 plan and checkpoint tracker first for Gate A review" (§2). Design documents only; each spike needs its own authorization. **Spikes S5, S6 and S7 authorized at Gate B** (2026-10-18), each for the questions it names (§10) |
 | **Branch** | `step-5`, from `main` at `c642ab3` (the Step 4 merge). Pushed to `origin` as the owner authorized at Gate A, and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items I1–I5, the text part of P4, and X4 if the owner adds it (§2.3); the questions earlier steps handed to Step 5 (§2.2); OQ-3, as evidence; ADRs from 0010 (§4); Step 6 |
@@ -278,7 +278,7 @@ Each subsystem design is judged against these criteria. CP18 checks every one an
 | CP11 | Spike S6: compositing on Metal | In progress: code at `c2c8ad5`, trials run; **the formal run waits for the owner** (AC power, the Mac idle, the window visible) |
 | CP12 | Spike S7: the network process and TLS | ✅ 2026-10-19 (§11; [results](s7-results.md)). S7-Q1, S7-Q3 and S7-Q4 pass, so ADR-0013 is accepted under the owner's Gate B approval; S7-Q2 settles NW6; verification off the I/O thread proposed for Gate C |
 | | **Part 2: the document and script engine** | |
-| CP13 | HTML parsing and the DOM | Not started |
+| CP13 | HTML parsing and the DOM | ✅ 2026-10-19 (§11; [document](../architecture/html-and-dom.md)). An amendment to ADR-0008 proposed for Gate C (HD11) |
 | CP14 | Style | Not started |
 | CP15 | Layout and paint | Not started |
 | CP16 | The JavaScript engine | Not started |
@@ -961,3 +961,23 @@ Every relative link resolves; the four standard checks pass. CP11 (spike S6) sta
 **Clean-up:** no helper crashed, so there were no crash reports. One empty helper data directory, in `target/release/`, was left by an informal run whose output was cut short by `head`: the broker panicked on the closed pipe before removing it. It was removed by hand.
 
 Every relative link resolves; the four standard checks pass. CP13 (HTML parsing and the DOM) starts.
+
+### CP13 — completed 2026-10-19
+
+**[HTML and the DOM](../architecture/html-and-dom.md)** (Proposed; HD1–HD33), answering Q9 and the handed-over question 18:
+- **Parsing:** the HTML standard's tokenizer (84 states, now including processing instructions) and tree builder, Axiom's own under DP1 (a), in safe Rust. It runs on the document's event-loop thread in budgeted tasks, starting from Blink's field-measured budgets, with a preload scanner on the helper pool. Off-thread tree building, Firefox's design and Servo's optional mode, is left possible behind a sink interface.
+- **Input:** sniffing as HTML §13.2.3 specifies, and TX3's decoders writing the DOM's own 8- and 16-bit strings, so nothing passes through UTF-8. Fragments and the new insertion methods (`setHTML` and its family) use one tree builder, which sanitizes while parsing.
+- **XML:** a non-validating parser of Axiom's own; Blink, WebKit and Ladybird use libxml2, and Firefox runs expat in an RLBox sandbox. XPath staged; XSLT an open question for the owner.
+- **Nodes:** one node arena of `u32` columns (five links, owner document, kind and flags, rare data, generation: 36 bytes a node), per-kind arenas, attributes without `Attr` nodes, immutable character data.
+- **One mutation path:** the DOM standard's algorithms call a fixed, ordered list of hooks, including style invalidation, box-tree dirtiness and accessibility.
+- **Events:** listeners in a side table; dispatch roots the path and each listener snapshot as one heap array each, as S3 recommended; non-passive wheel and touch listeners counted for hit-test regions; trust and activation only from the browser.
+- **The rest:** mutation observers, live ranges and selection, Shadow DOM, custom elements with scoped registries, forms submitted through the browser, editing through Input Events and the IME mirror, the top layer. `execCommand` is marked approximate: its own draft says it won't advance beyond draft status.
+- **The DOM's JavaScript facet** is an interface for CP17.
+
+**Precedent read** on 2026-10-19 from primary sources: the HTML and DOM standards (both 2026-10-16), the Encoding Standard, the Web Editing drafts, and Blink, Firefox, WebKit, Servo and Ladybird sources at their latest commits.
+
+**For the owner at Gate C:**
+- **An amendment to ADR-0008** (HD11): node slots never move, so SH10's compaction skips the node arena. PL2 and PL12 make node identity stable for a node's life and AX2 sends it to the browser; a compacting node arena would invalidate those identities. Recorded in ADR-0008's decision history; SH10 stands until the owner decides. **Recommended:** accept.
+- **XSLT** (open question 2). **Recommended:** not planned until a use requires it.
+
+Every relative link resolves; the four standard checks pass. CP14 (style) starts.
