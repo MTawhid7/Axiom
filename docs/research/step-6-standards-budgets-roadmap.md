@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **CP1–CP6 ✅** (2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written. Spike S8's automated part is complete; its session by hand awaits the owner. Next: CP7 and Gate B |
+| **Status** | **CP1–CP7 ✅** (2026-10-20). **At Gate B:** ADRs 0018 and 0019 proposed, with the final B1–B7. **Gate A passed** (2026-10-20). Spike S8's automated part is complete; its session by hand awaits the owner |
 | **Authorized** | 2026-10-20, by the owner: "Step 6 Authorization: Authorized. Proceed with creating branch step-6 from main and drafting the Phase Zero Step 6 plan (standards baseline, testing strategy, performance budgets, and Milestone 1 roadmap) for Gate A review." Design documents only; each spike needs its own authorization. **Spike S8 authorized at Gate A** (2026-10-20), for the questions it names (§10.1) |
 | **Branch** | `step-6`, from `main` at `b4948ce` (the Step 5 merge). Pushed to `origin` as the owner authorized at Gate A, after CP1's commit was amended (§11), and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items X1–X3; the roadmap and Milestone 1's acceptance criteria (charter §8); the final design review of Phase Zero; the questions earlier steps handed to Step 6 (§2.2) |
@@ -221,7 +221,7 @@ Step 6's outputs are judged against these criteria. CP10 checks every one and re
 | CP4 | The standards baseline and support matrix (X1) | ✅ 2026-10-20 (§11; [standards baseline](../standards.md)) |
 | CP5 | The testing and fuzzing strategy (X2) | ✅ 2026-10-20 (§11; [testing strategy](../testing.md)). Spike S9 designed for Gate B |
 | CP6 | Performance methodology and budgets (X3) | ✅ 2026-10-20 (§11; [performance budgets](../performance.md)). The final B1–B7 and the corpus pages' ceilings for the owner at Gate B |
-| CP7 | Synthesis of part 1: ADRs (Proposed); the final budgets for the owner; decision map, open questions, indexes, status. **Gate B** | Not started |
+| CP7 | Synthesis of part 1: ADRs (Proposed); the final budgets for the owner; decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-20 (§11; ADRs [0018](../adr/0018-corpus-standards-and-testing.md) and [0019](../adr/0019-performance-methodology-and-budgets.md) proposed). **Gate B** |
 | | **Part 2: the roadmap** | |
 | CP8 | The roadmap: milestones, security levels, corpus targets, decision points | Not started |
 | CP9 | Milestone 1: scope and measurable acceptance criteria | Not started |
@@ -534,6 +534,23 @@ Every relative link resolves; the four standard checks pass.
 Sources read for it: Chromium's, WebKit's and Firefox's hang, throttling, scrolling, parsing and image constants; V8's string thresholds; the Long Tasks draft; the Storage Standard; MDN's account of quotas; Mach's limits in the SDK headers.
 
 Every relative link resolves; the four standard checks pass.
+
+### CP7 — completed 2026-10-20
+
+Part 1 put together:
+- **[ADR-0018](../adr/0018-corpus-standards-and-testing.md), Proposed:** the corpus (CO1–CO14), the standards baseline (SB1–SB12) and the testing strategy (TS1–TS18), decided together because each uses the others: X1 and X2.
+- **[ADR-0019](../adr/0019-performance-methodology-and-budgets.md), Proposed:** the performance budgets (PF1–PF24), X3, with **the final B1–B7 as an amendment to the process model.** B1 is 60 MB for the core plus tiles at 6.2 bytes per window pixel. B3 keeps its 50 MB median and gains a ceiling for each corpus page. The others are unchanged. The process model itself changes only when the owner accepts it.
+- **The plan's grouping settled:** three documents under one ADR, and the budgets under another. The corpus belongs with the standards and testing, since it sets their priorities and their corpus checks.
+- **Updated:**
+  - the four documents' status (Proposed, with their ADRs);
+  - the decision map (X1–X3 proposed; Step 6 at Gate B);
+  - OQ-13 (the pause budget proposed);
+  - the docs index;
+  - status, with Gate B's decisions.
+
+Every relative link resolves; the four standard checks pass.
+
+**Gate B.** The owner reviews the part 1 ADRs and the final budgets. The decisions, with recommendations, are in [status](../status.md), "Next steps".
 
 ## Sources
 

@@ -17,11 +17,11 @@ These documents are the project's source of truth. Conversation history is not.
 | Document | Purpose | Status |
 |---|---|---|
 | [charter.md](charter.md) | Goals, users, environment, scope, non-goals, success criteria | Draft (scope sections Accepted) |
-| [corpus.md](corpus.md) | The target-site corpus: the owner's 13 pages, their tiers, needs, logins and earliest security levels; what each site's terms allow automation to do; how each page is measured, logged out and signed in, and how repeatably | Draft (Step 6, CP2) |
+| [corpus.md](corpus.md) | The target-site corpus: the owner's 13 pages, their tiers, needs, logins and earliest security levels; what each site's terms allow automation to do; how each page is measured, logged out and signed in, and how repeatably | **Proposed** (ADR-0018, Step 6's Gate B) |
 | [decision-map.md](decision-map.md) | Decision layers, couplings, Phase Zero sequence | Living |
-| [standards.md](standards.md) | The standards baseline (X1): how each specification is pinned, five support classes, the approximate behaviours, the support matrix with its suites and the corpus's needs, and pass-rate targets calibrated on wpt.fyi | Draft (Step 6, CP4) |
-| [testing.md](testing.md) | The testing strategy (X2): eight layers of tests; WPT through a test-only WebDriver server in the headless embedder; Axiom's own runners for html5lib-tests, test262 and Unicode; oracles and determinism; fuzzing and sanitizers; the checks V1–V9; the advisory routine; spike S9, proposed | Draft (Step 6, CP5) |
-| [performance.md](performance.md) | Performance methodology and budgets (X3): the conditions of every measurement; the final B1–B7, with tiles by pixels and a ceiling for every corpus page; frame, pause and long-task budgets; energy and idle; the build; the limits and deadlines the designs left open | Draft (Step 6, CP6) |
+| [standards.md](standards.md) | The standards baseline (X1): how each specification is pinned, five support classes, the approximate behaviours, the support matrix with its suites and the corpus's needs, and pass-rate targets calibrated on wpt.fyi | **Proposed** (ADR-0018, Step 6's Gate B) |
+| [testing.md](testing.md) | The testing strategy (X2): eight layers of tests; WPT through a test-only WebDriver server in the headless embedder; Axiom's own runners for html5lib-tests, test262 and Unicode; oracles and determinism; fuzzing and sanitizers; the checks V1–V9; the advisory routine; spike S9, proposed | **Proposed** (ADR-0018, Step 6's Gate B) |
+| [performance.md](performance.md) | Performance methodology and budgets (X3): the conditions of every measurement; the final B1–B7, with tiles by pixels and a ceiling for every corpus page; frame, pause and long-task budgets; energy and idle; the build; the limits and deadlines the designs left open | **Proposed** (ADR-0019, Step 6's Gate B) |
 | [open-questions.md](open-questions.md) | Unresolved questions and the evidence each needs | Living |
 | [status.md](status.md) | Current state and session handoffs | Living |
 | [adr/](adr/) | Architecture Decision Records | See each ADR |
@@ -43,6 +43,8 @@ These documents are the project's source of truth. Conversation history is not.
 | ↳ [0015-html-parsing-and-the-dom.md](adr/0015-html-parsing-and-the-dom.md) | HTML parsing and the DOM (P5), with an amendment to ADR-0008 (HD11) | **Accepted** (2026-10-20, Step 5's Gate C), with the amendment to ADR-0008 |
 | ↳ [0016-style-layout-and-paint.md](adr/0016-style-layout-and-paint.md) | Style, layout and paint (P6), with an amendment to ADR-0007 (ST25, ST31) | **Accepted** (2026-10-20, Step 5's Gate C), with the amendment to ADR-0007 and `:visited` by partitioned history |
 | ↳ [0017-javascript-engine-and-bindings.md](adr/0017-javascript-engine-and-bindings.md) | The JavaScript engine and WebIDL bindings (P7) | **Accepted** (2026-10-20, Step 5's Gate C) |
+| ↳ [0018-corpus-standards-and-testing.md](adr/0018-corpus-standards-and-testing.md) | The corpus, the standards baseline and testing (X1, X2) | **Proposed** (2026-10-20, Step 6's Gate B) |
+| ↳ [0019-performance-methodology-and-budgets.md](adr/0019-performance-methodology-and-budgets.md) | Performance methodology and budgets (X3), with the final B1–B7 | **Proposed** (2026-10-20, Step 6's Gate B) |
 | [security/threat-model.md](security/threat-model.md) | Assets, adversaries, attack surfaces, trust boundaries, security goals, security levels L0–L3 | **Accepted** (2026-10-17), amended: out-of-process iframes required for L3 |
 | [security/process-model.md](security/process-model.md) | Process types and privileges, site isolation, IPC trust rules, memory budgets | Binding (ADR-0004 accepted, 2026-10-17); refined at Step 5's Gate C (2026-10-20), in its change record |
 | [technology/language-evaluation.md](technology/language-evaluation.md) | Detailed language comparison and recommendation | Reviewed |

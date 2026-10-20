@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Draft** (Step 6, CP2, 2026-10-20). It becomes binding when its ADR is accepted; CP7 settles which ADR. **Baselines from spike S8** (CP3, §5): the five pages automation may load, in Chrome Canary; the other pages and Safari await the session by hand |
+| **Status** | **Proposed** (Step 6, CP2, 2026-10-20), with [ADR-0018](adr/0018-corpus-standards-and-testing.md), for the owner at Gate B; binding when it is accepted. **Baselines from spike S8** (CP3, §5): the five pages automation may load, in Chrome Canary; the other pages and Safari await the session by hand |
 | **Question** | Which pages is Axiom judged against? What does each need, and from which security level can it be used? How is each measured, repeatably and within its site's terms? |
 | **Answers** | Step 6 question Q1 ([tracker](research/step-6-standards-budgets-roadmap.md) §3), with S8; the tracker's handed-over questions 1 and 2 (§2.2) |
 | **Feeds** | Spike S8 (CP3); the standards baseline (CP4); testing (CP5); budgets (CP6); the roadmap's corpus targets and login track (CP8); Milestone 1 (CP9) |

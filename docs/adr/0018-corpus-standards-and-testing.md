@@ -1,0 +1,138 @@
+# ADR-0018: The Corpus, the Standards Baseline and Testing
+
+| | |
+|---|---|
+| **Status** | **Proposed** (2026-10-20), for the owner at Step 6's Gate B |
+| **Date** | 2026-10-20 |
+| **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
+| **Related** | [The corpus](../corpus.md) (CO1–CO14); [the standards baseline](../standards.md) (SB1–SB12); [the testing strategy](../testing.md) (TS1–TS18); [S8 results](../research/s8-results.md); decision-map items X1 and X2; [OQ-2](../open-questions.md), [OQ-22](../open-questions.md); the [charter](../charter.md) §8 and principle 5; the [threat model](../security/threat-model.md) §8–§9; [ADR-0009](0009-embedder-api-and-shell.md) (EM9); [ADR-0010](0010-dependency-and-supply-chain-policy.md) |
+
+## Decision history
+
+| Date | Event |
+|---|---|
+| 2026-10-20 | Proposed at Step 6, CP7 |
+
+## Question
+
+How is Axiom judged? Three parts decided together, because each uses the others:
+- **the corpus:** which pages, measured how, within each site's terms;
+- **the standards baseline (X1):** which specifications, at which versions, how fully, against which suites and targets;
+- **the testing strategy (X2):** which harnesses, oracles, fuzzers and security checks.
+
+## Requirements and constraints
+
+- **Charter §8:** milestone criteria draw on "pass rates on selected WPT directories, html5lib-tests and test262", on target-corpus checks, budgets and security gates. **Principle 5:** standards-compliant and approximate behaviour stay distinct.
+- **ADR-0001:** the full modern app web stays reachable; DRM is a non-goal; sensitive logins wait for the isolation milestone.
+- **The owner's Gate A decisions** (2026-10-20):
+  - S8's two modes;
+  - the S8 accounts in a dedicated profile;
+  - the owner's own accounts at L3, test accounts from L2;
+  - two identifying URL parameters kept out of the repository.
+- **SC5:** each subsystem names dated specifications and suites, and leaves the baseline and pass rates to Step 6.
+- **EM9:** a headless embedder runs WPT, reference tests, crash tests and fuzzing. **EL24:** a virtual clock for tests.
+- **Threat model §8:** the checks V1–V9 gate L3. **§9 and DP20:** fixes arrive only through rebuilds, "Step 6 sets the routine and its cadence".
+- **OQ-22:** XSLT deferred.
+
+## Alternatives considered
+
+- **A. Automate every corpus page that works logged out,** as S8's first design had it. Simple, but eight of the thirteen sites' terms forbid automated access, logged out too ([corpus](../corpus.md) §3).
+- **B. Pin specifications only at reviewed snapshots** (WHATWG Review Drafts, W3C Recommendations). Stable, but up to six months behind the living standards that engines and WPT follow, and many shipped CSS modules have no Recommendation.
+- **C. Fixed pass-rate targets,** such as 90% or 100% of every directory. Simple, but blind to directories whose tests cover one engine's features (`storage/`: Chrome 97.5%, the others 33%).
+- **D. A WPT executor speaking the embedder API directly.** No WebDriver server to write, but no precedent among wptrunner's products, and no reuse of `testdriver.js`'s WebDriver mapping.
+- **E. Rely on hosted services** for fuzzing and continuous integration. Less load on this Mac, but hosted runners can't stand in for macOS 27's sandbox, frameworks or performance.
+
+## Historical context and modern developments
+
+- **Engines test against one shared suite.** WHATWG requires tests in WPT with each normative change. wpt.fyi publishes runs of Chrome, Firefox, Safari, Servo and Ladybird at aligned revisions (sourced, [standards](../standards.md) §2).
+- **New engines run WPT through WebDriver.** wptrunner's Ladybird product launches Ladybird's WebDriver server (sourced, [testing](../testing.md) §2).
+- **html5lib-tests' tree-construction tests moved into WPT** on 2026-06-26 (sourced).
+- **Chromium measures popular sites** with replayed recordings (system-health stories over Web Page Replay archives). For a project without agreements with those sites, their terms forbid recording or automating most of them (sourced, [corpus](../corpus.md) §3, §9).
+- **web-features' Baseline** names what the web can rely on: "high" after 30 months of support across the core browsers. Chrome's WebDX use counters name the same features (sourced).
+
+## Analysis
+
+- **The corpus within its terms** (CO3–CO6):
+  - Automation loads only the five pages whose terms and robots files permit it, identified and few; the other eight are measured by hand.
+  - It costs the owner's time at each census, and measures by hand what can't be instrumented.
+  - It keeps the project within every site's published rules.
+- **Living standards at commit snapshots** (SB1, SB2) track what WPT tests, and moving all pins together at a milestone's start keeps changes in pass rates attributable.
+- **The shipping median as the target** (SB11) is what the web relies on. A new engine can reach it: Ladybird meets it on `html/syntax/parsing/`, `dom/` and `css/CSS2/` (measured from wpt.fyi's runs).
+- **A WebDriver server, test-only** (TS2), follows the precedent, maps `testdriver.js` directly, and stays out of the shell's build, so the browser the owner uses has no remote-control surface.
+- **This Mac as the authority** (TS17) keeps every platform-dependent result on the target, at the cost of local time for fuzzing and suites.
+
+## Evidence and sources
+
+The three documents' sources:
+- the sites' terms and robots files;
+- the WHATWG's, W3C's, Ecma's and Unicode's publications;
+- web-features, Interop 2026 and wpt.fyi;
+- wptrunner, testdriver and test262's documentation;
+- cargo-fuzz, libFuzzer and Rust's sanitizers;
+- GitHub's runners.
+
+Plus S8's census of five pages ([S8 results](../research/s8-results.md)), and wpt.fyi's runs of 2026-10-19 computed with `tools/wpt-pass-rates.py`.
+
+## Decision
+
+**Proposed:** adopt [the corpus](../corpus.md) (CO1–CO14), [the standards baseline](../standards.md) (SB1–SB12) and [the testing strategy](../testing.md) (TS1–TS18) as binding. In short:
+1. **The corpus** is the owner's 13 pages in four tiers. Automation loads only the pages whose sites' terms and robots files permit it, identified in its user agent, at most five times per census, never signed in. The rest are measured by hand, with only process sampling. Accounts follow the owner's Gate A decision. Copies are kept only where terms and licences permit, and never committed.
+2. **The standards baseline:**
+   - specifications pinned by body;
+   - the baseline moved only at a milestone's start;
+   - five support classes, and a staged API exposed only when it works;
+   - four approximate behaviours, listed with their reasons;
+   - priorities from the corpus, then Baseline, then Interop;
+   - expectations kept test by test;
+   - completed areas targeting the shipping median on their WPT directories, without regressions.
+3. **The testing strategy:**
+   - eight layers of tests;
+   - WPT through a test-only WebDriver server in the headless embedder;
+   - Axiom's own runners for html5lib-tests, test262 and Unicode;
+   - test-only differential oracles and self-oracles, under virtual time;
+   - every parser and IPC decoder fuzzed, with AddressSanitizer, ThreadSanitizer and Miri;
+   - V1–V9 built as tests;
+   - weekly advisory checks, and the OS-dependent checks after every macOS update;
+   - this Mac authoritative.
+
+Spike S9 ([testing](../testing.md) §9) and the hosted runners (TS17) are separate decisions for the owner.
+
+## Rationale
+
+- **Charter §8** asks for measurable conformance and corpus checks; SB10–SB12 and TS12 make them measurable.
+- **Principle 5** asks for approximations kept apart; SB5 lists them, in one place.
+- **ADR-0001's reach** to the app web is kept by staging, not by excluding (SB3).
+- **The threat model's L3 gate** gets its nine checks as tests (TS14).
+- **Respecting the corpus sites' terms** keeps the project's measurements defensible, and the owner's accounts out of automation.
+
+## Assumptions
+
+- wpt.fyi keeps publishing aligned runs, and WPT remains the shared suite.
+- The sites' terms read on 2026-10-20 stay as read until the next census, which reads them again (CO3).
+- cargo-fuzz with AddressSanitizer works on this Mac's target, as its documentation says; spike S9 would confirm it.
+
+## Risks and unresolved issues
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| A site's terms change and forbid what a census does | Medium | A census breaches terms | Terms and robots files read again before each census (CO3); a robots file that disallows a page stops automation |
+| WPT is too large for this Mac | Medium | Gates slow | WPT runs by directory, with run time and memory recorded (TS18); S9-Q3 |
+| Fuzzing tools fail on this target | Low | TS9–TS11 can't run | S9 proposed; libFuzzer still gets bug fixes |
+| Measurements by hand can't be repeated exactly | High | Noisier baselines for eight pages | Dated, with their spread; budgets for those pages stay hypotheses (CO12) |
+| The median is skewed by a directory's engine-specific tests | Medium | A misleading target | The median of three discounts one engine's features; a milestone may set an interim target with its reason (SB11) |
+
+## Conditions for revisiting
+
+- A corpus site's terms or robots file change.
+- wpt.fyi stops aligned runs.
+- S9 shows the fuzzing tools fail on this target.
+- The owner changes the corpus.
+- A milestone shows the median targets are unreachable for a reason other than effort.
+
+## Consequences
+
+- **Milestone 1's conformance criteria** (CP9) use SB9–SB11. Its plan pins the snapshots and WPT's revision.
+- **The headless embedder needs its WebDriver server** at the first milestone that runs WPT. wptrunner and WPT's Python tools are test dependencies that need the owner's authorization at that milestone.
+- **Expectation files live in the repository** beside the code.
+- **Every census reads the corpus's terms again,** and the session by hand needs the owner.
+- **`cargo-deny`, `cargo-vet` and `cargo-fuzz`** become checks once the owner authorizes them (DP22).

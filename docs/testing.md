@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Draft** (Step 6, CP5, 2026-10-20). It becomes binding when its ADR is accepted (CP7; tentatively ADR-0018, with the [standards baseline](standards.md)) |
+| **Status** | **Proposed** (Step 6, CP5, 2026-10-20), with [ADR-0018](adr/0018-corpus-standards-and-testing.md), for the owner at Gate B; binding when it is accepted |
 | **Question** | How is Axiom tested? Through which harnesses, oracles and fuzzers; how do tests stay deterministic; how are the security checks V1–V9 built; how are performance regressions caught; which routine keeps a locally built browser patched; where do tests run? |
 | **Answers** | Step 6 question Q3 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); decision-map item X2; the tracker's handed-over questions 4–12 (§2.2), with CP6 for the limits and benchmarks' thresholds |
 | **Feeds** | Budgets (CP6), which tests enforce; the roadmap (CP8), which places each harness and check; Milestone 1 (CP9); the L3 gate ([threat model](security/threat-model.md) §8) |

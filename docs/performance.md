@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Draft** (Step 6, CP6, 2026-10-20). It becomes binding when its ADR is accepted (CP7; tentatively ADR-0019). The final memory budgets B1–B7 go to the owner as an amendment to the [process model](security/process-model.md) (CP7), as ADR-0004's D6 requires |
+| **Status** | **Proposed** (Step 6, CP6, 2026-10-20), with [ADR-0019](adr/0019-performance-methodology-and-budgets.md), for the owner at Gate B; binding when it is accepted. The final memory budgets B1–B7 are proposed in the same ADR as an amendment to the [process model](security/process-model.md), as ADR-0004's D6 requires |
 | **Question** | How is performance measured on this Mac, and what are the budgets: memory, time, energy and idle, and build? What are the limits and deadlines the designs left open, and how is each budget enforced? |
 | **Answers** | Step 6 question Q4 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); decision-map item X3; the tracker's handed-over questions 11–24 (§2.2) |
 | **Feeds** | The process model's B1–B7 (CP7); the [testing strategy](testing.md)'s benchmarks (TS13); the roadmap (CP8); Milestone 1 (CP9) |
