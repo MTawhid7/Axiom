@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>S8 test page</title>
+<link rel="stylesheet" href="style.css">
+<h1>S8's test page</h1>
+<p>Served on 127.0.0.1 by <code>s8.py check</code>, to check the census's method on this Mac: each feature below should appear among the use counters.</p>
+<s8-widget></s8-widget>
+<canvas id="flat" width="200" height="100"></canvas>
+<canvas id="gl" width="200" height="100"></canvas>
+<img src="square.svg" alt="" width="40" height="40">
+<div class="tall"></div>
+<script>
+  customElements.define("s8-widget", class extends HTMLElement {
+    constructor() {
+      super();
+      this.attachShadow({ mode: "open" }).innerHTML = "<p>In an open shadow root.</p>";
+    }
+  });
+  document.getElementById("flat").getContext("2d").fillRect(0, 0, 20, 20);
+  document.getElementById("gl").getContext("webgl");
+  new Worker("worker.js");
+  indexedDB.open("s8-check");
+  new IntersectionObserver(() => {}).observe(document.querySelector("h1"));
+  new ResizeObserver(() => {}).observe(document.body);
+  document.querySelector("h1").animate([{ opacity: 0.5 }, { opacity: 1 }], 500);
+  fetch("style.css");
+</script>
+</html>

@@ -1,7 +1,8 @@
 # Axiom workspace.
 #
 # Phase Zero: only validation spikes live here (spikes/, throwaway): S1 and S2
-# from Step 2b, S4 from Step 3, S3 from Step 4, S5 to S7 from Step 5. Engine crates will live
+# from Step 2b, S4 from Step 3, S3 from Step 4, S5 to S7 from Step 5. S8, Step 6's
+# corpus census, is Python and outside the workspace. Engine crates will live
 # under crates/ once the architecture is approved; the lints, profiles and toolchain pin
 # below are meant to carry over.
 
