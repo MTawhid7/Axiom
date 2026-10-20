@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed: v2** (Step 6, CP10, 2026-10-20), refining v1 (Step 5, CP18) and v0 (Step 4, CP11): Step 6's budgets, the roadmap's milestones and the readiness checks added (§5.3, §5.4, §6, §9). **For the owner's approval as the architecture proposal as a whole at Step 6's Gate C.** The owner accepted ADRs 0005–0007 and 0009 at Step 4's Gate B (2026-10-17) and ADR-0008 at its Gate C (2026-10-18); at Step 5's Gate B, ADRs 0010 and 0014 (2026-10-18), then ADR-0013 once spike S7 met its condition (2026-10-19); and at Step 5's Gate C (2026-10-20), ADRs 0011, 0012 and 0015–0017, with the amendments to ADR-0007 and ADR-0008. The proposal as a whole is approved at the end of Phase Zero (Step 6) |
+| **Status** | **Approved: v2, the Phase Zero baseline** (2026-10-20, Step 6's Gate C): "Architecture Proposal as a Whole: Approved as the Phase Zero baseline." Written at Step 6, CP10, refining v1 (Step 5, CP18) and v0 (Step 4, CP11): Step 6's budgets, the roadmap's milestones and the readiness checks added (§5.3, §5.4, §6, §9). **Under independent review** on branch `architecture-review` before any milestone starts ([handover](../handover-phase-0.md) §11). The owner accepted ADRs 0005–0007 and 0009 at Step 4's Gate B (2026-10-17) and ADR-0008 at its Gate C (2026-10-18); at Step 5's Gate B, ADRs 0010 and 0014 (2026-10-18), then ADR-0013 once spike S7 met its condition (2026-10-19); and at Step 5's Gate C (2026-10-20), ADRs 0011, 0012 and 0015–0017, with the amendments to ADR-0007 and ADR-0008. The proposal as a whole is approved at the end of Phase Zero (Step 6) |
 | **Question** | How do the parts fit together: processes × threads × pipeline; the crate structure, its `unsafe` map and its dependencies; what happens end to end in common scenarios; and how does the system grow from L0 to L3 without a rewrite? |
 | **Answers** | Step 4 question Q16 ([Step 4 tracker](../research/step-4-architecture-proposal.md) §3) and the check of AC1–AC10; Step 5's CP18 ([Step 5 tracker](../research/step-5-subsystems.md) §6.1): the crates refined, a summary of the [register](../technology/dependency-register.md), scenarios traced through the subsystems' rules, and the check of SC1–SC10 |
 | **Builds on** | Step 3: [threat model](../security/threat-model.md), [process model](../security/process-model.md), [ADR-0004](../adr/0004-process-model-and-sandbox.md). Step 4: [event loop and threading](event-loop-and-threading.md), [IPC](ipc.md), [frame tree and navigation](frame-tree-and-navigation.md), [rendering pipeline](rendering-pipeline.md), [invalidation](invalidation.md), [input and accessibility](input-and-accessibility.md), [embedder API](embedder-api.md), [script and heap](script-and-heap.md). Step 5: the [dependency policy](../technology/dependency-policy.md), [text and fonts](text-and-fonts.md), [graphics](graphics.md), [images and media](images-and-media.md), [networking](networking.md), [storage and workers](storage-and-workers.md), [accessibility](accessibility.md), [HTML and the DOM](html-and-dom.md), [style](style.md), [layout and paint](layout-and-paint.md), [the JavaScript engine](javascript-engine.md), [WebIDL bindings](bindings.md) |
-| **Last updated** | 2026-10-20: v2 (Step 6, CP10). Earlier: Step 5's Gate C decisions and S6's results recorded (CP19); v1 on 2026-10-19 (CP18) |
+| **Last updated** | 2026-10-21: approved at Step 6's Gate C (2026-10-20), with its decisions (§9). Earlier: v2 (Step 6, CP10, 2026-10-20); Step 5's Gate C decisions and S6's results recorded (CP19); v1 on 2026-10-19 (CP18) |
 
 Everything here is **planned**; nothing is implemented. This document adds no new rules; it assembles the rules of the documents above, which it cites: Step 4's EL, IP, FT, PL, IV, IN, EM and SH, and Step 5's DP, TX, GR, IM, NW, SW, AX, HD, ST, LY, JE and WB.
 
@@ -187,7 +187,7 @@ From the [Step 6 tracker](../research/step-6-standards-budgets-roadmap.md) §5, 
 | RC7 | Efficiency is budgeted | Memory (B1–B7 with tiles by pixels, the ceilings), frames, pauses, idle, energy and the build (PF6–PF18) | **Met** |
 | RC8 | Testable at every boundary | Every parser and IPC decoder fuzzed (TS9), determinism (TS8, IV14), the advisory routine (TS15); S9 confirmed cargo-fuzz and wptrunner here | **Met**, with ThreadSanitizer waiting for a nightly whose runtime works on macOS 27 (S9-Q2) |
 | RC9 | Paced by checkpoints, not dates | Milestones ordered and gated (MS1), each planned in checkpoints when it starts (MS10) | **Met** |
-| RC10 | Phase Zero is complete | §5.4 | **Met once Gate C accepts** ADRs 0020 and 0021 and this proposal |
+| RC10 | Phase Zero is complete | §5.4 | **Met** at Gate C (2026-10-20): ADRs 0020 and 0021 accepted, and this proposal approved |
 
 ### 5.4 Phase Zero's success criteria
 
@@ -195,10 +195,10 @@ From the [charter](../charter.md) §8:
 
 | Criterion | Evidence | State |
 |---|---|---|
-| The owner has approved an architecture proposal and a roadmap | This overview v2, the [roadmap](../roadmap.md) and [ADR-0020](../adr/0020-roadmap-and-security-levels.md), at Gate C | **For the owner** |
+| The owner has approved an architecture proposal and a roadmap | This overview v2, the [roadmap](../roadmap.md) and [ADR-0020](../adr/0020-roadmap-and-security-levels.md), at Gate C | **Met** (2026-10-20), as the baseline under review |
 | Every foundational decision has an Accepted ADR | The [decision map](../decision-map.md): F1–F5, P1–P7, I1–I5 and X1–X4 accepted; I6, WebAssembly, deliberately open and placed at M8's gate (MS9) | **Met** |
 | The target-site corpus is defined | The [corpus](../corpus.md), binding since Gate B | **Met** |
-| The measurable acceptance criteria for Milestone 1 are written | [Milestone 1](../milestone-1.md) (MA4–MA9) and [ADR-0021](../adr/0021-milestone-1.md) | **Written; for the owner at Gate C** |
+| The measurable acceptance criteria for Milestone 1 are written | [Milestone 1](../milestone-1.md) (MA4–MA9) and [ADR-0021](../adr/0021-milestone-1.md) | **Met** (2026-10-20): accepted as M1's specification baseline |
 
 ## 6. Staging from L0 to L3
 
@@ -261,3 +261,16 @@ Recorded in ADRs 0018 and 0019, the [tracker](../research/step-6-standards-budge
 - **B2:** a ready renderer at most 10 MB. **B4:** the network process at most 25 MB. **B5:** 16 renderers. **B7:** 2 GiB per renderer.
 - **B3:** a 50 MB median over the documents and content pages, and every corpus page within its ceiling: half of Chrome's measured cost, capped by tier. The ceilings run from 70 MB (MDN) to 300 MB.
 - **B6:** 1 GB for 10 tabs of document and content pages.
+
+**Gate C (2026-10-20),** the final design review of Phase Zero. The owner: "Step 6 Gate C is approved, completing the Phase Zero architectural baseline. We are deferring implementation (Milestone 1 kickoff) until the architecture and roadmap undergo independent, multi-round adversarial review."
+
+| # | Decision | The owner's decision |
+|---|---|---|
+| 1 | [ADR-0020](../adr/0020-roadmap-and-security-levels.md), the roadmap and its security levels | Accepted as the proposed baseline, under review |
+| 2 | [ADR-0021](../adr/0021-milestone-1.md), Milestone 1 | Accepted as M1's specification baseline: MA1–MA12 as written |
+| 3 | This overview v2, with the [requirements](../requirements.md) | Approved as the Phase Zero baseline; the requirements complete for Phase Zero |
+| 4 | The content tier's 150 MB cap | Kept as the baseline hypothesis for review ([OQ-25](../open-questions.md)) |
+| 5 | Safari's census by hand, second session | Folded into the [S8 results](../research/s8-results.md) §7.4 |
+| 6 | A handover report | Written: the [Phase Zero handover](../handover-phase-0.md) |
+| 7 | Merging `step-6` into `main`, and the branch `architecture-review` from `main` | Authorized, once the above are committed with every check green; both pushed |
+| 8 | Milestone 1's implementation (MA10) | On hold: no skeleton or production code. The independent review runs first, on `architecture-review` |

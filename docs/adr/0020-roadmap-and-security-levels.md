@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-20), for the owner at Step 6's Gate C |
+| **Status** | **Accepted** (2026-10-20), by the owner at Step 6's Gate C, as the proposed baseline: "The nine-milestone progression (M1–M9) and security levels L0–L3 are approved as the baseline under review." The independent architecture review comes before any milestone starts (decision history) |
 | **Date** | 2026-10-20 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [The roadmap](../roadmap.md) (MS1–MS12); [Milestone 1](../milestone-1.md) and [ADR-0021](0021-milestone-1.md); the [threat model](../security/threat-model.md) §8; the [overview](../architecture/overview.md) §6; [ADR-0001](0001-scope-and-target.md); [ADR-0004](0004-process-model-and-sandbox.md) (J1); [ADR-0018](0018-corpus-standards-and-testing.md); [ADR-0019](0019-performance-methodology-and-budgets.md); [OQ-1](../open-questions.md), [OQ-3](../open-questions.md), [OQ-9](../open-questions.md), [OQ-16](../open-questions.md), [OQ-18](../open-questions.md) |
@@ -12,6 +12,7 @@
 | Date | Event |
 |---|---|
 | 2026-10-20 | Proposed at Step 6, CP10 |
+| 2026-10-20 | **Accepted** at Step 6's Gate C. The owner: "ADR-0020 (The Roadmap and Its Security Levels): Accepted as proposed baseline. The nine-milestone progression (M1–M9) and security levels L0–L3 are approved as the baseline under review." With it: "We are deferring implementation (Milestone 1 kickoff) until the architecture and roadmap undergo independent, multi-round adversarial review." The [roadmap](../roadmap.md) is binding as that baseline; a change the review brings returns to the owner under MS12 |
 
 ## Question
 
@@ -55,7 +56,7 @@ The [roadmap](../roadmap.md)'s sources: Chromium's Site Isolation page, Mozilla'
 
 ## Decision
 
-**Proposed:** adopt [the roadmap](../roadmap.md) (MS1–MS12) as binding:
+**Accepted** (2026-10-20, as the baseline under review): adopt [the roadmap](../roadmap.md) (MS1–MS12) as binding:
 1. **Nine milestones, ordered and gated, never dated:** M1 static documents (L0); M2 the sandboxed engine, M3 script, M4 the modern document (L1); M5 site isolation and logins (L2); M6 the sensitive-use gate, M7 media, M8 applications, M9 the GPU and WebAssembly (L3).
 2. **Each milestone has one level,** and keeps it after its gate (MS2). **No script from the web before L1** (MS3). **Every interface from M1** (MS4).
 3. **Corpus targets** by milestone (MS6), **the login track** (MS8): test accounts at M5, made by hand in the owner's name, the owner's own accounts at M6.

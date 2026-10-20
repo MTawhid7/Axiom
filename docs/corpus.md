@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0018](adr/0018-corpus-standards-and-testing.md) was accepted (2026-10-20, Step 6's Gate B), with the automation boundary (§3) confirmed by the owner. Written at Step 6, CP2. **Baselines from spike S8** (§5): all thirteen pages in Chrome Canary, the five automated logged out, the eight others signed in by the owner's hand. Safari's runs need repeating ([S8 results](research/s8-results.md) §7.4) |
+| **Status** | **Binding** since [ADR-0018](adr/0018-corpus-standards-and-testing.md) was accepted (2026-10-20, Step 6's Gate B), with the automation boundary (§3) confirmed by the owner. Written at Step 6, CP2. **Baselines from spike S8** (§5): all thirteen pages in Chrome Canary, the five automated logged out, the eight others signed in by the owner's hand; and the ten pages that work logged out in Safari, by the owner's hand ([S8 results](research/s8-results.md) §7.4, recorded at Step 6's Gate C) |
 | **Question** | Which pages is Axiom judged against? What does each need, and from which security level can it be used? How is each measured, repeatably and within its site's terms? |
 | **Answers** | Step 6 question Q1 ([tracker](research/step-6-standards-budgets-roadmap.md) §3), with S8; the tracker's handed-over questions 1 and 2 (§2.2) |
 | **Feeds** | Spike S8 (CP3); the standards baseline (CP4); testing (CP5); budgets (CP6); the roadmap's corpus targets and login track (CP8); Milestone 1 (CP9) |
@@ -215,7 +215,26 @@ Chrome Canary 158.0.8113.0, signed in, 2026-10-20: the medians of three runs by 
 | Figma | 1,319 | 1,111 | 4.4 |
 | Prism | 715 | 494 | 10.0 |
 
-Interaction by hand varies, so the spread is wide: Reddit's cost ran from 495 to 1,631 MB. **Safari** was measured logged out on five of these pages, but the census tool kept the earlier pages open, so only one run measures one page (Google Search: 738 MB across Safari's processes after 30 s without input). The tool is corrected; repeating Safari, Chrome logged out by hand, and Safari on the other eight pages need the owner (§7.4–§7.5 of the results).
+Interaction by hand varies, so the spread is wide: Reddit's cost ran from 495 to 1,631 MB. Chrome logged out by hand, and Safari signed in, weren't measured (§7.5 of the results).
+
+### Baselines in Safari, from S8 (Gate C)
+
+Safari 27.2 (22625.2.8.11.9), logged out in a Private window, 2026-10-20: the medians of three runs by the owner, who added advanced tasks to each page's interaction, such as MDN's live code demos and Street View in Maps ([S8 results](research/s8-results.md) §7.4). The cost is above the same fresh Safari on the census's list page.
+
+| Page | All Safari's processes, 30 s after the interaction (MB) | The page's cost above the list page (MB) | CPU in those 30 s (s) |
+|---|---|---|---|
+| Google Search | 829 | 568 | 0.2 |
+| YouTube | 1,884 | 1,624 | 12.7 |
+| Instagram | 536 | 278 | 2.2 |
+| Reddit | 982 | 736 | 8.3 |
+| Wikipedia | 646 | 385 | 3.8 |
+| Google Maps | 2,137 | 1,880 | 0.4 |
+| Twitch | 1,053 | 795 | 18.8 |
+| MDN | 440 | 181 | 6.8 |
+| Three.js | 692 | 433 | 16.0 |
+| VS Code for the Web | 1,336 | 1,076 | 1.1 |
+
+The interactions differ from Chrome's, and Chrome's content and media pages ran signed in, so the two browsers' figures are context side by side, not a comparison of engines (CO12). A first Safari session that evening is superseded: the census tool's protocol kept earlier pages open, and was corrected before the second.
 
 ## 6. Repeatability and captures
 
@@ -263,7 +282,7 @@ The roadmap (CP8) places each site at the first milestone and level where it can
 ## 10. Open questions
 
 1. **Features of the eight pages measured by hand.** S8 can't instrument them. **Optional, by hand:** after each page, the owner saves Chrome's own `chrome://histograms/Blink.UseCounter` page from the census profile. That page counts the features the browser saw used, records the browser's own statistics, and holds no page content. Not saved in the session of 2026-10-20, so these pages' features stay inference.
-2. **Safari for the five automated pages.** Safari's automation needs its remote automation enabled (Develop → Allow Remote Automation, or `safaridriver --enable` with an administrator's password), a setting only the owner may change. It stayed off at Gate B, so Safari is measured by hand for every page, as the corrected census tool now does.
+2. **Safari for the five automated pages.** Safari's automation needs its remote automation enabled (Develop → Allow Remote Automation, or `safaridriver --enable` with an administrator's password), a setting only the owner may change. It stayed off, so Safari is measured by hand for every page: the corrected census tool measured the ten pages that work logged out on 2026-10-20 ([S8 results](research/s8-results.md) §7.4).
 3. **Test accounts at L2:** answered at CP8 in the [roadmap](roadmap.md) §6. M5 targets Google Search, Instagram and Reddit, whose terms set no limit on a person's accounts; each test account is made by hand, in the owner's own name, with accurate details, and used only to sign in and read.
 4. **When to read terms again:** before each census and each milestone's corpus checks (CO3). Whether a changed clause should stop a census automatically, as a changed robots file does, is CP5's to decide.
 

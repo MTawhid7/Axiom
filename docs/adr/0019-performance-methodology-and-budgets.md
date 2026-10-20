@@ -14,6 +14,7 @@
 | 2026-10-20 | Proposed at Step 6, CP7 |
 | 2026-10-20 | **Accepted** at Step 6's Gate B. The owner: "ADR-0019 (Performance Methodology and Budgets): Accepted as proposed, including the B1-B7 process model amendment (B1 tile scaling formula and B3 per-page memory ceilings)." The [process model](../security/process-model.md)'s §7 and change record carry the final B1–B7 |
 | 2026-10-20 | **The eight pages measured by hand get their ceilings,** by the accepted rule (half of Chrome's cost, capped by tier), from S8's session by hand, signed in ([S8 results](../research/s8-results.md) §7): Google Search, Instagram and Reddit 150 MB (the content cap); YouTube 300 MB (the media cap); Twitch 200 MB; Discord 210 MB; Figma 300 MB (the applications cap); Prism 245 MB. All thirteen are in the [performance budgets](../performance.md) §4.1. **A condition for revisiting is met:** the content pages' Chrome costs (578–1,260 MB) put their cap at 12–26% of Chrome's cost, so the cap goes to the owner at Gate C |
+| 2026-10-20 | **At Step 6's Gate C, the content tier's cap kept.** The owner: "Content Tier Memory Cap (150 MB): Keep the 150 MB ceiling as the baseline hypothesis for review." The ceilings stand as the accepted rule gives them; the architecture review examines the cap ([OQ-25](../open-questions.md)). **Safari's census by hand,** logged out, was recorded at the same gate ([S8 results](../research/s8-results.md) §7.4). It changes no ceiling, since the rule takes Chrome's figures; the ceilings come to 16–54% of Safari's costs |
 
 ## Question
 

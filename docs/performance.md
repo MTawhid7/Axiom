@@ -156,7 +156,9 @@ Values are rounded down to 5 MB. They are fixed numbers: they don't move with Ch
 
 **Every ceiling is a hypothesis** (RC2), measured at the milestone named, under PF1. A miss goes back to the owner as a revision (PF5).
 
-**The caps bind on seven pages.** On the content pages they bind hardest: signed-in feeds cost as much as applications in Chrome, so their ceilings are 12–26% of Chrome's cost, against about half elsewhere. ADR-0019 names that case among its conditions for revisiting ("S8's session by hand shows a corpus page's Chrome cost to differ from its assumed tier cap"), so it goes to the owner at Gate C. Until the owner decides otherwise, the ceilings above stand as the accepted rule gives them.
+**The caps bind on seven pages.** On the content pages they bind hardest: signed-in feeds cost as much as applications in Chrome, so their ceilings are 12–26% of Chrome's cost, against about half elsewhere. ADR-0019 names that case among its conditions for revisiting ("S8's session by hand shows a corpus page's Chrome cost to differ from its assumed tier cap"), so it went to the owner at Gate C. **The owner kept the cap** (2026-10-20): "Keep the 150 MB ceiling as the baseline hypothesis for review." So the ceilings above stand as the accepted rule gives them, and the architecture review examines the cap ([OQ-25](open-questions.md)).
+
+**Safari's figures are context,** and don't change the ceilings. They were measured logged out, by hand, with the owner's advanced tasks, and the ceilings come to 16–54% of them ([S8 results](research/s8-results.md) §7.4).
 
 ## 5. Time
 
@@ -171,7 +173,7 @@ Values are rounded down to 5 MB. They are fixed numbers: they don't move with Ch
 | # | Budget | Value | Evidence |
 |---|---|---|---|
 | PF16 | **No wakeups while idle** | A loaded static page with no timers or animations: **no idle wakeups** in its renderer over 30 s, and none in the browser or network processes beyond what the system's own events cause. Pages with their own timers: no wakeups beyond what they schedule, coalesced with the system's timer leeway | **Measured** possible: S6's compositor and S7's network process had no idle wakeups in most windows (AC3, PM8). Chrome's browser process used 0.45–0.9 s of CPU in every 30 s window of S8, whatever the page (measured) |
-| PF17 | **Hidden pages and energy impact** | Hidden pages: no rendering; timers once a second; chained timers once a minute after 5 minutes hidden and 30 s silent; video paused unless audible. Pages that animate or play: **energy impact no higher than Safari's** on the same page | **Sourced:** Chrome's throttling [C2]. Safari's figures for five pages, logged out, come from S8's session by hand, with a caveat ([S8 results](research/s8-results.md) §7.4); **hypothesis** until the media milestone measures both |
+| PF17 | **Hidden pages and energy impact** | Hidden pages: no rendering; timers once a second; chained timers once a minute after 5 minutes hidden and 30 s silent; video paused unless audible. Pages that animate or play: **energy impact no higher than Safari's** on the same page | **Sourced:** Chrome's throttling [C2]. Safari's figures for ten pages, logged out, come from S8's corrected session by hand, under the owner's advanced tasks ([S8 results](research/s8-results.md) §7.4); **hypothesis** until the media milestone measures both with the same interaction |
 
 ## 7. Build
 
@@ -192,8 +194,8 @@ Values are rounded down to 5 MB. They are fixed numbers: they don't move with Ch
 
 ## 9. Open questions
 
-1. **The content tier's cap** (§4.1): it binds at 12–26% of Chrome's cost on the three content pages, signed in. ADR-0019's condition for revisiting is met, so it goes to the owner at Gate C.
-2. **Safari's figures:** only one run of the session by hand measured one page (S8 results §7.4). PF17's comparison waits for the corrected session, which needs the owner.
+1. **The content tier's cap** (§4.1): it binds at 12–26% of Chrome's cost on the three content pages, signed in. ADR-0019's condition for revisiting was met, and the owner kept the cap at Gate C as the baseline hypothesis for review ([OQ-25](open-questions.md)). Axiom's own measurements at M4 and M5 test it.
+2. **Safari's figures:** measured with the corrected tool for the ten pages that work logged out (S8 results §7.4), so PF17 has Safari's energy impact for those pages. They were taken under the owner's advanced tasks, so the media milestone measures Safari again beside Axiom, with the same interaction.
 3. **Values marked hypothesis** are measured at the milestones named. A miss returns to the owner as a revision (PF5).
 
 ## Sources

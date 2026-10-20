@@ -2,15 +2,15 @@
 
 > **Read this first when resuming work.** Then check the documents it links to against the actual state of the repository (`git log`, `git status`, and the checkpoint tracker). Don't assume earlier work is still accurate.
 
-## Current state (2026-10-20)
+## Current state (2026-10-21)
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero: Step 6, standards, testing, budgets and the roadmap** (authorized 2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written, and spike S8 authorized. CP1–CP10 ✅, **at Gate C,** the final design review. **Gate B passed** (2026-10-20): ADRs 0018 and 0019 accepted, spike S9 authorized and run. Step 5 is done and merged (2026-10-20): ADRs 0010–0017 are accepted. Production engine code is **not** authorized |
-| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 5** (merged with `--no-ff` on 2026-10-20) and is pushed. **Step 6 runs on branch `step-6`**, from `main` at `b4948ce`, pushed to `origin` as the owner authorized at Gate A, and kept pushed |
-| Current checkpoint | **Step 6: CP1–CP10 ✅; Gate C:** the owner reviews ADRs 0020 and 0021, the overview v2 and the requirements ([tracker](research/step-6-standards-budgets-roadmap.md)). Step 5: CP1–CP19 ✅ ([tracker](research/step-5-subsystems.md)) |
-| Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census** (`spikes/s8/`, Python), is complete in Chrome: automated, and by the owner's hand ([results](research/s8-results.md)). Its Safari runs need repeating with the corrected tool. **S9, the test tools** (`spikes/s9/`), is complete ([results](research/s9-results.md)): fuzzing and wptrunner work here; the installed nightly's ThreadSanitizer doesn't. Tooling under `tools/`, now with `s6-tails.py` and `png-region-stats.py`; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
-| Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md), [S6](research/s6-results.md), [S7](research/s7-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
+| Phase | **Phase Zero's baseline is complete:** Step 6's **Gate C passed** (2026-10-20), the final design review. ADRs 0020 and 0021 are accepted, and the architecture proposal (the overview v2, with the requirements) is approved as the Phase Zero baseline. **Next: an independent, multi-round adversarial review** of the architecture and roadmap, on branch `architecture-review` ([handover](handover-phase-0.md)). **Milestone 1 is on hold:** no crate skeleton and no production code (the owner's decision 8) |
+| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 6,** merged with `--no-ff` on 2026-10-21 right after this entry was committed, and pushed, as the owner instructed at Gate C. **`architecture-review`** is branched from that `main` and pushed, for the review cycle. The step branches `step-2b` to `step-6` are kept |
+| Current checkpoint | **Step 6 is done:** CP1–CP11 ✅, Gates A–C passed ([tracker](research/step-6-standards-budgets-roadmap.md)). **The review cycle** hasn't started: its plan and process are the owner's to set ("Next steps") |
+| Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census** (`spikes/s8/`, Python), is complete: in Chrome, automated and by the owner's hand; in Safari, by the owner's hand, logged out, with the corrected tool ([results](research/s8-results.md)). **S9, the test tools** (`spikes/s9/`), is complete ([results](research/s9-results.md)): fuzzing and wptrunner work here; the installed nightly's ThreadSanitizer doesn't. Tooling under `tools/`, now with `s6-tails.py` and `png-region-stats.py`; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
+| Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md), [S6](research/s6-results.md), [S7](research/s7-results.md), [S8](research/s8-results.md), [S9](research/s9-results.md). The [handover](handover-phase-0.md) summarizes them all. Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final**, with build thresholds T1–T4 |
 | | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 |
@@ -31,26 +31,68 @@
 | | [ADR-0016](adr/0016-style-layout-and-paint.md): style, layout and paint, with `:visited` by partitioned history (2026-10-20, Step 5's Gate C) |
 | | [ADR-0017](adr/0017-javascript-engine-and-bindings.md): the JavaScript engine and bindings (2026-10-20, Step 5's Gate C) |
 | | [ADR-0018](adr/0018-corpus-standards-and-testing.md): the corpus, the standards baseline and testing, X1 and X2 (2026-10-20, Step 6's Gate B); the automation boundary confirmed, the not-planned list approved |
-| | [ADR-0019](adr/0019-performance-methodology-and-budgets.md): performance methodology and budgets, X3, with the final B1–B7 (2026-10-20, Step 6's Gate B) |
+| | [ADR-0019](adr/0019-performance-methodology-and-budgets.md): performance methodology and budgets, X3, with the final B1–B7 (2026-10-20, Step 6's Gate B); the content tier's 150 MB cap kept at Gate C as the baseline hypothesis for review ([OQ-25](open-questions.md)) |
+| | [ADR-0020](adr/0020-roadmap-and-security-levels.md): the roadmap and its security levels, M1–M9 and L0–L3, accepted as the baseline under review (2026-10-20, Step 6's Gate C) |
+| | [ADR-0021](adr/0021-milestone-1.md): Milestone 1, static documents, accepted as M1's specification baseline (2026-10-20, Step 6's Gate C); **starting it is on hold** |
+| | The [overview](architecture/overview.md) v2 and the [requirements](requirements.md) (RQ1–RQ66), approved as the Phase Zero baseline (2026-10-20, Step 6's Gate C) |
 | The corpus | 13 sites, set by the owner on 2026-10-20 ([OQ-2](open-questions.md)), and [defined](corpus.md) at Step 6's CP2, binding since Gate B. Eight sites' terms forbid automated access, even logged out, so they are measured by hand; five may be loaded by automation, with care. Every page has a memory ceiling ([performance](performance.md) §4.1) |
 
-## Next steps: Gate C
+## Next steps: the independent architecture review
 
-**Work stops for the owner's Gate C decisions,** the final design review of Phase Zero, each with a recommendation:
-1. **[ADR-0020](adr/0020-roadmap-and-security-levels.md), the roadmap** ([roadmap](roadmap.md), MS1–MS12): nine milestones, from static documents at L0 to the GPU and WebAssembly at L3; the sandbox at M2, site locks at M5, out-of-process iframes and V1–V9 at M6; no script from the web before L1; corpus targets, the login track and the decision points placed. Recommended: accept. Security reaches L3 before media codecs, the GPU process and WebAssembly widen the attack surface, and every open decision has a milestone.
-2. **[ADR-0021](adr/0021-milestone-1.md), Milestone 1** ([Milestone 1](milestone-1.md), MA1–MA12): static documents at L0, with CSS 2.1's visual model. Conformance without script: tokenizer 100%, tree construction ≥ 96%, `css/CSS2`'s reference tests ≥ 97%, Unicode 100%. Corpus checks on Wikipedia and MDN; budgets of 95 MB idle, the pages' ceilings, frames, idle and pauses; no credentials by construction. Recommended: accept. Every criterion is a number with its method, as the charter's §8 asks; the CSS target is demanding (neither new engine meets it yet), and a miss with a reason comes back to you.
-3. **The architecture proposal as a whole:** the [overview](architecture/overview.md) v2, with the [requirements](requirements.md)' traceability (no gaps) and the readiness checks RC1–RC10. Recommended: approve. That completes Phase Zero's criteria (charter §8).
-4. **The content tier's memory cap,** which ADR-0019 sends back to you: signed in, Chrome's cost for Google Search, Instagram and Reddit is 578–1,260 MB, so their 150 MB ceilings are 12–26% of Chrome's. Recommended: keep the cap for now. B6's 1 GB session depends on it; the ceilings are hypotheses that Axiom's own measurements at M4 and M5 will test; and a miss returns to you with evidence, which is a better basis for a revision than Chrome's numbers alone.
-5. **Merging `step-6` into `main`** (CP11), with `--no-ff`, and pushing `main`. Recommended: yes, once you accept the above.
-6. **Starting Milestone 1:** authorize [Milestone 1](milestone-1.md)'s MA10 list: the branch `milestone-1`, the skeleton under `crates/`, the dependencies listed, the pinned test data and the two pages' local copies, the tools (including a nightly whose ThreadSanitizer works), and the live loads of Wikipedia and MDN. Recommended: authorize when you're ready to start; its plan comes back to you at its first gate.
+**Work stops here for the owner.** At Gate C the owner deferred implementation "until the architecture and roadmap undergo independent, multi-round adversarial review", to run on branch `architecture-review` in a dedicated review cycle, with another LLM agent as reviewer. Milestone 1 stays on hold. **Decisions for the owner,** each with a recommendation:
+1. **The review's brief and process.** Recommended: let the review cycle's first checkpoint be a written plan on `architecture-review`, put to the owner like any step's CP1:
+   - the scope, with the [handover](handover-phase-0.md) §11 as the first agenda;
+   - a findings format and a disposition log, where each finding is accepted, rejected or deferred, with the owner's reason;
+   - how accepted findings become ADR amendments or document changes;
+   - a stopping rule: for example, stop when a round raises no critical or major finding.
+
+   **Why:** findings then land in the same records as every other decision, and the end of the review is a decision, not a feeling.
+2. **What the reviewer sees.** Recommended: point the reviewer at `architecture-review` on GitHub, starting from the handover. **Why:** the repository is public, the branch is fixed at the approved baseline, and the reviewer then needs nothing outside the documents. The raw measurement records under `target/` stay on this Mac.
+3. **Optional, before M4: the census's remaining runs by hand,** Chrome logged out for the five pages that work without an account, and Safari signed in ([S8 results](research/s8-results.md) §7.5). Recommended: not before the review, which may change what the census should measure. **Why:** the ceilings rest on Chrome's figures, which are complete.
 
 **For your information:**
-- **A correction to Gate B's report.** The standards baseline's calibration had left WPT's reference tests out. Corrected: `css/CSS2/`'s median is 98.1%, not 98.9%, and Ladybird meets the median on HTML parsing, not on the DOM (0.1 point short) or CSS 2 (4.3 points short). SB10 and SB11 stand; recorded in ADR-0018's history.
-- **A deviation, stopped:** a first attempt at S8's blank baseline opened the dedicated profile by script (about:blank only, no page, no debugging connection), which CO14 forbids. Its two records are unused, under `target/`; they can be deleted if you prefer.
-- **Optional, by hand, before M4:** Safari's runs again with the corrected tool, and Chrome logged out for the five pages that work without an account ([S8 results](research/s8-results.md) §7.5).
-- **ThreadSanitizer** waits for a nightly whose runtime works on macOS 27; Milestone 1 pins one at its start (MA10).
+- **ThreadSanitizer** still waits for a nightly whose runtime works on macOS 27; Milestone 1 pins one at its start (MA10).
+- **A deviation of Gate B's session, recorded there:** two unused records from the stopped attempt on the dedicated profile remain under `target/`. They can be deleted if you prefer.
 
 ## Session log
+
+### 2026-10-20 to 2026-10-21 — Session 16 (Gate C; Safari's census; the handover; the merge)
+
+**Gate C, the owner's decisions** (2026-10-20), with the preamble: "Step 6 Gate C is approved, completing the Phase Zero architectural baseline. We are deferring implementation (Milestone 1 kickoff) until the architecture and roadmap undergo independent, multi-round adversarial review."
+1. "ADR-0020 (The Roadmap and Its Security Levels): Accepted as proposed baseline. The nine-milestone progression (M1–M9) and security levels L0–L3 are approved as the baseline under review."
+2. "ADR-0021 (Milestone 1, Static Documents): Accepted as the specification baseline for M1. The scope, pinned baselines, and measurable criteria (MA1–MA12) are approved as written."
+3. "Architecture Proposal as a Whole: Approved as the Phase Zero baseline. The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero."
+4. "Content Tier Memory Cap (150 MB): Keep the 150 MB ceiling as the baseline hypothesis for review."
+5. "New Safari S8 Census Data: Fold the clean Safari dataset from target/s8-results/20261020-222359-hand-safari-logged-out into docs/research/s8-results.md (§7.4 and status)."
+6. "Phase Zero Handover Report: Please generate a comprehensive handover report (docs/handover-phase-0.md)", with the contents listed in the [tracker](research/step-6-standards-budgets-roadmap.md) §2.
+7. "Merge Step 6 & Review Branch Creation: Once the Safari data and Handover Report are committed and all checks pass, merge step-6 into main with --no-ff, and push main to origin. Branch architecture-review from main and push to origin."
+8. "Milestone 1 Implementation (MA10): ON HOLD. Do not create crate skeletons or write production code. The next phase will be conducted on branch architecture-review in a dedicated review cycle."
+
+**Recorded:**
+- ADRs 0020 and 0021 accepted, with their decision histories;
+- the roadmap, Milestone 1, the requirements and the overview v2, with its §9 and RC10;
+- ADR-0019's decision history and the performance budgets for the content cap, and a new OQ-25;
+- the decision map, with Step 6 done and the review phase next; the open questions; the charter's §8; the tracker; the indexes.
+
+**Safari's census by hand, second session** ([S8 results](research/s8-results.md) §7.4): ten pages logged out, three runs each, 22:24–23:21 on 2026-10-20, with the corrected tool. The run met the power conditions (AC, Low Power Mode off), and began at a load average of 4.04, above PF1's 3.0. Each page's cost above the census's list page:
+- Maps 1,880 MB, YouTube 1,624, VS Code 1,076;
+- Twitch 795, Reddit 736, Google Search 568, Three.js 433, Wikipedia 385, Instagram 278, MDN 181.
+
+Two notes from the owner, later in the session, are recorded with them:
+- "In the reddit case, I forgot to open the private window." Reddit's third run is the one whose record differs: Safari's own process held 45–61 MB, against 203–230 MB elsewhere, which the run's own baseline cancels.
+- "for all sites, I ran some advanced browsing tasks such as running live code demo in mdn, street view in maps, etc", so Safari's figures aren't like for like with Chrome's automated runs.
+
+Other findings:
+- One impossible reading of `top`'s energy counter (29.9 million, Reddit's third run) is left out.
+- Safari's network process grew to 233–241 MB with VS Code for the Web, a datum for B4 (inference).
+- The ceilings don't change; they come to 16–54% of Safari's costs.
+- The S8 results' §10 had a code block left open by a sentence on its closing fence; it is closed.
+
+**The [Phase Zero handover](handover-phase-0.md)** written: the blueprint across the 21 ADRs, spikes S1–S9, trade-offs, deferred decisions, assumptions, known risks, open questions, and 30 areas flagged for critical review.
+
+**CP11:** `step-6` merged into `main` with `--no-ff` once the above were committed with every check green; `main` pushed; `architecture-review` branched from `main` and pushed. This entry is committed on `step-6` just before the merge, so the merge commit itself isn't named here; `git log main --merges -1` shows it.
+
+**Clean-up:** none needed. Since the evening's census sessions, `~/Library/Logs/DiagnosticReports` gained only a routine macOS analytics file (`SFA-swtransparency`, 23:17), like those of 07:48 and 14:14, and no crash report; it was left alone.
 
 ### 2026-10-20 — Session 15 (Gate B; S8 by hand; S9; Step 6 part 2)
 

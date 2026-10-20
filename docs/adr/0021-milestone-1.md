@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-20), for the owner at Step 6's Gate C. Accepting it defines Milestone 1; starting it is a separate authorization |
+| **Status** | **Accepted** (2026-10-20), by the owner at Step 6's Gate C, as the specification baseline for M1: "The scope, pinned baselines, and measurable criteria (MA1–MA12) are approved as written." **Starting it (MA10) is on hold** until the independent architecture review is done (decision history) |
 | **Date** | 2026-10-20 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Milestone 1](../milestone-1.md) (MA1–MA12); [the roadmap](../roadmap.md) and [ADR-0020](0020-roadmap-and-security-levels.md); [ADR-0018](0018-corpus-standards-and-testing.md); [ADR-0019](0019-performance-methodology-and-budgets.md); [S9 results](../research/s9-results.md); the [charter](../charter.md) §8 |
@@ -12,6 +12,7 @@
 | Date | Event |
 |---|---|
 | 2026-10-20 | Proposed at Step 6, CP10 |
+| 2026-10-20 | **Accepted** at Step 6's Gate C. The owner: "ADR-0021 (Milestone 1, Static Documents): Accepted as the specification baseline for M1. The scope, pinned baselines, and measurable criteria (MA1–MA12) are approved as written." And: "Milestone 1 Implementation (MA10): ON HOLD. Do not create crate skeletons or write production code. The next phase will be conducted on branch architecture-review in a dedicated review cycle." |
 
 ## Question
 
@@ -51,7 +52,7 @@ What exactly is Milestone 1, how is it accepted, and what does starting it requi
 
 ## Decision
 
-**Proposed:** adopt [Milestone 1](../milestone-1.md) (MA1–MA12) as the first milestone's definition:
+**Accepted** (2026-10-20, as the specification baseline; starting it on hold): adopt [Milestone 1](../milestone-1.md) (MA1–MA12) as the first milestone's definition:
 1. **Scope** (MA1, MA2): the static-document engine at L0, with CSS 2.1's visual formatting model without paged media, in one process with every interface of the later levels; no script, cookies, storage, web fonts, SVG, flexbox, grid or separate processes.
 2. **The baseline** pinned at its start (MA3).
 3. **Acceptance criteria** (MA4–MA8), each a number with its method:

@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **CP1–CP10 ✅** (2026-10-20). **At Gate C,** the final design review: ADRs 0020 and 0021 proposed, the overview v2 and the requirements' traceability. **Gate B passed** (2026-10-20): ADRs 0018 and 0019 accepted; spike S9 run. **Gate A passed** (2026-10-20). Spike S8 is complete in Chrome; its Safari runs need repeating (§11) |
+| **Status** | **Done** (2026-10-21). CP1–CP11 ✅. **Gate C passed** (2026-10-20): ADRs 0020 and 0021 accepted, and the overview v2 and the requirements approved, as the Phase Zero baseline; Milestone 1 on hold for an independent review (§11). **Gate B passed** (2026-10-20): ADRs 0018 and 0019 accepted; spike S9 run. **Gate A passed** (2026-10-20). Spike S8 is complete, in Chrome and Safari. Merged into `main` |
 | **Authorized** | 2026-10-20, by the owner: "Step 6 Authorization: Authorized. Proceed with creating branch step-6 from main and drafting the Phase Zero Step 6 plan (standards baseline, testing strategy, performance budgets, and Milestone 1 roadmap) for Gate A review." Design documents only; each spike needs its own authorization. **Spike S8 authorized at Gate A** (2026-10-20), for the questions it names (§10.1) |
 | **Branch** | `step-6`, from `main` at `b4948ce` (the Step 5 merge). Pushed to `origin` as the owner authorized at Gate A, after CP1's commit was amended (§11), and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items X1–X3; the roadmap and Milestone 1's acceptance criteria (charter §8); the final design review of Phase Zero; the questions earlier steps handed to Step 6 (§2.2) |
-| **Last updated** | 2026-10-20 |
+| **Last updated** | 2026-10-21 |
 
 > **Resuming in a new session?**
 > 1. Read §6 to find the first checkpoint that isn't ✅.
@@ -55,6 +55,15 @@ Phase Zero's last step turns the accepted architecture into work that can be bui
 | "Spike S9 (Testing and Fuzzing Tooling): Authorized. Proceed with validating cargo-fuzz, AddressSanitizer/ThreadSanitizer, and wptrunner on this Mac." | S9 runs before CP8 ([testing](../testing.md) §9; §10 here) |
 | "Not-Planned List: Approved as written in docs/standards.md §5.3 (DRM, plugins, Web SQL, AppCache, WebXR, Web MIDI, etc.)." | [Standards](../standards.md) §5.3 |
 | "Cadence: Approved. Proceed through CP8–CP10 (Roadmap, Milestone 1 specification, and Phase Zero final synthesis) without pausing up to Gate C." | CP8–CP10 run without pausing, to Gate C |
+| **Gate C (2026-10-20):** "Step 6 Gate C is approved, completing the Phase Zero architectural baseline. We are deferring implementation (Milestone 1 kickoff) until the architecture and roadmap undergo independent, multi-round adversarial review." | Phase Zero's criteria are met ([charter](../charter.md) §8). The review runs on branch `architecture-review` before any milestone starts (§11) |
+| "ADR-0020 (The Roadmap and Its Security Levels): Accepted as proposed baseline. The nine-milestone progression (M1–M9) and security levels L0–L3 are approved as the baseline under review." | [ADR-0020](../adr/0020-roadmap-and-security-levels.md) accepted: the [roadmap](../roadmap.md) is binding as the baseline under review |
+| "ADR-0021 (Milestone 1, Static Documents): Accepted as the specification baseline for M1. The scope, pinned baselines, and measurable criteria (MA1–MA12) are approved as written." | [ADR-0021](../adr/0021-milestone-1.md) accepted: [Milestone 1](../milestone-1.md) is binding as M1's specification |
+| "Architecture Proposal as a Whole: Approved as the Phase Zero baseline. The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." | The [overview](../architecture/overview.md) v2 (RC10 met) and the [requirements](../requirements.md) approved |
+| "Content Tier Memory Cap (150 MB): Keep the 150 MB ceiling as the baseline hypothesis for review." | ADR-0019's decision history; the [performance budgets](../performance.md) §4.1 and §9; [OQ-25](../open-questions.md) |
+| "New Safari S8 Census Data: Fold the clean Safari dataset from target/s8-results/20261020-222359-hand-safari-logged-out into docs/research/s8-results.md (§7.4 and status)." Later in the session: "In the reddit case, I forgot to open the private window. Although my Safari browser is clean and there is barely any difference between regular and incognito browsing as I haven't logged in safari and no extension is installed. Also, for all sites, I ran some advanced browsing tasks such as running live code demo in mdn, street view in maps, etc" | [S8 results](s8-results.md) §7.4, with both of the owner's notes; the [corpus](../corpus.md) §5; the [performance budgets](../performance.md) PF17 and §9 (§11) |
+| "Phase Zero Handover Report: Please generate a comprehensive handover report (docs/handover-phase-0.md) detailing: Complete architectural blueprint and key decisions across all 21 ADRs; Empirical findings from Spikes S1 through S9; All documented trade-offs, deferred decisions, assumptions, and known risk areas (e.g., TSan on macOS 27, 150 MB content cap, single-process L0 transition to multi-process L1/L2, JIT deferred to L2, HarfRust/skrifa vs CoreText); Open questions and areas explicitly flagged for critical review." | The [Phase Zero handover](../handover-phase-0.md) |
+| "Merge Step 6 & Review Branch Creation: Once the Safari data and Handover Report are committed and all checks pass, merge step-6 into main with --no-ff, and push main to origin. Branch architecture-review from main and push to origin." | CP11 (§11) |
+| "Milestone 1 Implementation (MA10): ON HOLD. Do not create crate skeletons or write production code. The next phase will be conducted on branch architecture-review in a dedicated review cycle." | Milestone 1 stays unstarted: no skeleton, no production code. ADR-0021's status and decision history record it |
 
 ### 2.1 Binding inputs
 
@@ -234,7 +243,7 @@ Step 6's outputs are judged against these criteria. CP10 checks every one and re
 | CP8 | The roadmap: milestones, security levels, corpus targets, decision points | ✅ 2026-10-20 (§11; [roadmap](../roadmap.md)) |
 | CP9 | Milestone 1: scope and measurable acceptance criteria | ✅ 2026-10-20 (§11; [Milestone 1](../milestone-1.md)) |
 | CP10 | Requirements traceability; the overview v2 and the criteria checks; ADRs for part 2 (Proposed); decision map, open questions, indexes, status. **Gate C: the final design review** | ✅ 2026-10-20 (§11; [requirements](../requirements.md), [overview](../architecture/overview.md) v2, ADRs [0020](../adr/0020-roadmap-and-security-levels.md) and [0021](../adr/0021-milestone-1.md) proposed). **Gate C** |
-| CP11 | Merge `step-6` into `main` (`--no-ff`), when the owner instructs | Not started |
+| CP11 | Merge `step-6` into `main` (`--no-ff`), when the owner instructs | ✅ 2026-10-21 (§11): merged and `main` pushed, as the owner instructed at Gate C; `architecture-review` branched from `main` and pushed |
 
 ### 6.1 What each checkpoint decides
 
@@ -660,6 +669,34 @@ The final synthesis:
 Every relative link resolves; the four standard checks pass.
 
 **Gate C,** the final design review. The decisions, with recommendations, are in [status](../status.md), "Next steps".
+
+### Gate C — passed 2026-10-20
+
+The owner's decisions, quoted in full in §2:
+- **[ADR-0020](../adr/0020-roadmap-and-security-levels.md) accepted** as the proposed baseline: the [roadmap](../roadmap.md) is binding as the baseline under review.
+- **[ADR-0021](../adr/0021-milestone-1.md) accepted** as M1's specification baseline: [Milestone 1](../milestone-1.md) is binding, MA1–MA12 as written. **Its implementation is on hold:** no skeleton and no production code.
+- **The architecture proposal approved** as the Phase Zero baseline: the [overview](../architecture/overview.md) v2, with RC10 now met, and the [requirements](../requirements.md), complete for Phase Zero. Phase Zero's criteria are met ([charter](../charter.md) §8).
+- **The content tier's 150 MB cap kept** as the baseline hypothesis for review: in ADR-0019's decision history, the [performance budgets](../performance.md) §4.1 and §9, and a new [OQ-25](../open-questions.md).
+- **Safari's census by hand, its second session, folded in** ([S8 results](s8-results.md) §7.4; the [corpus](../corpus.md) §5; the [performance budgets](../performance.md) PF17 and §9):
+  - ten pages logged out, three runs each, 22:24–23:21, with Safari quit and restarted for every run;
+  - each page's cost above the census's list page: Maps 1,880 MB, YouTube 1,624, VS Code 1,076, Twitch 795, Reddit 736, Google Search 568, Three.js 433, Wikipedia 385, Instagram 278, MDN 181;
+  - the owner added advanced tasks to each page's interaction, so the figures aren't like for like with Chrome's automated runs, and neither browser's costs bound the other's;
+  - one run of Reddit had no Private window, which shows in Safari's own process (45–61 MB, against 203–230 MB), and which the run's own baseline cancels;
+  - one impossible reading of `top`'s energy counter is left out;
+  - the ceilings don't change: they come to 16–54% of Safari's costs.
+
+  The first Safari session is superseded. The S8 results' §10 had a code block left open by a sentence on its closing fence; it is closed.
+- **The [Phase Zero handover](../handover-phase-0.md)** written: the blueprint across the 21 ADRs, spikes S1–S9, trade-offs, deferred decisions, assumptions, risks, open questions, and the areas flagged for critical review.
+- **The merge and the review branch** authorized (CP11).
+- **The next phase:** an independent, multi-round adversarial review of the architecture and roadmap, on branch `architecture-review`.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP11 — completed 2026-10-21
+
+`step-6` merged into `main` with `git merge --no-ff step-6`, as the owner instructed at Gate C, once the Safari data and the handover were committed with every check green. `main` pushed to `origin`, then `architecture-review` branched from `main` and pushed. This entry is the last commit on `step-6`; the merge follows it.
+
+**Step 6 is done, and with it Phase Zero's design work.** Milestone 1 is on hold; the independent review comes next ([status](../status.md), "Next steps").
 
 ## Sources
 

@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Complete in Chrome** (2026-10-20): the five corpus pages whose sites' terms permit automated loads, three valid runs each (§3–§6), and the other eight signed in, by the owner's hand, three runs each (§7). **Safari's runs need repeating:** the tool kept earlier pages open in Safari, so only one of its runs measures a single page (§7.4). Chrome logged out by hand, and Safari for eight pages, weren't run (§7.5) |
+| **Status** | **Complete** (2026-10-20). **In Chrome:** the five corpus pages whose sites' terms permit automated loads, three valid runs each (§3–§6), and the other eight signed in, by the owner's hand, three runs each (§7). **In Safari:** the ten pages that work logged out, by the owner's hand with the corrected tool, three runs each (§7.4), recorded at Step 6's Gate C. The first Safari session is superseded, since the tool's protocol kept earlier pages open. Not run: Chrome logged out by hand, and Safari signed in (§7.5) |
 | **Question** | What does each corpus page use and cost in shipping engines on this Mac? Its features (S8-Q1), size (S8-Q2), memory (S8-Q3), and load milestones and cost without input (S8-Q4) |
 | **Feeds** | The [corpus](../corpus.md)'s baselines; the [standards baseline](../standards.md)'s priorities (CP4); the [performance budgets](../performance.md) (CP6) |
 | **Plan** | [Step 6 tracker](step-6-standards-budgets-roadmap.md) §10.1, authorized at Gate A (2026-10-20), as refined at CP2 to the sites' terms ([corpus](../corpus.md) CO3–CO6) |
-| **Code** | `spikes/s8/` (Python, standard library only) and `tools/s8-measure.sh`, at `6ba5068` for the formal run and `df7b179` for the rerun; at `cbf8559` for the session by hand; `s8.py blank` and the corrected session by hand at this step's Gate B commit; `tools/s8-report.py` for the tables (§10) |
+| **Code** | `spikes/s8/` (Python, standard library only) and `tools/s8-measure.sh`, at `6ba5068` for the formal run and `df7b179` for the rerun; at `cbf8559` for the session by hand; `s8.py blank` and the corrected session by hand at `c914044`, which Safari's second session ran (at `84254cf`); `tools/s8-report.py` for the tables (§10) |
 | **Last updated** | 2026-10-20 |
 
 **Evidence labels** follow the [research conventions](README.md):
@@ -43,7 +43,11 @@ MB means 10⁶ bytes, as B1 and S6 use it. Every figure is a median of three val
   - Google Search 582, Instagram 578, Prism 494, Discord 427, Twitch 401.
 
   Runs driven by hand vary more than automated ones: Reddit's ran from 495 to 1,631 MB. Signed in, the content pages cost as much as the applications.
-- **Safari** (§7.4): the tool kept the earlier pages open, so only the session's first run measures one page. Google Search, logged out, held 738 MB across Safari's processes after 30 s without input. The tool is corrected; repeating the runs needs the owner.
+- **By hand, logged out, in Safari** (§7.4), in Safari 27.2 with the corrected tool: ten pages, three runs each. Each page's steady-state cost above the same fresh Safari on the census's list page:
+  - Google Maps 1,880 MB, YouTube 1,624, VS Code 1,076;
+  - Twitch 795, Reddit 736, Google Search 568, Three.js 433, Wikipedia 385, Instagram 278, MDN 181.
+
+  The owner went beyond each page's listed interaction, with tasks such as MDN's live code demos and Street View in Maps. So these figures aren't like for like with Chrome's automated runs, whose interaction was scripted. Neither browser's costs bound the other's. Safari's figures don't move the ceilings, which the accepted rule takes from Chrome. A first Safari session, earlier that evening, is superseded: the tool's protocol kept earlier pages open.
 
 ## 1. What was built
 
@@ -169,15 +173,15 @@ All of Chrome's processes, in MB (`footprint`'s total, shared memory counted onc
 
 ## 7. The census by hand
 
-**Run by the owner on 2026-10-20,** after Gate B (the owner's decision 4), with secondary accounts in the dedicated profile: "I have used my secondary accounts for these tests." The tools only sampled the browsers' processes (CO6).
+**Run by the owner on 2026-10-20,** after Gate B (the owner's decision 4), with secondary accounts in the dedicated profile: "I have used my secondary accounts for these tests." The tools only sampled the browsers' processes (CO6). Safari's second session, with the corrected tool, followed that evening, and was recorded at Gate C (the owner's decision 5).
 
-| | Chrome Canary, signed in | Safari, logged out |
-|---|---|---|
-| **Pages** | Google Search, YouTube, Instagram, Reddit, Twitch, Discord, Figma, Prism | Google Search, YouTube, Instagram, Reddit, Twitch |
-| **Runs** | Three of each, 18:17–18:58 | Three of each, 19:01–19:25 |
-| **Browser** | Chrome Canary 158.0.8113.0, the next build after the automated runs' 158.0.8112.0, which it updated itself to in between. The dedicated profile, no debugging connection, no automation flags | Safari 27.2 (22625.2.8.11.9), a Private window |
-| **Records** | `target/s8-results/20261020-181706-hand-chrome-signed-in/` | `target/s8-results/20261020-190125-hand-safari-logged-out/`. A first start at 18:59 recorded only its environment |
-| **Conditions** | AC power, Low Power Mode off; load average 1.63 at the start and 1.5–4.7 after the runs; memory free 61–73% | The same power; load average 1.86 at the start and 1.3–4.4 after the runs; memory free 43–72% |
+| | Chrome Canary, signed in | Safari, logged out: the second session (§7.4) | Safari, logged out: the first session, superseded |
+|---|---|---|---|
+| **Pages** | Google Search, YouTube, Instagram, Reddit, Twitch, Discord, Figma, Prism | The ten that work logged out: Google Search, YouTube, Instagram, Reddit, Wikipedia, Google Maps, Twitch, MDN, Three.js, VS Code for the Web | Google Search, YouTube, Instagram, Reddit, Twitch |
+| **Runs** | Three of each, 18:17–18:58 | Three of each, 22:24–23:21, a round of the ten pages at a time, with Safari quit and restarted for every run | Three of each, 19:01–19:25 |
+| **Browser** | Chrome Canary 158.0.8113.0, the next build after the automated runs' 158.0.8112.0, which it updated itself to in between. The dedicated profile, no debugging connection, no automation flags | Safari 27.2 (22625.2.8.11.9), a Private window, except in one run of Reddit (§7.4) | Safari 27.2 (22625.2.8.11.9), a Private window |
+| **Records** | `target/s8-results/20261020-181706-hand-chrome-signed-in/` | `target/s8-results/20261020-222359-hand-safari-logged-out/` | `target/s8-results/20261020-190125-hand-safari-logged-out/`. A first start at 18:59 recorded only its environment |
+| **Conditions** | AC power, Low Power Mode off; load average 1.63 at the start and 1.5–4.7 after the runs; memory free 61–73% | The same power; load average 4.04 at the start, above PF1's 3.0, and 1.3–3.0 after each run; memory free 64–75% | The same power; load average 1.86 at the start and 1.3–4.4 after the runs; memory free 43–72% |
 
 ### 7.1 The baseline
 
@@ -232,37 +236,63 @@ All of Chrome's processes, in MB (footprint's total, shared memory counted once)
 - **Prism and Reddit kept working without input,** about a third of a core at the median, with a wide spread on Reddit.
 - **Discord was the quietest:** 1.25 s of CPU and 13 wakeups in 30 s.
 
-### 7.4 Safari, logged out: one run measures one page
+### 7.4 Safari, logged out
 
-- **The tool kept the earlier pages open.** After each page it asked the owner to go back to the list in the same tab. Safari kept the earlier pages' WebContent processes alive, in its back-forward cache or its process cache (inference). The renderers counted rose from 2 after the first page to 5, 7 and 9, and the total from 0.74 GB to 3.8 GB, while memory free fell to 43%. **So every run after the first counts earlier pages too,** and its memory figures aren't one page's. The fault is the tool's protocol, not the session.
-- **Only the session's first run measures one page:** Google Search, logged out. All of Safari's processes held 453 MB loaded, 800 MB after the interaction and 738 MB after 30 s without input. Its renderers held 218, 549 and 501 MB, and Safari's own process 206 MB. One run, so no spread.
-- **The 30 s without input are less affected:** pages kept in the back-forward cache are suspended, with no timers or rendering (inference), so CPU time and energy belong mostly to the page shown. With that caveat:
+**The second session, with the corrected tool,** 22:24–23:21, folded in at Gate C on the owner's decision 5. Safari was quit and restarted for every run, so each run's records hold one page. Each run's baseline is the census's list page, 10 s after a fresh Safari opened it in a Private window. All of Safari's processes, in MB (footprint's total, shared memory counted once):
 
-  | Page | CPU time over 30 s (s) | Idle wakeups | Energy impact |
-  |---|---|---|---|
-  | Google Search | 0.65 (0.24–1.02) | 36 (30–43), one run left out: no wakeup counted for any process | 1.8 (0.7–3.0) |
-  | YouTube | 15.51 (14.53–16.69) | 240 (158–256) | 48.3 (45.2–51.7) |
-  | Instagram | 2.31 (2.04–2.50) | 46 (38–193) | 6.9 (6.4–7.5) |
-  | Reddit | 2.69 (2.26–12.83) | 122 (54–171) | 8.3 (6.8–39.6) |
-  | Twitch | 18.04 (17.84–19.37) | 70 (69–72) | 55.8 (55.2–59.9) |
+| Page | Tier | Loaded | After interaction | After 30 s without input | Renderers, loaded | GPU, after 30 s | Cost above the baseline, after 30 s |
+|---|---|---|---|---|---|---|---|
+| Google Search | Content | 532 (451–594) | 864 (793–917) | 829 (790–859) | 289 (220–346) | 24 (20–26) | **568** (534–601) |
+| YouTube | Media | 1,254 (1,194–1,408) | 2,131 (1,947–2,245) | 1,884 (1,790–1,906) | 966 (902–1,087) | 324 (320–327) | **1,624** (1,533–1,648) |
+| Instagram | Content | 522 (506–597) | 603 (597–741) | 536 (536–586) | 289 (276–353) | 18 (18–20) | **278** (277–329) |
+| Reddit | Content | 644 (379–660) | 1,082 (938–1,807) | 982 (836–1,325) | 390 (281–405) | 36 (33–76) | **736** (724–1,068) |
+| Wikipedia | Documents | 504 (481–510) | 653 (610–750) | 646 (585–650) | 257 (240–259) | 36 (24–45) | **385** (327–390) |
+| Google Maps | Media and maps | 1,362 (865–1,414) | 2,165 (1,459–2,518) | 2,137 (1,258–2,479) | 1,064 (611–1,116) | 48 (41–50) | **1,880** (998–2,219) |
+| Twitch | Media | 1,045 (948–1,063) | 974 (971–1,005) | 1,053 (1,025–1,066) | 752 (670–770) | 103 (101–107) | **795** (766–806) |
+| MDN | Documents | 378 (372–392) | 441 (437–507) | 440 (403–506) | 147 (143–150) | 28 (17–29) | **181** (145–247) |
+| Three.js | Applications | 699 (689–701) | 699 (688–706) | 692 (687–710) | 431 (426–431) | 55 (55–70) | **433** (430–450) |
+| VS Code for the Web | Applications | 936 (742–1,031) | 1,362 (1,012–1,400) | 1,336 (965–1,600) | 582 (508–684) | 29 (17–30) | **1,076** (708–1,341) |
 
-  Safari ran logged out and Chrome signed in, so the two browsers' figures aren't the same pages' experience.
-- **The tool is corrected:**
-  - Safari is quit and restarted for each page.
-  - Each run records its own baseline, 10 s after the list opens.
-  - By hand, Safari covers every page of the mode, the five automated pages included, since its remote automation is off. The tool's first version left those five out.
+- **The baseline** held 257–261 MB in 29 of the 30 runs: Safari's own process 203–207 MB, its GPU process 11 MB, its network process 6 MB, and two WebContent processes 36–38 MB.
+- **The owner went beyond each page's listed interaction** (CO10): "for all sites, I ran some advanced browsing tasks such as running live code demo in mdn, street view in maps, etc." So these figures measure heavier use than the corpus's interactions and Chrome's automated runs, whose interaction was scripted (§2). Maps' renderers held 1.9 and 2.2 GB after 30 s without input in two of its runs, and 1.0 GB in the third.
+- **One run of Reddit had no Private window:** "In the reddit case, I forgot to open the private window." The owner adds that this Safari is signed in to nothing and has no extension, so a regular window differs little from a Private one for the page. Only Reddit's third run differs in the record, so it is most likely that run (inference). There, Safari's own process held 45–61 MB, against 203–230 MB in the other 29 runs, and the baseline came to 100 MB. Its cost subtracts its own baseline, so it stays comparable: 737 MB, against 724 and 1,068 MB. **Inference, from that one run:** the Private window accounts for about 160 MB of Safari's own process, which cancels out of every cost.
+- **Video keeps its memory on the GPU:** YouTube's GPU process held 320–327 MB after 30 s, and Twitch's 101–107 MB; the other pages' 18–55 MB at the median.
+- **VS Code's data went to the network process.** Safari's network process grew from 6 MB to 233–241 MB with VS Code for the Web, against 7–22 MB on every other page. WebKit's network process hosts web storage, as Axiom's does (SW1), so this is most likely VS Code's IndexedDB and caches (inference). B4 bounds Axiom's network process only while idle ([performance](../performance.md) PF9).
 
-  Repeating the Safari runs needs the owner (§7.5).
+**The 30 s without input:**
+
+| Page | CPU time over 30 s (s) | Idle wakeups | Energy impact |
+|---|---|---|---|
+| Google Search | 0.23 (0.10–0.32) | 4 (1–4) | 0.6 (0.2–0.9) |
+| YouTube | 12.69 (10.91–14.24) | 92 (73–182) | 39.4 (33.6–44.4) |
+| Instagram | 2.23 (2.08–2.37) | 23 (14–24) | 6.9 (6.3–7.1) |
+| Reddit | 8.30 (0.55–15.60) | 19 (9–77) | 1.6 and 48.4 in two runs. In the third, `top` gave the GPU process an impossible 29.9 million, a fault of its counter, left out; 24.9 without that process |
+| Wikipedia | 3.81 (0.09–11.35) | 10 (0–13) | 11.7 (0.2–35.0) |
+| Google Maps | 0.41 (0.32–0.43) | 4 (4–17) | 1.2 (0.9–1.2) |
+| Twitch | 18.76 (17.77–18.80) | 59 (41–60) | 58.3 (55.4–58.3) |
+| MDN | 6.82 (0.03–6.93) | 21 (1–24) | 21.0 (0.1–21.3) |
+| Three.js | 15.95 (15.90–16.01) | 49 (44–50) | 49.6 (49.5–49.8) |
+| VS Code for the Web | 1.09 (0.18–4.25) | 6 (0–32) | 3.2 (0.5–13.0) |
+
+- **Twitch, Three.js and YouTube keep working,** about half a core each, as they do in Chrome (§6, §7.3). Three.js's simulation cost the same in both: 16.0 s of CPU here, 15.4 s in Chrome.
+- **MDN kept working in two runs** (6.8 and 6.9 s), and Wikipedia in two (3.8 and 11.4 s), where Chrome's automated runs of the static pages used 0.9–2.4 s. Most likely the owner's tasks left work running, such as MDN's live demos (inference).
+- **Google Maps idles cheaply in Safari:** 0.4 s of CPU in 30 s, despite its 1–2 GB.
+
+**Beside Chrome** (inference; the conditions differ, so this is context, not a comparison of engines):
+- **On the five automated pages,** Chrome's interaction was scripted, and Safari's by hand with the owner's advanced tasks. Safari's costs are higher on Maps (1,880 against 627 MB), VS Code (1,076 against 457), Wikipedia (385 against 319) and MDN (181 against 145), and lower on Three.js (433 against 470).
+- **On the five content and media pages,** Chrome ran signed in and Safari logged out. Safari's costs are higher on YouTube (1,624 against 908 MB) and Twitch (795 against 401), about the same on Google Search (568 against 582), and lower on Reddit (736 against 1,260) and Instagram (278 against 578).
+- **So neither browser bounds the other,** and a page's cost depends on what is done with it as much as on the engine.
+- **The ceilings stay as the accepted rule gives them:** half of Chrome's cost, capped by tier ([performance](../performance.md) §4.1). Against Safari's costs, they come to 16% (Maps) to 54% (Instagram, Three.js).
+
+**The first session, superseded** (19:01–19:25). After each page, the tool asked the owner to go back to the list in the same tab, and Safari kept the earlier pages' WebContent processes alive. So every run after the first counted earlier pages too: the renderers counted rose from 2 to 9, and the total from 0.74 to 3.8 GB. Only its first run measured one page: Google Search, at 738 MB across Safari's processes after 30 s without input. Its records stay under `target/`, and its figures aren't used. The tool was corrected before the second session:
+- Safari is quit and restarted for each run;
+- each run records its own baseline;
+- Safari covers every page of the mode, the five automated pages included.
 
 ### 7.5 Not measured
 
 - **Chrome logged out by hand:** Google Search, YouTube, Instagram, Reddit and Twitch, which CO10 measures beside signed in.
-- **Safari:**
-  - Discord, Figma and Prism, signed in;
-  - the five automated pages;
-  - single-page memory for every page but Google Search (§7.4).
-
-  `python3 -I spikes/s8/s8.py hand --browser safari --mode logged-out` now covers the ten pages that work logged out, and `--mode signed-in` the eight that need a sign-in.
+- **Safari signed in:** Discord, Figma and Prism, which need a sign-in, and the five content and media pages, which differ signed in. `python3 -I spikes/s8/s8.py hand --browser safari --mode signed-in` covers those eight.
 - **The eight pages' features:** `chrome://histograms` wasn't saved, so they stay inference ([corpus](../corpus.md) §10, question 1).
 - **Safari's remote automation** stayed off.
 
@@ -280,6 +310,8 @@ These are inferences, for CP4 and CP6:
 - **HTTP/3 carries most of Maps' traffic.** Networking's plan to add HTTP/3 after HTTP/1.1 and HTTP/2 stands, and the corpus will measure its effect.
 - **Signed-in feeds are the heaviest pages per tier** (§7.2). Reddit, Instagram and Google Search cost 578–1,260 MB in Chrome after scrolling, where the content tier's cap is 150 MB. So the content pages' ceilings are the tightest in the corpus, at 12–26% of Chrome's cost ([performance](../performance.md) §4.1).
 - **Feeds keep their media on the GPU:** Instagram's and Reddit's GPU processes held 311–388 MB at the steady state. Charging GPU memory to the page (PF4), and dropping what has scrolled away, matter most on these pages (inference).
+- **What is done with a page sets its cost as much as the engine does** (§7.4). With the owner's advanced tasks, Safari's costs exceeded Chrome's scripted ones on four of the five automated pages, up to three times Chrome's, on Maps. So a ceiling means something only with its interaction: each milestone's corpus check states the interaction it measures (CO10), and a check by hand records what the owner did (inference).
+- **Web storage can make the network process large:** Safari's grew to 233–241 MB with VS Code for the Web (§7.4). Axiom keeps web storage in its network process too (SW1), where B4 bounds only the idle process. A budget for that process under storage load is for the storage milestone (inference).
 
 ## 9. Threats to validity
 
@@ -296,7 +328,12 @@ These are inferences, for CP4 and CP6:
   - the baseline is a fresh profile's, measured after the session, so each cost includes the dedicated profile's own state (§7.1);
   - the runs used Canary 158.0.8113.0, the automated ones 158.0.8112.0;
   - one run's load average reached 4.68 (Figma's third), above PF1's 3.0.
-- **Safari:** only one run measures one page (§7.4).
+- **Safari** (§7.4):
+  - the owner's advanced tasks go beyond the corpus's listed interactions and Chrome's scripted ones, so the two browsers' figures aren't like for like;
+  - one run of Reddit had no Private window, which changed Safari's own process by about 160 MB; the run's own baseline cancels it;
+  - the session began at a load average of 4.04, above PF1's 3.0, and stayed at 1.3–3.0 after each run;
+  - one reading of `top`'s energy counter was impossible (29.9 million) and is left out;
+  - the first session is superseded, since the tool's protocol kept earlier pages open.
 
 ## 10. Reproducing these results
 
@@ -315,7 +352,16 @@ python3 -I tools/s8-report.py target/s8-results/<timestamp>-auto [...] \
 python3 -I spikes/s8/s8.py blank          # three runs, about 6 minutes; no page loaded
 python3 -I tools/s8-report.py target/s8-results/20261020-181706-hand-chrome-signed-in \
     --blank target/s8-results/20261020-195301-blank-chrome-fresh
-``` web-features' `data.json` is release v3.43.0's [W1], downloaded into `target/`.
+```
+
+Safari's second session records each run's own baseline, so its report needs no `--blank`:
+
+```sh
+python3 -I spikes/s8/s8.py hand --browser safari --mode logged-out   # by hand: ten pages, three runs, about an hour
+python3 -I tools/s8-report.py target/s8-results/20261020-222359-hand-safari-logged-out
+```
+
+web-features' `data.json` is release v3.43.0's [W1], downloaded into `target/`.
 
 ## Sources
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 6, CP10, 2026-10-20), for the owner at Gate C, with the [overview](architecture/overview.md) v2 |
+| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review |
 | **Question** | Does every requirement trace from its source to the milestone that verifies it, and to the check that does? |
 | **Answers** | Part of Step 6 question Q7 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the tracker's handed-over question 30 (§2.2). Planned since Step 1 |
 | **Builds on** | The [charter](charter.md); the accepted ADRs; the [threat model](security/threat-model.md) and [process model](security/process-model.md); the [corpus](corpus.md), [standards](standards.md), [testing](testing.md) and [performance](performance.md) documents; the [roadmap](roadmap.md) and [Milestone 1](milestone-1.md) |
