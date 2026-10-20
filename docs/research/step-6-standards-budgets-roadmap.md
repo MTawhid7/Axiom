@@ -232,7 +232,7 @@ Step 6's outputs are judged against these criteria. CP10 checks every one and re
 | (Gate B) | The owner's decisions recorded; S8's session by hand folded in, with every page's ceiling; spike S9, authorized at Gate B | ✅ 2026-10-20 (§11). S9 ([results](s9-results.md)): Q1 and Q3 pass; Q2 fails with the installed nightly. The pass-rate tool corrected, and the standards' calibration recomputed |
 | | **Part 2: the roadmap** | |
 | CP8 | The roadmap: milestones, security levels, corpus targets, decision points | ✅ 2026-10-20 (§11; [roadmap](../roadmap.md)) |
-| CP9 | Milestone 1: scope and measurable acceptance criteria | Not started |
+| CP9 | Milestone 1: scope and measurable acceptance criteria | ✅ 2026-10-20 (§11; [Milestone 1](../milestone-1.md)) |
 | CP10 | Requirements traceability; the overview v2 and the criteria checks; ADRs for part 2 (Proposed); decision map, open questions, indexes, status. **Gate C: the final design review** | Not started |
 | CP11 | Merge `step-6` into `main` (`--no-ff`), when the owner instructs | Not started |
 
@@ -616,6 +616,26 @@ Every relative link resolves; the four standard checks pass.
 - **How a milestone runs** (MS10): the owner's authorization, a branch, a plan with gates, checkpoints, dependencies adopted after grading with the owner's approval, the routine from M1.
 - **Precedent:** Chromium's and Firefox's site-isolation retrofits, and Ladybird's sandboxes before its alpha, read on 2026-10-20.
 - **Found for M1:** WPT's testharness tests are themselves script, so M1 runs reference and crash tests, and html5lib's tree-construction tests from WPT's `.dat` files in its own runner.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP9 — completed 2026-10-20
+
+[Milestone 1](../milestone-1.md) written (**Proposed**, with ADR-0021 at CP10; rules MA1–MA12):
+- **Scope** (MA1, MA2): the static-document engine at L0, with CSS 2.1's visual formatting model without paged media. One process with every interface of the later levels. No script, cookies, storage, web fonts, SVG, flexbox, grid or separate processes.
+- **The baseline pinned at its start** (MA3); candidates WPT `0f26972422` and html5lib-tests `c777c408`.
+- **Conformance without script** (MA4), because WPT's testharness tests are script:
+  - html5lib's tokenizer tests, 100%;
+  - the 1,973 tree-construction tests in WPT's `.dat` files, at least 96%;
+  - `css/CSS2`'s 5,848 reference tests in scope (all but `tables/` and the inline-SVG files), at least 97%: the median of Chrome 98.2%, Firefox 97.8% and Safari 96.4% on those tests, rounded down (SB11);
+  - Unicode's line-breaking and bidi files, 100%.
+
+  Neither new engine meets the CSS target yet: Servo 93.7%, Ladybird 91.2%.
+- **The corpus** (MA5): Wikipedia and MDN from dated copies and live; text laid out in order without overlaps, measured; the owner's checklist against Safari; links navigate; 10 loads with no crash or hang.
+- **Budgets** (MA6): the idle process at most 95 MB, being B1's core, the window's tiles and B2 in one process; Wikipedia at most 100 MB and MDN at most 70 MB above it; S6's frame budgets; no task over 50 ms; no idle wakeups; pauses within 4 ms; T1–T4.
+- **Security** (MA7): no script engine linked; no credentials, by construction, with password forms refused below L2; every parser and decoder fuzzed at least an hour; `unsafe` only where allowed; dependencies registered and graded. **Determinism** (MA8).
+- **Starting it** (MA10): the owner authorizes the branch, the skeleton under `crates/`, the dependencies listed, the pinned data and copies, the tools, a nightly whose ThreadSanitizer works, and the live loads.
+- **Computed for it:** a WPT manifest of the sparse checkout gave each test's type; the corrected `tools/wpt-pass-rates.py` gave the medians over reference tests.
 
 Every relative link resolves; the four standard checks pass.
 

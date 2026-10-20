@@ -84,11 +84,11 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 
 ### 4.1 What each milestone contains
 
-**M1, static documents (L0).** CP9 defines it precisely, in Milestone 1 (`docs/milestone-1.md`). In outline:
+**M1, static documents (L0).** CP9 defines it precisely, in [Milestone 1](milestone-1.md). In outline:
 - **The engine in one process** (MS4), with the AppKit shell (window, address field, back and forward) and the objc2 classes for text input and accessibility validated (EM11); the headless embedder with the test-only WebDriver server (EM9, TS2).
 - **HTML and the DOM:** the first document milestone's row ([HTML and the DOM](architecture/html-and-dom.md) §8), without script: the parser with encoding sniffing and fragments; nodes, attributes and the mutation algorithms with their hooks; event dispatch for routed input; ranges and selection; forms submitted as navigations.
 - **Style:** the first document milestone's row ([style](architecture/style.md) §8).
-- **Layout and paint: CSS 2.1's visual formatting model, without paged media.** That is the first document milestone's row ([layout](architecture/layout-and-paint.md) §8), **plus tables** (approximate, LY10), lists and generated content, every CSS 2.1 border style, and outlines. Tables are brought forward from the next stage because both documents lay out tables, such as Wikipedia's infoboxes (inference); the rest completes CSS 2.1, whose reference tests are M1's CSS target (Milestone 1 (`docs/milestone-1.md`) MA4).
+- **Layout and paint: CSS 2.1's visual formatting model, without paged media.** That is the first document milestone's row ([layout](architecture/layout-and-paint.md) §8), **plus tables** (approximate, LY10), lists and generated content, every CSS 2.1 border style, and outlines. Tables are brought forward from the next stage because both documents lay out tables, such as Wikipedia's infoboxes (inference); the rest completes CSS 2.1, whose reference tests are M1's CSS target ([Milestone 1](milestone-1.md) MA4).
 - **Text:** the first text milestone's row: system fonts through CoreText, HarfRust, ICU4X, the atlas, the encodings ([text](architecture/text-and-fonts.md) §8).
 - **Images:** PNG, JPEG, GIF and WebP ([images](architecture/images-and-media.md) §8). **Graphics:** the first rendering milestone's row ([graphics](architecture/graphics.md) §8).
 - **Networking:** URLs, `file:`, HTTP/1.1 and HTTP/2 over rustls with the system verifying certificates (S7), DNS-SD, an in-memory cache, mixed content, HSTS and Referrer-Policy. No cookies and no disk cache until M2.

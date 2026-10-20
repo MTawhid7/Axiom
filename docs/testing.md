@@ -135,7 +135,7 @@ Except the rustup component, everything stays under `target/`, which git ignores
 - **S9-Q3 passes:** wptrunner ran `dom/nodes` against Chrome Canary within memory, at wpt.fyi's pass rate.
 
 **What follows, within these rules:**
-- Milestone 1 pins a nightly whose ThreadSanitizer works (TS11; Milestone 1 (`docs/milestone-1.md`) MA7, MA10).
+- Milestone 1 pins a nightly whose ThreadSanitizer works (TS11; [Milestone 1](milestone-1.md) MA7, MA10).
 - Campaigns run one or two at a time within 8 GB, since a fuzzer under AddressSanitizer held about 0.5 GB.
 - Deep formats get structure-aware generation beside their seeds (TS10).
 - **WPT keeps html5lib's tree-construction tests as `.dat` files** beside their script wrappers (observed), so an engine without script runs them in its own runner (TS4; Milestone 1's MA4).

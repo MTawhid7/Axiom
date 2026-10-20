@@ -4,7 +4,7 @@
 |---|---|
 | **Status** | **Complete** (2026-10-20). **S9-Q1 passes:** cargo-fuzz finds the planted bug, runs 10 minutes and reports coverage, under AddressSanitizer. **S9-Q2 fails** with the installed nightly: ThreadSanitizer's runtime crashes while starting, on macOS 27.2; Apple's own ThreadSanitizer works. **S9-Q3 passes:** wptrunner runs `dom/nodes` against Chrome Canary within memory, and reproduces wpt.fyi's pass rate |
 | **Question** | Do Axiom's planned test tools work on this Mac: cargo-fuzz with libFuzzer, AddressSanitizer and coverage (S9-Q1); ThreadSanitizer (S9-Q2); wptrunner within 8 GB (S9-Q3)? |
-| **Feeds** | The [testing strategy](../testing.md)'s TS9–TS11 and TS18; Milestone 1 (`docs/milestone-1.md`)'s criteria and authorization (MA7, MA10) |
+| **Feeds** | The [testing strategy](../testing.md)'s TS9–TS11 and TS18; [Milestone 1](../milestone-1.md)'s criteria and authorization (MA7, MA10) |
 | **Plan** | [Testing](../testing.md) §9, authorized at Step 6's Gate B (2026-10-20): "Spike S9 (Testing and Fuzzing Tooling): Authorized. Proceed with validating cargo-fuzz, AddressSanitizer/ThreadSanitizer, and wptrunner on this Mac." |
 | **Code** | `spikes/s9/`: `decoder` and `race` (workspace crates) and `fuzz` (cargo-fuzz's targets, its own workspace); `tools/s9-measure.sh` |
 | **Last updated** | 2026-10-20 |
