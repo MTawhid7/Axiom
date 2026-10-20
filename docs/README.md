@@ -19,6 +19,7 @@ These documents are the project's source of truth. Conversation history is not.
 | [charter.md](charter.md) | Goals, users, environment, scope, non-goals, success criteria | Draft (scope sections Accepted) |
 | [corpus.md](corpus.md) | The target-site corpus: the owner's 13 pages, their tiers, needs, logins and earliest security levels; what each site's terms allow automation to do; how each page is measured, logged out and signed in, and how repeatably | Draft (Step 6, CP2) |
 | [decision-map.md](decision-map.md) | Decision layers, couplings, Phase Zero sequence | Living |
+| [standards.md](standards.md) | The standards baseline (X1): how each specification is pinned, five support classes, the approximate behaviours, the support matrix with its suites and the corpus's needs, and pass-rate targets calibrated on wpt.fyi | Draft (Step 6, CP4) |
 | [open-questions.md](open-questions.md) | Unresolved questions and the evidence each needs | Living |
 | [status.md](status.md) | Current state and session handoffs | Living |
 | [adr/](adr/) | Architecture Decision Records | See each ADR |
@@ -86,7 +87,6 @@ These documents are the project's source of truth. Conversation history is not.
 
 | Document | Step |
 |---|---|
-| `standards.md` | Step 6 (CP4) |
 | `testing.md` | Step 6 (CP5) |
 | `performance.md` | Step 6 (CP6) |
 | `roadmap.md` | Step 6 (CP8) |

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **CP1–CP3 ✅** (2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written. Spike S8's automated part is complete; its session by hand awaits the owner. Next: CP4 |
+| **Status** | **CP1–CP4 ✅** (2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written. Spike S8's automated part is complete; its session by hand awaits the owner. Next: CP5 |
 | **Authorized** | 2026-10-20, by the owner: "Step 6 Authorization: Authorized. Proceed with creating branch step-6 from main and drafting the Phase Zero Step 6 plan (standards baseline, testing strategy, performance budgets, and Milestone 1 roadmap) for Gate A review." Design documents only; each spike needs its own authorization. **Spike S8 authorized at Gate A** (2026-10-20), for the questions it names (§10.1) |
 | **Branch** | `step-6`, from `main` at `b4948ce` (the Step 5 merge). Pushed to `origin` as the owner authorized at Gate A, after CP1's commit was amended (§11), and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items X1–X3; the roadmap and Milestone 1's acceptance criteria (charter §8); the final design review of Phase Zero; the questions earlier steps handed to Step 6 (§2.2) |
@@ -218,7 +218,7 @@ Step 6's outputs are judged against these criteria. CP10 checks every one and re
 | | **Part 1: evidence and the cross-cutting decisions** | |
 | CP2 | The corpus: each site's tier, needs, logins and level; the measurement protocol; capturing pages | ✅ 2026-10-20 (§11; [corpus](../corpus.md)). Eight sites' terms forbid automated access, so S8 measures them by hand |
 | CP3 | Spike S8: the corpus census, if authorized | ✅ 2026-10-20 (§11; [results](s8-results.md)). The automated part: five pages, three valid runs each. The session by hand (eight pages, and Safari) awaits the owner at Gate B |
-| CP4 | The standards baseline and support matrix (X1) | Not started |
+| CP4 | The standards baseline and support matrix (X1) | ✅ 2026-10-20 (§11; [standards baseline](../standards.md)) |
 | CP5 | The testing and fuzzing strategy (X2) | Not started |
 | CP6 | Performance methodology and budgets (X3) | Not started |
 | CP7 | Synthesis of part 1: ADRs (Proposed); the final budgets for the owner; decision map, open questions, indexes, status. **Gate B** | Not started |
@@ -462,6 +462,27 @@ The `CO` prefix was checked unused, as were the plan's other prefixes. Every rel
 - **Research data for CP4,** downloaded into `target/`, which git ignores: web-features 3.43.0's `data.json`, and wpt.fyi's run summaries for Chrome, Firefox, Safari, Servo and Ladybird.
 
 Every relative link resolves; the four standard checks and S8's own tests pass.
+
+### CP4 — completed 2026-10-20
+
+[The standards baseline](../standards.md) written (**Draft**; rules SB1–SB12). Main decisions:
+- **Pinning by body** (SB1, SB2):
+  - WHATWG living standards at a commit snapshot per milestone, with the January or July Review Draft noted;
+  - W3C reports at their dated version, or a dated editor's draft where WPT tests it;
+  - ECMA-262's 17th and ECMA-402's 13th editions, plus finished proposals;
+  - Unicode at ICU4X's version, one across the engine: 17.0.0 for ICU4X 2.3.0, with 18.0.0 released on 2026-09-16;
+  - RFCs by number.
+
+  Everything moves together at a milestone's start.
+- **Five support classes** (SB3): to the specification, approximate, staged, deferred, not planned. A staged API isn't exposed until it works (SB4). **Four approximate behaviours,** each with its reason (SB5).
+- **Priorities** (SB6): the corpus (S8: of 116 web-features the automated pages touch, 72 Baseline high, 19 low, 25 in only some engines), then Baseline, then Interop 2026's 20 focus areas.
+- **A support matrix** of about 50 areas, gathered from every subsystem's §2, each with its class, suites and corpus need. A not-planned list: DRM, plugins, Web SQL and AppCache, single-engine device APIs, and others without corpus use.
+- **Suites and expectations** (SB7–SB9): wptrunner's metadata, test by test. html5lib-tests' tree-construction tests moved into WPT on 2026-06-26.
+- **Targets** (SB10–SB12): a completed area targets the median of Chrome, Firefox and Safari on its directories at the pinned revision. Passing tests don't regress without a reason. Calibrated on wpt.fyi's runs of 2026-10-19 (WPT `0f26972422`) for about 120 directories, with `tools/wpt-pass-rates.py`, new. Ladybird meets the median on `html/syntax/parsing/`, `dom/` and `css/CSS2/`.
+
+Sources read for it: the WHATWG's working mode and policies, the W3C Process, CSS Snapshot 2026, ECMA-262 and ECMA-402, Unicode 18.0, web-features' Baseline definition and its 3.43.0 data, Interop 2026, wpt.fyi's API and runs, and wptrunner's documentation.
+
+Every relative link resolves; the four standard checks pass.
 
 ## Sources
 

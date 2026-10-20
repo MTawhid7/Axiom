@@ -6,9 +6,9 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero: Step 6, standards, testing, budgets and the roadmap** (authorized 2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written, and spike S8 authorized. CP1–CP3 ✅. Step 5 is done and merged (2026-10-20): ADRs 0010–0017 are accepted. Production engine code is **not** authorized |
+| Phase | **Phase Zero: Step 6, standards, testing, budgets and the roadmap** (authorized 2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written, and spike S8 authorized. CP1–CP4 ✅. Step 5 is done and merged (2026-10-20): ADRs 0010–0017 are accepted. Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 5** (merged with `--no-ff` on 2026-10-20) and is pushed. **Step 6 runs on branch `step-6`**, from `main` at `b4948ce`, pushed to `origin` as the owner authorized at Gate A, and kept pushed |
-| Current checkpoint | **Step 6: CP1–CP3 ✅; next, CP4:** the standards baseline ([tracker](research/step-6-standards-budgets-roadmap.md)). Step 5: CP1–CP19 ✅ ([tracker](research/step-5-subsystems.md)) |
+| Current checkpoint | **Step 6: CP1–CP4 ✅; next, CP5:** the testing strategy ([tracker](research/step-6-standards-budgets-roadmap.md)). Step 5: CP1–CP19 ✅ ([tracker](research/step-5-subsystems.md)) |
 | Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census,** is built (`spikes/s8/`, Python): its automated part is complete ([results](research/s8-results.md)), and its session by hand awaits the owner. Tooling under `tools/`, now with `s6-tails.py` and `png-region-stats.py`; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md), [S6](research/s6-results.md), [S7](research/s7-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -34,7 +34,7 @@
 
 ## Next steps
 
-1. **CP4–CP7 without pausing,** to Gate B: the standards baseline, the testing strategy, the performance budgets, then the ADRs for part 1 and the final B1–B7 for the owner.
+1. **CP5–CP7 without pausing,** to Gate B: the testing strategy, the performance budgets, then the ADRs for part 1 and the final B1–B7 for the owner.
 2. **At Gate B the owner's hands are needed** for S8's session by hand ([S8 results](research/s8-results.md) §7):
    - the eight pages automation may not load, signed in in Chrome Canary's dedicated profile (`s8.py signin`, then `s8.py hand`);
    - the five of them that work logged out, logged out;
@@ -72,6 +72,11 @@
   - The pages touch 116 of web-features' features: 72 widely available, 19 newly, 25 in only some engines.
   - Steady-state cost above about:blank: Maps 627 MB, Three.js 470, VS Code 457, Wikipedia 319, MDN 145.
 - **Pending:** the session by hand (eight pages; Safari, whose remote automation is off), for the owner at Gate B.
+
+**CP4, [the standards baseline](standards.md)** (SB1–SB12):
+- WHATWG standards pinned at commit snapshots per milestone; five support classes; four approximate behaviours.
+- A matrix of about 50 areas, with each area's suites and the corpus's needs.
+- Targets: the median of Chrome, Firefox and Safari on each WPT directory, calibrated on wpt.fyi's runs of 2026-10-19 with the new `tools/wpt-pass-rates.py`.
 
 **Clean-up:**
 - The terms pages and robots files were downloaded into the session's scratchpad, read, and left there.
