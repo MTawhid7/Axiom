@@ -211,12 +211,13 @@ def cmd_auto(args):
                     continue
                 print(f"run {run} {page.ident}: cool-down {args.cooldown} s", flush=True)
                 time.sleep(args.cooldown)
+                before = system.conditions()
                 record = census.measure(page.ident, page.url, user_agent, names, TARGET, log, phase_seconds=args.seconds)
-                record.update({"run": run, "conditions": system.conditions()})
+                record.update({"run": run, "conditions_before": before, "conditions": system.conditions()})
                 write_json(os.path.join(out, f"auto-chrome-{page.ident}-run{run}.json"), record)
-                mem = record.get("memory_loaded", {}).get("total_footprint", 0) / 2**20
+                mem = record.get("memory_loaded", {}).get("total_footprint", 0) / 10**6
                 print(f"run {run} {page.ident}: {record.get('error') or 'ok'}; {mem:.0f} MB loaded; "
-                      f"{record.get('navigation', {}).get('ended_by')}", flush=True)
+                      f"{record.get('navigation', {}).get('ended_by')}; visibility {record.get('visibility')}", flush=True)
     summarize(out)
 
 
@@ -324,7 +325,7 @@ def cmd_hand(args):
             _sample_by_hand(record, "memory_after", kinds())
             record["conditions"] = system.conditions()
             write_json(os.path.join(out, f"hand-{args.browser}-{args.mode}-{page.ident}-run{run}.json"), record)
-            mem = record["memory_loaded"]["total_footprint"] / 2**20
+            mem = record["memory_loaded"]["total_footprint"] / 10**6
             print(f"  recorded: {mem:.0f} MB when loaded")
             if browser:
                 browser.terminate()
@@ -366,15 +367,26 @@ def _median(values):
     return statistics.median(values), (min(values), max(values))
 
 
+def visible_throughout(record):
+    """Whether a run's page stayed visible, from its validity flag or, in older records, its two DOM samples."""
+    if "valid" in record:
+        return record["valid"]
+    samples = [record.get(k, {}).get("visibility") for k in ("dom_loaded", "dom_after")]
+    return all(v in (None, "visible") for v in samples)
+
+
 def summarize(directory):
     records = {}
     for name in sorted(os.listdir(directory)):
         if name.endswith(".json") and name != "environment.json":
             with open(os.path.join(directory, name)) as f:
                 record = json.load(f)
+            if not visible_throughout(record):
+                print(f"{name}: left out, the page wasn't visible throughout")
+                continue
             records.setdefault(record.get("page", name), []).append(record)
     lines, table = [f"S8 results: {directory}", ""], {}
-    mb = 2**20
+    mb = 10**6  # megabytes as B1 and the S6 results count them
     for page, runs in records.items():
         row = {"runs": len(runs), "errors": [r["error"] for r in runs if r.get("error")]}
 

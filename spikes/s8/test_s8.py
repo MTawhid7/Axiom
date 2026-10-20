@@ -98,5 +98,15 @@ class Corpus(unittest.TestCase):
             os.remove(f.name)
 
 
+class Visibility(unittest.TestCase):
+    def test_a_run_counts_only_if_visible_throughout(self):
+        import s8
+
+        self.assertTrue(s8.visible_throughout({"valid": True}))
+        self.assertFalse(s8.visible_throughout({"valid": False}))
+        self.assertFalse(s8.visible_throughout({"dom_loaded": {"visibility": "hidden"}, "dom_after": {"visibility": "visible"}}))
+        self.assertTrue(s8.visible_throughout({"dom_loaded": {"visibility": "visible"}, "dom_after": {"visibility": "visible"}}))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -288,6 +288,7 @@ def measure(page, url, user_agent, names, scratch, log, phase_seconds=30, load_t
             record["interaction"] = {"error": str(error), "after_seconds": round(time.monotonic() - started, 1)}
             browser.pump(max(0.0, phase_seconds - (time.monotonic() - started)))
         _, record["memory_after_interaction"] = _processes(browser, scratch)
+        visible_after_interaction = evaluate("JSON.stringify(document.visibilityState)")
 
         kinds = system.chrome_processes(browser.process.pid)
         idle = system.sample_top(kinds, phase_seconds)
@@ -300,6 +301,11 @@ def measure(page, url, user_agent, names, scratch, log, phase_seconds=30, load_t
         record["without_input"] = {"seconds": phase_seconds, "by_kind": by_kind}
         browser.pump(0.1)
         record["dom_after"] = evaluate(DOM_SCRIPT)
+        # A hidden page isn't composited and doesn't take input, so a run is
+        # valid only if the page stayed visible at every sample.
+        record["visibility"] = [record["dom_loaded"].get("visibility"), visible_after_interaction,
+                                record["dom_after"].get("visibility")]
+        record["valid"] = all(v == "visible" for v in record["visibility"])
         record["metrics_after"] = _metrics(browser, session)
         _, record["memory_after"] = _processes(browser, scratch)
 
