@@ -6,44 +6,73 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero: Step 5, subsystem design, is done** (2026-10-20): Gate C passed, and `step-5` is merged into `main`. ADRs 0010–0017 are accepted, with amendments to ADR-0007 (IV1, IV2) and ADR-0008 (SH10), and the process model was refined in its change record. All seven spikes are complete. **Step 6** (standards baseline, testing, performance budgets, roadmap) is next, and needs the owner's authorization. Production engine code is **not** authorized |
-| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 5** (merged with `--no-ff` on 2026-10-20) and is pushed. Step 5 ran on branch `step-5`, also pushed; Steps 2b to 4 ran on `step-2b`, `step-3` and `step-4` |
-| Current checkpoint | **Step 5: CP1–CP19 ✅** ([tracker](research/step-5-subsystems.md)); Gates A, B and C passed. Step 6: not started |
-| Code | Spike code only, under `spikes/`: S1 and S2 (Step 2b), S4 (Step 3), S3 (Step 4), and S5, S6 and S7 (Step 5), all complete. S1 stays as the baseline for S3. Tooling under `tools/`. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
+| Phase | **Phase Zero: Step 6, standards, testing, budgets and the roadmap** (authorized 2026-10-20), **at Gate A:** CP1 ✅, the plan committed on branch `step-6`. Step 5 is done and merged (2026-10-20): ADRs 0010–0017 are accepted. Production engine code is **not** authorized |
+| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 5** (merged with `--no-ff` on 2026-10-20) and is pushed. **Step 6 runs on branch `step-6`**, from `main` at `b4948ce`, local until the owner authorizes a push |
+| Current checkpoint | **Step 6: CP1 ✅; Gate A,** the owner reviews the plan ([tracker](research/step-6-standards-budgets-roadmap.md)). Step 5: CP1–CP19 ✅ ([tracker](research/step-5-subsystems.md)) |
+| Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census,** is designed and awaits authorization. Tooling under `tools/`, now with `s6-tails.py` and `png-region-stats.py`; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md), [S6](research/s6-results.md), [S7](research/s7-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final**, with build thresholds T1–T4 |
 | | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 |
 | | [ADR-0004](adr/0004-process-model-and-sandbox.md): process model, sandbox and JIT policy (2026-10-17), validated by spike S4. The owner confirmed S4's refinements |
 | | [Threat model](security/threat-model.md) (2026-10-17), amended: out-of-process iframes are required for L3 |
-| | [Process model](security/process-model.md), binding with ADR-0004 (2026-10-17); refined at Step 5's Gate C (2026-10-20) in its change record: S5's and S7's metadata rules, and ImageIO's place |
+| | [Process model](security/process-model.md), binding with ADR-0004 (2026-10-17); refined at Step 5's Gate C (2026-10-20) in its change record: S5's and S7's metadata rules, ImageIO's place, and B1's scope (the core browser at 60 MB, tiles budgeted by their pixels) |
 | | [ADR-0005](adr/0005-ipc-transport-and-interfaces.md): IPC, Mach transport, capabilities, IDL, `Untrusted<T>` (2026-10-17, Gate B) |
 | | [ADR-0006](adr/0006-event-loop-and-threading.md): event loop and threading, with EL11 amended for read-only lending of DOM arenas (2026-10-17, Gate B) |
 | | [ADR-0007](adr/0007-frame-tree-pipeline-and-input.md): frame tree, rendering pipeline, invalidation and input across frames (2026-10-17, Gate B); IV1 and IV2 amended for size container queries (2026-10-20, Step 5's Gate C) |
 | | [ADR-0008](adr/0008-script-agents-and-heap.md): script, agents and heap. C1 is met by `SliceStack`, a safe root stack, so the `gc` crate has no `unsafe` (2026-10-18, Gate C); SH10 amended: the DOM's node arena is never compacted (2026-10-20, Step 5's Gate C) |
 | | [ADR-0009](adr/0009-embedder-api-and-shell.md): engine/embedder API and the pure-Rust shell (2026-10-17, Gate B) |
 | | [ADR-0010](adr/0010-dependency-and-supply-chain-policy.md): the dependency and supply-chain policy, with DP10's refinement (2026-10-18, Step 5's Gate B) |
-| | [ADR-0011](adr/0011-text-fonts-and-unicode.md): text, fonts and Unicode; CoreText rasterizes system fonts (2026-10-20, Step 5's Gate C) |
-| | [ADR-0012](adr/0012-graphics-images-and-media.md): graphics, images and media; AVIF in the media utility process (2026-10-20, Step 5's Gate C) |
+| | [ADR-0011](adr/0011-text-fonts-and-unicode.md): text, fonts and Unicode; CoreText rasterizes system fonts (2026-10-20, Step 5's Gate C); `vello_cpu` adopted as the renderer's Rust rasterizer, subject to grading |
+| | [ADR-0012](adr/0012-graphics-images-and-media.md): graphics, images and media; AVIF in the media utility process (2026-10-20, Step 5's Gate C). Colour tags confirmed by S6's second run; GR5's amendment deferred to the graphics milestone |
 | | [ADR-0013](adr/0013-networking-storage-and-workers.md): networking, storage and workers (2026-10-19), the owner's Gate B condition met by S7; verification in the worker pool confirmed at Gate C |
 | | [ADR-0014](adr/0014-accessibility.md): accessibility, with the settings list and the reserved key equivalents (2026-10-18, Step 5's Gate B) |
 | | [ADR-0015](adr/0015-html-parsing-and-the-dom.md): HTML parsing and the DOM (2026-10-20, Step 5's Gate C); XSLT deferred (OQ-22) |
 | | [ADR-0016](adr/0016-style-layout-and-paint.md): style, layout and paint, with `:visited` by partitioned history (2026-10-20, Step 5's Gate C) |
 | | [ADR-0017](adr/0017-javascript-engine-and-bindings.md): the JavaScript engine and bindings (2026-10-20, Step 5's Gate C) |
-| Open for the owner | [OQ-23](open-questions.md): B1 against S6-Q5's measured footprint, in Step 6. [OQ-24](open-questions.md): GR5's amendment, path items in PL7, at the graphics milestone. The renderer's one Rust rasterizer: `vello_cpu`, recommended subject to grading |
+| The corpus | 13 sites, set by the owner on 2026-10-20 ([OQ-2](open-questions.md); the [Step 6 tracker](research/step-6-standards-budgets-roadmap.md) §2.4), several of which need a login |
 
-## Next steps: Step 6
+## Next steps: Gate A
 
-**Step 5 is done.** Step 6 (standards baseline, testing, performance budgets and the roadmap; it ends in a design review and the approval of Milestone 1) needs the owner's authorization. Its plan would be committed as CP1 on a new branch, `step-6`, from `main`, for Gate A, as each step's plan has been. **Decisions for the owner,** each with a recommendation:
-1. **Authorize Step 6** and its planning on `step-6`. Recommended: authorize. It turns Step 5's inputs (B1–B7, the subsystem designs and the spikes' measurements) into budgets, a test strategy and a roadmap.
-2. **The site corpus** (OQ-2). Step 6's budgets and acceptance criteria are measured on the sites the owner actually uses. Recommended: provide the list with Step 6's authorization, or at its Gate A.
-3. **B1 against S6-Q5** (OQ-23). Recommended: in Step 6, count a visible window's tile surfaces apart from the browser's own memory, budgeted by the window's pixels, and keep 60 MB for the rest. One window's tiles took 25.2 MB, and its compositor state left about 4 MB of B1 for everything else.
-4. **GR5's amendment** (OQ-24). Recommended: decide it at the graphics milestone, with a GPU filler of analytic quality measured on S6-Q4's contents. GPU filling was faster and smaller, but its 4× multisampled edges are coarser; GR5 stands meanwhile.
-5. **The renderer's Rust rasterizer.** Recommended: `vello_cpu` as the one rasterizer for web fonts and paths (2.1–6.8× faster than `zeno` on paths, at the same quality), subject to grading its tree at the text milestone.
+**Work stops for the owner's Gate A decisions** on the [Step 6 plan](research/step-6-standards-budgets-roadmap.md), each with a recommendation:
+1. **The plan:** its scope (§2.3), the readiness criteria RC1–RC10 (§5), the 11 checkpoints in two parts (§6), the three gates (§7), and the cadence: CP2–CP7 without pausing, then CP8–CP10. Recommended: approve.
+2. **Spike S8, the corpus census** (§10.1), with read-only page loads of the 13 corpus URLs and everything they load. **Logged out,** automated in Chrome Canary with a temporary profile; **logged in,** in a dedicated profile you sign into by hand, where the spike automates nothing inside the page and only samples the browser's processes. Recommended: authorize. Its feature census and baselines feed CP4–CP6, and the logged-in mode is the only way to measure the full experience you asked for without code handling your credentials. Safari is measured by hand unless you enable its remote automation, which is optional.
+3. **Which accounts.** Recommended: for S8, your own accounts in the dedicated profile, since the measurement is passive in a shipping browser. For Axiom, your own accounts wait for L3, as the threat model has it, while test accounts that hold nothing of value and are linked to nothing of yours count as non-sensitive, usable from L2. That reading of the threat model's §8 is yours to confirm.
+4. **The two identifying URL parameters,** Prism's `u=` and Figma's `t=`. Recommended: keep the full URLs only in `scratch/`, which git ignores, for the census, and record them in the repository without those parameters. That means amending CP1's commit, which is still local, before `step-6` is first pushed.
+5. **Push `step-6`** to `origin` and keep it pushed as checkpoints land. Recommended: yes, after item 4.
 
-Informational: AWS-LC's jitter entropy source is decided at the network milestone (CP12).
+Informational: the roadmap's login track (CP8) plans what logging in needs in Axiom, from forms and cookies to sign-in pop-ups and passkeys (OQ-16).
 
 ## Session log
+
+### 2026-10-20 — Session 13 (Gate C follow-ups; Step 6 kickoff)
+
+**The owner's decisions after Gate C** (2026-10-20):
+1. "Display P3 Color Pattern (S6-Q5): I've captured a screenshot of the three squares at the end of the run. Please analyze the image critically.." The second formal run: `target/s6-results/20261020-074751`.
+2. "Real-World Site Corpus (OQ-2): Use the following 13 sites as Axiom's standard evaluation corpus for performance budgets, WPT suites, and memory baselines in Step 6", with the 13 URLs ([Step 6 tracker](research/step-6-standards-budgets-roadmap.md) §2.4).
+3. "Memory Target B1 (OQ-23): Approved. In Step 6, budget visible window tile memory separately based on surface pixel dimensions (e.g. 25.2 MB for this Retina window), and maintain a 60 MB budget for the core browser process state."
+4. "GPU Path Rasterization (OQ-24): Approved. Keep path rasterization in the renderer for now to preserve analytic edge quality. Defer the GR5 display list amendment to the graphics milestone."
+5. "Renderer Rasterizer: Approved. Adopt vello_cpu as the primary Rust rasterizer for web fonts and paths, subject to crate dependency grading at the text milestone."
+6. "Step 6 Authorization: Authorized. Proceed with creating branch step-6 from main and drafting the Phase Zero Step 6 plan (standards baseline, testing strategy, performance budgets, and Milestone 1 roadmap) for Gate A review."
+
+During the session the owner added: "You can store important scratcpad codes and files in this project folder so that you can use them later even if the system wipes out the scratchpad." And: "Many of the websites that I have mentioned, requires log in. We need to create a mechanism to log in to get the full experience."
+
+**S6's follow-up** ([S6 results](research/s6-results.md)):
+- **The second formal run** reproduced the first: S6-Q1 and S6-Q3 pass at the median again. The tails were again in the session's first runs (225 and 127 of 600 typical updates over 2 ms in runs 1 and 2, 1 in run 3); one 10 s idle window recorded a package idle wakeup; S6-Q4's pixels were identical, and S6-Q5's footprints within 0.1 MB.
+- **The Display P3 check,** measured in the owner's screenshot with the new `tools/png-region-stats.py`: the P3-tagged red is (255, 0, 0) in Display P3, and the sRGB-tagged red (234, 51, 35), exactly sRGB's red converted, computed independently (a plain 2.2 gamma would give (233, 54, 40)). The untagged surface is (255, 0, 0), unconverted. **S6-Q5's colour condition is met,** and every surface is tagged (GR6).
+- **The display runs scaled,** 1,440 × 900 points in a 2,880 × 1,800 framebuffer on the 2,560 × 1,600 panel, so S6's window was not full screen; the results are corrected.
+
+**Recorded:** ADRs 0011, 0012 and 0016; graphics GR2, GR5, GR6 and GR12; text TX12 and TX15; layout and paint; the process model's B1 and change record; the register; the open questions (OQ-2 and OQ-23 resolved, OQ-24 deferred); the decision map; the overview §2, §3, §5 and §8; the charter's §8.
+
+**Tooling and working files,** as the owner allowed: `tools/s6-tails.py` and `tools/png-region-stats.py`, with `--help`; `scratch/` in `.gitignore`; CLAUDE.md's environment and layout sections. The screenshot is kept with its run, in `target/`.
+
+**Step 6, CP1:** branch `step-6` from `main` at `b4948ce`, and [its plan](research/step-6-standards-budgets-roadmap.md): 7 questions; the 30 questions earlier steps handed to Step 6; readiness criteria RC1–RC10; 11 checkpoints; gates A–C; spike S8, the corpus census, designed for Gate A, with S9 only if needed.
+- **Logging in,** as the owner asked: S8 gains a logged-in mode, in a dedicated profile the owner signs into by hand, where nothing is automated inside the page; the roadmap gains a login track (CP8).
+- **Discord's terms** were read: they forbid scraping "by using any robot, spider, crawler, scraper" and "unauthorized software designed to modify the services", the reason the logged-in mode is passive.
+
+**Not pushed:** `step-6` stays local until Gate A.
+
+**Clean-up:** nothing to clean. No code ran but the analysis scripts and the five checks; no crash reports.
 
 ### 2026-10-20 — Session 12 (Gate C; spike S6 reported; Step 5 merged)
 

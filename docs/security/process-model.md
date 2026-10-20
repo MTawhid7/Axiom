@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0004's acceptance (2026-10-17). The owner accepted SI1–SI7 as staged (SI3 limited to L1 and non-sensitive L2; out-of-process iframes required for L3) and B1–B7 as initial baselines. Spike S4 measurements are folded in ([S4 results](../research/s4-results.md)). **Refined at Step 5's Gate C** (2026-10-20), with the owner's approval: S5's and S7's metadata rules, and ImageIO's place (change record below) |
+| **Status** | **Binding** since ADR-0004's acceptance (2026-10-17). The owner accepted SI1–SI7 as staged (SI3 limited to L1 and non-sensitive L2; out-of-process iframes required for L3) and B1–B7 as initial baselines. Spike S4 measurements are folded in ([S4 results](../research/s4-results.md)). **Refined at Step 5's Gate C** (2026-10-20), with the owner's approval: S5's and S7's metadata rules, ImageIO's place, and B1's scope (change record below) |
 | **Question** | Into which processes is Axiom split? What may each one do, how are sites assigned to processes, which rules govern IPC, and how much memory may each process use on the 8 GB M1? |
 | **Feeds** | ADR-0004; the architecture proposal (Step 4): event loop, pipeline, embedder API; Step 5 subsystems; Step 6 budgets and roadmap |
 | **Builds on** | [Threat model](threat-model.md); [macOS confinement note](../research/macos-process-confinement.md); [ADR-0001](../adr/0001-scope-and-target.md); [ADR-0002](../adr/0002-implementation-language.md); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [S2 results](../research/s2-results.md) |
@@ -20,6 +20,7 @@ The model is binding, so it changes only with the owner's approval. Changes sinc
 | 2026-10-20 | **Renderers and the network process, the executable's directory** (§4.1): the metadata of the helper's own executable directory, one directory with no listing and no contents. Without it, `CFBundleGetMainBundle` fails inside the profile: in renderers ImageIO crashes, and CoreText does when it draws colour emoji; in the network process `SecPolicyCreateSSL` returns NULL, and verification fails closed. The kernel logs no denial for it | [S5 results](../research/s5-results.md) §7 (rule R1); [S7 results](../research/s7-results.md) §3.1, checked by removal | As above |
 | 2026-10-20 | **The network process, `/var`** (§4.1): the metadata of the `/var` symlink, which DNS-SD's client needs to reach `/var/run/mDNSResponder`. The kernel logs no denial for it | [S7 results](../research/s7-results.md) §3.1, §5, checked by removal | As above |
 | 2026-10-20 | **ImageIO in the media utility process** (§3, note 3; §4.2): ImageIO decodes AVIF there rather than in a renderer, because in a renderer it needs VideoToolbox's decoder service, a Mach service §4.1 denies renderers | [S5 results](../research/s5-results.md) §7; [images and media](../architecture/images-and-media.md) IM3 | Step 5's Gate C: "IM3's fallback (AVIF in the media utility process) is approved." |
+| 2026-10-20 | **B1's scope** (§7): ≤ 60 MB now covers the core browser process state, and each visible window's tile surfaces get a budget of their own, by their pixel dimensions, which Step 6 sets. One window's compositor state had left about 4 MB of the old B1 for everything else | [S6 results](../research/s6-results.md) §7 (S6-Q5) | After Step 5's Gate C ([OQ-23](../open-questions.md)): "Approved. In Step 6, budget visible window tile memory separately based on surface pixel dimensions (e.g. 25.2 MB for this Retina window), and maintain a 60 MB budget for the core browser process state." |
 
 ---
 
@@ -184,7 +185,7 @@ The transport itself (Mach messages, or Unix-domain socket pairs) is chosen in S
 
 | # | Budget | Target | Basis |
 |---|---|---|---|
-| B1 | Browser process, idle, one window | ≤ 60 MB | S2's 20 MB, plus browser UI, profile and compositor |
+| B1 | Browser process, idle, one window: **the core browser process state,** with each visible window's tile surfaces budgeted separately, by their pixel dimensions (revised 2026-10-20; change record) | ≤ 60 MB, plus the tiles' budget, which Step 6 sets | S2's 20 MB, plus browser UI, profile and compositor. S6 measured one 2,560 × 1,600 window's tiles at 25.2 MB of surfaces ([S6 results](../research/s6-results.md) §7) |
 | B2 | Renderer, sandboxed and ready, empty document | ≤ 10 MB | S4 measured a sandboxed helper at 1.14 MiB, and 4.05 MiB once CoreText has drawn text. Engine state and an empty heap come on top |
 | B3 | Renderer, typical page (median) | ≤ 50 MB | Chrome's 42 MB median, for comparable content in 2018 |
 | B4 | Network process, idle | ≤ 25 MB | Excludes the disk cache's mapped files |
