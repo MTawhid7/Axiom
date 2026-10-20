@@ -21,6 +21,7 @@ These documents are the project's source of truth. Conversation history is not.
 | [decision-map.md](decision-map.md) | Decision layers, couplings, Phase Zero sequence | Living |
 | [standards.md](standards.md) | The standards baseline (X1): how each specification is pinned, five support classes, the approximate behaviours, the support matrix with its suites and the corpus's needs, and pass-rate targets calibrated on wpt.fyi | Draft (Step 6, CP4) |
 | [testing.md](testing.md) | The testing strategy (X2): eight layers of tests; WPT through a test-only WebDriver server in the headless embedder; Axiom's own runners for html5lib-tests, test262 and Unicode; oracles and determinism; fuzzing and sanitizers; the checks V1–V9; the advisory routine; spike S9, proposed | Draft (Step 6, CP5) |
+| [performance.md](performance.md) | Performance methodology and budgets (X3): the conditions of every measurement; the final B1–B7, with tiles by pixels and a ceiling for every corpus page; frame, pause and long-task budgets; energy and idle; the build; the limits and deadlines the designs left open | Draft (Step 6, CP6) |
 | [open-questions.md](open-questions.md) | Unresolved questions and the evidence each needs | Living |
 | [status.md](status.md) | Current state and session handoffs | Living |
 | [adr/](adr/) | Architecture Decision Records | See each ADR |
@@ -88,7 +89,6 @@ These documents are the project's source of truth. Conversation history is not.
 
 | Document | Step |
 |---|---|
-| `performance.md` | Step 6 (CP6) |
 | `roadmap.md` | Step 6 (CP8) |
 | `milestone-1.md` | Step 6 (CP9) |
 | `requirements.md` | Steps 1→6 (CP10) |

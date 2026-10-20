@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **CP1–CP5 ✅** (2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written. Spike S8's automated part is complete; its session by hand awaits the owner. Next: CP6 |
+| **Status** | **CP1–CP6 ✅** (2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written. Spike S8's automated part is complete; its session by hand awaits the owner. Next: CP7 and Gate B |
 | **Authorized** | 2026-10-20, by the owner: "Step 6 Authorization: Authorized. Proceed with creating branch step-6 from main and drafting the Phase Zero Step 6 plan (standards baseline, testing strategy, performance budgets, and Milestone 1 roadmap) for Gate A review." Design documents only; each spike needs its own authorization. **Spike S8 authorized at Gate A** (2026-10-20), for the questions it names (§10.1) |
 | **Branch** | `step-6`, from `main` at `b4948ce` (the Step 5 merge). Pushed to `origin` as the owner authorized at Gate A, after CP1's commit was amended (§11), and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items X1–X3; the roadmap and Milestone 1's acceptance criteria (charter §8); the final design review of Phase Zero; the questions earlier steps handed to Step 6 (§2.2) |
@@ -220,7 +220,7 @@ Step 6's outputs are judged against these criteria. CP10 checks every one and re
 | CP3 | Spike S8: the corpus census, if authorized | ✅ 2026-10-20 (§11; [results](s8-results.md)). The automated part: five pages, three valid runs each. The session by hand (eight pages, and Safari) awaits the owner at Gate B |
 | CP4 | The standards baseline and support matrix (X1) | ✅ 2026-10-20 (§11; [standards baseline](../standards.md)) |
 | CP5 | The testing and fuzzing strategy (X2) | ✅ 2026-10-20 (§11; [testing strategy](../testing.md)). Spike S9 designed for Gate B |
-| CP6 | Performance methodology and budgets (X3) | Not started |
+| CP6 | Performance methodology and budgets (X3) | ✅ 2026-10-20 (§11; [performance budgets](../performance.md)). The final B1–B7 and the corpus pages' ceilings for the owner at Gate B |
 | CP7 | Synthesis of part 1: ADRs (Proposed); the final budgets for the owner; decision map, open questions, indexes, status. **Gate B** | Not started |
 | | **Part 2: the roadmap** | |
 | CP8 | The roadmap: milestones, security levels, corpus targets, decision points | Not started |
@@ -500,6 +500,38 @@ Every relative link resolves; the four standard checks pass.
 Found along the way:
 - html5lib-tests' tree-construction tests now live only in WPT (2026-06-26).
 - `cargo-deny` 0.20.2 is already installed on this Mac, though not configured for Axiom; `cargo-vet` and `cargo-fuzz` aren't.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP6 — completed 2026-10-20
+
+[The performance budgets](../performance.md) written (**Draft**; rules PF1–PF24). Main decisions:
+- **The method** (PF1–PF5):
+  - S1–S8's conditions made rules: a load average below 3.0 before each run, and visibility checked at every sample;
+  - the tools;
+  - reference engines as frozen context;
+  - **a page's cost includes the GPU and compositor memory allocated for it,** charged to its renderer, which settles the IPC design's open question 4;
+  - every budget enforced at the gates.
+- **The final B1–B7,** for the owner as an amendment to the process model (PF6–PF12):
+  - B1: 60 MB for the core, plus tiles at 6.2 bytes per window pixel, from S6's 6.14;
+  - B2: 10 MB, unchanged;
+  - B3: a 50 MB median over the documents and content tiers, **with a ceiling for every corpus page**, half of Chrome's measured cost capped by tier: Wikipedia 100 MB, MDN 70, Maps 300, Three.js 235, VS Code 225, and the tier's cap for the eight pages measured by hand until their session;
+  - B4: 25 MB; B5: 16; B6: 1 GB for a session of document and content pages; B7: 2 GiB.
+- **Time** (PF13–PF15): S6's frame budgets; no engine task over 50 ms (the Long Tasks threshold); the collector's pauses at 4 ms while interacting and 50 ms when idle, the trigger for SH10's incremental marking.
+- **Energy** (PF16, PF17): no idle wakeups on a static page; Chrome's throttling of hidden pages' timers; energy impact no higher than Safari's. **Build** (PF18): T1–T4, with the bindings counted.
+- **Limits and deadlines** (PF19–PF24):
+  - hangs: an offer to stop at 5 s, the end at 30 s;
+  - starvation: 33 ms for rendering, 50 ms for tasks;
+  - scrolling: 400 ms for listeners that may block it, and one prepainted tile row, from S6's row cost;
+  - IPC: queues of 1,024, 16 and 5, and a backlog of 1,024 messages or 8 MiB;
+  - navigation: two cached documents per tab, and 1 s for `beforeunload`;
+  - the parser: 4 ms and 30 ms slices;
+  - storage: quotas from free space, 5 MiB for Web Storage;
+  - images: their limits.
+
+  Each is labelled sourced, measured or hypothesis.
+
+Sources read for it: Chromium's, WebKit's and Firefox's hang, throttling, scrolling, parsing and image constants; V8's string thresholds; the Long Tasks draft; the Storage Standard; MDN's account of quotas; Mach's limits in the SDK headers.
 
 Every relative link resolves; the four standard checks pass.
 

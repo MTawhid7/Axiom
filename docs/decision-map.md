@@ -48,7 +48,7 @@ X  Cross-cutting    standards baseline · conformance testing · fuzzing · perf
 | I6 | WebAssembly: our own or embedded | Open | [OQ-3](open-questions.md) |
 | X1 | Standards baseline and support matrix | **Proposed** (Step 6, CP4): [standards baseline](standards.md); its ADR at CP7 | Step 6 |
 | X2 | Testing and fuzzing strategy | **Proposed** (Step 6, CP5): [testing strategy](testing.md); its ADR at CP7 | Step 6 |
-| X3 | Performance methodology and budgets | Open | Step 6 |
+| X3 | Performance methodology and budgets | **Proposed** (Step 6, CP6): [performance budgets](performance.md), with the final B1–B7 for the owner; its ADR at CP7 | Step 6 |
 | X4 | Dependency and supply-chain policy: what Axiom builds and what it may reuse; how each dependency is justified, classed and audited; how the `unsafe` and C code inside dependencies count against ADR-0002's rules and the Rule of 2 | **Accepted** (2026-10-18, Step 5's Gate B): the [dependency policy](technology/dependency-policy.md), rules DP1–DP23, with CP3's refinement of DP10 and a living [register](technology/dependency-register.md) ([ADR-0010](adr/0010-dependency-and-supply-chain-policy.md)). Axiom's own license: "MIT OR Apache-2.0" (OQ-21). **Added by the owner at Step 5's Gate A** (2026-10-18) | [Step 5 tracker](research/step-5-subsystems.md) |
 
 ## 2. How the decisions constrain each other
