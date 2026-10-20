@@ -1,7 +1,7 @@
 # Axiom — Design Documentation
 
 Axiom is a from-first-principles browser engine for personal use on macOS. **The project is in Phase Zero: research, requirements and architecture.**
-- **Authorized:** design documents, now Step 6's (2026-10-20), whose plan awaits Gate A. Step 5 is done and merged (2026-10-20). The spikes of Steps 2b to 5 (S1–S7, all complete) remain in `spikes/` as throwaway code; Step 6's census spike (S8) awaits its authorization.
+- **Authorized:** design documents, now Step 6's (2026-10-20), whose plan passed Gate A (2026-10-20), and Step 6's census spike, S8 (authorized at Gate A). Step 5 is done and merged (2026-10-20). The spikes of Steps 2b to 5 (S1–S7, all complete) remain in `spikes/` as throwaway code.
 - **Not yet authorized:** production engine code.
 
 These documents are the project's source of truth. Conversation history is not.
@@ -17,6 +17,7 @@ These documents are the project's source of truth. Conversation history is not.
 | Document | Purpose | Status |
 |---|---|---|
 | [charter.md](charter.md) | Goals, users, environment, scope, non-goals, success criteria | Draft (scope sections Accepted) |
+| [corpus.md](corpus.md) | The target-site corpus: the owner's 13 pages, their tiers, needs, logins and earliest security levels; what each site's terms allow automation to do; how each page is measured, logged out and signed in, and how repeatably | Draft (Step 6, CP2) |
 | [decision-map.md](decision-map.md) | Decision layers, couplings, Phase Zero sequence | Living |
 | [open-questions.md](open-questions.md) | Unresolved questions and the evidence each needs | Living |
 | [status.md](status.md) | Current state and session handoffs | Living |
@@ -57,7 +58,7 @@ These documents are the project's source of truth. Conversation history is not.
 | [research/s6-results.md](research/s6-results.md) | S6 results: compositing on Metal into tiled IOSurface layers; damage-limited redraws; scrolling and animation by layers; CPU against GPU path filling; the compositor's memory against B1, and Display P3 tags | Complete (2026-10-20), two formal runs: S6-Q1 and S6-Q3 pass at the median; S6-Q5's colour condition met, by the owner's screenshot, and its memory condition not met as measured (B1 revised); ADR-0012 accepted |
 | [research/s7-results.md](research/s7-results.md) | S7 results: the network process's sandbox profile, and TLS verified by Security inside it; rustls against Network framework; DNS-SD from kqueue; one `kevent64` wait for every protocol | Complete (2026-10-19): S7-Q1, S7-Q3 and S7-Q4 pass; ADR-0013 accepted |
 | [research/step-5-subsystems.md](research/step-5-subsystems.md) | Step 5 plan and checkpoint tracker: the subsystems behind Step 4's interfaces, the subsystem criteria SC1–SC10, and candidate spikes S5–S7 | Done (CP1–CP19; merged 2026-10-20) |
-| [research/step-6-standards-budgets-roadmap.md](research/step-6-standards-budgets-roadmap.md) | Step 6 plan and checkpoint tracker: the owner's 13-site corpus, the standards baseline (X1), the testing strategy (X2), performance budgets (X3), the roadmap and Milestone 1, the readiness criteria RC1–RC10, and spike S8, the corpus census, with its logged-in mode | **At Gate A** (2026-10-20): CP1 ✅ |
+| [research/step-6-standards-budgets-roadmap.md](research/step-6-standards-budgets-roadmap.md) | Step 6 plan and checkpoint tracker: the owner's 13-site corpus, the standards baseline (X1), the testing strategy (X2), performance budgets (X3), the roadmap and Milestone 1, the readiness criteria RC1–RC10, and spike S8, the corpus census, with its logged-in mode | **In progress:** CP1–CP2 ✅; Gate A passed (2026-10-20) |
 | [architecture/overview.md](architecture/overview.md) | **Architecture overview v1:** the system on one page, crates with their `unsafe` map and dependencies, the register summarized, seven end-to-end scenarios through the subsystems' rules, the checks of AC1–AC10 and SC1–SC10, staging, and the decisions for Step 5's Gate C | **Proposed** (v0 at Step 4, CP11; v1 at Step 5, CP18); Step 5's ADRs accepted at Gate C (2026-10-20) |
 | [architecture/event-loop-and-threading.md](architecture/event-loop-and-threading.md) | Event loop and threading model: thread loops, the threads of each process, the HTML event loop, frame scheduling, agents and workers | Binding (ADR-0006 accepted, 2026-10-17) |
 | [architecture/ipc.md](architecture/ipc.md) | IPC: Mach transport, channels and capabilities, the IDL and generated decoders, `Untrusted<T>` validation, synchronous requests, bulk data, backpressure | Binding (ADR-0005 accepted, 2026-10-17) |
@@ -84,7 +85,6 @@ These documents are the project's source of truth. Conversation history is not.
 
 | Document | Step |
 |---|---|
-| `corpus.md` | Step 6 (CP2) |
 | `standards.md` | Step 6 (CP4) |
 | `testing.md` | Step 6 (CP5) |
 | `performance.md` | Step 6 (CP6) |

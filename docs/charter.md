@@ -95,7 +95,7 @@ This machine is also the **performance floor**: budgets are set and measured her
 - performance budgets measured on the M1;
 - security gates, for example no sensitive logins until isolation is verified.
 
-**Target-site corpus:** defined by the owner on 2026-10-20: 13 sites, from documents (Wikipedia, MDN) to applications (Figma, VS Code for the Web, Discord, Prism), several of which need a login ([OQ-2](open-questions.md); the [Step 6 tracker](research/step-6-standards-budgets-roadmap.md) §2.4).
+**Target-site corpus:** defined by the owner on 2026-10-20: 13 sites, from documents (Wikipedia, MDN) to applications (Figma, VS Code for the Web, Discord, Prism), several of which need a login ([OQ-2](open-questions.md)). The [corpus](corpus.md) classifies each site, records what its terms allow automation to do, and defines how it is measured (Step 6, CP2).
 
 ## 9. Principles
 

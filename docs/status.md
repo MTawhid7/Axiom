@@ -6,10 +6,10 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero: Step 6, standards, testing, budgets and the roadmap** (authorized 2026-10-20), **at Gate A:** CP1 ✅, the plan committed on branch `step-6`. Step 5 is done and merged (2026-10-20): ADRs 0010–0017 are accepted. Production engine code is **not** authorized |
-| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 5** (merged with `--no-ff` on 2026-10-20) and is pushed. **Step 6 runs on branch `step-6`**, from `main` at `b4948ce`, local until the owner authorizes a push |
-| Current checkpoint | **Step 6: CP1 ✅; Gate A,** the owner reviews the plan ([tracker](research/step-6-standards-budgets-roadmap.md)). Step 5: CP1–CP19 ✅ ([tracker](research/step-5-subsystems.md)) |
-| Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census,** is designed and awaits authorization. Tooling under `tools/`, now with `s6-tails.py` and `png-region-stats.py`; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
+| Phase | **Phase Zero: Step 6, standards, testing, budgets and the roadmap** (authorized 2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written, and spike S8 authorized. CP1–CP2 ✅. Step 5 is done and merged (2026-10-20): ADRs 0010–0017 are accepted. Production engine code is **not** authorized |
+| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 5** (merged with `--no-ff` on 2026-10-20) and is pushed. **Step 6 runs on branch `step-6`**, from `main` at `b4948ce`, pushed to `origin` as the owner authorized at Gate A, and kept pushed |
+| Current checkpoint | **Step 6: CP1–CP2 ✅; next, CP3:** spike S8, the corpus census ([tracker](research/step-6-standards-budgets-roadmap.md)). Step 5: CP1–CP19 ✅ ([tracker](research/step-5-subsystems.md)) |
+| Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census,** is authorized (Gate A) and is built at CP3. Tooling under `tools/`, now with `s6-tails.py` and `png-region-stats.py`; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md), [S6](research/s6-results.md), [S7](research/s7-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final**, with build thresholds T1–T4 |
@@ -30,20 +30,48 @@
 | | [ADR-0015](adr/0015-html-parsing-and-the-dom.md): HTML parsing and the DOM (2026-10-20, Step 5's Gate C); XSLT deferred (OQ-22) |
 | | [ADR-0016](adr/0016-style-layout-and-paint.md): style, layout and paint, with `:visited` by partitioned history (2026-10-20, Step 5's Gate C) |
 | | [ADR-0017](adr/0017-javascript-engine-and-bindings.md): the JavaScript engine and bindings (2026-10-20, Step 5's Gate C) |
-| The corpus | 13 sites, set by the owner on 2026-10-20 ([OQ-2](open-questions.md); the [Step 6 tracker](research/step-6-standards-budgets-roadmap.md) §2.4), several of which need a login |
+| The corpus | 13 sites, set by the owner on 2026-10-20 ([OQ-2](open-questions.md)), and [defined](corpus.md) at Step 6's CP2. Eight sites' terms forbid automated access, even logged out, so they are measured by hand; five may be loaded by automation, with care |
 
-## Next steps: Gate A
+## Next steps
 
-**Work stops for the owner's Gate A decisions** on the [Step 6 plan](research/step-6-standards-budgets-roadmap.md), each with a recommendation:
-1. **The plan:** its scope (§2.3), the readiness criteria RC1–RC10 (§5), the 11 checkpoints in two parts (§6), the three gates (§7), and the cadence: CP2–CP7 without pausing, then CP8–CP10. Recommended: approve.
-2. **Spike S8, the corpus census** (§10.1), with read-only page loads of the 13 corpus URLs and everything they load. **Logged out,** automated in Chrome Canary with a temporary profile; **logged in,** in a dedicated profile you sign into by hand, where the spike automates nothing inside the page and only samples the browser's processes. Recommended: authorize. Its feature census and baselines feed CP4–CP6, and the logged-in mode is the only way to measure the full experience you asked for without code handling your credentials. Safari is measured by hand unless you enable its remote automation, which is optional.
-3. **Which accounts.** Recommended: for S8, your own accounts in the dedicated profile, since the measurement is passive in a shipping browser. For Axiom, your own accounts wait for L3, as the threat model has it, while test accounts that hold nothing of value and are linked to nothing of yours count as non-sensitive, usable from L2. That reading of the threat model's §8 is yours to confirm.
-4. **The two identifying URL parameters,** Prism's `u=` and Figma's `t=`. Recommended: keep the full URLs only in `scratch/`, which git ignores, for the census, and record them in the repository without those parameters. That means amending CP1's commit, which is still local, before `step-6` is first pushed.
-5. **Push `step-6`** to `origin` and keep it pushed as checkpoints land. Recommended: yes, after item 4.
+1. **CP3, spike S8, the corpus census** ([tracker](research/step-6-standards-budgets-roadmap.md) §10.1, as refined at CP2):
+   - build the census tools, in `spikes/s8/` and `tools/s8-measure.sh`;
+   - check that Chrome's own feature counters can be read;
+   - run the automated census of the five pages that may be automated, in Chrome Canary, under formal conditions;
+   - check whether Safari's remote automation is enabled, without changing it;
+   - prepare the session by hand for the owner.
+2. **Then CP4–CP7 without pausing,** to Gate B: the standards baseline, testing, budgets, and the ADRs for part 1.
 
-Informational: the roadmap's login track (CP8) plans what logging in needs in Axiom, from forms and cookies to sign-in pop-ups and passkeys (OQ-16).
+**At Gate B the owner's hands will be needed** for S8's session by hand:
+- the eight pages automation may not load, signed in in Chrome Canary's dedicated profile and in Safari;
+- the five of them that work logged out, logged out.
+
+Two optional choices come with it ([corpus](corpus.md) §10, questions 1 and 2): saving Chrome's feature counters by hand, and enabling Safari's remote automation.
 
 ## Session log
+
+### 2026-10-20 — Session 14 (Gate A; Step 6 from CP2)
+
+**Gate A, the owner's decisions** (2026-10-20), each as recommended:
+1. "Step 6 Plan Approval: Approved as written. The scope, readiness criteria RC1–RC10, 11-checkpoint sequence, and review gates are approved. Proceed through CP2–CP7 without pausing until Gate B."
+2. "Spike S8 (Corpus Census): Authorized. Proceed with measuring the 13 corpus sites across Chrome Canary and Safari. The two-mode design (automated logged-out mode; passive, non-automated logged-in mode in a dedicated scratch profile) is approved."
+3. "Account Policy: Approved as recommended: For Spike S8 measurements in shipping browsers, use my regular accounts via the dedicated local profile. For Axiom engine testing, sensitive personal accounts will wait for Level 3 (L3) verification, while non-sensitive test accounts may be used starting at Level 2 (L2)."
+4. "URL Parameter Scrubbing: Approved. Please amend the local CP1 commit to remove the identifying parameters (Prism's u= and Figma's t=) from the committed repository documents, while preserving the full URLs in scratch/ for Spike S8."
+5. "Push Branch: Authorized. Push branch step-6 to origin after amending the commit, and keep it pushed as checkpoints land."
+
+**CP1 amended, then pushed:**
+- `e86ea98` became `a73ccd9`. The two URLs lost `u=` and `t=`, and CP1's log gained a line saying so.
+- Neither value appears in any commit on `step-6` that isn't on `main`, in diffs or messages (checked with `git log -p`). The original commit stays only in this Mac's reflog, never pushed.
+- `step-6` was pushed with upstream tracking and stays pushed.
+
+**CP2, [the corpus](corpus.md)** (rules CO1–CO14):
+- **Every site's terms of use read,** with its robots file, matched as RFC 9309 specifies. **Eight sites forbid automated access even logged out:** Google Search, through robots.txt; YouTube; Instagram; Reddit; Twitch; Discord; Figma; and Prism, under OpenAI's terms (a secondary source). The plan had cited only Discord's.
+- **So S8 automates only five pages:** Wikipedia, Google Maps, MDN, Three.js and VS Code for the Web. Automation identifies itself, checks robots.txt, loads each site at most five times, and never signs in. The other eight are measured by hand, in the passive mode the owner approved, which needs the owner at Gate B.
+- **The accounts,** as decided; the measurement protocol, window and browsers; live baselines, with copies only where terms and licences allow (Wikipedia, MDN, Three.js); and privacy rules for the dedicated profile.
+
+**Also updated:** the tracker (§2, §6, §7, §9, §10.1 refined, §11), the charter's §8, OQ-2's entry, the decision map, and both indexes.
+
+**Clean-up:** the terms pages and robots files were downloaded into the session's scratchpad, read, and left there; nothing outside the repository changed.
 
 ### 2026-10-20 — Session 13 (Gate C follow-ups; Step 6 kickoff)
 

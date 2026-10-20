@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Status** | **CP1 ✅** (2026-10-20). **At Gate A:** the owner reviews this plan |
-| **Authorized** | 2026-10-20, by the owner: "Step 6 Authorization: Authorized. Proceed with creating branch step-6 from main and drafting the Phase Zero Step 6 plan (standards baseline, testing strategy, performance budgets, and Milestone 1 roadmap) for Gate A review." Design documents only; each spike needs its own authorization |
-| **Branch** | `step-6`, from `main` at `b4948ce` (the Step 5 merge). Local until the owner authorizes a push (§7) |
+| **Status** | **CP1–CP2 ✅** (2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written. Next: CP3, spike S8 |
+| **Authorized** | 2026-10-20, by the owner: "Step 6 Authorization: Authorized. Proceed with creating branch step-6 from main and drafting the Phase Zero Step 6 plan (standards baseline, testing strategy, performance budgets, and Milestone 1 roadmap) for Gate A review." Design documents only; each spike needs its own authorization. **Spike S8 authorized at Gate A** (2026-10-20), for the questions it names (§10.1) |
+| **Branch** | `step-6`, from `main` at `b4948ce` (the Step 5 merge). Pushed to `origin` as the owner authorized at Gate A, after CP1's commit was amended (§11), and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items X1–X3; the roadmap and Milestone 1's acceptance criteria (charter §8); the final design review of Phase Zero; the questions earlier steps handed to Step 6 (§2.2) |
 | **Last updated** | 2026-10-20 |
 
@@ -43,6 +43,11 @@ Phase Zero's last step turns the accepted architecture into work that can be bui
 | "Step 6 Authorization: Authorized. Proceed with creating branch step-6 from main and drafting the Phase Zero Step 6 plan (standards baseline, testing strategy, performance budgets, and Milestone 1 roadmap) for Gate A review." | This plan, on branch `step-6`, created from `main` at `b4948ce`. CP1 ends at Gate A (§7) |
 | "You can store important scratcpad codes and files in this project folder so that you can use them later even if the system wipes out the scratchpad." | Reusable scripts go in `tools/` (`s6-tails.py` and `png-region-stats.py` so far); other working files in `scratch/`, which git ignores; CLAUDE.md records it |
 | "Many of the websites that I have mentioned, requires log in. We need to create a mechanism to log in to get the full experience." | Two mechanisms, both planned here (§2.4): **for measurement now,** S8 gains a logged-in mode, in a dedicated browser profile the owner signs into by hand (§10.1); **in Axiom,** the roadmap gains a login track to L2 and L3, within the security levels (CP8). Gate A decides which accounts are used (§7) |
+| **Gate A (2026-10-20):** "Step 6 Plan Approval: Approved as written. The scope, readiness criteria RC1–RC10, 11-checkpoint sequence, and review gates are approved. Proceed through CP2–CP7 without pausing until Gate B." | The plan stands as written (§3–§10). CP2–CP7 run without pausing |
+| "Spike S8 (Corpus Census): Authorized. Proceed with measuring the 13 corpus sites across Chrome Canary and Safari. The two-mode design (automated logged-out mode; passive, non-automated logged-in mode in a dedicated scratch profile) is approved." | S8 runs at CP3 (§10.1). CP2 found that eight sites' terms forbid automated access even logged out, so S8 measures those by hand, in the approved passive mode ([corpus](../corpus.md) §3; §10.1 here) |
+| "Account Policy: Approved as recommended: For Spike S8 measurements in shipping browsers, use my regular accounts via the dedicated local profile. For Axiom engine testing, sensitive personal accounts will wait for Level 3 (L3) verification, while non-sensitive test accounts may be used starting at Level 2 (L2)." | [Corpus](../corpus.md) CO7 and CO8; the roadmap's login track (CP8) |
+| "URL Parameter Scrubbing: Approved. Please amend the local CP1 commit to remove the identifying parameters (Prism's u= and Figma's t=) from the committed repository documents, while preserving the full URLs in scratch/ for Spike S8." | CP1's commit amended before the first push (`e86ea98` became `a73ccd9`); the full URLs stay in `scratch/corpus-urls.txt` ([corpus](../corpus.md) CO13) |
+| "Push Branch: Authorized. Push branch step-6 to origin after amending the commit, and keep it pushed as checkpoints land." | `step-6` pushed on 2026-10-20 at `a73ccd9`, and kept pushed |
 
 ### 2.1 Binding inputs
 
@@ -67,7 +72,7 @@ Every one of these is accepted, so Step 6 plans within them:
 
 | # | Question | Raised in | Checkpoint |
 |---|---|---|---|
-| 1 | The target-site corpus: per tier, the sites the owner uses (resolved: §2.4) | [OQ-2](../open-questions.md); [charter](../charter.md) §8 | CP2 |
+| 1 | The target-site corpus: per tier, the sites the owner uses (resolved: §2.4; at CP2, the [corpus](../corpus.md)) | [OQ-2](../open-questions.md); [charter](../charter.md) §8 | CP2 |
 | 2 | **Logging in to the corpus's sites,** for their full experience (the owner, §2): how logged-in pages are measured now, in shipping browsers, without code handling credentials; and how Axiom reaches them: credentials, cookies and sessions, sign-in redirects and pop-ups, passkeys. Under the threat model, accounts with write access are sensitive and wait for L3 | The owner, 2026-10-20; [threat model](../security/threat-model.md) §8; [OQ-16](../open-questions.md); §2.4 here | CP2, CP3; CP8 |
 | 3 | The standards baseline and support matrix; each subsystem's specifications and suites, whose pass rates Step 6 sets; the approximate behaviours to classify (`execCommand`, automatic table layout, `Error.prototype.stack`, `Date.parse`'s legacy formats) | [Decision map](../decision-map.md) X1; [Step 5 tracker](step-5-subsystems.md) §5, SC5; [overview](../architecture/overview.md) §5.2 | CP4 |
 | 4 | The testing and fuzzing strategy | [Decision map](../decision-map.md) X2 | CP5 |
@@ -111,6 +116,8 @@ Every one of these is accepted, so Step 6 plans within them:
 **Evidence without code,** as in earlier steps: specifications, WPT's published results (wpt.fyi), test262, engines' documentation and sources, published benchmark suites, and observations of this Mac (tools present, the display mode). Measurements come only from authorized spikes.
 
 ### 2.4 The corpus
+
+**Superseded at CP2 by the [corpus](../corpus.md),** which classifies each site, records its terms on automation, and defines how it is measured. This section keeps the plan's first classification.
 
 As the owner gave it, with a first classification, except that two URL parameters that may identify the owner are left out (below). **The tiers and needs are inference,** from background knowledge of these sites, to be checked by CP2 and spike S8. "Earliest level" applies the [threat model](../security/threat-model.md)'s §8: L1 permits browsing without logging in, L2 logging in to accounts that aren't sensitive, and L3 accounts with write access.
 
@@ -161,7 +168,7 @@ Planned documents are named in code font until they exist.
 | # | Deliverable | Checkpoint |
 |---|---|---|
 | 1 | This plan and tracker | CP1 |
-| 2 | `docs/corpus.md`: the corpus, each site's tier, needs, logins and level, the measurement protocol and the capture of pages; rules CO | CP2; baselines added at CP3 |
+| 2 | [`docs/corpus.md`](../corpus.md): the corpus, each site's tier, needs, logins and level, the measurement protocol and the capture of pages; rules CO | CP2; baselines added at CP3 |
 | 3 | Spike S8, if authorized: code in `spikes/s8/`, a script in `tools/`, results in `docs/research/s8-results.md` | CP3 |
 | 4 | `docs/standards.md` (X1): the baseline, the support matrix, the suites and their expectations; rules SB | CP4 |
 | 5 | `docs/testing.md` (X2): harnesses, oracles, fuzzing, the security checks, the advisory routine; rules TS. Spike S9's design, only if CP5 needs one | CP5 |
@@ -207,9 +214,9 @@ Step 6's outputs are judged against these criteria. CP10 checks every one and re
 
 | CP | Scope | Status |
 |---|---|---|
-| **CP1** | This plan; branch `step-6`; the owner's decisions recorded | ✅ 2026-10-20 (§11). **Gate A** |
+| **CP1** | This plan; branch `step-6`; the owner's decisions recorded | ✅ 2026-10-20 (§11). **Gate A passed** 2026-10-20: approved as written |
 | | **Part 1: evidence and the cross-cutting decisions** | |
-| CP2 | The corpus: each site's tier, needs, logins and level; the measurement protocol; capturing pages | Not started |
+| CP2 | The corpus: each site's tier, needs, logins and level; the measurement protocol; capturing pages | ✅ 2026-10-20 (§11; [corpus](../corpus.md)). Eight sites' terms forbid automated access, so S8 measures them by hand |
 | CP3 | Spike S8: the corpus census, if authorized | Not started |
 | CP4 | The standards baseline and support matrix (X1) | Not started |
 | CP5 | The testing and fuzzing strategy (X2) | Not started |
@@ -231,7 +238,7 @@ Step 6's outputs are judged against these criteria. CP10 checks every one and re
 - **Reference browsers:** Safari (WebKit) and Chrome Canary (Chromium), both installed on this Mac (observed in `/Applications`), with their versions recorded.
 - **The window:** one stated size for measurements, with the scaled display mode recorded.
 
-**CP3. Spike S8, the corpus census** (§10.1), if authorized at Gate A. Results in `docs/research/s8-results.md`; baselines added to `docs/corpus.md`.
+**CP3. Spike S8, the corpus census** (§10.1), if authorized at Gate A. Results in `docs/research/s8-results.md`; baselines added to the [corpus](../corpus.md).
 
 **CP4. The standards baseline and support matrix (X1; Q2):**
 - **Versions:** how each body's specifications are pinned (WHATWG living standards by review draft or commit date, W3C reports by date, ECMA-262 and ECMA-402 by edition, Unicode by version, IETF RFCs by number), and how often the baseline moves.
@@ -291,7 +298,7 @@ Between gates, checkpoints run without pausing, as in Steps 2b to 5: CP2–CP7, 
 | Gate | After | The owner decides |
 |---|---|---|
 | A | CP1 | **This plan:** its scope (§2.3), the readiness criteria (§5), the sequence and checkpoints (§6), these gates and the cadence. **Spike S8** (§10.1), with its logged-in mode. **The accounts:** the owner's own or test accounts, for measurement now and for Axiom's levels (§2.4). **The corpus's two identifying parameters** (§2.4). **Pushing** `step-6` to `origin` |
-| B | CP7 | **The ADRs for part 1** (Proposed), and **the final memory budgets** as an amendment to the process model. Spike S9, if CP5 proposes one. Anything S8 found that changes the corpus |
+| B | CP7 | **The ADRs for part 1** (Proposed), and **the final memory budgets** as an amendment to the process model. Spike S9, if CP5 proposes one. Anything S8 found that changes the corpus. **S8's session by hand,** which needs the owner, with the boundary CP2 drew for automation ([corpus](../corpus.md) §3) and the corpus's open questions 1 and 2 (Chrome's feature counters saved by hand; Safari's remote automation) |
 | C | CP10 | **The final design review:** the ADRs for part 2 (the roadmap, Milestone 1); the overview v2, as the architecture proposal as a whole; the requirements' traceability; Phase Zero's completion. Then merging `step-6` into `main`. Milestone 1's implementation is a separate authorization |
 
 ## 8. Method
@@ -316,7 +323,7 @@ Between gates, checkpoints run without pausing, as in Steps 2b to 5: CP2–CP7, 
 | The roadmap grows into a schedule | Milestones are ordered and gated, not dated (RC9). Each is planned in checkpoints when it starts |
 | A decision deferred to a milestone turns out to need an architectural change | RC6: an amendment for the owner. The designs already name their revisit conditions |
 | S8 touches the owner's accounts or settings | Logged-out runs use a temporary profile under `target/`, deleted after each run. Logged-in runs use a dedicated profile in `scratch/`, which the owner signs into by hand and can delete; there the spike automates nothing in the page. No credential in code; Safari's automation setting changed only by the owner, if at all (§10.1) |
-| Automating sites breaches their terms, or trips their bot checks | Automation only on public pages, logged out, a few loads per page, with nothing collected but aggregate figures; none in signed-in pages, whose terms can forbid it ([D1]). A page that answers with a check or a consent screen is recorded as such, not worked around |
+| Automating sites breaches their terms, or trips their bot checks | Automation only on public pages, logged out, a few loads per page, with nothing collected but aggregate figures; none in signed-in pages, whose terms can forbid it ([D1]). A page that answers with a check or a consent screen is recorded as such, not worked around. **At CP2 this risk was found real:** eight sites' terms forbid automated access even logged out, so automation loads only the five pages whose terms and robots files permit it ([corpus](../corpus.md) CO3, CO4) |
 
 ## 10. Candidate spikes
 
@@ -359,7 +366,14 @@ One spike is designed now, so that its evidence can reach CP4–CP6; a second on
 - **What is kept:** aggregate figures in the results; raw traces under `target/s8-results/`, which git ignores. No page content, screenshots, cookies or credentials are committed, and nothing from a signed-in page beyond process measurements.
 - **Code:** `spikes/s8/` (Python, standard library only) and `tools/s8-measure.sh`. No new dependency; no `unsafe`, since no Rust crate is needed.
 
-**Outputs:** `docs/research/s8-results.md`; `docs/corpus.md`'s baselines, logged out and logged in; inputs to CP4 and CP6.
+**Refined at CP2 (2026-10-20),** within the questions the owner authorized at Gate A:
+- **Automation loads only the five pages whose terms and robots files permit it:** Wikipedia, Google Maps, MDN, Three.js and VS Code for the Web ([corpus](../corpus.md) CO3). Its loads identify themselves, stay few and spaced, and never sign in (CO4).
+- **The other eight are measured in the passive mode the owner approved** (CO6): by hand, with process sampling only. Each is measured logged out in a temporary profile where the site works logged out, and signed in in the dedicated profile. That needs the owner's hands, so the session by hand is put to the owner at Gate B, with S8's automated results. It is the part of "measuring the 13 corpus sites across Chrome Canary and Safari" that automation may not do.
+- **Features from the browser's own counters,** instead of the instrumentation first planned. Chrome counts the platform features each page uses (Blink's use counters, the source of chromestatus.com's usage figures), in histograms that the DevTools Protocol's `Browser.getHistograms` reads. So nothing is injected into the page. The features' names come from Chromium's `web_feature.mojom` at the Canary's version. To be checked at the start of CP3.
+- **Sizes** come from the DOM, read in an isolated world, and from the Network domain's events. Nothing runs in the page's own world.
+- **Safari:** through WebDriver for the five automated pages if the owner enables its remote automation; otherwise by hand, like the rest.
+
+**Outputs:** `docs/research/s8-results.md`; the [corpus](../corpus.md)'s baselines, logged out and logged in; inputs to CP4 and CP6.
 
 ## 11. Results log
 
@@ -380,6 +394,44 @@ One spike is designed now, so that its evidence can reach CP4–CP6; a second on
 
 **Gate A.** The owner reviews this plan. The decisions, with recommendations, are in [status](../status.md), "Next steps".
 
+### Gate A — passed 2026-10-20
+
+The owner's decisions, each as recommended, quoted in full in §2:
+- **The plan:** "Approved as written." The cadence: "Proceed through CP2–CP7 without pausing until Gate B."
+- **Spike S8:** "Authorized", across Chrome Canary and Safari, with the two-mode design.
+- **The accounts:** "Approved as recommended". S8 uses the owner's regular accounts in the dedicated local profile. In Axiom, sensitive personal accounts wait for L3, and test accounts that aren't sensitive may be used from L2.
+- **The URL parameters:** CP1's commit was amended before the first push. `e86ea98` became `a73ccd9`; the only other change is a line in CP1's log. Checked: neither value appears in any commit on `step-6` that isn't on `main`, in diffs or messages. The original commit survives only in this Mac's reflog, and was never pushed. The full URLs stay in `scratch/corpus-urls.txt`.
+- **The branch:** `step-6` pushed to `origin` at `a73ccd9`, and kept pushed.
+
+CP2 starts.
+
+### CP2 — completed 2026-10-20
+
+[The corpus](../corpus.md) written (**Draft**; rules CO1–CO14). Main decisions:
+- **The sites and tiers** (CO1, CO2): two documents, three content sites, three media or map sites, five applications. Each has its needs (inference until measured), what a login adds, and its earliest level.
+- **Every site's terms of use read** (corpus §3), with robots.txt matched as RFC 9309 specifies:
+  - **Eight sites forbid automated access even logged out:** Google Search (its terms turn on robots.txt, which disallows `/search`), YouTube, Instagram, Reddit, Twitch, Discord, Figma, and Prism under OpenAI's terms (a secondary source, since openai.com refused retrieval).
+  - **Five permit occasional automated loads:**
+    - Wikipedia, identified and within Wikimedia's Robot and User-Agent policies;
+    - Google Maps, whose robots file allows `/maps/search/`, with nothing copied;
+    - MDN;
+    - Three.js, which publishes no terms;
+    - VS Code for the Web.
+  - **So S8 automates five pages and measures eight by hand** (§10.1, refined). This narrows the automated mode the owner approved, in the direction of doing less, because the plan cited only Discord's terms. It is put to the owner at Gate B.
+- **Automated loads** identify themselves, check robots.txt, load each site at most five times and never sign in (CO4).
+- **The accounts** (CO7, CO8), as the owner decided at Gate A, with what makes a test account non-sensitive.
+- **The protocol** (CO9–CO11):
+  - three phases: loaded, interaction, then 30 s without input;
+  - an interaction for each site;
+  - a 1,280 × 800-point window;
+  - Safari 27.2 and Chrome Canary 158.0.8112.0, observed.
+- **Repeatability** (CO12): live baselines. Copies only of Wikipedia's and MDN's pages and of the Three.js example, made by the milestone that needs them. No captures of sites whose terms forbid copying.
+- **Privacy and the dedicated profile** (CO13, CO14).
+- **Precedent:** Chromium's system-health benchmark, whose 141 desktop stories replay from Web Page Replay archives dated by year.
+
+The `CO` prefix was checked unused, as were the plan's other prefixes. Every relative link resolves; the four standard checks pass.
+
 ## Sources
 
 - [D1] Discord, *Terms of Service*, effective 29 September 2025 (last updated 29 August 2025), "Restrictions on your use of Discord's services": "scraping our services without our written consent, including by using any robot, spider, crawler, scraper", and "using any unauthorized software designed to modify the services". Checked 2026-10-20 — https://discord.com/terms
+- The other sites' terms, their robots files, RFC 9309 and the precedent for repeatable page loads are cited in the [corpus](../corpus.md)'s sources (CP2).
