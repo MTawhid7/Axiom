@@ -47,7 +47,7 @@ X  Cross-cutting    standards baseline · conformance testing · fuzzing · perf
 | I5 | Accessibility bridge (NSAccessibility) | **Accepted** (2026-10-18, Step 5's Gate B): trees pushed by renderers; the browser's cache; text markers; our own bridge. The settings list and the reserved key equivalents approved as written | [ADR-0014](adr/0014-accessibility.md), [accessibility](architecture/accessibility.md) |
 | I6 | WebAssembly: our own or embedded | Open | [OQ-3](open-questions.md) |
 | X1 | Standards baseline and support matrix | **Proposed** (Step 6, CP4): [standards baseline](standards.md); its ADR at CP7 | Step 6 |
-| X2 | Testing and fuzzing strategy | Open | Step 6 |
+| X2 | Testing and fuzzing strategy | **Proposed** (Step 6, CP5): [testing strategy](testing.md); its ADR at CP7 | Step 6 |
 | X3 | Performance methodology and budgets | Open | Step 6 |
 | X4 | Dependency and supply-chain policy: what Axiom builds and what it may reuse; how each dependency is justified, classed and audited; how the `unsafe` and C code inside dependencies count against ADR-0002's rules and the Rule of 2 | **Accepted** (2026-10-18, Step 5's Gate B): the [dependency policy](technology/dependency-policy.md), rules DP1–DP23, with CP3's refinement of DP10 and a living [register](technology/dependency-register.md) ([ADR-0010](adr/0010-dependency-and-supply-chain-policy.md)). Axiom's own license: "MIT OR Apache-2.0" (OQ-21). **Added by the owner at Step 5's Gate A** (2026-10-18) | [Step 5 tracker](research/step-5-subsystems.md) |
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **CP1–CP4 ✅** (2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written. Spike S8's automated part is complete; its session by hand awaits the owner. Next: CP5 |
+| **Status** | **CP1–CP5 ✅** (2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written. Spike S8's automated part is complete; its session by hand awaits the owner. Next: CP6 |
 | **Authorized** | 2026-10-20, by the owner: "Step 6 Authorization: Authorized. Proceed with creating branch step-6 from main and drafting the Phase Zero Step 6 plan (standards baseline, testing strategy, performance budgets, and Milestone 1 roadmap) for Gate A review." Design documents only; each spike needs its own authorization. **Spike S8 authorized at Gate A** (2026-10-20), for the questions it names (§10.1) |
 | **Branch** | `step-6`, from `main` at `b4948ce` (the Step 5 merge). Pushed to `origin` as the owner authorized at Gate A, after CP1's commit was amended (§11), and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items X1–X3; the roadmap and Milestone 1's acceptance criteria (charter §8); the final design review of Phase Zero; the questions earlier steps handed to Step 6 (§2.2) |
@@ -219,7 +219,7 @@ Step 6's outputs are judged against these criteria. CP10 checks every one and re
 | CP2 | The corpus: each site's tier, needs, logins and level; the measurement protocol; capturing pages | ✅ 2026-10-20 (§11; [corpus](../corpus.md)). Eight sites' terms forbid automated access, so S8 measures them by hand |
 | CP3 | Spike S8: the corpus census, if authorized | ✅ 2026-10-20 (§11; [results](s8-results.md)). The automated part: five pages, three valid runs each. The session by hand (eight pages, and Safari) awaits the owner at Gate B |
 | CP4 | The standards baseline and support matrix (X1) | ✅ 2026-10-20 (§11; [standards baseline](../standards.md)) |
-| CP5 | The testing and fuzzing strategy (X2) | Not started |
+| CP5 | The testing and fuzzing strategy (X2) | ✅ 2026-10-20 (§11; [testing strategy](../testing.md)). Spike S9 designed for Gate B |
 | CP6 | Performance methodology and budgets (X3) | Not started |
 | CP7 | Synthesis of part 1: ADRs (Proposed); the final budgets for the owner; decision map, open questions, indexes, status. **Gate B** | Not started |
 | | **Part 2: the roadmap** | |
@@ -332,7 +332,7 @@ One spike is designed now, so that its evidence can reach CP4–CP6; a second on
 | Spike | Area | Question | Why sources can't settle it | What it decides |
 |---|---|---|---|---|
 | **S8** | The corpus census (designed here, §10.1) | What do the owner's 13 pages use and cost in two shipping engines on this Mac? | The pages are specific, change over time, and are measured nowhere for this machine. Feature use and memory per page need measuring | The corpus's tiers and needs (CP2); the standards' priorities (CP4); memory and time baselines (CP6) |
-| (S9) | Test tooling on this Mac (designed at CP5, only if needed) | Does fuzzing with `cargo-fuzz` and libFuzzer run on nightly Rust for this Mac's target, with coverage? Which sanitizers work? | Tool support for `aarch64-apple-darwin` changes with toolchains; trying it is the only check | X2's fuzzing tools |
+| (S9) | Test tooling on this Mac (**designed at CP5**, [testing](../testing.md) §9, for Gate B) | Does fuzzing with `cargo-fuzz` and libFuzzer run on nightly Rust for this Mac's target, with coverage? Do the sanitizers work? Does wptrunner run here within memory? | Tool support for `aarch64-apple-darwin` changes with toolchains; trying it is the only check | X2's fuzzing tools; WPT's cost on 8 GB |
 
 **No spike is planned for these areas:** the standards baseline (sources and wpt.fyi settle it); the roadmap and Milestone 1 (they assemble decisions already taken); and performance methodology, which S1–S7 already exercised.
 
@@ -481,6 +481,25 @@ Every relative link resolves; the four standard checks and S8's own tests pass.
 - **Targets** (SB10–SB12): a completed area targets the median of Chrome, Firefox and Safari on its directories at the pinned revision. Passing tests don't regress without a reason. Calibrated on wpt.fyi's runs of 2026-10-19 (WPT `0f26972422`) for about 120 directories, with `tools/wpt-pass-rates.py`, new. Ladybird meets the median on `html/syntax/parsing/`, `dom/` and `css/CSS2/`.
 
 Sources read for it: the WHATWG's working mode and policies, the W3C Process, CSS Snapshot 2026, ECMA-262 and ECMA-402, Unicode 18.0, web-features' Baseline definition and its 3.43.0 data, Interop 2026, wpt.fyi's API and runs, and wptrunner's documentation.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP5 — completed 2026-10-20
+
+[The testing strategy](../testing.md) written (**Draft**; rules TS1–TS18). Main decisions:
+- **Eight layers of tests,** each with a home and a trigger (TS1).
+- **WPT through a WebDriver server in the headless embedder,** compiled only into the test embedder (TS2). wptrunner's Ladybird product is the precedent; it settles the embedder API's open question 3. Reference tests come from EM9's offscreen texture (TS3).
+- **Axiom's own runners** for html5lib-tests' tokenizer tests, test262 (with `$262` in full) and Unicode's conformance files (TS4–TS6).
+- **Oracles:** the test-only references (html5ever, xml5ever, Taffy, `regress`, `temporal_rs`, `num-bigint`), and the self-oracles IV14, ST22 and HD33 (TS7). **Determinism** on EL24's virtual clock, with the environment injected (TS8).
+- **Fuzzing** of every parser and IPC decoder with cargo-fuzz, libFuzzer and AddressSanitizer; ThreadSanitizer for the threads; Miri for `unsafe` (TS9–TS11). Rust's sanitizers on this target: AddressSanitizer and ThreadSanitizer only. libFuzzer is maintained for bug fixes only.
+- **The corpus checks** follow the corpus's rules: automated where CO3 permits, by hand elsewhere (TS12). **Benchmarks** kept from the spikes, with the budgets as thresholds (TS13). **V1–V9**, each built as a test (TS14).
+- **The routine:** weekly advisory checks, and rebuilds when a crate that parses untrusted input is affected. The OS-dependent checks run again after every macOS update (TS15, TS16).
+- **This Mac is authoritative.** GitHub's hosted runners (M1, 3 CPUs, 7 GB, macOS 26 at newest) are offered for correctness only, at Milestone 1 (TS17). WPT runs by directory within 8 GB (TS18).
+- **Spike S9 designed** (§9 of the document), for Gate B: cargo-fuzz with AddressSanitizer, ThreadSanitizer, and wptrunner on this Mac.
+
+Found along the way:
+- html5lib-tests' tree-construction tests now live only in WPT (2026-06-26).
+- `cargo-deny` 0.20.2 is already installed on this Mac, though not configured for Axiom; `cargo-vet` and `cargo-fuzz` aren't.
 
 Every relative link resolves; the four standard checks pass.
 
