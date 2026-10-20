@@ -231,7 +231,7 @@ Step 6's outputs are judged against these criteria. CP10 checks every one and re
 | CP7 | Synthesis of part 1: ADRs (Proposed); the final budgets for the owner; decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-20 (§11; ADRs [0018](../adr/0018-corpus-standards-and-testing.md) and [0019](../adr/0019-performance-methodology-and-budgets.md) proposed). **Gate B passed** 2026-10-20: both ADRs accepted |
 | (Gate B) | The owner's decisions recorded; S8's session by hand folded in, with every page's ceiling; spike S9, authorized at Gate B | ✅ 2026-10-20 (§11). S9 ([results](s9-results.md)): Q1 and Q3 pass; Q2 fails with the installed nightly. The pass-rate tool corrected, and the standards' calibration recomputed |
 | | **Part 2: the roadmap** | |
-| CP8 | The roadmap: milestones, security levels, corpus targets, decision points | Not started |
+| CP8 | The roadmap: milestones, security levels, corpus targets, decision points | ✅ 2026-10-20 (§11; [roadmap](../roadmap.md)) |
 | CP9 | Milestone 1: scope and measurable acceptance criteria | Not started |
 | CP10 | Requirements traceability; the overview v2 and the criteria checks; ADRs for part 2 (Proposed); decision map, open questions, indexes, status. **Gate C: the final design review** | Not started |
 | CP11 | Merge `step-6` into `main` (`--no-ff`), when the owner instructs | Not started |
@@ -596,6 +596,26 @@ Every relative link resolves; the four standard checks and S8's tests pass.
 - Ladybird meets the median on `html/syntax/parsing/` but not on `css/CSS2/` (93.8%).
 
 [ADR-0018](../adr/0018-corpus-standards-and-testing.md)'s decision history records the correction; SB10 and SB11 are unchanged. The tool also gained `--manifest` and `--types`.
+
+Every relative link resolves; the four standard checks pass.
+
+### CP8 — completed 2026-10-20
+
+[The roadmap](../roadmap.md) written (**Proposed**, with ADR-0020 at CP10; rules MS1–MS12). Main decisions:
+- **Nine milestones, ordered and gated, never dated** (MS1, MS5):
+  - M1 static documents (L0);
+  - M2 the sandboxed engine, M3 script, M4 the modern document (L1);
+  - M5 site isolation and logins (L2);
+  - M6 the sensitive-use gate, with out-of-process iframes and V1–V9 (L3);
+  - M7 media, M8 applications, M9 the GPU and WebAssembly, each keeping L3.
+- **Security before surface:** the sandbox at M2, site locks at M5, L3 at M6, before media codecs, the GPU process and WebAssembly arrive (MS2). **No script from the web before L1** (MS3). **Every interface from M1** (MS4).
+- **Corpus targets** by milestone (MS6): the documents at M1, MDN in full at M3, Wikipedia in full and the content sites logged out at M4, signed in with test accounts at M5, with the owner's accounts at M6; YouTube and Twitch at M7; VS Code, Discord and Prism at M8; Maps, Three.js and Figma at M9.
+- **Every milestone's criteria take one shape** (MS7): conformance, corpus checks, budgets, the level's checks, fuzzing, determinism.
+- **The login track** (MS8). M5's sites set no limit on a person's accounts (Google, Instagram and Reddit, read on 2026-10-20), so each test account is made by hand in the owner's name, with accurate details, and only signs in and reads. That answers the [corpus](../corpus.md)'s open question 3.
+- **Decision points placed** (MS9): WebAssembly at M8's gate; a JIT not before L2, at M8's gate; passkeys before M6; Xcode at M1's plan; QoS overrides at M2; DNS over HTTPS at M5; Step 5's deferred decisions at their milestones.
+- **How a milestone runs** (MS10): the owner's authorization, a branch, a plan with gates, checkpoints, dependencies adopted after grading with the owner's approval, the routine from M1.
+- **Precedent:** Chromium's and Firefox's site-isolation retrofits, and Ladybird's sandboxes before its alpha, read on 2026-10-20.
+- **Found for M1:** WPT's testharness tests are themselves script, so M1 runs reference and crash tests, and html5lib's tree-construction tests from WPT's `.dat` files in its own runner.
 
 Every relative link resolves; the four standard checks pass.
 

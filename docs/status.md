@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Phase Zero: Step 6, standards, testing, budgets and the roadmap** (authorized 2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written, and spike S8 authorized. CP1–CP7 ✅. **Gate B passed** (2026-10-20): ADRs 0018 and 0019 accepted, spike S9 authorized, and CP8–CP10 to run without pausing, to Gate C. Step 5 is done and merged (2026-10-20): ADRs 0010–0017 are accepted. Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 5** (merged with `--no-ff` on 2026-10-20) and is pushed. **Step 6 runs on branch `step-6`**, from `main` at `b4948ce`, pushed to `origin` as the owner authorized at Gate A, and kept pushed |
-| Current checkpoint | **Step 6: CP1–CP7 ✅; Gate B passed; spike S9 run;** CP8, the roadmap, next ([tracker](research/step-6-standards-budgets-roadmap.md)). Step 5: CP1–CP19 ✅ ([tracker](research/step-5-subsystems.md)) |
+| Current checkpoint | **Step 6: CP1–CP8 ✅; Gate B passed; spike S9 run;** CP9, Milestone 1, next ([tracker](research/step-6-standards-budgets-roadmap.md)). Step 5: CP1–CP19 ✅ ([tracker](research/step-5-subsystems.md)) |
 | Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census** (`spikes/s8/`, Python), is complete in Chrome: automated, and by the owner's hand ([results](research/s8-results.md)). Its Safari runs need repeating with the corrected tool. **S9, the test tools** (`spikes/s9/`), is complete ([results](research/s9-results.md)): fuzzing and wptrunner work here; the installed nightly's ThreadSanitizer doesn't. Tooling under `tools/`, now with `s6-tails.py` and `png-region-stats.py`; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md), [S6](research/s6-results.md), [S7](research/s7-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -77,6 +77,12 @@
 - The first fuzzing run found the Mac on battery with Low Power Mode on; the step was repeated on AC power.
 
 **A correction to CP4's calibration.** `tools/wpt-pass-rates.py` had left reference and crash tests out, because wpt.fyi's summaries give them no subtest counts. Corrected, and [the standards baseline](standards.md) §6 recomputed: 42 of 48 rows changed, and `css/CSS2/`'s median is 98.1%, not 98.9%. **Gate B's report said Ladybird meets the median on HTML parsing, the DOM and CSS 2; after the correction it meets it on HTML parsing only,** is 0.1 point short on the DOM, and 4.3 points short on CSS 2. Recorded in ADR-0018's decision history; SB10 and SB11 stand.
+
+**CP8, [the roadmap](roadmap.md)** (MS1–MS12):
+- nine milestones, from static documents at L0 to the GPU and WebAssembly at L3;
+- the sandbox at M2, site locks at M5, out-of-process iframes and V1–V9 at M6, before media, applications, the GPU and WebAssembly;
+- no script from the web before L1;
+- corpus targets, the login track and the decision points placed.
 
 **A deviation, stopped.** A first attempt at the baseline opened the dedicated profile by script: two runs on about:blank, 19:46–19:51, with no page loaded and no debugging connection. CO14 says that profile is never opened by automation. So the attempt was stopped and its records aren't used. The profile closed cleanly (`SessionEnded`), and `s8.py blank` now opens only a fresh profile.
 

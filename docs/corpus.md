@@ -264,7 +264,7 @@ The roadmap (CP8) places each site at the first milestone and level where it can
 
 1. **Features of the eight pages measured by hand.** S8 can't instrument them. **Optional, by hand:** after each page, the owner saves Chrome's own `chrome://histograms/Blink.UseCounter` page from the census profile. That page counts the features the browser saw used, records the browser's own statistics, and holds no page content. Not saved in the session of 2026-10-20, so these pages' features stay inference.
 2. **Safari for the five automated pages.** Safari's automation needs its remote automation enabled (Develop → Allow Remote Automation, or `safaridriver --enable` with an administrator's password), a setting only the owner may change. It stayed off at Gate B, so Safari is measured by hand for every page, as the corrected census tool now does.
-3. **Test accounts at L2:** which sites, and each site's rules on additional accounts (CP8).
+3. **Test accounts at L2:** answered at CP8 in the [roadmap](roadmap.md) §6. M5 targets Google Search, Instagram and Reddit, whose terms set no limit on a person's accounts; each test account is made by hand, in the owner's own name, with accurate details, and used only to sign in and read.
 4. **When to read terms again:** before each census and each milestone's corpus checks (CO3). Whether a changed clause should stop a census automatically, as a changed robots file does, is CP5's to decide.
 
 ## Sources
