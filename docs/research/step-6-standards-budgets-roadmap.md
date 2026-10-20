@@ -229,7 +229,7 @@ Step 6's outputs are judged against these criteria. CP10 checks every one and re
 | CP5 | The testing and fuzzing strategy (X2) | ✅ 2026-10-20 (§11; [testing strategy](../testing.md)). Spike S9 designed for Gate B |
 | CP6 | Performance methodology and budgets (X3) | ✅ 2026-10-20 (§11; [performance budgets](../performance.md)). The final B1–B7 and the corpus pages' ceilings for the owner at Gate B |
 | CP7 | Synthesis of part 1: ADRs (Proposed); the final budgets for the owner; decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-20 (§11; ADRs [0018](../adr/0018-corpus-standards-and-testing.md) and [0019](../adr/0019-performance-methodology-and-budgets.md) proposed). **Gate B passed** 2026-10-20: both ADRs accepted |
-| (Gate B) | The owner's decisions recorded; S8's session by hand folded in, with every page's ceiling; spike S9, authorized at Gate B | In progress (§11) |
+| (Gate B) | The owner's decisions recorded; S8's session by hand folded in, with every page's ceiling; spike S9, authorized at Gate B | ✅ 2026-10-20 (§11). S9 ([results](s9-results.md)): Q1 and Q3 pass; Q2 fails with the installed nightly. The pass-rate tool corrected, and the standards' calibration recomputed |
 | | **Part 2: the roadmap** | |
 | CP8 | The roadmap: milestones, security levels, corpus targets, decision points | Not started |
 | CP9 | Milestone 1: scope and measurable acceptance criteria | Not started |
@@ -340,7 +340,7 @@ One spike is designed now, so that its evidence can reach CP4–CP6; a second on
 | Spike | Area | Question | Why sources can't settle it | What it decides |
 |---|---|---|---|---|
 | **S8** | The corpus census (designed here, §10.1) | What do the owner's 13 pages use and cost in two shipping engines on this Mac? | The pages are specific, change over time, and are measured nowhere for this machine. Feature use and memory per page need measuring | The corpus's tiers and needs (CP2); the standards' priorities (CP4); memory and time baselines (CP6) |
-| (S9) | Test tooling on this Mac (**designed at CP5**, [testing](../testing.md) §9; **authorized at Gate B**, 2026-10-20) | Does fuzzing with `cargo-fuzz` and libFuzzer run on nightly Rust for this Mac's target, with coverage? Do the sanitizers work? Does wptrunner run here within memory? | Tool support for `aarch64-apple-darwin` changes with toolchains; trying it is the only check | X2's fuzzing tools; WPT's cost on 8 GB |
+| (S9) | Test tooling on this Mac (**designed at CP5**, [testing](../testing.md) §9; **authorized at Gate B**, 2026-10-20; **run** 2026-10-20, [results](s9-results.md)) | Does fuzzing with `cargo-fuzz` and libFuzzer run on nightly Rust for this Mac's target, with coverage? Do the sanitizers work? Does wptrunner run here within memory? | Tool support for `aarch64-apple-darwin` changes with toolchains; trying it is the only check | X2's fuzzing tools; WPT's cost on 8 GB |
 
 **No spike is planned for these areas:** the standards baseline (sources and wpt.fyi settle it); the roadmap and Milestone 1 (they assemble decisions already taken); and performance methodology, which S1–S7 already exercised.
 
@@ -486,7 +486,7 @@ Every relative link resolves; the four standard checks and S8's own tests pass.
 - **Priorities** (SB6): the corpus (S8: of 116 web-features the automated pages touch, 72 Baseline high, 19 low, 25 in only some engines), then Baseline, then Interop 2026's 20 focus areas.
 - **A support matrix** of about 50 areas, gathered from every subsystem's §2, each with its class, suites and corpus need. A not-planned list: DRM, plugins, Web SQL and AppCache, single-engine device APIs, and others without corpus use.
 - **Suites and expectations** (SB7–SB9): wptrunner's metadata, test by test. html5lib-tests' tree-construction tests moved into WPT on 2026-06-26.
-- **Targets** (SB10–SB12): a completed area targets the median of Chrome, Firefox and Safari on its directories at the pinned revision. Passing tests don't regress without a reason. Calibrated on wpt.fyi's runs of 2026-10-19 (WPT `0f26972422`) for about 120 directories, with `tools/wpt-pass-rates.py`, new. Ladybird meets the median on `html/syntax/parsing/`, `dom/` and `css/CSS2/`.
+- **Targets** (SB10–SB12): a completed area targets the median of Chrome, Firefox and Safari on its directories at the pinned revision. Passing tests don't regress without a reason. Calibrated on wpt.fyi's runs of 2026-10-19 (WPT `0f26972422`) for about 120 directories, with `tools/wpt-pass-rates.py`, new. Ladybird meets the median on `html/syntax/parsing/`, `dom/` and `css/CSS2/`. **Corrected after S9** (2026-10-20, §11): the tool had left reference tests out. Recomputed, Ladybird meets the median on `html/syntax/parsing/` and not on `css/CSS2/`.
 
 Sources read for it: the WHATWG's working mode and policies, the W3C Process, CSS Snapshot 2026, ECMA-262 and ECMA-402, Unicode 18.0, web-features' Baseline definition and its 3.43.0 data, Interop 2026, wpt.fyi's API and runs, and wptrunner's documentation.
 
@@ -580,6 +580,24 @@ The owner's decisions, quoted in full in §2:
 - **Clean-up:** two crash reports that Chrome Canary left at 17:32–17:33, during the owner's `s8.py signin` (non-fatal guard faults; parent `python3`), were removed from `~/Library/Logs/DiagnosticReports`. A third, at 17:10, came from macOS's Software Update settings, not from S8, and was left.
 
 Every relative link resolves; the four standard checks and S8's tests pass.
+
+### S9 — completed 2026-10-20
+
+**Spike S9,** the test tools on this Mac ([results](s9-results.md); `spikes/s9/`, `tools/s9-measure.sh`, committed at `3485d3f`):
+- **S9-Q1 passes.** cargo-fuzz 0.13.2, on nightly with AddressSanitizer, found the planted bug in a safe decoder in about a second, twice. It ran the checked decoder 10 minutes with no finding, twice: 80.0 and 59.2 million inputs. Coverage reached 93.25% of regions. The standard library wasn't rebuilt with the sanitizer, despite cargo-fuzz's stated default, and a fuzzer held about 0.5 GB.
+- **S9-Q2 fails with the installed nightly** (2026-04-08). Its ThreadSanitizer runtime crashes before `main` on macOS 27.2: dyld calls `dispatch_once` while the runtime starts, and the runtime's interceptor dereferences null. Apple clang 21's ThreadSanitizer reported a planted race in C correctly. Milestone 1 pins a nightly whose runtime works.
+- **S9-Q3 passes.** wptrunner ran `dom/nodes`, 435 tests, against Chrome Canary through ChromeDriver, headless, in 140 s, at a 1,152 MB peak summed over its processes. It passed 99.6%, against wpt.fyi's Chrome at 99.5%.
+- **The first fuzzing run** found the Mac on battery with Low Power Mode on, so the fuzzing step was repeated on AC power.
+- **Clean-up:** ThreadSanitizer's crashes left four reports in `~/Library/Logs/DiagnosticReports`, removed; the script now moves such reports into its results, where the C control's report went too.
+
+**A correction to CP4's calibration.** Computing Milestone 1's target on `css/CSS2`'s reference tests showed that `tools/wpt-pass-rates.py` had left reference and crash tests out: wpt.fyi's summaries give them no subtest counts, only a status. The tool now counts each such test once, by its status, as SB10 defines the measure. [The standards baseline](../standards.md) §6 was recomputed:
+- 42 of its 48 rows changed;
+- `css/CSS2/`'s median fell from 98.9% to 98.1%;
+- Ladybird meets the median on `html/syntax/parsing/` but not on `css/CSS2/` (93.8%).
+
+[ADR-0018](../adr/0018-corpus-standards-and-testing.md)'s decision history records the correction; SB10 and SB11 are unchanged. The tool also gained `--manifest` and `--types`.
+
+Every relative link resolves; the four standard checks pass.
 
 ## Sources
 

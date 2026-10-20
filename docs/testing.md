@@ -129,6 +129,17 @@ Designed here because trying the tools on this Mac is the only check (tracker §
 
 Except the rustup component, everything stays under `target/`, which git ignores and which can be deleted. S9's results would settle TS9–TS11 and TS18 before Milestone 1 depends on them. Without S9, those rules rest on the sources above, and the first milestone that fuzzes tries the tools first.
 
+**Results** (2026-10-20, [S9 results](research/s9-results.md)):
+- **S9-Q1 passes:** cargo-fuzz found the planted bug in about a second, ran the checked decoder for 10 minutes with no finding, and reported coverage, under AddressSanitizer.
+- **S9-Q2 fails with the installed nightly:** its ThreadSanitizer runtime crashes while starting on macOS 27.2, where Apple clang's works.
+- **S9-Q3 passes:** wptrunner ran `dom/nodes` against Chrome Canary within memory, at wpt.fyi's pass rate.
+
+**What follows, within these rules:**
+- Milestone 1 pins a nightly whose ThreadSanitizer works (TS11; Milestone 1 (`docs/milestone-1.md`) MA7, MA10).
+- Campaigns run one or two at a time within 8 GB, since a fuzzer under AddressSanitizer held about 0.5 GB.
+- Deep formats get structure-aware generation beside their seeds (TS10).
+- **WPT keeps html5lib's tree-construction tests as `.dat` files** beside their script wrappers (observed), so an engine without script runs them in its own runner (TS4; Milestone 1's MA4).
+
 ## 10. Open questions
 
 1. **Spike S9** (§9): authorized by the owner at Gate B (2026-10-20).

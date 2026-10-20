@@ -8,7 +8,7 @@ This directory holds validation experiments. The code is **throwaway and not pro
 - S6 measures compositing on Metal for [ADR-0012](../docs/adr/0012-graphics-images-and-media.md) ([Step 5 plan](../docs/research/step-5-subsystems.md) §10.2).
 - S7 validates the network process's sandbox and TLS for [ADR-0013](../docs/adr/0013-networking-storage-and-workers.md) ([Step 5 plan](../docs/research/step-5-subsystems.md) §10.3).
 - S8 is the corpus census for Step 6 ([Step 6 plan](../docs/research/step-6-standards-budgets-roadmap.md) §10.1; [corpus](../docs/corpus.md)). It is Python, with the standard library only, outside the Cargo workspace.
-- S9 tries the test tools on this Mac for the [testing strategy](../docs/testing.md) §9: cargo-fuzz with AddressSanitizer and coverage, ThreadSanitizer, and wptrunner.
+- S9 tries the test tools on this Mac for the [testing strategy](../docs/testing.md) §9: cargo-fuzz with AddressSanitizer and coverage, ThreadSanitizer, and wptrunner ([results](../docs/research/s9-results.md)).
 
 | Spike | Question | Crates |
 |---|---|---|

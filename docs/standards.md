@@ -208,63 +208,63 @@ Rules are numbered SB1–SB12. Precedent and sources are dated (§2). The design
 | SB11 | **Targets:**<br>• An area **completed** at a milestone targets, on each of its directories, **the median of Chrome's, Firefox's and Safari's pass rates** on that directory, at the pinned WPT revision, rounded down to a whole percent. The median of the three is what the web can rely on: it discounts tests of features only one engine ships.<br>• An area **started** at a milestone may have a lower, interim target, stated with its reason in the milestone's plan.<br>• **Approximate** areas are measured and reported, never targeted.<br>• **No test that passed may regress** without its expectation being changed with a reason (SB8) |
 | SB12 | **What Axiom claims.** An area is "to the specification" in Axiom's documents only when it meets its target and holds no approximate behaviour. Status documents report each area's class and its pass rates, never one overall figure |
 
-**Calibration** (wpt.fyi's runs of 2026-10-19 at WPT `0f26972422`, and Ladybird's of 2026-10-20 at `a26422aab3` [T1]; computed from their summary files):
+**Calibration** (wpt.fyi's runs of 2026-10-19 at WPT `0f26972422`, and Ladybird's of 2026-10-20 at `a26422aab3` [T1]; computed from their summary files). **Corrected on 2026-10-20, at CP9:** the first computation read only each test's subtest counts, which wpt.fyi's summaries leave at zero for reference and crash tests, so it left those tests out. Every figure below now counts each reference and crash test once, by its status, as SB10 says. 42 of the 48 rows changed; the largest changes are in directories made mostly of reference tests, such as `css/CSS2/`:
 
 | Directory | Tests | Chrome 155 | Firefox 158 | Safari 27.0 | **Median, the target (SB11)** | Servo 0.7.0 | Ladybird 1.0 |
 |---|---|---|---|---|---|---|---|
 | `encoding/` | 1,345 | 100.0% | 100.0% | 100.0% | **100.0%** | 100.0% | 100.0% |
 | `url/` | 77 | 94.3% | 89.3% | 99.9% | **94.3%** | 90.0% | 99.9% |
-| `html/syntax/parsing/` | 245 | 99.2% | 96.3% | 96.0% | **96.3%** | 96.1% | 96.4% |
-| `dom/` | 845 | 99.7% | 98.4% | 98.2% | **98.4%** | 98.0% | 98.4% |
-| `html/semantics/` | 3,089 | 94.4% | 87.4% | 82.3% | **87.4%** | 64.1% | 83.7% |
-| `custom-elements/` | 202 | 98.3% | 92.7% | 82.4% | **92.7%** | 84.6% | 91.8% |
+| `html/syntax/parsing/` | 245 | 99.2% | 96.2% | 96.0% | **96.2%** | 96.1% | 96.4% |
+| `dom/` | 845 | 99.7% | 98.4% | 98.2% | **98.4%** | 98.0% | 98.3% |
+| `html/semantics/` | 3,089 | 94.3% | 87.0% | 82.0% | **87.0%** | 63.8% | 83.1% |
+| `custom-elements/` | 202 | 98.2% | 92.5% | 82.3% | **92.5%** | 84.4% | 91.7% |
 | `shadow-dom/` | 359 | 97.7% | 98.2% | 98.2% | **98.2%** | 96.5% | 96.6% |
 | `editing/` | 860 | 92.6% | 95.3% | 90.1% | **92.6%** | 79.5% | 89.6% |
-| `css/css-syntax/` | 52 | 98.2% | 77.3% | 99.3% | **98.2%** | 74.5% | 92.8% |
-| `css/css-cascade/` | 164 | 98.5% | 97.6% | 98.1% | **98.1%** | 77.8% | 95.8% |
-| `css/selectors/` | 833 | 83.5% | 93.4% | 96.7% | **93.4%** | 65.5% | 96.6% |
-| `css/css-values/` | 519 | 90.4% | 57.4% | 59.9% | **59.9%** | 55.2% | 60.9% |
+| `css/css-syntax/` | 52 | 98.2% | 77.5% | 99.3% | **98.2%** | 74.8% | 92.9% |
+| `css/css-cascade/` | 164 | 98.5% | 97.5% | 98.1% | **98.1%** | 78.2% | 95.8% |
+| `css/selectors/` | 833 | 84.1% | 93.7% | 96.8% | **93.7%** | 65.1% | 95.8% |
+| `css/css-values/` | 519 | 90.6% | 57.8% | 60.2% | **60.2%** | 55.4% | 61.3% |
 | `css/cssom/` | 296 | 96.9% | 97.4% | 96.0% | **96.9%** | 84.6% | 89.9% |
-| `css/css-conditional/` | 468 | 96.4% | 95.0% | 93.9% | **95.0%** | 72.7% | 93.6% |
-| `css/CSS2/` | 6,364 | 99.9% | 98.9% | 98.9% | **98.9%** | 91.1% | 99.2% |
-| `css/css-flexbox/` | 1,421 | 99.3% | 96.8% | 95.8% | **96.8%** | 68.7% | 88.2% |
-| `css/css-grid/` | 2,516 | 91.0% | 90.2% | 94.0% | **91.0%** | 64.0% | 76.9% |
-| `css/css-tables/` | 347 | 95.6% | 89.5% | 84.6% | (approximate: measured, not targeted) | 83.9% | 75.1% |
-| `css/css-position/` | 391 | 99.7% | 91.4% | 90.3% | **91.4%** | 72.3% | 84.5% |
-| `css/css-overflow/` | 932 | 92.2% | 65.9% | 55.1% | **65.9%** | 49.8% | 61.8% |
-| `css/css-text/` | 1,982 | 88.1% | 87.5% | 78.0% | **87.5%** | 72.9% | 64.1% |
-| `css/css-fonts/` | 561 | 96.1% | 95.5% | 95.5% | **95.5%** | 68.6% | 79.3% |
-| `css/css-writing-modes/` | 1,237 | 93.8% | 93.8% | 72.6% | **93.8%** | 31.5% | 58.5% |
-| `css/css-backgrounds/` | 875 | 95.1% | 95.6% | 96.4% | **95.6%** | 74.8% | 93.3% |
-| `css/css-color/` | 380 | 89.4% | 90.4% | 92.7% | **90.4%** | 90.1% | 87.6% |
-| `css/css-images/` | 510 | 99.1% | 97.5% | 97.6% | **97.6%** | 93.7% | 93.6% |
-| `css/css-transforms/` | 931 | 99.8% | 98.1% | 97.8% | **98.1%** | 65.3% | 83.3% |
-| `css/css-animations/` | 207 | 92.2% | 76.2% | 93.3% | **92.2%** | 49.6% | 71.2% |
-| `web-animations/` | 207 | 95.3% | 95.8% | 95.9% | **95.8%** | 7.8% | 88.3% |
-| `css/cssom-view/` | 246 | 85.2% | 86.6% | 71.5% | **85.2%** | 65.8% | 75.0% |
-| `svg/` | 1,405 | 96.9% | 97.8% | 92.9% | **96.9%** | 38.1% | 65.6% |
-| `mathml/` | 623 | 97.7% | 83.1% | 85.6% | **85.6%** | 23.9% | 45.6% |
-| `webidl/` | 63 | 93.8% | 96.4% | 94.2% | **94.2%** | 95.1% | 99.3% |
-| `html/semantics/scripting-1/` | 596 | 95.5% | 86.5% | 76.3% | **86.5%** | 83.0% | 84.3% |
-| `html/browsers/` | 792 | 84.6% | 81.2% | 80.4% | **81.2%** | 63.6% | 72.1% |
-| `workers/` | 336 | 92.5% | 97.5% | 96.6% | **96.6%** | 98.5% | 92.0% |
-| `IndexedDB/` | 820 | 99.9% | 99.8% | 88.4% | **99.8%** | 71.5% | 95.4% |
-| `service-workers/` | 334 | 92.0% | 90.3% | 91.8% | **91.8%** | 7.2% | 34.3% |
-| `fetch/` | 957 | 94.0% | 90.7% | 87.0% | **90.7%** | 84.7% | 87.0% |
-| `cookies/` | 89 | 96.7% | 93.6% | 80.5% | **93.6%** | 85.3% | 93.3% |
-| `content-security-policy/` | 930 | 88.9% | 81.0% | 79.3% | **81.0%** | 77.2% | 68.5% |
-| `websockets/` | 803 | 91.5% | 74.2% | 74.0% | **74.2%** | 73.1% | 69.3% |
+| `css/css-conditional/` | 468 | 96.6% | 93.4% | 92.5% | **93.4%** | 71.5% | 93.4% |
+| `css/CSS2/` | 6,364 | 98.5% | 98.1% | 96.6% | **98.1%** | 93.1% | 93.8% |
+| `css/css-flexbox/` | 1,421 | 99.2% | 96.1% | 95.0% | **96.1%** | 70.9% | 86.5% |
+| `css/css-grid/` | 2,516 | 87.4% | 86.5% | 91.5% | **87.4%** | 61.7% | 72.9% |
+| `css/css-tables/` | 347 | 95.8% | 89.3% | 84.7% | (approximate: measured, not targeted) | 84.3% | 75.4% |
+| `css/css-position/` | 391 | 99.7% | 89.6% | 88.4% | **89.6%** | 70.9% | 81.1% |
+| `css/css-overflow/` | 932 | 79.2% | 58.5% | 48.6% | **58.5%** | 44.4% | 60.5% |
+| `css/css-text/` | 1,982 | 87.2% | 84.4% | 77.7% | **84.4%** | 72.0% | 60.3% |
+| `css/css-fonts/` | 561 | 95.6% | 95.2% | 94.9% | **95.2%** | 68.4% | 78.5% |
+| `css/css-writing-modes/` | 1,237 | 96.0% | 96.6% | 87.6% | **96.0%** | 27.8% | 32.4% |
+| `css/css-backgrounds/` | 875 | 94.2% | 95.1% | 95.2% | **95.1%** | 73.4% | 92.2% |
+| `css/css-color/` | 380 | 89.6% | 90.5% | 92.7% | **90.5%** | 90.2% | 87.8% |
+| `css/css-images/` | 510 | 97.1% | 96.5% | 94.5% | **96.5%** | 89.2% | 88.6% |
+| `css/css-transforms/` | 931 | 99.7% | 98.2% | 97.7% | **98.2%** | 65.8% | 84.8% |
+| `css/css-animations/` | 207 | 92.6% | 77.3% | 93.4% | **92.6%** | 50.7% | 72.1% |
+| `web-animations/` | 207 | 95.3% | 95.9% | 96.0% | **95.9%** | 9.1% | 88.4% |
+| `css/cssom-view/` | 246 | 85.3% | 86.7% | 71.5% | **85.3%** | 66.0% | 75.1% |
+| `svg/` | 1,405 | 96.4% | 97.3% | 91.9% | **96.4%** | 37.9% | 65.2% |
+| `mathml/` | 623 | 97.5% | 83.4% | 85.6% | **85.6%** | 27.1% | 47.2% |
+| `webidl/` | 63 | 93.8% | 96.4% | 94.2% | **94.2%** | 94.8% | 99.0% |
+| `html/semantics/scripting-1/` | 596 | 95.4% | 86.4% | 76.0% | **86.4%** | 82.8% | 84.1% |
+| `html/browsers/` | 792 | 84.5% | 81.1% | 80.2% | **81.1%** | 63.4% | 71.8% |
+| `workers/` | 336 | 92.4% | 97.4% | 96.6% | **96.6%** | 97.6% | 91.2% |
+| `IndexedDB/` | 820 | 99.9% | 99.8% | 88.4% | **99.8%** | 68.7% | 91.7% |
+| `service-workers/` | 334 | 91.9% | 90.3% | 91.8% | **91.8%** | 7.2% | 34.0% |
+| `fetch/` | 957 | 94.0% | 90.7% | 87.0% | **90.7%** | 83.7% | 86.0% |
+| `cookies/` | 89 | 96.8% | 93.6% | 80.4% | **93.6%** | 85.3% | 93.3% |
+| `content-security-policy/` | 930 | 88.9% | 81.0% | 79.2% | **81.0%** | 76.7% | 68.1% |
+| `websockets/` | 803 | 91.3% | 74.2% | 74.0% | **74.2%** | 72.3% | 68.5% |
 | `wai-aria/` | 35 | 97.4% | 95.2% | 92.9% | **95.2%** | 44.2% | 92.7% |
-| `html/canvas/` | 3,933 | 86.4% | 76.4% | 86.1% | **86.1%** | 67.9% | 69.9% |
-| `media-source/` | 86 | 82.4% | 69.9% | 93.7% | **82.4%** | 3.9% | 64.8% |
-| `wasm/` | 615 | 99.8% | 99.9% | 97.8% | **99.8%** | 99.6% | 99.6% |
-| `storage/` | 56 | 97.5% | 33.0% | 32.6% | **33.0%** | 36.5% | 29.6% |
-| `quirks/` | 51 | 99.9% | 99.9% | 99.9% | **99.9%** | 99.8% | 98.9% |
+| `html/canvas/` | 3,933 | 82.6% | 72.8% | 81.0% | **81.0%** | 64.4% | 66.3% |
+| `media-source/` | 86 | 82.0% | 69.6% | 93.3% | **82.0%** | 3.8% | 64.4% |
+| `wasm/` | 615 | 99.8% | 99.8% | 97.7% | **99.8%** | 99.5% | 99.5% |
+| `storage/` | 56 | 97.5% | 33.0% | 32.6% | **33.0%** | 35.9% | 29.1% |
+| `quirks/` | 51 | 99.9% | 99.8% | 99.8% | **99.8%** | 99.8% | 98.6% |
 
 **What the calibration shows:**
 - **"Tests"** counts the directory's test files in the runs. The figures are the share of results that pass, computed with `tools/wpt-pass-rates.py` from the five runs' summary files, downloaded into `target/`. The other directories in §5 are in the same computation.
-- **The median discounts tests of one engine's features.** In `storage/`, Chrome passes 97.5% and the others about 33%: the directory tests features that only Chromium ships (inference, from the split). The median, 33.0%, is what the web can rely on. `css/css-values/` shows the same pattern, with Chrome at 90.4% and the others near 58%.
-- **A new engine can reach the targets.** Ladybird, an engine written from scratch (background), meets or passes the shipping median on `html/syntax/parsing/` (96.4%), `dom/` (98.4%), `css/CSS2/` (99.2%), `css/selectors/` (96.6%) and `webidl/` (99.3%) (measured). So SB11's targets are demanding, and reachable.
+- **The median discounts tests of one engine's features.** In `storage/`, Chrome passes 97.5% and the others about 33%: the directory tests features that only Chromium ships (inference, from the split). The median, 33.0%, is what the web can rely on. `css/css-values/` shows the same pattern, with Chrome at 90.6% and the others at 58–60%.
+- **A new engine can reach some targets already.** Ladybird, an engine written from scratch (background), meets or passes the shipping median on `html/syntax/parsing/` (96.4%), `css/selectors/` (95.8%), `css/css-display/` (78.3%), `webidl/` (99.0%) and `url/` (99.9%), and comes within 0.1 point of it on `dom/` (98.3%) (measured). On `css/CSS2/` it is 4.3 points below (93.8% against 98.1%). So SB11's targets are demanding, and some are reachable by a new engine. Before the correction above, this paragraph also named `css/CSS2/` and `dom/`.
 - **Where both new engines lag most:** `service-workers/`, `svg/`, `mathml/` and `css/css-writing-modes/`, with `web-animations/` for Servo. Most are staged areas in §5, which reach their targets at their milestones.
 - **WebGPU's conformance suite** isn't among wpt.fyi's runs (`webgpu/` shows no results), so it is run from its own repository at its milestone (SB7).
 

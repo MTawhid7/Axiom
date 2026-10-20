@@ -16,6 +16,7 @@
 | 2026-10-20 | **The automation boundary** ([corpus](../corpus.md) CO3) confirmed at Gate B: "Automation Boundary: Confirmed. Automating only the 5 permitted pages and reserving the other 8 for manual testing was the correct decision to respect site terms." |
 | 2026-10-20 | **The not-planned list** ([standards](../standards.md) §5.3) approved at Gate B: "Not-Planned List: Approved as written in docs/standards.md §5.3 (DRM, plugins, Web SQL, AppCache, WebXR, Web MIDI, etc.)." |
 | 2026-10-20 | **Spike S9** ([testing](../testing.md) §9) authorized at Gate B: "Spike S9 (Testing and Fuzzing Tooling): Authorized. Proceed with validating cargo-fuzz, AddressSanitizer/ThreadSanitizer, and wptrunner on this Mac." |
+| 2026-10-20 | **A correction to the evidence, not the decision** (Step 6, CP9): the [standards baseline](../standards.md) §6's calibration had left reference and crash tests out, because `tools/wpt-pass-rates.py` read only subtest counts, which wpt.fyi leaves at zero for them. Recomputed as SB10 defines the measure, 42 of the 48 rows changed. `css/CSS2/`'s median is 98.1%, not 98.9%. Ladybird meets the median on `html/syntax/parsing/`, not on `css/CSS2/`, where it has 93.8%. SB10 and SB11 are unchanged |
 
 ## Question
 
@@ -61,7 +62,7 @@ How is Axiom judged? Three parts decided together, because each uses the others:
   - It costs the owner's time at each census, and measures by hand what can't be instrumented.
   - It keeps the project within every site's published rules.
 - **Living standards at commit snapshots** (SB1, SB2) track what WPT tests, and moving all pins together at a milestone's start keeps changes in pass rates attributable.
-- **The shipping median as the target** (SB11) is what the web relies on. A new engine can reach it: Ladybird meets it on `html/syntax/parsing/`, `dom/` and `css/CSS2/` (measured from wpt.fyi's runs).
+- **The shipping median as the target** (SB11) is what the web relies on. A new engine can reach it on some areas: Ladybird meets it on `html/syntax/parsing/`, `css/selectors/` and `webidl/`, and comes within 0.1 point of it on `dom/` (measured from wpt.fyi's runs; corrected on 2026-10-20, decision history).
 - **A WebDriver server, test-only** (TS2), follows the precedent, maps `testdriver.js` directly, and stays out of the shell's build, so the browser the owner uses has no remote-control surface.
 - **This Mac as the authority** (TS17) keeps every platform-dependent result on the target, at the cost of local time for fuzzing and suites.
 
