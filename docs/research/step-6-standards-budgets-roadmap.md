@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **CP1–CP2 ✅** (2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written. Next: CP3, spike S8 |
+| **Status** | **CP1–CP3 ✅** (2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written. Spike S8's automated part is complete; its session by hand awaits the owner. Next: CP4 |
 | **Authorized** | 2026-10-20, by the owner: "Step 6 Authorization: Authorized. Proceed with creating branch step-6 from main and drafting the Phase Zero Step 6 plan (standards baseline, testing strategy, performance budgets, and Milestone 1 roadmap) for Gate A review." Design documents only; each spike needs its own authorization. **Spike S8 authorized at Gate A** (2026-10-20), for the questions it names (§10.1) |
 | **Branch** | `step-6`, from `main` at `b4948ce` (the Step 5 merge). Pushed to `origin` as the owner authorized at Gate A, after CP1's commit was amended (§11), and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items X1–X3; the roadmap and Milestone 1's acceptance criteria (charter §8); the final design review of Phase Zero; the questions earlier steps handed to Step 6 (§2.2) |
@@ -217,7 +217,7 @@ Step 6's outputs are judged against these criteria. CP10 checks every one and re
 | **CP1** | This plan; branch `step-6`; the owner's decisions recorded | ✅ 2026-10-20 (§11). **Gate A passed** 2026-10-20: approved as written |
 | | **Part 1: evidence and the cross-cutting decisions** | |
 | CP2 | The corpus: each site's tier, needs, logins and level; the measurement protocol; capturing pages | ✅ 2026-10-20 (§11; [corpus](../corpus.md)). Eight sites' terms forbid automated access, so S8 measures them by hand |
-| CP3 | Spike S8: the corpus census, if authorized | Not started |
+| CP3 | Spike S8: the corpus census, if authorized | ✅ 2026-10-20 (§11; [results](s8-results.md)). The automated part: five pages, three valid runs each. The session by hand (eight pages, and Safari) awaits the owner at Gate B |
 | CP4 | The standards baseline and support matrix (X1) | Not started |
 | CP5 | The testing and fuzzing strategy (X2) | Not started |
 | CP6 | Performance methodology and budgets (X3) | Not started |
@@ -430,6 +430,38 @@ CP2 starts.
 - **Precedent:** Chromium's system-health benchmark, whose 141 desktop stories replay from Web Page Replay archives dated by year.
 
 The `CO` prefix was checked unused, as were the plan's other prefixes. Every relative link resolves; the four standard checks pass.
+
+### CP3 — completed 2026-10-20
+
+**Spike S8, the corpus census,** built and run ([results](s8-results.md)):
+- **The tools:** `spikes/s8/`, Python with the standard library only; `tools/s8-measure.sh`; `tools/s8-report.py`. Committed at `6ba5068`, and at `df7b179` after the formal run showed that visibility must be checked at every phase.
+  - A DevTools Protocol client over Chrome's pipe, so no port is opened.
+  - Features from Chrome's own use counters, so nothing is injected into the pages. They include the WebDX counters, which name web-features' identifiers.
+  - Sizes from the Network domain and the DOM read in an isolated world.
+  - Processes sampled with `footprint` and `top`.
+  - Automated loads identify themselves in the user agent, and are refused where robots.txt disallows them (CO4).
+- **The method checked** on a local test page: every feature it uses appeared among the counters.
+- **The census:** the five pages automation may load, three valid runs each, in Chrome Canary 158.0.8112.0.
+  - Two runs had the page hidden: a page that isn't composited and takes no input. They were left out, and the two pages measured again, which used Wikipedia's and Three.js's fifth and last loads (CO4).
+  - In two runs `top`'s wakeup counter failed. Their wakeup figures are left out, and their CPU and energy figures kept.
+- **Results:**
+  - **Features:** the pages touch 116 of web-features' features, 72 Baseline high, 19 low and 25 in only some engines.
+  - **Size:** Wikipedia's article holds 126 MathML formulas and loads 164 SVG images. MDN's page holds 98 custom elements with open shadow roots.
+  - **Memory:** each page's steady-state cost in Chrome, above about:blank: Maps 627 MB, Three.js 470, VS Code 457, Wikipedia 319, MDN 145, with the GPU process carrying much of Maps' and Three.js's.
+  - **Time:** first contentful paint at 0.8–2.3 s.
+  - **The corpus** gains these baselines (§5).
+- **Not done here: the session by hand.**
+  - The eight pages automation may not load, signed in and logged out.
+  - Safari for all thirteen pages. `s8.py safari-status` found Safari's remote automation off (observed).
+
+  It is put to the owner at Gate B.
+- **Clean-up:**
+  - The Safari check made `safaridriver` launch Safari. A macOS agent it started, `nsattributedstringagent`, left a report of a non-fatal guard fault in `~/Library/Logs/DiagnosticReports`; it was removed. Safari and its WebKit GPU helper, both launched by the check, were ended.
+  - No other report appeared.
+  - Profiles were deleted after each run.
+- **Research data for CP4,** downloaded into `target/`, which git ignores: web-features 3.43.0's `data.json`, and wpt.fyi's run summaries for Chrome, Firefox, Safari, Servo and Ladybird.
+
+Every relative link resolves; the four standard checks and S8's own tests pass.
 
 ## Sources
 

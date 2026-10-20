@@ -8,7 +8,8 @@ Markdown tables, each page's medians with their ranges across runs (MB are
 10^6 bytes, as B1 counts them):
   - memory: every Chrome process together (footprint's total, shared memory
     counted once), the renderers, the GPU and browser processes, the same
-    browser on about:blank, and the change over blank;
+    browser on about:blank, and the change over blank, leaving out Chrome's
+    component-extension renderers, which exit before the steady state;
   - load: navigation milestones, requests and bytes, DOM size;
   - the 30 s without input: CPU time, idle wakeups and energy impact;
   - features: S8-Q1's groups, and the page's web-features identifiers.
@@ -80,13 +81,24 @@ def kind_sum(record, phase, kinds):
     return sum(v.get("footprint", 0) for k, v in by_kind.items() if k in kinds)
 
 
+def without_extensions(record, phase):
+    """A phase's total without Chrome's component-extension renderers.
+
+    They run on about:blank and exit about a minute after launch, before the
+    steady state, so a page's cost is compared without them on both sides.
+    footprint's total counts shared memory once; their own footprints are
+    taken off it, an approximation that their private memory dominates.
+    """
+    return get(record, phase, "total_footprint", default=0) - kind_sum(record, phase, ("extension",))
+
+
 def idle_sum(record, field):
     return sum(v.get(field, 0) for v in get(record, "without_input", "by_kind", default={}).values())
 
 
 def memory_table(pages):
-    print("| Page | All processes, loaded (MB) | After interaction | After 30 s without input | Renderers, loaded | GPU, loaded | Browser, loaded | On about:blank | Loaded − blank |")
-    print("|---|---|---|---|---|---|---|---|---|")
+    print("| Page | All processes, loaded (MB) | After interaction | After 30 s without input | Renderers, loaded | GPU, loaded | Browser, loaded | On about:blank | Loaded − blank, without extension renderers | After 30 s − blank, without extension renderers | GPU after 30 s |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|")
     for page, runs in pages.items():
         total = lambda phase: [get(r, phase, "total_footprint") for r in runs]  # noqa: E731
         print("| " + " | ".join([
@@ -98,8 +110,11 @@ def memory_table(pages):
             cell([kind_sum(r, "memory_loaded", ("gpu",)) for r in runs], MB),
             cell([kind_sum(r, "memory_loaded", ("browser",)) for r in runs], MB),
             cell(total("memory_blank"), MB),
-            cell([get(r, "memory_loaded", "total_footprint", default=0) - get(r, "memory_blank", "total_footprint", default=0)
+            cell([without_extensions(r, "memory_loaded") - without_extensions(r, "memory_blank")
                   for r in runs if get(r, "memory_blank")], MB),
+            cell([without_extensions(r, "memory_after") - without_extensions(r, "memory_blank")
+                  for r in runs if get(r, "memory_blank")], MB),
+            cell([kind_sum(r, "memory_after", ("gpu",)) for r in runs], MB),
         ]) + " |")
 
 
@@ -123,14 +138,23 @@ def load_table(pages):
         ]) + " |")
 
 
+def wakeups_counted(record):
+    """False when top reported no idle wakeup for any process while they used CPU: its counter failed."""
+    return idle_sum(record, "idle_wakeups") > 0 or idle_sum(record, "cpu_seconds") < 0.2
+
+
 def idle_table(pages):
     print("| Page | CPU time over 30 s (s) | Idle wakeups | Energy impact (sum of processes' means) | Renderers' energy impact |")
     print("|---|---|---|---|---|")
     for page, runs in pages.items():
+        uncounted = [str(r.get("run")) for r in runs if not wakeups_counted(r)]
+        wakeups = cell([idle_sum(r, "idle_wakeups") for r in runs if wakeups_counted(r)])
+        if uncounted:
+            wakeups += f"; run {', '.join(uncounted)} left out: no wakeup counted for any process"
         print("| " + " | ".join([
             page,
             cell([idle_sum(r, "cpu_seconds") for r in runs], digits=2),
-            cell([idle_sum(r, "idle_wakeups") for r in runs]),
+            wakeups,
             cell([idle_sum(r, "energy_impact") for r in runs], digits=1),
             cell([get(r, "without_input", "by_kind", "renderer", "energy_impact") for r in runs], digits=1),
         ]) + " |")

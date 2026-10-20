@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Draft** (Step 6, CP2, 2026-10-20). It becomes binding when its ADR is accepted; CP7 settles which ADR. CP3 adds the baselines, from spike S8 |
+| **Status** | **Draft** (Step 6, CP2, 2026-10-20). It becomes binding when its ADR is accepted; CP7 settles which ADR. **Baselines from spike S8** (CP3, §5): the five pages automation may load, in Chrome Canary; the other pages and Safari await the session by hand |
 | **Question** | Which pages is Axiom judged against? What does each need, and from which security level can it be used? How is each measured, repeatably and within its site's terms? |
 | **Answers** | Step 6 question Q1 ([tracker](research/step-6-standards-budgets-roadmap.md) §3), with S8; the tracker's handed-over questions 1 and 2 (§2.2) |
 | **Feeds** | Spike S8 (CP3); the standards baseline (CP4); testing (CP5); budgets (CP6); the roadmap's corpus targets and login track (CP8); Milestone 1 (CP9) |
@@ -184,6 +184,20 @@ Sites whose experience differs logged in are measured both ways where both are a
   - pages measured by hand logged out use a fresh temporary profile too;
   - signed-in pages use the dedicated profile (CO14).
 - **The network** is this Mac's own, unthrottled, and varies, so load times are context rather than targets.
+
+### Baselines, from S8 (CP3)
+
+Chrome Canary 158.0.8112.0, 2026-10-20: the medians of three valid runs ([S8 results](research/s8-results.md)). They are context for the budgets, not targets (CO12).
+
+| Page | First contentful paint (ms) | Requests | Transferred (MB) | Elements | All Chrome's processes, 30 s after the interaction (MB) | The page's cost above about:blank (MB) |
+|---|---|---|---|---|---|---|
+| Wikipedia | 1,636 | 239 | 3.74 | 12,828 | 523 | 319 |
+| Google Maps | 1,944 | 344 | 9.66 | 1,359 | 830 | 627 |
+| MDN | 812 | 89 | 0.43 | 2,695 | 350 | 145 |
+| Three.js | 1,100 | 24 | 0.84 | 461 | 674 | 470 |
+| VS Code for the Web | 2,259 | 2,449 | 8.96 | 656 | 665 | 457 |
+
+The page's cost leaves out three component-extension renderers of Chrome's own, which run on about:blank and exit before the steady state (S8 results §5). The eight pages measured by hand, and Safari for all thirteen, wait for the owner's session (S8 results §7).
 
 ## 6. Repeatability and captures
 

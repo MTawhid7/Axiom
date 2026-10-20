@@ -6,10 +6,10 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero: Step 6, standards, testing, budgets and the roadmap** (authorized 2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written, and spike S8 authorized. CP1–CP2 ✅. Step 5 is done and merged (2026-10-20): ADRs 0010–0017 are accepted. Production engine code is **not** authorized |
+| Phase | **Phase Zero: Step 6, standards, testing, budgets and the roadmap** (authorized 2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written, and spike S8 authorized. CP1–CP3 ✅. Step 5 is done and merged (2026-10-20): ADRs 0010–0017 are accepted. Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 5** (merged with `--no-ff` on 2026-10-20) and is pushed. **Step 6 runs on branch `step-6`**, from `main` at `b4948ce`, pushed to `origin` as the owner authorized at Gate A, and kept pushed |
-| Current checkpoint | **Step 6: CP1–CP2 ✅; next, CP3:** spike S8, the corpus census ([tracker](research/step-6-standards-budgets-roadmap.md)). Step 5: CP1–CP19 ✅ ([tracker](research/step-5-subsystems.md)) |
-| Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census,** is authorized (Gate A) and is built at CP3. Tooling under `tools/`, now with `s6-tails.py` and `png-region-stats.py`; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
+| Current checkpoint | **Step 6: CP1–CP3 ✅; next, CP4:** the standards baseline ([tracker](research/step-6-standards-budgets-roadmap.md)). Step 5: CP1–CP19 ✅ ([tracker](research/step-5-subsystems.md)) |
+| Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census,** is built (`spikes/s8/`, Python): its automated part is complete ([results](research/s8-results.md)), and its session by hand awaits the owner. Tooling under `tools/`, now with `s6-tails.py` and `png-region-stats.py`; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md), [S6](research/s6-results.md), [S7](research/s7-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final**, with build thresholds T1–T4 |
@@ -34,19 +34,13 @@
 
 ## Next steps
 
-1. **CP3, spike S8, the corpus census** ([tracker](research/step-6-standards-budgets-roadmap.md) §10.1, as refined at CP2):
-   - build the census tools, in `spikes/s8/` and `tools/s8-measure.sh`;
-   - check that Chrome's own feature counters can be read;
-   - run the automated census of the five pages that may be automated, in Chrome Canary, under formal conditions;
-   - check whether Safari's remote automation is enabled, without changing it;
-   - prepare the session by hand for the owner.
-2. **Then CP4–CP7 without pausing,** to Gate B: the standards baseline, testing, budgets, and the ADRs for part 1.
+1. **CP4–CP7 without pausing,** to Gate B: the standards baseline, the testing strategy, the performance budgets, then the ADRs for part 1 and the final B1–B7 for the owner.
+2. **At Gate B the owner's hands are needed** for S8's session by hand ([S8 results](research/s8-results.md) §7):
+   - the eight pages automation may not load, signed in in Chrome Canary's dedicated profile (`s8.py signin`, then `s8.py hand`);
+   - the five of them that work logged out, logged out;
+   - Safari for all thirteen pages, by hand, since its remote automation is off.
 
-**At Gate B the owner's hands will be needed** for S8's session by hand:
-- the eight pages automation may not load, signed in in Chrome Canary's dedicated profile and in Safari;
-- the five of them that work logged out, logged out.
-
-Two optional choices come with it ([corpus](corpus.md) §10, questions 1 and 2): saving Chrome's feature counters by hand, and enabling Safari's remote automation.
+   Two optional choices come with it ([corpus](corpus.md) §10, questions 1 and 2): saving Chrome's feature counters by hand, and enabling Safari's remote automation.
 
 ## Session log
 
@@ -71,7 +65,18 @@ Two optional choices come with it ([corpus](corpus.md) §10, questions 1 and 2):
 
 **Also updated:** the tracker (§2, §6, §7, §9, §10.1 refined, §11), the charter's §8, OQ-2's entry, the decision map, and both indexes.
 
-**Clean-up:** the terms pages and robots files were downloaded into the session's scratchpad, read, and left there; nothing outside the repository changed.
+**CP3, [spike S8](research/s8-results.md),** the corpus census, built and run:
+- **The tools:** a DevTools Protocol client over Chrome's pipe; features from Chrome's own use counters, with web-features' identifiers; sizes; processes sampled with `footprint` and `top`.
+- **The census:** the five pages automation may load, three valid runs each, in Chrome Canary 158.
+  - Two hidden runs were replaced, which used Wikipedia's and Three.js's fifth and last loads.
+  - The pages touch 116 of web-features' features: 72 widely available, 19 newly, 25 in only some engines.
+  - Steady-state cost above about:blank: Maps 627 MB, Three.js 470, VS Code 457, Wikipedia 319, MDN 145.
+- **Pending:** the session by hand (eight pages; Safari, whose remote automation is off), for the owner at Gate B.
+
+**Clean-up:**
+- The terms pages and robots files were downloaded into the session's scratchpad, read, and left there.
+- S8's Safari check made `safaridriver` launch Safari. A system agent it started left a report of a non-fatal guard fault in `~/Library/Logs/DiagnosticReports`, which was removed. Safari and its WebKit GPU helper, both launched by the check, were ended.
+- S8's profiles were deleted after each run. Nothing else outside the repository changed.
 
 ### 2026-10-20 — Session 13 (Gate C follow-ups; Step 6 kickoff)
 
