@@ -1,0 +1,138 @@
+# Milestone 1: Static Documents
+
+| | |
+|---|---|
+| **Status** | **Binding** as the specification baseline for M1, since [ADR-0021](adr/0021-milestone-1.md) was accepted (2026-10-20, Step 6's Gate C). Written at Step 6, CP9. **Its implementation is on hold** (the owner, Gate C): no skeleton or production code until the independent architecture review is done, and then only with the owner's authorization of MA10 |
+| **Question** | What exactly is Milestone 1? What does it build and leave out, against which pinned specifications and suites, with which measurable acceptance criteria? What does starting it require the owner to authorize? |
+| **Answers** | Step 6 question Q6 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the handed-over question 29 (§2.2) |
+| **Feeds** | ADR-0021; requirements traceability (CP10); Milestone 1's own plan, its CP1 |
+| **Builds on** | The [roadmap](roadmap.md)'s M1 (MS3–MS7); the [corpus](corpus.md) (CO3, CO4, CO12); the [standards baseline](standards.md) (SB1, SB2, SB9–SB12); the [testing strategy](testing.md) (TS1–TS18); the [performance budgets](performance.md) (PF1–PF24) and the [process model](security/process-model.md)'s B1–B7; the [threat model](security/threat-model.md) §8 (L0); the [overview](architecture/overview.md) §2 (crates); [S9 results](research/s9-results.md) |
+| **Last updated** | 2026-10-20 |
+
+Rules are numbered MA1–MA12. Every criterion is a number with its method (RC1). Values marked **hypothesis** are first measured here, and a miss returns to the owner as a revision (PF5). Everything here is **planned**; nothing is implemented.
+
+## Summary
+
+- **Milestone 1 is the static-document engine at L0** (MA1): HTML and the DOM without script, style, CSS 2.1's visual formatting model without paged media, text with system fonts, PNG, JPEG, GIF and WebP, paint and the Metal compositor, an AppKit shell, and HTTP/1.1 and HTTP/2 over rustls. One process, with every interface of the later levels (MS4).
+- **It leaves out** script, cookies, storage, web fonts, SVG, flexbox, grid and separate processes (MA2).
+- **Its specifications and suites are pinned at its start** (MA3): candidates today are WPT `0f26972422` and html5lib-tests `c777c408`.
+- **Conformance without script** (MA4), because WPT's testharness tests are script:
+  - html5lib's tokenizer tests: 100%;
+  - the 1,973 tree-construction tests: at least 96%, the shipping median rounded down (SB11);
+  - `css/CSS2`'s 5,848 reference tests in scope: at least 97%, the shipping median on those tests (97.8%) rounded down;
+  - Unicode's line-breaking and bidi conformance files: 100%.
+- **The corpus** (MA5): Wikipedia's article on π and MDN's canvas tutorial render readably from dated local copies and live, links navigate, and 10 loads of each never crash or hang.
+- **Budgets** (MA6): the process idle with one window at most 95 MB; Wikipedia's page at most 100 MB and MDN's at most 70 MB above it; S6's frame budgets; no task over 50 ms; no idle wakeups; pauses within 4 ms; T1–T4.
+- **Security and robustness** (MA7): no script engine linked; no credentials, by construction; every parser and decoder fuzzed for at least an hour under AddressSanitizer with no open finding; `unsafe` only where the policy allows; every dependency registered and graded.
+- **Determinism** (MA8): parsing and painting independent of chunking and repetition.
+- **Starting it needs the owner's authorization** (MA10): the branch, the skeleton under `crates/`, the dependencies listed, the test data, and the tools, including a nightly whose ThreadSanitizer works on macOS 27 (S9-Q2).
+
+## 1. Binding inputs
+
+| Input | Consequence here |
+|---|---|
+| **The roadmap's M1** (MS5): static documents at L0; no script before L1 (MS3); every interface from the first milestone (MS4); one shape of criteria (MS7) | MA1, MA2, MA4–MA8 |
+| **Charter §8:** milestone criteria from conformance, corpus checks, budgets on the M1 and security gates | MA4–MA7 |
+| **The threat model §8, L0:** "Local test pages and public documents. **Never credentials**" | MA7 |
+| **SB1, SB2:** specifications and suites pinned at a milestone's start; **SB9–SB12:** expectations test by test, no regressions, completed areas at the shipping median | MA3, MA4 |
+| **CO3, CO4, CO12:** automation loads Wikipedia and MDN only as their terms allow, identified and few; copies of both pages are permitted, kept on this Mac, never committed | MA5 |
+| **PF1–PF24, B1–B7:** the method, the budgets and the pages' ceilings | MA6, MA9 |
+| **TS1–TS18, and S9's results:** the test layers; cargo-fuzz with AddressSanitizer works here; ThreadSanitizer from the installed nightly doesn't; wptrunner reproduces wpt.fyi's results | MA4, MA7, MA10 |
+| **The overview §2 and the dependency policy:** the crates, and how each dependency is admitted | MA1, MA10 |
+
+## 2. Scope
+
+| # | Rule |
+|---|---|
+| MA1 | **What Milestone 1 builds,** one process at L0, by crate ([overview](architecture/overview.md) §2):<br>• `platform`: the AppKit window, Metal and CoreAnimation layers, CoreText and CoreGraphics for system fonts, Security's trust evaluation and DNS-SD, kqueue run loops, and in-process channels;<br>• `gc`: the node arena and the collector, for the DOM (SH8, HD11);<br>• `html`, `dom`: the parser with encoding sniffing and fragments; nodes, attributes, text and the mutation algorithms with their hooks; event dispatch for routed input; ranges and selection; forms submitted as navigations (HD, the first document milestone's row);<br>• `css`, `style`: the first document milestone's row of the style design;<br>• `layout`, `paint`: **CSS 2.1's visual formatting model, without paged media:** the first document milestone's row of the layout design, plus tables (approximate, LY10), lists and generated content, every CSS 2.1 border style, and outlines (roadmap §4.1);<br>• `text`: system fonts through CoreText's database and rasterization (TX12), HarfRust, ICU4X's line breaking and bidi, the atlas, the encodings;<br>• `image`: PNG, JPEG, GIF and WebP behind IM9's interface, decoded incrementally and at display size, with colour management;<br>• `ipc`, `idl`, `event-loop`, `core`, `frame-tree`, `embedder-api`: every channel, record and replica of the later levels, in one process (MS4);<br>• `compositor`, `display-list`: S6's pipelines, tiled layers with damage, scrolling layers, transform and opacity animation, Display P3 at 8 bits;<br>• `net`: URLs, `file:`, HTTP/1.1 and HTTP/2 over rustls with the system verifying certificates, DNS-SD, an in-memory cache, mixed content, HSTS and Referrer-Policy;<br>• `shell`: a window with an address field, back and forward, and the objc2 classes for text input and accessibility validated (EM11);<br>• `headless`: the headless embedder with the test-only WebDriver server (EM9, TS2) |
+| MA2 | **What it leaves out,** each to its milestone: script and everything that needs it (M3); the cookie jar and the disk cache (M2); Web Storage (M3); web fonts, SVG, flexbox, grid and the rest of layout's next stage (M4); separate processes and sandboxes (M2); media (M7). `<script>` elements stay inert, and event-handler attributes are kept as attributes and never compiled |
+
+## 3. The baseline it pins
+
+| # | Rule |
+|---|---|
+| MA3 | **At its start, its plan pins** (SB1, SB2), and records each:<br>• WHATWG HTML, DOM, URL, Encoding and Fetch at commit snapshots, with the January or July Review Draft noted;<br>• CSS2.1 and the CSS modules M1 implements, at dated drafts;<br>• **WPT** at one revision, for reference tests and the tree-construction data; the candidate is `0f26972422` (2026-10-18), at which the standards were calibrated;<br>• **html5lib-tests** at one commit, for the tokenizer tests; the candidate is `c777c408` (2026-10-01);<br>• **Unicode 17.0**, through ICU4X 2.3 (SB2), with its conformance files at the same version.<br>The targets of MA4 are recomputed at the pinned revision, by the same method |
+
+## 4. Acceptance criteria
+
+| # | Criterion | Target | Method |
+|---|---|---|---|
+| MA4 | **Conformance without script.** WPT's testharness tests are script, so M1 runs only what needs none (roadmap §4.1): | | |
+| | html5lib-tests' tokenizer tests | **100%** | Axiom's Rust runner over the JSON files at the pinned commit (TS4) |
+| | Tree construction: WPT's 1,973 tests in `html/syntax/parsing/resources/*.dat`, in the scripting modes each marks | **≥ 96%**: the shipping median on `html/syntax/parsing/`, 96.2% (standards §6), rounded down (SB11); and no failure without a recorded reason (SB9) | Axiom's Rust runner over the `.dat` files at the pinned WPT revision (observed: the files and their format, 2026-10-20) |
+| | `css/CSS2`'s reference tests, except `tables/` (approximate, so measured and reported: SB11) and the four inline-SVG files (SVG is M4's): 5,848 tests at `0f26972422` | **≥ 97%**: the median of Chrome (98.2%), Firefox (97.8%) and Safari (96.4%) on those same tests, 97.8%, rounded down (SB11) | wptrunner's `axiom` product, through the test-only WebDriver server and EM9's offscreen texture (TS2, TS3). The headless embedder injects WPT's test fonts, Ahem among them, as system fonts (TX21), since web fonts are M4's. The median from `tools/wpt-pass-rates.py --manifest --types reftest`, over a manifest of the pinned revision |
+| | Unicode's `LineBreakTest.txt`, `BidiTest.txt` and `BidiCharacterTest.txt` | **100%** | Through ICU4X, as `text` calls it (TS6) |
+| | No regressions | Every test that passes at a checkpoint passes at the gate | Expectation files in the repository (SB9) |
+
+| # | Criterion | Target | Method |
+|---|---|---|---|
+| MA5 | **The corpus,** Wikipedia's article on π and MDN's "Pixel manipulation with canvas", each from a dated local copy (CO12) and live: | | |
+| | Loads | Each copy loaded **10 times**: every load completes, with **no crash and no hang**: no task past PF19's 5 s deadline | The headless embedder, under PF1's conditions |
+| | Readable, measured | **≥ 99%** of the characters of the visible text nodes (not `display: none`, not `visibility: hidden`) are laid out, in document order; **no two text fragments overlap** by more than 1 pixel unless the page's own CSS places them so | The layout's fragments against the DOM's text, in the headless embedder |
+| | Readable, judged | **Every item passes** on a checklist: headings, paragraphs, lists, tables, images, code blocks, and formulas shown as their alternative text (SVG arrives at M4) | The owner compares screenshots with Safari's rendering of the same copy |
+| | Links navigate | **Every** link to a fragment scrolls to its target; **every** link between the two copies loads; and **five** links from each live page load live pages | The embedder's navigation API; live loads within CO4's limits: identified, spaced, at most five per site |
+| | Live loads | Each page loaded live **once,** identified as CO4 requires | After robots.txt is read (CO3) |
+
+| # | Criterion | Target | Method |
+|---|---|---|---|
+| MA6 | **Budgets** (PF5), each measured three times under PF1 (MA9): | | |
+| | The process, idle, one 1,280 × 800-point window showing an empty document | **≤ 95 MB**: B1's 60 MB core, plus the window's tiles at 6.2 bytes a pixel (25.4 MB), plus B2's 10 MB, which at L0 share one process (inference) | `footprint` after 30 s without input |
+| | Each corpus page's cost after 30 s without input, above that idle state | **Wikipedia ≤ 100 MB; MDN ≤ 70 MB** (performance §4.1) | `footprint`; the page's GPU memory is in the same process at L0, so it counts (PF4) |
+| | Frames while scrolling Wikipedia's article | Compositor **≤ 2 ms** and GPU **≤ 4 ms** at the median for typical updates; **≤ 1 ms** for frames that only move layers (PF13) | S6's method: command-buffer timestamps |
+| | The rendering update (style, layout, paint) for a typical update: a hover, a window resize | **≤ 8 ms** at the median (PF13, **hypothesis**) | Trace spans in the engine |
+| | Long tasks | **No task over 50 ms** while the page is interactive (PF14); the parser yields after **4 ms** while interactive and **30 ms** during the initial load (PF23) | Trace spans |
+| | Idle | **No idle wakeups** in the process over 30 s on a loaded static page, beyond the system's own events (PF16) | `top -stats idlew` over 30 s |
+| | The collector's pauses on Wikipedia | **≤ 4 ms** while interacting; **≤ 50 ms** in idle time (PF15) | The collector's own timing |
+| | The build | **T1** incremental rebuild ≤ 5 s; **T2** clean build ≤ 5 min; **T3** compiler memory ≤ 3 GiB; **T4** one `rustc` ≤ 1.5 GiB (PF18) | `/usr/bin/time -l`; `tools/measure-build.sh` |
+
+| # | Criterion | Target | Method |
+|---|---|---|---|
+| MA7 | **Security and robustness at L0:** | | |
+| | No script | No JavaScript engine is linked: the `js` and `bindings` crates aren't dependencies of any M1 executable | `cargo tree` |
+| | No credentials | No cookie jar, no password saving and no Keychain access exist. **The shell shows the level** (L0), and **a form with a non-empty password field isn't submitted** below L2, with a message saying why | Code review at the gate; a test |
+| | Fuzzing | **Every parser and decoder M1 adds has a fuzz target** (TS9): HTML's tokenizer and tree builder, differentially against html5ever (TS7); CSS syntax, selectors, values and media queries; URLs; HTTP/1.1 framing; HTTP/2 framing and HPACK; content decoding; the image decoders' wrappers; the display-list decoder and validator; the IDL-generated decoders. **Each runs at least 1 hour** under AddressSanitizer, with **no open finding** at the gate. Crashes become regression tests (TS10) | cargo-fuzz, as S9 ran it |
+| | `unsafe` | Only in `platform` and the shell's `platform` module (AC9); `tools/check-unsafe-policy.sh` passes; **Miri** passes on every crate with `unsafe` (TS11); **ThreadSanitizer** on the threaded crates, with a nightly whose runtime works here (S9-Q2), or recorded as blocked | The five checks; `cargo +nightly miri test` |
+| | Dependencies | Every crate in the register, with its class, grade and audit (DP6, DP8, DP15); `cargo-deny`'s four checks pass (DP16); **no open advisory** (DP20) | `cargo deny check`; `cargo vet` |
+
+| # | Criterion | Target | Method |
+|---|---|---|---|
+| MA8 | **Determinism and the oracles:** | | |
+| | Parsing doesn't depend on how input arrives | Every tree-construction test and both corpus copies parse identically in **100 random chunkings** each (HD33) | The parser's test harness |
+| | Rendering doesn't depend on repetition or on the path | Each corpus copy yields **the same display list** in 10 runs; a hover or resize updated incrementally equals a rebuild (IV14) | Display-list hashes; the self-oracle |
+| | Tests run on virtual time | Every test that involves time uses EL24's clock | Review at the gate |
+
+## 5. How the gate is measured
+
+| # | Rule |
+|---|---|
+| MA9 | **PF1's conditions** for every timing and memory figure: a release build; AC power with Low Power Mode off; a load average below 3.0; cool-downs; three runs, reporting the median with the range; a visible 1,280 × 800-point window. **The gate's report** gives every criterion's measured value beside its target, with the raw records under `target/`, as the spikes' results did. A missed criterion fails the gate, unless the owner accepts a revision (PF5) |
+
+## 6. Starting it
+
+| # | Rule |
+|---|---|
+| MA10 | **Starting Milestone 1 needs the owner's authorization of:**<br>1. **The branch** `milestone-1` from `main`, and its plan as CP1, at its first gate (MS10).<br>2. **The skeleton:** the crates of MA1 under `crates/`, the executables `axiom` (the shell and the engine, one process at L0) and `axiom-headless` (with the test-only WebDriver server), and the workspace's members. The spikes stay where they are.<br>3. **The dependencies,** each recorded in the register with its class and grade before use (DP6, DP8):<br>• foundational: `objc2` and its framework crates (AppKit, Foundation, Metal, QuartzCore, CoreText, CoreGraphics, CoreFoundation, Security, IOSurface) with `block2`; ICU4X's components for segmentation, properties and normalization; rustls;<br>• replaceable: HarfRust, `read-fonts`, `skrifa`, `unicode-bidi`, `vello_cpu` (graded first, the owner's condition), `png`, `gif`, `image-webp`, `jpeg-decoder`, `moxcms`, `aws-lc-rs` (C, under DP10's exception), `miniz_oxide`, `brotli-decompressor`, and `smallvec`, which HarfRust and ICU4X need, graded on the version adopted;<br>• test-only: html5ever (the differential reference), `libfuzzer-sys`, wptrunner and WPT's Python tools in a virtual environment under `target/`, and an `axiom` product for wptrunner, kept in Axiom's repository.<br>4. **The test data,** pinned (MA3): html5lib-tests, WPT, Unicode's conformance files; and the dated local copies of the two corpus pages, kept under `scratch/` or `target/`, never committed (CO12).<br>5. **The tools:** `cargo-vet`; cargo-fuzz 0.13.2 under `target/`; a pinned nightly for the sanitizers and Miri, chosen at M1's start so that ThreadSanitizer works on macOS 27 (S9-Q2).<br>6. **Live loads** of Wikipedia and MDN by the engine, within CO3 and CO4.<br>Optional, the owner's choice: GitHub's hosted runners for correctness checks (TS17) |
+| MA11 | **A checkpoint outline** for its plan to refine (inference):<br>1. The skeleton, the checks, the first register entries; a window, a Metal clear and a CoreAnimation layer.<br>2. URLs and `file:` loading; the HTML tokenizer and tree builder with their runners; the node arena and the DOM.<br>3. CSS syntax, selectors, the cascade and computed values; sharing and invalidation sets.<br>4. Text: the font database, shaping, line breaking, bidi, the atlas.<br>5. Block and inline layout, floats and positioning; then tables.<br>6. Paint, display lists, the compositor's tiles and scrolling.<br>7. The image decoders behind IM9.<br>8. Networking: HTTP/1.1, HTTP/2, rustls, DNS-SD, the in-memory cache, mixed content, HSTS.<br>9. The shell: the address field, history, the objc2 classes.<br>10. The headless embedder, the WebDriver server, reference tests through wptrunner.<br>11. Fuzzing campaigns, determinism tests, budgets.<br>12. The corpus checks, and the gate |
+| MA12 | **Decisions due at its plan** (roadmap §7): Xcode (OQ-7); `vello_cpu`'s and `smallvec`'s grades; surfaces allocated ahead; AWS-LC's jitter entropy; the objc2 classes (EM11); hosted runners (TS17); the nightly to pin (S9-Q2) |
+
+## 7. Risks
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| **The milestone is large:** the whole static pipeline | High | A long milestone | Checkpoints that each leave the workspace working (MA11); the gate counts only M1's scope |
+| **The CSS2 median is high,** set by mature engines | High | The conformance gate is missed | Neither new engine meets it yet on these tests: Servo 93.7%, Ladybird 91.2% (measured from wpt.fyi's runs). A miss with a reason goes to the owner as an interim target (SB11) |
+| **ThreadSanitizer stays broken** on macOS 27 for Rust's nightlies | Medium | Threads are checked by review, Miri and loom-style tests only | Recorded as blocked (MA7); Miri's own race detector covers `unsafe` code; rechecked with each nightly |
+| **Text differs from CoreText's rendering** (S5) | Medium | The readability check fails on details | S5's measured differences are known; the judged check looks at readability, not pixel identity |
+| **Wikipedia's chrome needs flexbox and grid** (S8) | High | The page's header and navigation look wrong | The criteria judge the article's content (MA5); the chrome is M4's |
+
+## 8. Open questions
+
+1. **The `css/CSS2` tests in scope** (MA4): every reference test except `tables/` and the inline-SVG files, as computed here; the plan confirms them against MA1's scope at the pinned revision.
+2. **The local copies' date** (MA5): made at M1's start, and kept for the milestone.
+3. **Hosted runners** (TS17): the owner's choice at M1's start.
+
+## Sources
+
+- [W1] web-platform-tests at `0f26972422b15f587e2afbd38dbb6ea2397fded0` (committed 2026-10-18): `html/syntax/parsing/README` ("The html5lib_*.html files in this directory wrap the tree-construction .dat files in resources/"), the 62 `.dat` files, and `css/CSS2/`, with a manifest built from the sparse checkout (`./wpt manifest`), which gives each test's type. Read on 2026-10-20 in the sparse checkout under `target/s9/wpt` — https://github.com/web-platform-tests/wpt/tree/0f26972422b15f587e2afbd38dbb6ea2397fded0/html/syntax/parsing
+- [W2] wpt.fyi's runs of 2026-10-19 at the same revision, as calibrated in the [standards baseline](standards.md) §6.
+- [H1] html5lib-tests at `c777c408b61078ea2eb4acefc2535f54dbc8b28a` (2026-10-01), as [HTML and the DOM](architecture/html-and-dom.md) cites it — https://github.com/html5lib/html5lib-tests

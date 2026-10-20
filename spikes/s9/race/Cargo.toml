@@ -1,0 +1,11 @@
+[package]
+name = "s9-race"
+description = "Spike S9-Q2: a counter shared by threads, for ThreadSanitizer: done with atomics, and, in src/planted/, with a deliberate data race that only ThreadSanitizer's run executes. unsafe only in src/planted/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true

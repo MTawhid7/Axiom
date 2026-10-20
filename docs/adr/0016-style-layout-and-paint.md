@@ -23,7 +23,7 @@ How is CSS parsed and the cascade computed, with its caches and invalidation? Ho
 - **DP1 (a), (b):** parsing CSS, and style, layout and paint, are Axiom's own.
 - **PL1–PL7, PL10, PL14–PL16:** computed styles immutable and shared in a side table; immutable fragments with their constraints; per-frame display lists of validated primitives with property trees; style and layout on the event loop's thread for now.
 - **IV1–IV14:** a compiler-checked lifecycle with two entry points; pending, selector-driven invalidation; reuse at each stage; compositor-driven scrolling and animation; incremental equals from scratch.
-- **GR5, GR9:** paths as renderer images until the owner decides GR5's amendment; GR9's list of compositor animations.
+- **GR5, GR9:** paths as renderer images, with GR5's amendment deferred to the graphics milestone; GR9's list of compositor animations.
 - **TX6–TX20, IM5, IM9, AX10:** text's interface; images through IM9; system preferences as media features.
 - **J3:** no dynamic code generation outside `renderer-jit`.
 
@@ -84,7 +84,7 @@ Sourced in [style](../architecture/style.md) §3 and [layout and paint](../archi
 
 - Stylo's measured cache sizes, and Blink's budgets, are sound starting points (Step 6 tunes them on the corpus).
 - ±33.5 million CSS pixels is enough range for real pages; beyond it, results saturate as in Blink and Ladybird.
-- GR5 holds until the owner decides its amendment. S6-Q4 found GPU filling faster and smaller but coarser at the edges ([S6 results](../research/s6-results.md) §6); if the owner accepts the amendment, path items enter PL7, and LY23 changes only where paths are filled.
+- GR5 holds until the graphics milestone, to which the owner deferred its amendment (2026-10-20). S6-Q4 found GPU filling faster and smaller but coarser at the edges ([S6 results](../research/s6-results.md) §6); if the amendment is accepted then, path items enter PL7, and LY23 changes only where paths are filled.
 
 ## Risks and unresolved issues
 
@@ -97,7 +97,7 @@ Sourced in [style](../architecture/style.md) §3 and [layout and paint](../archi
 
 ## Conditions for revisiting
 
-- The owner accepts GR5's amendment, which S6-Q4's results put to the owner ([S6 results](../research/s6-results.md) §8): path items enter PL7, and LY23's path images change.
+- GR5's amendment is accepted at the graphics milestone, to which the owner deferred it ([S6 results](../research/s6-results.md) §8): path items enter PL7, and LY23's path images change.
 - Profiling shows style or layout limiting frames: build ST33's and LY30's parallel paths.
 - Ladybird's dependency-program style engine proves its memory and incrementality over a longer period: revisit ST14–ST17 at the implementation milestone.
 

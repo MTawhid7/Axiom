@@ -53,7 +53,8 @@ Axiom is a browser engine designed from first principles for the owner's own Mac
   - `technology/`;
   - `architecture/`, from Step 4.
 - `spikes/`: throwaway validation code, one directory per spike. Results go in `docs/research/sN-results.md`. See `spikes/README.md`.
-- `tools/`: the unsafe-policy checker (`check-unsafe-policy.sh`, `unsafe-policy.txt`), the link checker (`check-doc-links.py`), and measurement and signing scripts. Each prints its usage with `--help`.
+- `tools/`: the unsafe-policy checker (`check-unsafe-policy.sh`, `unsafe-policy.txt`), the link checker (`check-doc-links.py`), and measurement, analysis and signing scripts. Each prints its usage with `--help`.
+- `scratch/`: working files kept between sessions; git ignores it, so nothing there is published.
 
 # Verification
 
@@ -93,7 +94,7 @@ These apply to spikes now and carry over to engine code.
 
 - **Measurement** uses command-line tools only: `samply`, `/usr/bin/time -l`, `cargo bench` and Miri. Instruments needs Xcode, which isn't installed.
 - **zsh shadows `log`.** Use `/usr/bin/log` for the unified log, for example to read sandbox denials.
-- **Temporary files** go in the session's scratchpad, never in the repository.
+- **Temporary files** go in the session's scratchpad, which can be wiped between sessions. **Files worth keeping go in the project** (the owner, 2026-10-20): reusable scripts in `tools/`, committed and printing their usage with `--help`; other working files in `scratch/`, which git ignores, so they are never published.
 - **Avoid side effects outside the repository.** If a test leaves something behind, such as crash reports in `~/Library/Logs/DiagnosticReports`, clean it up and note it in the status log.
 - **Web research:**
   - When an Apple documentation page renders empty, read its JSON form at `https://developer.apple.com/tutorials/data/documentation/<path>.json`.

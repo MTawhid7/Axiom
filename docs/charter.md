@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | Draft. Sections marked *Accepted* are confirmed in [ADR-0001](adr/0001-scope-and-target.md) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-21: Phase Zero's criteria met at Step 6's Gate C (§8). Earlier: the target-site corpus defined (2026-10-20) |
 
 ## 1. Vision
 
@@ -89,13 +89,15 @@ This machine is also the **performance floor**: budgets are set and measured her
 - the target-site corpus is defined;
 - the measurable acceptance criteria for Milestone 1 are written.
 
+**Met at Step 6's Gate C** (2026-10-20; [overview](architecture/overview.md) §5.4): the corpus is defined; every foundational decision has an accepted ADR; Milestone 1's measurable criteria are written and accepted ([Milestone 1](milestone-1.md)); and the owner approved the architecture proposal, the overview v2, and the [roadmap](roadmap.md) as the Phase Zero baseline. Before Milestone 1 starts, the owner has that baseline reviewed independently, in several rounds if needed ([handover](handover-phase-0.md)).
+
 **Every milestone** will have acceptance criteria that can be measured. They will draw on:
 - conformance: pass rates on selected WPT directories, html5lib-tests and test262;
 - target-corpus checks: content renders and is readable, links navigate, and there are no crashes or hangs;
 - performance budgets measured on the M1;
 - security gates, for example no sensitive logins until isolation is verified.
 
-**Target-site corpus:** to be defined ([OQ-2](open-questions.md)).
+**Target-site corpus:** defined by the owner on 2026-10-20: 13 sites, from documents (Wikipedia, MDN) to applications (Figma, VS Code for the Web, Discord, Prism), several of which need a login ([OQ-2](open-questions.md)). The [corpus](corpus.md) classifies each site, records what its terms allow automation to do, and defines how it is measured (Step 6, CP2).
 
 ## 9. Principles
 

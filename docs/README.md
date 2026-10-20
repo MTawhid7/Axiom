@@ -1,8 +1,8 @@
 # Axiom — Design Documentation
 
 Axiom is a from-first-principles browser engine for personal use on macOS. **The project is in Phase Zero: research, requirements and architecture.**
-- **Authorized:** design documents. Step 5 is done and merged (2026-10-20); Step 6 waits for the owner's authorization. The spikes of Steps 2b to 5 (S1–S7, all complete) remain in `spikes/` as throwaway code.
-- **Not yet authorized:** production engine code.
+- **Phase Zero's baseline is approved** (Step 6's Gate C, 2026-10-20): every ADR is accepted, and the architecture proposal, the roadmap and Milestone 1's specification are the baseline. **Next:** an independent, multi-round review of that baseline, on branch `architecture-review`, starting from the [handover](handover-phase-0.md). The spikes S1–S9, all complete, remain in `spikes/` as throwaway code.
+- **Not authorized:** production engine code. Milestone 1 is on hold until the review is done.
 
 These documents are the project's source of truth. Conversation history is not.
 
@@ -17,7 +17,15 @@ These documents are the project's source of truth. Conversation history is not.
 | Document | Purpose | Status |
 |---|---|---|
 | [charter.md](charter.md) | Goals, users, environment, scope, non-goals, success criteria | Draft (scope sections Accepted) |
+| [corpus.md](corpus.md) | The target-site corpus: the owner's 13 pages, their tiers, needs, logins and earliest security levels; what each site's terms allow automation to do; how each page is measured, logged out and signed in, and how repeatably | **Binding** (ADR-0018, accepted 2026-10-20) |
 | [decision-map.md](decision-map.md) | Decision layers, couplings, Phase Zero sequence | Living |
+| [standards.md](standards.md) | The standards baseline (X1): how each specification is pinned, five support classes, the approximate behaviours, the support matrix with its suites and the corpus's needs, and pass-rate targets calibrated on wpt.fyi | **Binding** (ADR-0018, accepted 2026-10-20) |
+| [testing.md](testing.md) | The testing strategy (X2): eight layers of tests; WPT through a test-only WebDriver server in the headless embedder; Axiom's own runners for html5lib-tests, test262 and Unicode; oracles and determinism; fuzzing and sanitizers; the checks V1–V9; the advisory routine; spike S9 | **Binding** (ADR-0018, accepted 2026-10-20) |
+| [performance.md](performance.md) | Performance methodology and budgets (X3): the conditions of every measurement; the final B1–B7, with tiles by pixels and a ceiling for every corpus page; frame, pause and long-task budgets; energy and idle; the build; the limits and deadlines the designs left open | **Binding** (ADR-0019, accepted 2026-10-20) |
+| [roadmap.md](roadmap.md) | The roadmap: nine milestones from static documents at L0 to the GPU and WebAssembly at L3, each with its security level, corpus targets and decision points; the login track; how a milestone runs | **Binding** as the baseline under review ([ADR-0020](adr/0020-roadmap-and-security-levels.md), accepted 2026-10-20) |
+| [milestone-1.md](milestone-1.md) | Milestone 1, static documents at L0: its scope, the baseline it pins, its measurable acceptance criteria, and what starting it requires the owner to authorize | **Binding** as M1's specification ([ADR-0021](adr/0021-milestone-1.md), accepted 2026-10-20); starting it on hold |
+| [requirements.md](requirements.md) | Every requirement, from the charter, the ADRs and the binding documents, traced to the milestone and the check that verify it | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C) |
+| [handover-phase-0.md](handover-phase-0.md) | The Phase Zero handover: the blueprint across the 21 ADRs, the findings of spikes S1–S9, trade-offs, deferred decisions, assumptions, known risks, open questions, and the areas flagged for critical review. The independent review's starting point | The Phase Zero baseline (2026-10-21) |
 | [open-questions.md](open-questions.md) | Unresolved questions and the evidence each needs | Living |
 | [status.md](status.md) | Current state and session handoffs | Living |
 | [adr/](adr/) | Architecture Decision Records | See each ADR |
@@ -39,6 +47,10 @@ These documents are the project's source of truth. Conversation history is not.
 | ↳ [0015-html-parsing-and-the-dom.md](adr/0015-html-parsing-and-the-dom.md) | HTML parsing and the DOM (P5), with an amendment to ADR-0008 (HD11) | **Accepted** (2026-10-20, Step 5's Gate C), with the amendment to ADR-0008 |
 | ↳ [0016-style-layout-and-paint.md](adr/0016-style-layout-and-paint.md) | Style, layout and paint (P6), with an amendment to ADR-0007 (ST25, ST31) | **Accepted** (2026-10-20, Step 5's Gate C), with the amendment to ADR-0007 and `:visited` by partitioned history |
 | ↳ [0017-javascript-engine-and-bindings.md](adr/0017-javascript-engine-and-bindings.md) | The JavaScript engine and WebIDL bindings (P7) | **Accepted** (2026-10-20, Step 5's Gate C) |
+| ↳ [0018-corpus-standards-and-testing.md](adr/0018-corpus-standards-and-testing.md) | The corpus, the standards baseline and testing (X1, X2) | **Accepted** (2026-10-20, Step 6's Gate B) |
+| ↳ [0019-performance-methodology-and-budgets.md](adr/0019-performance-methodology-and-budgets.md) | Performance methodology and budgets (X3), with the final B1–B7 | **Accepted** (2026-10-20, Step 6's Gate B) |
+| ↳ [0020-roadmap-and-security-levels.md](adr/0020-roadmap-and-security-levels.md) | The roadmap: nine milestones and their security levels | **Accepted** (2026-10-20, Step 6's Gate C), as the baseline under review |
+| ↳ [0021-milestone-1.md](adr/0021-milestone-1.md) | Milestone 1, static documents: scope and measurable acceptance criteria | **Accepted** (2026-10-20, Step 6's Gate C), as M1's specification; starting it on hold |
 | [security/threat-model.md](security/threat-model.md) | Assets, adversaries, attack surfaces, trust boundaries, security goals, security levels L0–L3 | **Accepted** (2026-10-17), amended: out-of-process iframes required for L3 |
 | [security/process-model.md](security/process-model.md) | Process types and privileges, site isolation, IPC trust rules, memory budgets | Binding (ADR-0004 accepted, 2026-10-17); refined at Step 5's Gate C (2026-10-20), in its change record |
 | [technology/language-evaluation.md](technology/language-evaluation.md) | Detailed language comparison and recommendation | Reviewed |
@@ -54,10 +66,13 @@ These documents are the project's source of truth. Conversation history is not.
 | [research/macos-runtime-facilities.md](research/macos-runtime-facilities.md) | macOS facilities for the runtime: run loops, frame timing, QoS, surfaces, IME and accessibility; browser precedent | Complete (Step 4, CP2) |
 | [research/step-4-architecture-proposal.md](research/step-4-architecture-proposal.md) | Step 4 plan and checkpoint tracker: the architecture proposal v0, including spike S3's design | Done (CP1–CP17; merged 2026-10-18) |
 | [research/s5-results.md](research/s5-results.md) | S5 results: HarfRust and Rust rasterizers against CoreText; web fonts through a Rust-only path in the renderer's sandbox; footprint, speed and size; ImageIO in the sandbox against the safe image decoders | Complete (2026-10-18); the owner's visual checks of S5-Q1 and S5-Q2 done at Gate C (2026-10-20) |
-| [research/s6-results.md](research/s6-results.md) | S6 results: compositing on Metal into tiled IOSurface layers; damage-limited redraws; scrolling and animation by layers; CPU against GPU path filling; the compositor's memory against B1, and Display P3 tags | Complete (2026-10-20): S6-Q1 and S6-Q3 pass at the median; S6-Q5's memory condition not met as measured; ADR-0012 accepted |
+| [research/s6-results.md](research/s6-results.md) | S6 results: compositing on Metal into tiled IOSurface layers; damage-limited redraws; scrolling and animation by layers; CPU against GPU path filling; the compositor's memory against B1, and Display P3 tags | Complete (2026-10-20), two formal runs: S6-Q1 and S6-Q3 pass at the median; S6-Q5's colour condition met, by the owner's screenshot, and its memory condition not met as measured (B1 revised); ADR-0012 accepted |
 | [research/s7-results.md](research/s7-results.md) | S7 results: the network process's sandbox profile, and TLS verified by Security inside it; rustls against Network framework; DNS-SD from kqueue; one `kevent64` wait for every protocol | Complete (2026-10-19): S7-Q1, S7-Q3 and S7-Q4 pass; ADR-0013 accepted |
+| [research/s8-results.md](research/s8-results.md) | S8 results: the corpus census. What the five pages that automation may load use and cost in Chrome Canary: features from Chrome's use counters, with Baseline status; sizes; memory; load milestones and the cost without input. The eight other pages, signed in, by the owner's hand; and the ten that work logged out, in Safari, by hand | Complete (2026-10-20): Chrome automated and by hand; Safari by hand (recorded at Gate C) |
+| [research/s9-results.md](research/s9-results.md) | S9 results: whether cargo-fuzz, the sanitizers and wptrunner work on this Mac | Complete (2026-10-20): fuzzing and wptrunner work; ThreadSanitizer from the installed nightly doesn't |
 | [research/step-5-subsystems.md](research/step-5-subsystems.md) | Step 5 plan and checkpoint tracker: the subsystems behind Step 4's interfaces, the subsystem criteria SC1–SC10, and candidate spikes S5–S7 | Done (CP1–CP19; merged 2026-10-20) |
-| [architecture/overview.md](architecture/overview.md) | **Architecture overview v1:** the system on one page, crates with their `unsafe` map and dependencies, the register summarized, seven end-to-end scenarios through the subsystems' rules, the checks of AC1–AC10 and SC1–SC10, staging, and the decisions for Step 5's Gate C | **Proposed** (v0 at Step 4, CP11; v1 at Step 5, CP18); Step 5's ADRs accepted at Gate C (2026-10-20) |
+| [research/step-6-standards-budgets-roadmap.md](research/step-6-standards-budgets-roadmap.md) | Step 6 plan and checkpoint tracker: the owner's 13-site corpus, the standards baseline (X1), the testing strategy (X2), performance budgets (X3), the roadmap and Milestone 1, the readiness criteria RC1–RC10, and spike S8, the corpus census, with its logged-in mode | **In progress:** CP1–CP2 ✅; Gate A passed (2026-10-20) |
+| [architecture/overview.md](architecture/overview.md) | **Architecture overview v2:** the system on one page, crates with their `unsafe` map and dependencies, the register summarized, seven end-to-end scenarios through the subsystems' rules, the checks of AC1–AC10, SC1–SC10 and RC1–RC10, Phase Zero's criteria, staging by milestone, and the decisions of Steps 4–6's gates | **Proposed: v2** (Step 6, CP10), the architecture proposal as a whole, for the owner at Step 6's Gate C |
 | [architecture/event-loop-and-threading.md](architecture/event-loop-and-threading.md) | Event loop and threading model: thread loops, the threads of each process, the HTML event loop, frame scheduling, agents and workers | Binding (ADR-0006 accepted, 2026-10-17) |
 | [architecture/ipc.md](architecture/ipc.md) | IPC: Mach transport, channels and capabilities, the IDL and generated decoders, `Untrusted<T>` validation, synchronous requests, bulk data, backpressure | Binding (ADR-0005 accepted, 2026-10-17) |
 | [architecture/frame-tree-and-navigation.md](architecture/frame-tree-and-navigation.md) | Frame tree, navigation and loading: the browser's records, skeleton replicas, remote window proxies, browser-routed operations, browser-driven navigation, bound loader and storage endpoints | Binding (ADR-0007 accepted, 2026-10-17) |
@@ -67,7 +82,7 @@ These documents are the project's source of truth. Conversation history is not.
 | [architecture/embedder-api.md](architecture/embedder-api.md) | Engine/embedder API and the shell: the message boundary, commands, events, decisions, hosted objects, the headless embedder, the shell's language (OQ-11) | Binding (ADR-0009 accepted, 2026-10-17) |
 | [architecture/script-and-heap.md](architecture/script-and-heap.md) | Script, agents and the heap: agents and realms, messages and transfers, `SharedArrayBuffer`, the root set, ADR-0003's obligations C1–C5, bindings, room for a JIT | Binding (ADR-0008 accepted, 2026-10-18); SH10 amended at Step 5's Gate C (2026-10-20) |
 | [architecture/text-and-fonts.md](architecture/text-and-fonts.md) | Text, fonts and Unicode: ICU4X as the one Unicode source, our own encodings, CoreText's font database, HarfRust shaping, a Rust-only path for web fonts, glyph atlases in the renderer | Binding (ADR-0011 accepted, 2026-10-20); TX12: CoreText for system fonts |
-| [architecture/graphics.md](architecture/graphics.md) | Graphics: Metal through `platform`, CoreAnimation layer trees with damage-limited tiles, our own pipelines, paths in the renderer (GR5's amendment open), Display P3, compositor animations, the GPU process later | Binding (ADR-0012 accepted, 2026-10-20); S6 reported |
+| [architecture/graphics.md](architecture/graphics.md) | Graphics: Metal through `platform`, CoreAnimation layer trees with damage-limited tiles, our own pipelines, paths in the renderer (GR5's amendment deferred to the graphics milestone), Display P3, compositor animations, the GPU process later | Binding (ADR-0012 accepted, 2026-10-20); S6 reported |
 | [architecture/images-and-media.md](architecture/images-and-media.md) | Images and media: safe Rust decoders in the renderer, AVIF through ImageIO in the media utility process, decoding at display size and discarding, color management, a sandboxed media process | Binding (ADR-0012 accepted, 2026-10-20); IM3 amended |
 | [architecture/networking.md](architecture/networking.md) | Networking: state-machine protocols on one I/O thread, our own URL parser and HTTP framing, rustls with system certificate verification, DNS-SD, partitioned caches and cookies, Fetch's policy from bound endpoints | Binding (ADR-0013 accepted, 2026-10-19); NW6's verification in the worker pool confirmed at Gate C (2026-10-20) |
 | [architecture/storage-and-workers.md](architecture/storage-and-workers.md) | Storage and workers: web storage in the network process by storage key, one engine (`redb` or SQLite), a renderer cache for `localStorage`, serialized IndexedDB values, quotas, service-worker interception, worker placement | Binding (ADR-0013 accepted, 2026-10-19) |
@@ -79,15 +94,7 @@ These documents are the project's source of truth. Conversation history is not.
 | [architecture/bindings.md](architecture/bindings.md) | WebIDL bindings: our own generator over webref's curated IDL, emitting safe Rust; platform objects as heap entries with no wrappers; brand checks as range checks; lazy per-realm interfaces; Web IDL's conversions, with rooting only where a later conversion may collect; `[CEReactions]`, callbacks and the dispatch hot path; `WindowProxy` and remote window proxies | Binding (ADR-0017 accepted, 2026-10-20) |
 | [research/](research/README.md) | Research conventions and notes | Living |
 
-**Planned documents**, each created when its Phase Zero step begins:
-
-| Document | Step |
-|---|---|
-| `requirements.md` | Steps 1→6 |
-| `standards.md` | Step 6 |
-| `performance.md` | Step 6 |
-| `testing.md` | Step 6 |
-| `roadmap.md` | Step 6 |
+**Planned documents:** none left. The last three, the roadmap, Milestone 1 and the requirements, were written at Step 6's CP8–CP10.
 
 ## Document status legend
 

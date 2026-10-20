@@ -1,0 +1,33 @@
+[package]
+name = "s9-fuzz"
+description = "Spike S9-Q1: cargo-fuzz targets over s9-decoder, built by cargo-fuzz on nightly with AddressSanitizer. Its own workspace, outside the main one."
+version = "0.0.0"
+edition = "2024"
+publish = false
+license = "MIT OR Apache-2.0"
+
+[package.metadata]
+cargo-fuzz = true
+
+# libfuzzer-sys: cargo-fuzz's harness, linking LLVM's libFuzzer. A test-only
+# dependency of the spike, authorized with S9 at Step 6's Gate B (2026-10-20).
+[dependencies]
+libfuzzer-sys = "0.4"
+s9-decoder = { path = "../decoder" }
+
+[[bin]]
+name = "decode"
+path = "fuzz_targets/decode.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "planted"
+path = "fuzz_targets/planted.rs"
+test = false
+doc = false
+bench = false
+
+# Its own workspace: the fuzz targets build only through cargo-fuzz.
+[workspace]

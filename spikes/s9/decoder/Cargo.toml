@@ -1,0 +1,11 @@
+[package]
+name = "s9-decoder"
+description = "Spike S9-Q1: a small decoder of length-prefixed records, the shape of an IPC message, for cargo-fuzz; with a planted bug in a second entry point. No unsafe."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
