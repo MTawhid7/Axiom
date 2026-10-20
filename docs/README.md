@@ -22,8 +22,9 @@ These documents are the project's source of truth. Conversation history is not.
 | [standards.md](standards.md) | The standards baseline (X1): how each specification is pinned, five support classes, the approximate behaviours, the support matrix with its suites and the corpus's needs, and pass-rate targets calibrated on wpt.fyi | **Binding** (ADR-0018, accepted 2026-10-20) |
 | [testing.md](testing.md) | The testing strategy (X2): eight layers of tests; WPT through a test-only WebDriver server in the headless embedder; Axiom's own runners for html5lib-tests, test262 and Unicode; oracles and determinism; fuzzing and sanitizers; the checks V1–V9; the advisory routine; spike S9 | **Binding** (ADR-0018, accepted 2026-10-20) |
 | [performance.md](performance.md) | Performance methodology and budgets (X3): the conditions of every measurement; the final B1–B7, with tiles by pixels and a ceiling for every corpus page; frame, pause and long-task budgets; energy and idle; the build; the limits and deadlines the designs left open | **Binding** (ADR-0019, accepted 2026-10-20) |
-| [roadmap.md](roadmap.md) | The roadmap: nine milestones from static documents at L0 to the GPU and WebAssembly at L3, each with its security level, corpus targets and decision points; the login track; how a milestone runs | **Proposed** (Step 6, CP8; with ADR-0020 for Gate C) |
-| [milestone-1.md](milestone-1.md) | Milestone 1, static documents at L0: its scope, the baseline it pins, its measurable acceptance criteria, and what starting it requires the owner to authorize | **Proposed** (Step 6, CP9; with ADR-0021 for Gate C) |
+| [roadmap.md](roadmap.md) | The roadmap: nine milestones from static documents at L0 to the GPU and WebAssembly at L3, each with its security level, corpus targets and decision points; the login track; how a milestone runs | **Proposed** (Step 6, CP8; with [ADR-0020](adr/0020-roadmap-and-security-levels.md) for Gate C) |
+| [milestone-1.md](milestone-1.md) | Milestone 1, static documents at L0: its scope, the baseline it pins, its measurable acceptance criteria, and what starting it requires the owner to authorize | **Proposed** (Step 6, CP9; with [ADR-0021](adr/0021-milestone-1.md) for Gate C) |
+| [requirements.md](requirements.md) | Every requirement, from the charter, the ADRs and the binding documents, traced to the milestone and the check that verify it | **Proposed** (Step 6, CP10; for Gate C) |
 | [open-questions.md](open-questions.md) | Unresolved questions and the evidence each needs | Living |
 | [status.md](status.md) | Current state and session handoffs | Living |
 | [adr/](adr/) | Architecture Decision Records | See each ADR |
@@ -47,6 +48,8 @@ These documents are the project's source of truth. Conversation history is not.
 | ↳ [0017-javascript-engine-and-bindings.md](adr/0017-javascript-engine-and-bindings.md) | The JavaScript engine and WebIDL bindings (P7) | **Accepted** (2026-10-20, Step 5's Gate C) |
 | ↳ [0018-corpus-standards-and-testing.md](adr/0018-corpus-standards-and-testing.md) | The corpus, the standards baseline and testing (X1, X2) | **Accepted** (2026-10-20, Step 6's Gate B) |
 | ↳ [0019-performance-methodology-and-budgets.md](adr/0019-performance-methodology-and-budgets.md) | Performance methodology and budgets (X3), with the final B1–B7 | **Accepted** (2026-10-20, Step 6's Gate B) |
+| ↳ [0020-roadmap-and-security-levels.md](adr/0020-roadmap-and-security-levels.md) | The roadmap: nine milestones and their security levels | **Proposed** (2026-10-20, Step 6's Gate C) |
+| ↳ [0021-milestone-1.md](adr/0021-milestone-1.md) | Milestone 1, static documents: scope and measurable acceptance criteria | **Proposed** (2026-10-20, Step 6's Gate C) |
 | [security/threat-model.md](security/threat-model.md) | Assets, adversaries, attack surfaces, trust boundaries, security goals, security levels L0–L3 | **Accepted** (2026-10-17), amended: out-of-process iframes required for L3 |
 | [security/process-model.md](security/process-model.md) | Process types and privileges, site isolation, IPC trust rules, memory budgets | Binding (ADR-0004 accepted, 2026-10-17); refined at Step 5's Gate C (2026-10-20), in its change record |
 | [technology/language-evaluation.md](technology/language-evaluation.md) | Detailed language comparison and recommendation | Reviewed |
@@ -68,7 +71,7 @@ These documents are the project's source of truth. Conversation history is not.
 | [research/s9-results.md](research/s9-results.md) | S9 results: whether cargo-fuzz, the sanitizers and wptrunner work on this Mac | Complete (2026-10-20): fuzzing and wptrunner work; ThreadSanitizer from the installed nightly doesn't |
 | [research/step-5-subsystems.md](research/step-5-subsystems.md) | Step 5 plan and checkpoint tracker: the subsystems behind Step 4's interfaces, the subsystem criteria SC1–SC10, and candidate spikes S5–S7 | Done (CP1–CP19; merged 2026-10-20) |
 | [research/step-6-standards-budgets-roadmap.md](research/step-6-standards-budgets-roadmap.md) | Step 6 plan and checkpoint tracker: the owner's 13-site corpus, the standards baseline (X1), the testing strategy (X2), performance budgets (X3), the roadmap and Milestone 1, the readiness criteria RC1–RC10, and spike S8, the corpus census, with its logged-in mode | **In progress:** CP1–CP2 ✅; Gate A passed (2026-10-20) |
-| [architecture/overview.md](architecture/overview.md) | **Architecture overview v1:** the system on one page, crates with their `unsafe` map and dependencies, the register summarized, seven end-to-end scenarios through the subsystems' rules, the checks of AC1–AC10 and SC1–SC10, staging, and the decisions for Step 5's Gate C | **Proposed** (v0 at Step 4, CP11; v1 at Step 5, CP18); Step 5's ADRs accepted at Gate C (2026-10-20) |
+| [architecture/overview.md](architecture/overview.md) | **Architecture overview v2:** the system on one page, crates with their `unsafe` map and dependencies, the register summarized, seven end-to-end scenarios through the subsystems' rules, the checks of AC1–AC10, SC1–SC10 and RC1–RC10, Phase Zero's criteria, staging by milestone, and the decisions of Steps 4–6's gates | **Proposed: v2** (Step 6, CP10), the architecture proposal as a whole, for the owner at Step 6's Gate C |
 | [architecture/event-loop-and-threading.md](architecture/event-loop-and-threading.md) | Event loop and threading model: thread loops, the threads of each process, the HTML event loop, frame scheduling, agents and workers | Binding (ADR-0006 accepted, 2026-10-17) |
 | [architecture/ipc.md](architecture/ipc.md) | IPC: Mach transport, channels and capabilities, the IDL and generated decoders, `Untrusted<T>` validation, synchronous requests, bulk data, backpressure | Binding (ADR-0005 accepted, 2026-10-17) |
 | [architecture/frame-tree-and-navigation.md](architecture/frame-tree-and-navigation.md) | Frame tree, navigation and loading: the browser's records, skeleton replicas, remote window proxies, browser-routed operations, browser-driven navigation, bound loader and storage endpoints | Binding (ADR-0007 accepted, 2026-10-17) |
@@ -90,13 +93,7 @@ These documents are the project's source of truth. Conversation history is not.
 | [architecture/bindings.md](architecture/bindings.md) | WebIDL bindings: our own generator over webref's curated IDL, emitting safe Rust; platform objects as heap entries with no wrappers; brand checks as range checks; lazy per-realm interfaces; Web IDL's conversions, with rooting only where a later conversion may collect; `[CEReactions]`, callbacks and the dispatch hot path; `WindowProxy` and remote window proxies | Binding (ADR-0017 accepted, 2026-10-20) |
 | [research/](research/README.md) | Research conventions and notes | Living |
 
-**Planned documents**, each created when its Phase Zero step begins:
-
-| Document | Step |
-|---|---|
-| `roadmap.md` | Step 6 (CP8) |
-| `milestone-1.md` | Step 6 (CP9) |
-| `requirements.md` | Steps 1→6 (CP10) |
+**Planned documents:** none left. The last three, the roadmap, Milestone 1 and the requirements, were written at Step 6's CP8–CP10.
 
 ## Document status legend
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 6, CP8, 2026-10-20), with ADR-0020, for the owner at Gate C; binding when it is accepted |
+| **Status** | **Proposed** (Step 6, CP8, 2026-10-20), with [ADR-0020](adr/0020-roadmap-and-security-levels.md), for the owner at Gate C; binding when it is accepted |
 | **Question** | Which milestones lead from a static-document engine at L0 to the sensitive-use gate at L3 and the app web? What does each build, at which security level, against which corpus pages? Where does each decision point fall, and how does an implementation milestone run? |
 | **Answers** | Step 6 question Q5 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the tracker's handed-over questions 2 and 25–28 (§2.2); the [corpus](corpus.md)'s open question 3 |
 | **Feeds** | Milestone 1's definition (CP9); requirements traceability (CP10); the [overview](architecture/overview.md) v2's staging (CP10) |

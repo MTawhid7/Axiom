@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 6, CP9, 2026-10-20), with ADR-0021, for the owner at Gate C; binding when it is accepted. **Its implementation needs the owner's separate authorization** (MA10) |
+| **Status** | **Proposed** (Step 6, CP9, 2026-10-20), with [ADR-0021](adr/0021-milestone-1.md), for the owner at Gate C; binding when it is accepted. **Its implementation needs the owner's separate authorization** (MA10) |
 | **Question** | What exactly is Milestone 1? What does it build and leave out, against which pinned specifications and suites, with which measurable acceptance criteria? What does starting it require the owner to authorize? |
 | **Answers** | Step 6 question Q6 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the handed-over question 29 (§2.2) |
 | **Feeds** | ADR-0021; requirements traceability (CP10); Milestone 1's own plan, its CP1 |

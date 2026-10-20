@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed: v1** (Step 5, CP18, 2026-10-19), refining v0 (Step 4, CP11). The owner accepted ADRs 0005–0007 and 0009 at Step 4's Gate B (2026-10-17) and ADR-0008 at its Gate C (2026-10-18); at Step 5's Gate B, ADRs 0010 and 0014 (2026-10-18), then ADR-0013 once spike S7 met its condition (2026-10-19); and at Step 5's Gate C (2026-10-20), ADRs 0011, 0012 and 0015–0017, with the amendments to ADR-0007 and ADR-0008. The proposal as a whole is approved at the end of Phase Zero (Step 6) |
+| **Status** | **Proposed: v2** (Step 6, CP10, 2026-10-20), refining v1 (Step 5, CP18) and v0 (Step 4, CP11): Step 6's budgets, the roadmap's milestones and the readiness checks added (§5.3, §5.4, §6, §9). **For the owner's approval as the architecture proposal as a whole at Step 6's Gate C.** The owner accepted ADRs 0005–0007 and 0009 at Step 4's Gate B (2026-10-17) and ADR-0008 at its Gate C (2026-10-18); at Step 5's Gate B, ADRs 0010 and 0014 (2026-10-18), then ADR-0013 once spike S7 met its condition (2026-10-19); and at Step 5's Gate C (2026-10-20), ADRs 0011, 0012 and 0015–0017, with the amendments to ADR-0007 and ADR-0008. The proposal as a whole is approved at the end of Phase Zero (Step 6) |
 | **Question** | How do the parts fit together: processes × threads × pipeline; the crate structure, its `unsafe` map and its dependencies; what happens end to end in common scenarios; and how does the system grow from L0 to L3 without a rewrite? |
 | **Answers** | Step 4 question Q16 ([Step 4 tracker](../research/step-4-architecture-proposal.md) §3) and the check of AC1–AC10; Step 5's CP18 ([Step 5 tracker](../research/step-5-subsystems.md) §6.1): the crates refined, a summary of the [register](../technology/dependency-register.md), scenarios traced through the subsystems' rules, and the check of SC1–SC10 |
 | **Builds on** | Step 3: [threat model](../security/threat-model.md), [process model](../security/process-model.md), [ADR-0004](../adr/0004-process-model-and-sandbox.md). Step 4: [event loop and threading](event-loop-and-threading.md), [IPC](ipc.md), [frame tree and navigation](frame-tree-and-navigation.md), [rendering pipeline](rendering-pipeline.md), [invalidation](invalidation.md), [input and accessibility](input-and-accessibility.md), [embedder API](embedder-api.md), [script and heap](script-and-heap.md). Step 5: the [dependency policy](../technology/dependency-policy.md), [text and fonts](text-and-fonts.md), [graphics](graphics.md), [images and media](images-and-media.md), [networking](networking.md), [storage and workers](storage-and-workers.md), [accessibility](accessibility.md), [HTML and the DOM](html-and-dom.md), [style](style.md), [layout and paint](layout-and-paint.md), [the JavaScript engine](javascript-engine.md), [WebIDL bindings](bindings.md) |
-| **Last updated** | 2026-10-20: Step 5's Gate C decisions and S6's results recorded (CP19). v1, Step 5's subsystems assembled, on 2026-10-19 (CP18) |
+| **Last updated** | 2026-10-20: v2 (Step 6, CP10). Earlier: Step 5's Gate C decisions and S6's results recorded (CP19); v1 on 2026-10-19 (CP18) |
 
 Everything here is **planned**; nothing is implemented. This document adds no new rules; it assembles the rules of the documents above, which it cites: Step 4's EL, IP, FT, PL, IV, IN, EM and SH, and Step 5's DP, TX, GR, IM, NW, SW, AX, HD, ST, LY, JE and WB.
 
@@ -138,7 +138,7 @@ From the [register](../technology/dependency-register.md), as of 2026-10-20:
 | AC4 | The browser never decodes images or parses web fonts | Display lists carry validated primitives only (PL7–PL9); glyphs are rasterized in the renderer (TX12, TX14), images decoded there or in the media process (IM1, IM3) | **Met** |
 | AC5 | One single-threaded heap per agent; DOM arenas lent read-only only for a frozen stage | SH1, EL15; parallel style and layout use that lending only (ST33, LY30) | **Met** |
 | AC6 | A deterministic, testable core | EL24's virtual clock; the headless embedder (EM9, GR11); IV14's oracles, extended by ST22's cache-free path and LY29's exact comparison | **Met** |
-| AC7 | Memory is designed | Each subsystem names its owners and estimates (TX21, GR12, IM6, NW16, HD32, ST34, LY31, JE28) | **Met** by design; budgets in Step 6 |
+| AC7 | Memory is designed | Each subsystem names its owners and estimates (TX21, GR12, IM6, NW16, HD32, ST34, LY31, JE28); the final B1–B7 and every corpus page's ceiling were accepted at Step 6's Gate B ([ADR-0019](../adr/0019-performance-methodology-and-budgets.md)) | **Met** |
 | AC8 | The complete model fits | The table below, and each Step 5 document's complete-model section | **Met** |
 | AC9 | `unsafe` stays where ADR-0002 allows it | §2's map; spikes S5, S6 and S7 kept theirs in `platform` modules under stated invariants; the register records each dependency's `unsafe` and grade | **Met**, with `smallvec`'s grade open (§3) |
 | AC10 | Every decision traces to evidence | Each document cites dated sources and labels inference; spikes S5, S6 and S7 measured what sources couldn't, and S6 put GR5's amendment to the owner | **Met** |
@@ -166,20 +166,50 @@ From the [register](../technology/dependency-register.md), as of 2026-10-20:
 | SC3 | `unsafe` stays where ADR-0002 allows it, dependencies included | §2 and the register | **Met**, with `smallvec` open |
 | SC4 | Build or reuse follows the charter | Each document's §4; the core of DP1 is Axiom's own; reused infrastructure is justified and classed in the register | **Met** |
 | SC5 | Standards first, and testable | Each document names dated specifications and its suites; approximate behaviour is kept apart: `execCommand` (HD28), automatic table layout (LY10), `Error.prototype.stack` and `Date.parse`'s legacy formats (JE25, JE22) | **Met** |
-| SC6 | Efficiency is designed | Owners, estimates, threads and idle behaviour in every document (AC3, AC7 above) | **Met** by design; budgets in Step 6 |
+| SC6 | Efficiency is designed | Owners, estimates, threads and idle behaviour in every document (AC3, AC7 above); budgets accepted at Step 6's Gate B ([performance](../performance.md)) | **Met** |
 | SC7 | Incremental by design | Each pipeline document states its caches, invalidation and oracle (HD33, ST19–ST22, LY29, TX20, IM6) | **Met** |
 | SC8 | Deterministic and headless | EL24, EM9 and GR11; system fonts, system settings and the environment injected in tests (TX21, ST36, LY32) | **Met** |
 | SC9 | The complete model fits | Each document's complete-model section; §5.1's table | **Met** |
 | SC10 | Every decision traces to evidence | Dated primary sources in every document; spikes S5, S6 and S7 measured | **Met** |
 
+### 5.3 Step 6's readiness criteria
+
+From the [Step 6 tracker](../research/step-6-standards-budgets-roadmap.md) §5, checked at CP10:
+
+| # | Criterion | Evidence | Verdict |
+|---|---|---|---|
+| RC1 | Measurable | Every budget is a number with its tool, conditions and statistic ([performance](../performance.md) PF1–PF24); every Milestone 1 criterion likewise ([Milestone 1](../milestone-1.md) MA4–MA9) | **Met** |
+| RC2 | Traceable | Each budget and target is labelled measured, sourced or hypothesis, the hypotheses with their milestones; the ceilings rest on S8's census; [requirements](../requirements.md) traces each requirement to its milestone and check | **Met** |
+| RC3 | Grounded in the corpus | Every site has its tier, needs, logins and level ([corpus](../corpus.md) §2) and its milestone ([roadmap](../roadmap.md) §5); priorities cite the corpus (SB6); every page has a memory ceiling | **Met** |
+| RC4 | Standards first | Each area has a dated specification, a support class and its suites ([standards](../standards.md) §3–§5); targets from the shipping median (SB11), calibrated with the corrected counting (§6) | **Met** |
+| RC5 | Security-gated | Each milestone names its level (MS2); credentials from L2, the owner's accounts at L3 (MS8); V1–V9 built as tests (TS14), complete at M6 | **Met** |
+| RC6 | Staged, never cut | The roadmap stages within the accepted ADRs, with amendments to the owner (MS12); it needed none | **Met** |
+| RC7 | Efficiency is budgeted | Memory (B1–B7 with tiles by pixels, the ceilings), frames, pauses, idle, energy and the build (PF6–PF18) | **Met** |
+| RC8 | Testable at every boundary | Every parser and IPC decoder fuzzed (TS9), determinism (TS8, IV14), the advisory routine (TS15); S9 confirmed cargo-fuzz and wptrunner here | **Met**, with ThreadSanitizer waiting for a nightly whose runtime works on macOS 27 (S9-Q2) |
+| RC9 | Paced by checkpoints, not dates | Milestones ordered and gated (MS1), each planned in checkpoints when it starts (MS10) | **Met** |
+| RC10 | Phase Zero is complete | §5.4 | **Met once Gate C accepts** ADRs 0020 and 0021 and this proposal |
+
+### 5.4 Phase Zero's success criteria
+
+From the [charter](../charter.md) §8:
+
+| Criterion | Evidence | State |
+|---|---|---|
+| The owner has approved an architecture proposal and a roadmap | This overview v2, the [roadmap](../roadmap.md) and [ADR-0020](../adr/0020-roadmap-and-security-levels.md), at Gate C | **For the owner** |
+| Every foundational decision has an Accepted ADR | The [decision map](../decision-map.md): F1–F5, P1–P7, I1–I5 and X1–X4 accepted; I6, WebAssembly, deliberately open and placed at M8's gate (MS9) | **Met** |
+| The target-site corpus is defined | The [corpus](../corpus.md), binding since Gate B | **Met** |
+| The measurable acceptance criteria for Milestone 1 are written | [Milestone 1](../milestone-1.md) (MA4–MA9) and [ADR-0021](../adr/0021-milestone-1.md) | **Written; for the owner at Gate C** |
+
 ## 6. Staging from L0 to L3
 
-| Level | Built | Unchanged from the level before |
-|---|---|---|
-| **L0** | One process. Every thread role, channel, record and replica exists; helpers are threads; channels are in-memory or Mach within the process | — |
-| **L1** | Renderers (one per tab) and the network process become sandboxed processes with browser-compiled profiles. Launch pins audit tokens | Every interface, record and protocol |
-| **L2** | Site locks; separate agents and event loops for cross-site frames in their embedder's process (SI3), reached through remote window proxies (WB20); partitioning and ORB at the endpoints. A GPU process with the first web-supplied GPU work | Every interface |
-| **L3** | Cross-site frames in renderers locked to their own sites; V1–V9 pass | Every interface: only process selection changes |
+| Level | Built | Unchanged from the level before | Milestones ([roadmap](../roadmap.md)) |
+|---|---|---|---|
+| **L0** | One process. Every thread role, channel, record and replica exists; helpers are threads; channels are in-memory or Mach within the process | — | M1, static documents |
+| **L1** | Renderers (one per tab) and the network process become sandboxed processes with browser-compiled profiles. Launch pins audit tokens | Every interface, record and protocol | M2, the sandboxed engine; M3, script; M4, the modern document |
+| **L2** | Site locks; separate agents and event loops for cross-site frames in their embedder's process (SI3), reached through remote window proxies (WB20); partitioning and ORB at the endpoints | Every interface | M5, site isolation and logins |
+| **L3** | Cross-site frames in renderers locked to their own sites; V1–V9 pass | Every interface: only process selection changes | M6, the sensitive-use gate; then M7 media, M8 applications, M9 the GPU and WebAssembly, each keeping L3 |
+
+**The GPU process** arrives with the first web-supplied GPU work. The process model allows it from L2; the roadmap places it at M9, after L3, with WebGL and WebGPU (MS5).
 
 ## 7. Decisions at Step 4's gates
 
@@ -207,3 +237,27 @@ Recorded in ADR-0010 to ADR-0017, the [tracker](../research/step-5-subsystems.md
 | 12 | Merging `step-5` into `main` | Authorized, with `main` and `step-5` pushed |
 
 **Decided after Gate C** (2026-10-20), from [S6's results](../research/s6-results.md) §8, each as recommended: B1 is revised, a visible window's tiles budgeted by their pixels in Step 6 and the core browser kept at 60 MB ([OQ-23](../open-questions.md)); GR5's amendment, path items in PL7, is deferred to the graphics milestone ([OQ-24](../open-questions.md)); `vello_cpu` is the renderer's Rust rasterizer, subject to grading; and the site corpus for Step 6 is set ([OQ-2](../open-questions.md)).
+
+## 9. Decisions at Step 6's gates
+
+Recorded in ADRs 0018 and 0019, the [tracker](../research/step-6-standards-budgets-roadmap.md) and the [process model](../security/process-model.md)'s change record.
+
+**Gate A (2026-10-20):** the plan approved as written; spike S8 authorized, with its two modes; the account policy (S8 in a dedicated profile; the owner's sensitive accounts at L3, test accounts from L2); two identifying URL parameters kept out of the repository; `step-6` pushed.
+
+**Gate B (2026-10-20):**
+
+| # | Decision | The owner's decision |
+|---|---|---|
+| 1 | [ADR-0018](../adr/0018-corpus-standards-and-testing.md), the corpus, the standards baseline and testing | Accepted as proposed |
+| 2 | [ADR-0019](../adr/0019-performance-methodology-and-budgets.md), performance, with the final B1–B7 | Accepted as proposed, with the amendment to the process model |
+| 3 | The automation boundary: five pages automated, eight by hand | Confirmed |
+| 4 | S8's session by hand | Completed by the owner, with secondary accounts; folded into the [S8 results](../research/s8-results.md) |
+| 5 | Spike S9 | Authorized; [results](../research/s9-results.md) |
+| 6 | The not-planned list | Approved as written |
+| 7 | CP8–CP10 without pausing, to Gate C | Approved |
+
+**The budgets accepted** (process model §7; [performance](../performance.md) §4):
+- **B1:** the core browser at most 60 MB, plus each visible window's tiles at 6.2 bytes per window pixel.
+- **B2:** a ready renderer at most 10 MB. **B4:** the network process at most 25 MB. **B5:** 16 renderers. **B7:** 2 GiB per renderer.
+- **B3:** a 50 MB median over the documents and content pages, and every corpus page within its ceiling: half of Chrome's measured cost, capped by tier. The ceilings run from 70 MB (MDN) to 300 MB.
+- **B6:** 1 GB for 10 tabs of document and content pages.

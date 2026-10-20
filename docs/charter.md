@@ -89,6 +89,8 @@ This machine is also the **performance floor**: budgets are set and measured her
 - the target-site corpus is defined;
 - the measurable acceptance criteria for Milestone 1 are written.
 
+**State at Step 6's Gate C** (2026-10-20; [overview](architecture/overview.md) §5.4): the corpus is defined; every foundational decision has an accepted ADR; Milestone 1's measurable criteria are written ([Milestone 1](milestone-1.md)); the architecture proposal, the overview v2, and the [roadmap](roadmap.md) are put to the owner.
+
 **Every milestone** will have acceptance criteria that can be measured. They will draw on:
 - conformance: pass rates on selected WPT directories, html5lib-tests and test262;
 - target-corpus checks: content renders and is readable, links navigate, and there are no crashes or hangs;

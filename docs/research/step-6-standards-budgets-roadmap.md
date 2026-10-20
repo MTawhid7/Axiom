@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **CP1–CP7 ✅** (2026-10-20). **Gate B passed** (2026-10-20): ADRs 0018 and 0019 accepted, with the final B1–B7; spike S9 authorized; CP8–CP10 to run without pausing, to Gate C. **Gate A passed** (2026-10-20). Spike S8 is complete in Chrome; its Safari runs need repeating (§11) |
+| **Status** | **CP1–CP10 ✅** (2026-10-20). **At Gate C,** the final design review: ADRs 0020 and 0021 proposed, the overview v2 and the requirements' traceability. **Gate B passed** (2026-10-20): ADRs 0018 and 0019 accepted; spike S9 run. **Gate A passed** (2026-10-20). Spike S8 is complete in Chrome; its Safari runs need repeating (§11) |
 | **Authorized** | 2026-10-20, by the owner: "Step 6 Authorization: Authorized. Proceed with creating branch step-6 from main and drafting the Phase Zero Step 6 plan (standards baseline, testing strategy, performance budgets, and Milestone 1 roadmap) for Gate A review." Design documents only; each spike needs its own authorization. **Spike S8 authorized at Gate A** (2026-10-20), for the questions it names (§10.1) |
 | **Branch** | `step-6`, from `main` at `b4948ce` (the Step 5 merge). Pushed to `origin` as the owner authorized at Gate A, after CP1's commit was amended (§11), and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items X1–X3; the roadmap and Milestone 1's acceptance criteria (charter §8); the final design review of Phase Zero; the questions earlier steps handed to Step 6 (§2.2) |
@@ -233,7 +233,7 @@ Step 6's outputs are judged against these criteria. CP10 checks every one and re
 | | **Part 2: the roadmap** | |
 | CP8 | The roadmap: milestones, security levels, corpus targets, decision points | ✅ 2026-10-20 (§11; [roadmap](../roadmap.md)) |
 | CP9 | Milestone 1: scope and measurable acceptance criteria | ✅ 2026-10-20 (§11; [Milestone 1](../milestone-1.md)) |
-| CP10 | Requirements traceability; the overview v2 and the criteria checks; ADRs for part 2 (Proposed); decision map, open questions, indexes, status. **Gate C: the final design review** | Not started |
+| CP10 | Requirements traceability; the overview v2 and the criteria checks; ADRs for part 2 (Proposed); decision map, open questions, indexes, status. **Gate C: the final design review** | ✅ 2026-10-20 (§11; [requirements](../requirements.md), [overview](../architecture/overview.md) v2, ADRs [0020](../adr/0020-roadmap-and-security-levels.md) and [0021](../adr/0021-milestone-1.md) proposed). **Gate C** |
 | CP11 | Merge `step-6` into `main` (`--no-ff`), when the owner instructs | Not started |
 
 ### 6.1 What each checkpoint decides
@@ -638,6 +638,28 @@ Every relative link resolves; the four standard checks pass.
 - **Computed for it:** a WPT manifest of the sparse checkout gave each test's type; the corrected `tools/wpt-pass-rates.py` gave the medians over reference tests.
 
 Every relative link resolves; the four standard checks pass.
+
+### CP10 — completed 2026-10-20
+
+The final synthesis:
+- **[Requirements](../requirements.md)** (RQ1–RQ66): every requirement from the charter, the ADRs and the binding documents, traced to the milestone and the check that verify it. **No gaps;** WebAssembly (I6) and ThreadSanitizer are placed, not missing.
+- **The [overview](../architecture/overview.md) v2,** the architecture proposal as a whole:
+  - the milestones on its staging table (§6);
+  - AC7 and SC6 met, with the budgets accepted;
+  - **RC1–RC10 checked** (§5.3): all met, RC8 with ThreadSanitizer waiting for a working runtime, RC10 once Gate C accepts;
+  - **Phase Zero's criteria** (§5.4): the corpus defined, every foundational decision accepted, Milestone 1's criteria written; the proposal and the roadmap for the owner;
+  - Step 6's gate decisions (§9).
+- **[ADR-0020](../adr/0020-roadmap-and-security-levels.md),** the roadmap and its security levels, and **[ADR-0021](../adr/0021-milestone-1.md),** Milestone 1: both Proposed.
+- **Updated:**
+  - the open questions, with the roadmap's placements: OQ-3, OQ-7, OQ-9, OQ-16, OQ-18, OQ-20;
+  - the decision map, with I6 placed and Step 6 at Gate C;
+  - the charter's §8, with the state at Gate C;
+  - the docs index, which now has no planned documents left;
+  - status, with Gate C's decisions.
+
+Every relative link resolves; the four standard checks pass.
+
+**Gate C,** the final design review. The decisions, with recommendations, are in [status](../status.md), "Next steps".
 
 ## Sources
 

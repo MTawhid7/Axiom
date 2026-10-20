@@ -6,9 +6,9 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero: Step 6, standards, testing, budgets and the roadmap** (authorized 2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written, and spike S8 authorized. CP1–CP7 ✅. **Gate B passed** (2026-10-20): ADRs 0018 and 0019 accepted, spike S9 authorized, and CP8–CP10 to run without pausing, to Gate C. Step 5 is done and merged (2026-10-20): ADRs 0010–0017 are accepted. Production engine code is **not** authorized |
+| Phase | **Phase Zero: Step 6, standards, testing, budgets and the roadmap** (authorized 2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written, and spike S8 authorized. CP1–CP10 ✅, **at Gate C,** the final design review. **Gate B passed** (2026-10-20): ADRs 0018 and 0019 accepted, spike S9 authorized and run. Step 5 is done and merged (2026-10-20): ADRs 0010–0017 are accepted. Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 5** (merged with `--no-ff` on 2026-10-20) and is pushed. **Step 6 runs on branch `step-6`**, from `main` at `b4948ce`, pushed to `origin` as the owner authorized at Gate A, and kept pushed |
-| Current checkpoint | **Step 6: CP1–CP9 ✅; Gate B passed; spike S9 run;** CP10, the final synthesis, next ([tracker](research/step-6-standards-budgets-roadmap.md)). Step 5: CP1–CP19 ✅ ([tracker](research/step-5-subsystems.md)) |
+| Current checkpoint | **Step 6: CP1–CP10 ✅; Gate C:** the owner reviews ADRs 0020 and 0021, the overview v2 and the requirements ([tracker](research/step-6-standards-budgets-roadmap.md)). Step 5: CP1–CP19 ✅ ([tracker](research/step-5-subsystems.md)) |
 | Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census** (`spikes/s8/`, Python), is complete in Chrome: automated, and by the owner's hand ([results](research/s8-results.md)). Its Safari runs need repeating with the corrected tool. **S9, the test tools** (`spikes/s9/`), is complete ([results](research/s9-results.md)): fuzzing and wptrunner work here; the installed nightly's ThreadSanitizer doesn't. Tooling under `tools/`, now with `s6-tails.py` and `png-region-stats.py`; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md), [S6](research/s6-results.md), [S7](research/s7-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -34,15 +34,21 @@
 | | [ADR-0019](adr/0019-performance-methodology-and-budgets.md): performance methodology and budgets, X3, with the final B1–B7 (2026-10-20, Step 6's Gate B) |
 | The corpus | 13 sites, set by the owner on 2026-10-20 ([OQ-2](open-questions.md)), and [defined](corpus.md) at Step 6's CP2, binding since Gate B. Eight sites' terms forbid automated access, even logged out, so they are measured by hand; five may be loaded by automation, with care. Every page has a memory ceiling ([performance](performance.md) §4.1) |
 
-## Next steps: S9, then CP8–CP10
+## Next steps: Gate C
 
-**Between Gate B and Gate C, work runs without pausing,** as the owner approved:
-1. ~~Spike S9~~: done ([results](research/s9-results.md)).
-2. **CP8, the roadmap;** **CP9, Milestone 1;** **CP10,** requirements traceability, the overview v2 and ADRs 0020 and 0021. Then **Gate C,** the final design review.
+**Work stops for the owner's Gate C decisions,** the final design review of Phase Zero, each with a recommendation:
+1. **[ADR-0020](adr/0020-roadmap-and-security-levels.md), the roadmap** ([roadmap](roadmap.md), MS1–MS12): nine milestones, from static documents at L0 to the GPU and WebAssembly at L3; the sandbox at M2, site locks at M5, out-of-process iframes and V1–V9 at M6; no script from the web before L1; corpus targets, the login track and the decision points placed. Recommended: accept. Security reaches L3 before media codecs, the GPU process and WebAssembly widen the attack surface, and every open decision has a milestone.
+2. **[ADR-0021](adr/0021-milestone-1.md), Milestone 1** ([Milestone 1](milestone-1.md), MA1–MA12): static documents at L0, with CSS 2.1's visual model. Conformance without script: tokenizer 100%, tree construction ≥ 96%, `css/CSS2`'s reference tests ≥ 97%, Unicode 100%. Corpus checks on Wikipedia and MDN; budgets of 95 MB idle, the pages' ceilings, frames, idle and pauses; no credentials by construction. Recommended: accept. Every criterion is a number with its method, as the charter's §8 asks; the CSS target is demanding (neither new engine meets it yet), and a miss with a reason comes back to you.
+3. **The architecture proposal as a whole:** the [overview](architecture/overview.md) v2, with the [requirements](requirements.md)' traceability (no gaps) and the readiness checks RC1–RC10. Recommended: approve. That completes Phase Zero's criteria (charter §8).
+4. **The content tier's memory cap,** which ADR-0019 sends back to you: signed in, Chrome's cost for Google Search, Instagram and Reddit is 578–1,260 MB, so their 150 MB ceilings are 12–26% of Chrome's. Recommended: keep the cap for now. B6's 1 GB session depends on it; the ceilings are hypotheses that Axiom's own measurements at M4 and M5 will test; and a miss returns to you with evidence, which is a better basis for a revision than Chrome's numbers alone.
+5. **Merging `step-6` into `main`** (CP11), with `--no-ff`, and pushing `main`. Recommended: yes, once you accept the above.
+6. **Starting Milestone 1:** authorize [Milestone 1](milestone-1.md)'s MA10 list: the branch `milestone-1`, the skeleton under `crates/`, the dependencies listed, the pinned test data and the two pages' local copies, the tools (including a nightly whose ThreadSanitizer works), and the live loads of Wikipedia and MDN. Recommended: authorize when you're ready to start; its plan comes back to you at its first gate.
 
-**Optional for the owner, at any time,** each by hand with the corrected census tool ([S8 results](research/s8-results.md) §7.5):
-- Safari again, logged out and signed in, since the first session's runs counted earlier pages;
-- Chrome logged out, for the five pages that work without an account.
+**For your information:**
+- **A correction to Gate B's report.** The standards baseline's calibration had left WPT's reference tests out. Corrected: `css/CSS2/`'s median is 98.1%, not 98.9%, and Ladybird meets the median on HTML parsing, not on the DOM (0.1 point short) or CSS 2 (4.3 points short). SB10 and SB11 stand; recorded in ADR-0018's history.
+- **A deviation, stopped:** a first attempt at S8's blank baseline opened the dedicated profile by script (about:blank only, no page, no debugging connection), which CO14 forbids. Its two records are unused, under `target/`; they can be deleted if you prefer.
+- **Optional, by hand, before M4:** Safari's runs again with the corrected tool, and Chrome logged out for the five pages that work without an account ([S8 results](research/s8-results.md) §7.5).
+- **ThreadSanitizer** waits for a nightly whose runtime works on macOS 27; Milestone 1 pins one at its start (MA10).
 
 ## Session log
 
@@ -86,6 +92,12 @@
 
 **CP9, [Milestone 1](milestone-1.md)** (MA1–MA12): static documents at L0, with CSS 2.1's visual model; conformance without script (tokenizer 100%, tree construction ≥ 96%, `css/CSS2`'s reference tests ≥ 97%, Unicode 100%); the corpus checks; budgets (95 MB idle, the pages' ceilings, frames, idle, pauses, T1–T4); security by construction; what starting it needs the owner to authorize.
 
+**CP10, the final synthesis:**
+- [requirements](requirements.md) (RQ1–RQ66, no gaps);
+- the [overview](architecture/overview.md) v2, with RC1–RC10 and Phase Zero's criteria checked;
+- ADRs [0020](adr/0020-roadmap-and-security-levels.md) and [0021](adr/0021-milestone-1.md) proposed;
+- the open questions, decision map, charter's §8 and index updated.
+
 **A deviation, stopped.** A first attempt at the baseline opened the dedicated profile by script: two runs on about:blank, 19:46–19:51, with no page loaded and no debugging connection. CO14 says that profile is never opened by automation. So the attempt was stopped and its records aren't used. The profile closed cleanly (`SessionEnded`), and `s8.py blank` now opens only a fresh profile.
 
 **Clean-up:**
@@ -94,6 +106,8 @@
 - S9 installed cargo-fuzz under `target/s9/tools` and the nightly's `llvm-tools-preview` component, as authorized; `rustup component remove llvm-tools-preview --toolchain nightly` takes the component away.
 - One report, at 17:10, came from macOS's Software Update settings; it was left alone.
 - The fresh profiles were deleted after each run.
+
+**Gate C,** the final design review: the decisions are in "Next steps".
 
 ### 2026-10-20 — Session 14 (Gate A; Step 6 from CP2)
 
