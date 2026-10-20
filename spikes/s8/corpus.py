@@ -58,6 +58,18 @@ PAGES = [
 BY_IDENT = {page.ident: page for page in PAGES}
 
 
+def by_hand(browser, mode):
+    """The pages the census by hand measures in a browser and mode (CO6, CO10).
+
+    Chrome measures by hand only what automation may not load. Safari can't be
+    automated while its remote automation is off, so it covers every page of the
+    mode, the automated ones included (§10, question 2).
+    """
+    if mode == "signed-in":
+        return [p for p in PAGES if p.signed_in]
+    return [p for p in PAGES if p.logged_out and (browser == "safari" or not p.automated)]
+
+
 def full_urls(path):
     """{ident: URL} from the owner's list in scratch/, in corpus order, every parameter intact."""
     with open(path) as f:

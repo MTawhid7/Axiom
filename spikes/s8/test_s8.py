@@ -84,6 +84,16 @@ class Corpus(unittest.TestCase):
         self.assertEqual(len(corpus.PAGES), 13)
         self.assertEqual({p.ident for p in corpus.PAGES if p.automated}, {"wikipedia", "maps", "mdn", "threejs", "vscode"})
 
+    def test_pages_measured_by_hand(self):
+        idents = lambda pages: {p.ident for p in pages}  # noqa: E731
+        content_and_media = {"google", "youtube", "instagram", "reddit", "twitch"}
+        automated = {"wikipedia", "maps", "mdn", "threejs", "vscode"}
+        self.assertEqual(idents(corpus.by_hand("chrome", "logged-out")), content_and_media)
+        self.assertEqual(idents(corpus.by_hand("safari", "logged-out")), content_and_media | automated)
+        signed_in = content_and_media | {"discord", "figma", "prism"}
+        self.assertEqual(idents(corpus.by_hand("chrome", "signed-in")), signed_in)
+        self.assertEqual(idents(corpus.by_hand("safari", "signed-in")), signed_in)
+
     def test_no_identifying_parameters(self):
         for page in corpus.PAGES:
             parameters = urllib.parse.parse_qs(urllib.parse.urlsplit(page.url).query)

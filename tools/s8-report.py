@@ -2,14 +2,19 @@
 """Tables for spike S8's results, from its records.
 
     python3 -I tools/s8-report.py target/s8-results/<timestamp>-auto [...] [--web-features data.json]
+                                  [--blank target/s8-results/<timestamp>-blank-chrome-signed-in]
 
 Reads the census's per-run records (auto-*.json, hand-*.json) and prints, as
 Markdown tables, each page's medians with their ranges across runs (MB are
 10^6 bytes, as B1 counts them):
-  - memory: every Chrome process together (footprint's total, shared memory
+  - memory: every browser process together (footprint's total, shared memory
     counted once), the renderers, the GPU and browser processes, the same
-    browser on about:blank, and the change over blank, leaving out Chrome's
-    component-extension renderers, which exit before the steady state;
+    browser on its baseline, and the change over the baseline, leaving out
+    Chrome's component-extension renderers, which exit before the steady state.
+    The baseline is about:blank in automated runs, and the list page in runs by
+    hand that record one. For runs by hand without one, --blank names the
+    records of `s8.py blank` (the same browser's flags, in a fresh profile, on
+    about:blank), whose median is used; they get a table of their own;
   - load: navigation milestones, requests and bytes, DOM size;
   - the 30 s without input: CPU time, idle wakeups and energy impact;
   - features: S8-Q1's groups, and the page's web-features identifiers.
@@ -58,6 +63,17 @@ def load(directories, include_hidden=False):
     return pages, left_out
 
 
+def load_blanks(directories):
+    """{browser: [records]} from `s8.py blank`'s directories."""
+    blanks = {}
+    for directory in directories:
+        for path in sorted(glob.glob(os.path.join(directory, "blank-*-run*.json"))):
+            with open(path) as f:
+                record = json.load(f)
+            blanks.setdefault(record.get("browser"), []).append(record)
+    return blanks
+
+
 def get(record, *keys, default=None):
     for key in keys:
         if not isinstance(record, dict) or key not in record:
@@ -96,11 +112,23 @@ def idle_sum(record, field):
     return sum(v.get(field, 0) for v in get(record, "without_input", "by_kind", default={}).values())
 
 
-def memory_table(pages):
-    print("| Page | All processes, loaded (MB) | After interaction | After 30 s without input | Renderers, loaded | GPU, loaded | Browser, loaded | On about:blank | Loaded − blank, without extension renderers | After 30 s − blank, without extension renderers | GPU after 30 s |")
+def baseline(record, blanks):
+    """(total, total without extension renderers) of the run's baseline: its own, or the median of --blank's."""
+    if get(record, "memory_blank"):
+        return get(record, "memory_blank", "total_footprint"), without_extensions(record, "memory_blank")
+    others = blanks.get(record.get("browser"))
+    if not others:
+        return None, None
+    return (statistics.median(get(b, "memory_blank", "total_footprint") for b in others),
+            statistics.median(without_extensions(b, "memory_blank") for b in others))
+
+
+def memory_table(pages, blanks):
+    print("| Page | All processes, loaded (MB) | After interaction | After 30 s without input | Renderers, loaded | GPU, loaded | Browser, loaded | Baseline | Loaded − baseline, without extension renderers | After 30 s − baseline, without extension renderers | GPU after 30 s |")
     print("|---|---|---|---|---|---|---|---|---|---|---|")
     for page, runs in pages.items():
         total = lambda phase: [get(r, phase, "total_footprint") for r in runs]  # noqa: E731
+        bases = [baseline(r, blanks) for r in runs]
         print("| " + " | ".join([
             page,
             cell(total("memory_loaded"), MB),
@@ -109,12 +137,31 @@ def memory_table(pages):
             cell([kind_sum(r, "memory_loaded", ("renderer",)) for r in runs], MB),
             cell([kind_sum(r, "memory_loaded", ("gpu",)) for r in runs], MB),
             cell([kind_sum(r, "memory_loaded", ("browser",)) for r in runs], MB),
-            cell(total("memory_blank"), MB),
-            cell([without_extensions(r, "memory_loaded") - without_extensions(r, "memory_blank")
-                  for r in runs if get(r, "memory_blank")], MB),
-            cell([without_extensions(r, "memory_after") - without_extensions(r, "memory_blank")
-                  for r in runs if get(r, "memory_blank")], MB),
+            cell([b[0] for b in bases], MB),
+            cell([without_extensions(r, "memory_loaded") - b[1] for r, b in zip(runs, bases) if b[1] is not None],
+                 MB),
+            cell([without_extensions(r, "memory_after") - b[1] for r, b in zip(runs, bases) if b[1] is not None],
+                 MB),
             cell([kind_sum(r, "memory_after", ("gpu",)) for r in runs], MB),
+        ]) + " |")
+
+
+def blank_table(blanks):
+    print("| Browser | Runs | All processes, 10 s after launch (MB) | Without extension renderers | Extension renderers | Later sample | Without extension renderers | Extension renderers | Browser process, 10 s | Browser process, later |")
+    print("|---|---|---|---|---|---|---|---|---|---|")
+    for browser, runs in blanks.items():
+        count = lambda phase: [get(r, phase, "by_kind", "extension", "processes", default=0) for r in runs]  # noqa: E731
+        print("| " + " | ".join([
+            f"{browser}, fresh profile",
+            str(len(runs)),
+            cell([get(r, "memory_blank", "total_footprint") for r in runs], MB),
+            cell([without_extensions(r, "memory_blank") for r in runs], MB),
+            cell(count("memory_blank")),
+            cell([get(r, "memory_blank_late", "total_footprint") for r in runs], MB),
+            cell([without_extensions(r, "memory_blank_late") for r in runs], MB),
+            cell(count("memory_blank_late")),
+            cell([kind_sum(r, "memory_blank", ("browser",)) for r in runs], MB),
+            cell([kind_sum(r, "memory_blank_late", ("browser",)) for r in runs], MB),
         ]) + " |")
 
 
@@ -122,6 +169,8 @@ def load_table(pages):
     print("| Page | First contentful paint (ms) | Largest contentful paint (ms) | Load event (ms) | Wait ended by | Requests | Transferred (MB) | Hosts | Elements | DOM depth | Frames (targets) |")
     print("|---|---|---|---|---|---|---|---|---|---|---|")
     for page, runs in pages.items():
+        if not any("navigation" in r for r in runs):  # the census by hand doesn't instrument pages
+            continue
         ended = sorted({get(r, "navigation", "ended_by", default="?") for r in runs})
         print("| " + " | ".join([
             page,
@@ -134,7 +183,7 @@ def load_table(pages):
             cell([get(r, "network", "hosts") for r in runs]),
             cell([get(r, "dom_loaded", "elements") for r in runs]),
             cell([get(r, "dom_loaded", "depth") for r in runs]),
-            cell([get(r, "targets", "iframe", default=0) for r in runs]),
+            cell([get(r, "targets", "iframe", default=0) for r in runs if "targets" in r]),
         ]) + " |")
 
 
@@ -195,10 +244,13 @@ def main():
     parser.add_argument("directories", nargs="+", help="S8 results directories, whose runs are pooled")
     parser.add_argument("--web-features", help="web-features' data.json, for Baseline status")
     parser.add_argument("--include-hidden", action="store_true", help="keep runs whose page wasn't visible throughout")
+    parser.add_argument("--blank", action="append", default=[],
+                        help="a directory of `s8.py blank` records: the baseline for runs by hand without their own")
     args = parser.parse_args()
     pages, left_out = load(args.directories, args.include_hidden)
     if not pages:
         sys.exit("no S8 records (*-run*.json) in those directories")
+    blanks = load_blanks(args.blank)
     for path in left_out:
         print(f"Left out, the page wasn't visible throughout: `{path}`")
     print("\nRuns: " + ", ".join(f"{page} {len(runs)}" for page, runs in pages.items()))
@@ -206,7 +258,12 @@ def main():
     if args.web_features:
         with open(args.web_features) as f:
             features = json.load(f).get("features", {})
-    for title, table in (("Memory", memory_table), ("Loading", load_table), ("Without input", idle_table)):
+    if blanks:
+        print("\n### Baselines measured apart (`s8.py blank`)\n")
+        blank_table(blanks)
+    print("\n### Memory\n")
+    memory_table(pages, blanks)
+    for title, table in (("Loading", load_table), ("Without input", idle_table)):
         print(f"\n### {title}\n")
         table(pages)
     print("\n### Features\n")

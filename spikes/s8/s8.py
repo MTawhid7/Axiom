@@ -15,6 +15,10 @@ Commands:
                  owner to sign in by hand; nothing is measured
   hand           the census by hand (CO6): the owner drives Chrome Canary or
                  Safari, and only the browser's processes are sampled
+  blank          the census by hand's baseline in Chrome Canary: its flags, in
+                 a fresh profile, on about:blank, sampled after 10 s and after
+                 --late seconds; no page is loaded, and the dedicated profile
+                 is never opened (CO14)
   safari-status  whether Safari accepts WebDriver sessions (remote automation),
                  without changing any setting
   summary DIR    medians and spreads of a results directory
@@ -45,7 +49,7 @@ import census  # noqa: E402
 import robots  # noqa: E402
 import system  # noqa: E402
 import usecounters  # noqa: E402
-from corpus import BY_IDENT, PAGES, full_urls  # noqa: E402
+from corpus import BY_IDENT, PAGES, by_hand, full_urls  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 TARGET = os.path.join(ROOT, "target", "s8")
@@ -54,6 +58,7 @@ SCRATCH = os.path.join(ROOT, "scratch", "s8")
 URL_LIST = os.path.join(ROOT, "scratch", "corpus-urls.txt")
 TEST_PAGE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "testpage")
 AGENT = "AxiomCensus"
+BLANK_SECONDS = 10  # as the automated census settles about:blank before its baseline
 
 
 def canary_version():
@@ -248,7 +253,9 @@ def _sample_by_hand(record, key, pids_kinds):
         entry = by_kind.setdefault(kind, {"processes": 0, "footprint": 0})
         entry["processes"] += 1
         entry["footprint"] += each.get(pid, ("?", 0))[1]
-    record[key] = {"by_kind": by_kind, "total_footprint": total}
+    record[key] = {"by_kind": by_kind, "total_footprint": total,
+                   "renderers": sorted((each[p][1] for p, k in pids_kinds.items() if k == "renderer" and p in each),
+                                       reverse=True)}
 
 
 def _idle_by_hand(record, pids_kinds, seconds):
@@ -274,12 +281,40 @@ def cmd_signin(args):
     subprocess.run(argv, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
+def _hand_profile(mode):
+    """The dedicated profile for signed-in pages (CO14); a fresh one under target/ otherwise, deleted after the run."""
+    if mode == "signed-in":
+        return os.path.join(SCRATCH, "chrome-profile")
+    return os.path.join(TARGET, f"hand-profile-{os.getpid()}")
+
+
+def _hand_argv(profile, url):
+    """Chrome Canary as the owner runs it: no debugging connection and no automation flags."""
+    return [census.CHROME, f"--user-data-dir={profile}", "--no-first-run", "--no-default-browser-check",
+            f"--window-size={census.WINDOW[0]},{census.WINDOW[1]}", "--window-position=0,0", url]
+
+
+def _start_safari(index, mode):
+    """Starts Safari afresh with the list, and returns the WebKit helpers that ran before it, which aren't its own.
+
+    Each page gets a fresh Safari: in one that keeps running, the pages already
+    measured stay alive in the back-forward cache and are counted again.
+    """
+    _prompt("Quit Safari if it is open (Safari > Quit Safari), then press Return.")
+    baseline = set(system.safari_processes())
+    subprocess.run(["/usr/bin/open", "-a", "Safari", index])
+    window = ("a Private window (File > New Private Window) with the list open in it, and close the other window"
+              if mode == "logged-out" else "the window with the list, and close any other")
+    _prompt(f"Safari opens the list. Use {window}, sized like the census window "
+            f"({census.WINDOW[0]} x {census.WINDOW[1]} points) if you can. Then press Return and wait "
+            f"{BLANK_SECONDS} s.")
+    return baseline
+
+
 def cmd_hand(args):
     state = require_conditions(args.allow_battery)
     urls = full_urls(URL_LIST)
-    pages = [BY_IDENT[p] for p in args.pages.split(",")] if args.pages else [
-        p for p in PAGES if (p.signed_in if args.mode == "signed-in" else (p.logged_out and not p.automated))
-    ]
+    pages = [BY_IDENT[p] for p in args.pages.split(",")] if args.pages else by_hand(args.browser, args.mode)
     out = new_results_dir(f"hand-{args.browser}-{args.mode}")
     env = environment()
     env["options"] = {"browser": args.browser, "mode": args.mode, "runs": args.runs, "seconds": args.seconds,
@@ -289,29 +324,23 @@ def cmd_hand(args):
     index = os.path.join(SCRATCH, f"index-{args.mode}.html")
     index_page(index, urls, pages, args.mode)
     print(f"Load average {state['load_average']}. Close other apps you don't need, and keep the Mac otherwise idle.")
-    baseline = set()
-    if args.browser == "safari":
-        _prompt("Quit Safari if it is open (Safari > Quit Safari), then press Return.")
-        baseline = set(system.safari_processes())
-        window = "a Private window (File > New Private Window)" if args.mode == "logged-out" else "a normal window"
-        subprocess.run(["/usr/bin/open", "-a", "Safari", index])
-        _prompt(f"Safari opens the list. Use {window} with only the list in it, sized like the census window "
-                f"({census.WINDOW[0]} x {census.WINDOW[1]} points) if you can.")
     for run in range(1, args.runs + 1):
         for page in pages:
             record = {"page": page.ident, "run": run, "mode": args.mode, "browser": args.browser,
                       "started": time.strftime("%Y-%m-%dT%H:%M:%S")}
             browser = None
-            profile = os.path.join(SCRATCH, "chrome-profile") if args.mode == "signed-in" else os.path.join(
-                TARGET, f"hand-profile-{os.getpid()}")
             if args.browser == "chrome":
+                profile = _hand_profile(args.mode)
                 os.makedirs(profile, exist_ok=True)
-                argv = [census.CHROME, f"--user-data-dir={profile}", "--no-first-run", "--no-default-browser-check",
-                        f"--window-size={census.WINDOW[0]},{census.WINDOW[1]}", "--window-position=0,0", "file://" + index]
-                browser = subprocess.Popen(argv, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                time.sleep(3)
-            kinds = (lambda: system.chrome_processes(browser.pid)) if browser else (
-                lambda: system.safari_processes(exclude=baseline))
+                browser = subprocess.Popen(_hand_argv(profile, "file://" + index), stdout=subprocess.DEVNULL,
+                                           stderr=subprocess.DEVNULL)
+                kinds = lambda: system.chrome_processes(browser.pid)  # noqa: E731
+            else:
+                baseline = _start_safari(index, args.mode)
+                kinds = lambda: system.safari_processes(exclude=baseline)  # noqa: E731
+            # The browser on the list, a local page of a few links: this run's baseline.
+            time.sleep(BLANK_SECONDS)
+            _sample_by_hand(record, "memory_blank", kinds())
             _prompt(f"Run {run}: click '{page.label}' in the list (it opens in the same tab). "
                     "When the page looks complete, press Return.")
             _sample_by_hand(record, "memory_loaded", kinds())
@@ -332,8 +361,46 @@ def cmd_hand(args):
                 browser.wait(30)
                 if args.mode != "signed-in":
                     subprocess.run(["/bin/rm", "-rf", profile])
-            else:
-                _prompt("Go back to the list (Command-[), then press Return.")
+    if args.browser == "safari":
+        _prompt("Done. Quit Safari (Safari > Quit Safari), then press Return.")
+    summarize(out)
+
+
+def cmd_blank(args):
+    """The census by hand's baseline in Chrome: its flags on about:blank, in a fresh profile.
+
+    No page is loaded. The dedicated profile is never opened here: only the
+    owner's session by hand opens it (CO14). Runs by hand record their own
+    baseline since 2026-10-20; this serves the session that didn't.
+    """
+    require_conditions(args.allow_battery)
+    out = new_results_dir("blank-chrome-fresh")
+    env = environment()
+    env["options"] = {"browser": "chrome", "profile": "fresh", "runs": args.runs, "cooldown": args.cooldown,
+                      "late": args.late}
+    write_json(os.path.join(out, "environment.json"), env)
+    for run in range(1, args.runs + 1):
+        _countdown(args.cooldown, "cool-down")
+        profile = _hand_profile("logged-out")
+        os.makedirs(profile, exist_ok=True)
+        record = {"page": "blank", "run": run, "profile": "fresh", "browser": "chrome",
+                  "started": time.strftime("%Y-%m-%dT%H:%M:%S")}
+        browser = subprocess.Popen(_hand_argv(profile, "about:blank"), stdout=subprocess.DEVNULL,
+                                   stderr=subprocess.DEVNULL)
+        try:
+            time.sleep(BLANK_SECONDS)
+            _sample_by_hand(record, "memory_blank", system.chrome_processes(browser.pid))
+            time.sleep(max(0, args.late - BLANK_SECONDS))
+            _sample_by_hand(record, "memory_blank_late", system.chrome_processes(browser.pid))
+        finally:
+            browser.terminate()
+            browser.wait(30)
+            subprocess.run(["/bin/rm", "-rf", profile])
+        record["conditions"] = system.conditions()
+        write_json(os.path.join(out, f"blank-chrome-fresh-run{run}.json"), record)
+        mb = 10**6
+        print(f"  run {run}: {record['memory_blank']['total_footprint'] / mb:.0f} MB after {BLANK_SECONDS} s, "
+              f"{record['memory_blank_late']['total_footprint'] / mb:.0f} MB after {args.late} s")
     summarize(out)
 
 
@@ -460,13 +527,21 @@ def main():
     hand.add_argument("--seconds", type=int, default=30)
     hand.add_argument("--pages", help="comma-separated page names (default: the pages the mode measures)")
     hand.add_argument("--allow-battery", action="store_true")
+    blank = sub.add_parser("blank")
+    blank.add_argument("--runs", type=int, default=3)
+    blank.add_argument("--cooldown", type=int, default=30, help="idle seconds before each run (default 30)")
+    blank.add_argument("--late", type=int, default=90,
+                       help="seconds after launch of the second sample, about when the census by hand reaches "
+                            "its steady state (default 90)")
+    blank.add_argument("--allow-battery", action="store_true")
     sub.add_parser("safari-status")
     summary = sub.add_parser("summary")
     summary.add_argument("directory")
     args = parser.parse_args()
     {
         "prepare": cmd_prepare, "check": cmd_check, "robots": cmd_robots, "auto": cmd_auto, "signin": cmd_signin,
-        "hand": cmd_hand, "safari-status": cmd_safari_status, "summary": lambda a: summarize(a.directory),
+        "hand": cmd_hand, "blank": cmd_blank, "safari-status": cmd_safari_status,
+        "summary": lambda a: summarize(a.directory),
     }[args.command](args)
 
 
