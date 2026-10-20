@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **The automated part is complete** (2026-10-20): the five corpus pages whose sites' terms permit automated loads, in Chrome Canary, three valid runs each (§3–§6). **The part by hand awaits the owner** (§7): the other eight pages, logged out and signed in, and Safari for all thirteen, since Safari's remote automation is off (observed) |
+| **Status** | **Complete in Chrome** (2026-10-20): the five corpus pages whose sites' terms permit automated loads, three valid runs each (§3–§6), and the other eight signed in, by the owner's hand, three runs each (§7). **Safari's runs need repeating:** the tool kept earlier pages open in Safari, so only one of its runs measures a single page (§7.4). Chrome logged out by hand, and Safari for eight pages, weren't run (§7.5) |
 | **Question** | What does each corpus page use and cost in shipping engines on this Mac? Its features (S8-Q1), size (S8-Q2), memory (S8-Q3), and load milestones and cost without input (S8-Q4) |
 | **Feeds** | The [corpus](../corpus.md)'s baselines; the [standards baseline](../standards.md)'s priorities (CP4); the [performance budgets](../performance.md) (CP6) |
 | **Plan** | [Step 6 tracker](step-6-standards-budgets-roadmap.md) §10.1, authorized at Gate A (2026-10-20), as refined at CP2 to the sites' terms ([corpus](../corpus.md) CO3–CO6) |
-| **Code** | `spikes/s8/` (Python, standard library only) and `tools/s8-measure.sh`, at `6ba5068` for the formal run and `df7b179` for the rerun; `tools/s8-report.py` for the tables (§10) |
+| **Code** | `spikes/s8/` (Python, standard library only) and `tools/s8-measure.sh`, at `6ba5068` for the formal run and `df7b179` for the rerun; at `cbf8559` for the session by hand; `s8.py blank` and the corrected session by hand at this step's Gate B commit; `tools/s8-report.py` for the tables (§10) |
 | **Last updated** | 2026-10-20 |
 
 **Evidence labels** follow the [research conventions](README.md):
@@ -21,7 +21,7 @@ MB means 10⁶ bytes, as B1 and S6 use it. Every figure is a median of three val
 
 ## Summary
 
-- **Five pages, three valid runs each,** in Chrome Canary 158.0.8112.0: Wikipedia's article on π, Google Maps, MDN's canvas tutorial, Three.js's WebGPU example and VS Code for the Web. Two runs had the page hidden and were replaced; the two sites' fifth loads are the corpus's limit (CO4).
+- **Automated: five pages, three valid runs each,** in Chrome Canary 158.0.8112.0: Wikipedia's article on π, Google Maps, MDN's canvas tutorial, Three.js's WebGPU example and VS Code for the Web. Two runs had the page hidden and were replaced; the two sites' fifth loads are the corpus's limit (CO4).
 - **Features (S8-Q1).** Chrome's own use counters name 86–316 platform features per page. Among the 116 features of the web-features project that the five pages touch:
   - 72 are Baseline "high", widely available;
   - 19 are "low", newly available;
@@ -38,6 +38,12 @@ MB means 10⁶ bytes, as B1 and S6 use it. Every figure is a median of three val
 
   The GPU process carries much of it on Maps (342 MB) and Three.js (443 MB), against 34–38 MB on about:blank. A fresh Canary on about:blank costs 250–266 MB.
 - **Time and energy (S8-Q4).** First contentful paint at 0.8–2.3 s. In the 30 s after the interaction, the static pages used 0.9–2.4 s of CPU across all processes. Three.js's simulation used 15.4 s, about half a core, at an energy impact of 47.6.
+- **By hand, signed in** (§7), in Chrome Canary 158.0.8113.0, with the owner's secondary accounts. Each page's steady-state cost above a fresh Canary on about:blank, leaving out extension renderers:
+  - Reddit 1,260 MB, Figma 1,111, YouTube 908;
+  - Google Search 582, Instagram 578, Prism 494, Discord 427, Twitch 401.
+
+  Runs driven by hand vary more than automated ones: Reddit's ran from 495 to 1,631 MB. Signed in, the content pages cost as much as the applications.
+- **Safari** (§7.4): the tool kept the earlier pages open, so only the session's first run measures one page. Google Search, logged out, held 738 MB across Safari's processes after 30 s without input. The tool is corrected; repeating the runs needs the owner.
 
 ## 1. What was built
 
@@ -161,12 +167,104 @@ All of Chrome's processes, in MB (`footprint`'s total, shared memory counted onc
 - **Maps is quiet once loaded:** its renderers used 0.04–0.08 s of CPU in the 30 s, with 1–2 wakeups.
 - **Three.js's simulation keeps the GPU process busy:** 10.3–10.7 s of CPU in 30 s, with the renderer at about 4.4 s.
 
-## 7. The census by hand (pending)
+## 7. The census by hand
 
-Not run; it needs the owner (CO6), and is put to the owner at Gate B:
-- **The eight pages automation may not load:** Google Search, YouTube, Instagram, Reddit, Twitch, Discord, Figma and Prism. In Chrome Canary they are measured signed in, in the dedicated profile (`s8.py signin`, then `s8.py hand --browser chrome --mode signed-in`). The five of them that work logged out are also measured logged out (`--mode logged-out`).
-- **Safari, all thirteen pages, by hand.** `s8.py safari-status` found its remote automation off: "You must enable 'Allow remote automation' in the Developer section of Safari Settings to control Safari via WebDriver" (observed, 2026-10-20). If the owner turns it on, the five automated pages can run in Safari through WebDriver instead.
-- **Optional:** saving `chrome://histograms/Blink.UseCounter` by hand after each page, to record the features of the pages measured by hand ([corpus](../corpus.md) §10, question 1).
+**Run by the owner on 2026-10-20,** after Gate B (the owner's decision 4), with secondary accounts in the dedicated profile: "I have used my secondary accounts for these tests." The tools only sampled the browsers' processes (CO6).
+
+| | Chrome Canary, signed in | Safari, logged out |
+|---|---|---|
+| **Pages** | Google Search, YouTube, Instagram, Reddit, Twitch, Discord, Figma, Prism | Google Search, YouTube, Instagram, Reddit, Twitch |
+| **Runs** | Three of each, 18:17–18:58 | Three of each, 19:01–19:25 |
+| **Browser** | Chrome Canary 158.0.8113.0, the next build after the automated runs' 158.0.8112.0, which it updated itself to in between. The dedicated profile, no debugging connection, no automation flags | Safari 27.2 (22625.2.8.11.9), a Private window |
+| **Records** | `target/s8-results/20261020-181706-hand-chrome-signed-in/` | `target/s8-results/20261020-190125-hand-safari-logged-out/`. A first start at 18:59 recorded only its environment |
+| **Conditions** | AC power, Low Power Mode off; load average 1.63 at the start and 1.5–4.7 after the runs; memory free 61–73% | The same power; load average 1.86 at the start and 1.3–4.4 after the runs; memory free 43–72% |
+
+### 7.1 The baseline
+
+The census by hand recorded no baseline of its own. So a fresh Chrome Canary with the same flags was measured on about:blank afterwards: three runs, 19:53–20:00 (`s8.py blank`; `target/s8-results/20261020-195301-blank-chrome-fresh/`). It measured:
+- **10 s after launch:** 297–301 MB, including five component-extension renderers (91–93 MB), so **207 MB without them** (206–210);
+- **90 s after launch:** 199–204 MB, with no extension renderer left. The runs by hand reached their steady state a median of 90 s after launch (from each record's start and write times).
+
+A page's cost subtracts the 207 MB, the definition §5 uses for the automated runs.
+
+**The baseline's profile is fresh, not the dedicated one,** so each cost includes the dedicated profile's own state. Chrome's browser process held 101–152 MB at the steady state by hand, against 90–92 MB at 90 s in the fresh profile. How much of the difference is the profile and how much the page can't be separated (inference).
+
+**A first attempt opened the dedicated profile** on about:blank, with no page loaded and no debugging connection: two runs, 19:46–19:51. CO14 says that profile is never opened by automation, so the attempt was stopped and its records (`20261020-194649-blank-chrome-signed-in/`) aren't used. Since then:
+- `s8.py blank` opens only a fresh profile;
+- the census by hand records each run's own baseline, on the list page, before the owner opens the corpus page.
+
+### 7.2 Chrome, signed in: memory
+
+All of Chrome's processes, in MB (footprint's total, shared memory counted once):
+
+| Page | Tier | Loaded | After interaction | After 30 s without input | Renderers, loaded | GPU, after 30 s | Browser, loaded | Cost above the baseline, after 30 s |
+|---|---|---|---|---|---|---|---|---|
+| Google Search | Content | 562 (553–585) | 846 (528–1,292) | 789 (517–1,053) | 298 (296–302) | 202 (115–256) | 108 | **582** (310–846) |
+| YouTube | Media | 1,000 (957–1,026) | 1,221 (1,044–1,430) | 1,115 (1,063–1,119) | 585 (584–596) | 236 (138–241) | 113 | **908** (856–912) |
+| Instagram | Content | 555 (548–583) | 1,247 (1,109–1,468) | 785 (691–1,001) | 314 (308–328) | 388 (137–391) | 103 | **578** (484–794) |
+| Reddit | Content | 820 (812–896) | 1,675 (1,089–2,174) | 1,467 (702–1,838) | 484 (474–489) | 311 (191–365) | 108 | **1,260** (495–1,631) |
+| Twitch | Media | 845 (828–861) | 762 (619–1,010) | 608 (599–783) | 468 (463–478) | 119 (118–170) | 104 | **401** (391–576) |
+| Discord | Applications | 795 (758–1,273) | 862 (632–1,259) | 634 (617–1,029) | 474 (469–772) | 120 (114–211) | 111 | **427** (410–822) |
+| Figma | Applications | 1,882 (1,820–1,919) | 1,587 (1,367–1,855) | 1,319 (1,234–1,366) | 1,283 (1,222–1,297) | 291 (285–358) | 113 | **1,111** (1,027–1,159) |
+| Prism | Applications | 778 (438–852) | 855 (812–923) | 715 (669–737) | 349 (213–398) | 241 (205–246) | 105 | **494** (462–508) |
+
+- **Interaction by hand varies from run to run.** A feed loads as much as the hand scrolls: Reddit's steady state ran from 702 to 1,838 MB across its runs, Google's from 517 to 1,053 MB.
+- **Signed-in content pages cost as much as the applications.** Reddit's median cost, 1,260 MB, is above Figma's 1,111 MB; Google Search's and Instagram's are above Discord's and Prism's.
+- **The GPU process** held 119–388 MB at the steady state, against 28–35 MB on the fresh about:blank. It held the most on Instagram and Reddit, feeds of images and video (inference).
+- **Renderers:** three to seven per page, counting cross-site frames' and the spare. Figma's held 1.3 GB when loaded, and Reddit's 1.5 GB after scrolling in its second run, each as the sum of five processes. The census by hand didn't record each process's own footprint; it now does, as the automated census did (B7, [performance](../performance.md) PF12).
+- **Figma released about 560 MB** between loading and its steady state, much of it from its renderers.
+- **A component-extension renderer appeared once,** in Prism's third run (36–40 MB), and is left out of the cost like the others.
+
+### 7.3 Chrome, signed in: the 30 s without input
+
+| Page | CPU time over 30 s (s) | Idle wakeups | Energy impact | Renderers' energy impact |
+|---|---|---|---|---|
+| Google Search | 3.03 (0.26–4.15) | 51 (13–190) | 9.4 (0.5–12.6) | 6.3 (0.2–6.3) |
+| YouTube | 14.07 (13.43–14.41) | 233 (194–266) | 44.2 (42.4–45.2) | 20.5 (19.7–31.6) |
+| Instagram | 2.34 (1.84–2.61) | 34 (31–160) | 6.9 (5.6–8.0) | 4.3 (4.0–4.7) |
+| Reddit | 10.77 (3.06–23.00) | 97 (25–521) | 34.0 (9.3–71.5) | 22.4 (6.9–45.0) |
+| Twitch | 13.02 (12.33–16.65) | 348 (154–538) | 41.0 (38.5–52.7) | 16.8 (14.4–26.3) |
+| Discord | 1.25 (0.72–2.08) | 13 (7–25) | 3.6 (2.1–6.4) | 2.2 (0.8–4.2) |
+| Figma | 4.38 (2.75–4.95) | 223 (152–333) | 13.6 (8.6–15.8) | 9.9 (6.2–12.6) |
+| Prism | 9.98 (2.21–11.30) | 50 (42–56) | 31.0 (6.7–35.0) | 16.6 (4.1–20.0) |
+
+- **YouTube and Twitch play video throughout,** so they are in a steady state rather than idle (CO9): about half a core each.
+- **Prism and Reddit kept working without input,** about a third of a core at the median, with a wide spread on Reddit.
+- **Discord was the quietest:** 1.25 s of CPU and 13 wakeups in 30 s.
+
+### 7.4 Safari, logged out: one run measures one page
+
+- **The tool kept the earlier pages open.** After each page it asked the owner to go back to the list in the same tab. Safari kept the earlier pages' WebContent processes alive, in its back-forward cache or its process cache (inference). The renderers counted rose from 2 after the first page to 5, 7 and 9, and the total from 0.74 GB to 3.8 GB, while memory free fell to 43%. **So every run after the first counts earlier pages too,** and its memory figures aren't one page's. The fault is the tool's protocol, not the session.
+- **Only the session's first run measures one page:** Google Search, logged out. All of Safari's processes held 453 MB loaded, 800 MB after the interaction and 738 MB after 30 s without input. Its renderers held 218, 549 and 501 MB, and Safari's own process 206 MB. One run, so no spread.
+- **The 30 s without input are less affected:** pages kept in the back-forward cache are suspended, with no timers or rendering (inference), so CPU time and energy belong mostly to the page shown. With that caveat:
+
+  | Page | CPU time over 30 s (s) | Idle wakeups | Energy impact |
+  |---|---|---|---|
+  | Google Search | 0.65 (0.24–1.02) | 36 (30–43), one run left out: no wakeup counted for any process | 1.8 (0.7–3.0) |
+  | YouTube | 15.51 (14.53–16.69) | 240 (158–256) | 48.3 (45.2–51.7) |
+  | Instagram | 2.31 (2.04–2.50) | 46 (38–193) | 6.9 (6.4–7.5) |
+  | Reddit | 2.69 (2.26–12.83) | 122 (54–171) | 8.3 (6.8–39.6) |
+  | Twitch | 18.04 (17.84–19.37) | 70 (69–72) | 55.8 (55.2–59.9) |
+
+  Safari ran logged out and Chrome signed in, so the two browsers' figures aren't the same pages' experience.
+- **The tool is corrected:**
+  - Safari is quit and restarted for each page.
+  - Each run records its own baseline, 10 s after the list opens.
+  - By hand, Safari covers every page of the mode, the five automated pages included, since its remote automation is off. The tool's first version left those five out.
+
+  Repeating the Safari runs needs the owner (§7.5).
+
+### 7.5 Not measured
+
+- **Chrome logged out by hand:** Google Search, YouTube, Instagram, Reddit and Twitch, which CO10 measures beside signed in.
+- **Safari:**
+  - Discord, Figma and Prism, signed in;
+  - the five automated pages;
+  - single-page memory for every page but Google Search (§7.4).
+
+  `python3 -I spikes/s8/s8.py hand --browser safari --mode logged-out` now covers the ten pages that work logged out, and `--mode signed-in` the eight that need a sign-in.
+- **The eight pages' features:** `chrome://histograms` wasn't saved, so they stay inference ([corpus](../corpus.md) §10, question 1).
+- **Safari's remote automation** stayed off.
 
 ## 8. Implications for Axiom
 
@@ -180,6 +278,8 @@ These are inferences, for CP4 and CP6:
 - **SVG images as documents are costly in Chrome:** 150 documents on Wikipedia. Axiom's image path can rasterize an SVG image and keep its source, rather than keeping a live document for each (to be designed at the images milestone).
 - **Most of what the pages use is widely available** (72 of 116 web-features). The features in only some engines are mostly enhancements (§3). That supports the standards baseline's order of priority (CP4, SB6).
 - **HTTP/3 carries most of Maps' traffic.** Networking's plan to add HTTP/3 after HTTP/1.1 and HTTP/2 stands, and the corpus will measure its effect.
+- **Signed-in feeds are the heaviest pages per tier** (§7.2). Reddit, Instagram and Google Search cost 578–1,260 MB in Chrome after scrolling, where the content tier's cap is 150 MB. So the content pages' ceilings are the tightest in the corpus, at 12–26% of Chrome's cost ([performance](../performance.md) §4.1).
+- **Feeds keep their media on the GPU:** Instagram's and Reddit's GPU processes held 311–388 MB at the steady state. Charging GPU memory to the page (PF4), and dropping what has scrolled away, matter most on these pages (inference).
 
 ## 9. Threats to validity
 
@@ -191,7 +291,12 @@ These are inferences, for CP4 and CP6:
 - **The DOM counts** exclude closed shadow roots, and the documents of cross-site frames.
 - **"Above about:blank"** includes Chrome's browser-process growth, a few MB. The baseline itself varies by up to 16 MB between runs. Leaving out the extension renderers subtracts their own footprints from a total that counts shared memory once, an approximation (§5).
 - **`top`'s wakeup counter failed in two runs** (§6).
-- **Only Chrome, and only five pages.** Safari and the other eight pages wait for the session by hand (§7).
+- **By hand** (§7):
+  - the owner's interaction differs from run to run, so the spread is wide;
+  - the baseline is a fresh profile's, measured after the session, so each cost includes the dedicated profile's own state (§7.1);
+  - the runs used Canary 158.0.8113.0, the automated ones 158.0.8112.0;
+  - one run's load average reached 4.68 (Figma's third), above PF1's 3.0.
+- **Safari:** only one run measures one page (§7.4).
 
 ## 10. Reproducing these results
 
@@ -204,7 +309,13 @@ python3 -I tools/s8-report.py target/s8-results/<timestamp>-auto [...] \
     --web-features target/s8/web-features-3.43.0/data.json
 ```
 
-`tools/s8-measure.sh --quick` checks the tools against the live pages, and counts towards each site's limit of five loads per census (CO4). The census by hand runs with `s8.py signin` and `s8.py hand` (§7). web-features' `data.json` is release v3.43.0's [W1], downloaded into `target/`.
+`tools/s8-measure.sh --quick` checks the tools against the live pages, and counts towards each site's limit of five loads per census (CO4). The census by hand runs with `s8.py signin` and `s8.py hand` (§7). For the session of 2026-10-20, which recorded no baseline of its own, `s8.py blank` measures a fresh Canary on about:blank, and the report takes it with `--blank`:
+
+```sh
+python3 -I spikes/s8/s8.py blank          # three runs, about 6 minutes; no page loaded
+python3 -I tools/s8-report.py target/s8-results/20261020-181706-hand-chrome-signed-in \
+    --blank target/s8-results/20261020-195301-blank-chrome-fresh
+``` web-features' `data.json` is release v3.43.0's [W1], downloaded into `target/`.
 
 ## Sources
 

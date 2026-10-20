@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 6, CP6, 2026-10-20), with [ADR-0019](adr/0019-performance-methodology-and-budgets.md), for the owner at Gate B; binding when it is accepted. The final memory budgets B1–B7 are proposed in the same ADR as an amendment to the [process model](security/process-model.md), as ADR-0004's D6 requires |
+| **Status** | **Binding** since [ADR-0019](adr/0019-performance-methodology-and-budgets.md) was accepted (2026-10-20, Step 6's Gate B), with the final B1–B7 amending the [process model](security/process-model.md), as ADR-0004's D6 requires. Written at Step 6, CP6. **Every corpus page's ceiling** set from S8's measurements of Chrome, the eight measured by hand included (§4.1) |
 | **Question** | How is performance measured on this Mac, and what are the budgets: memory, time, energy and idle, and build? What are the limits and deadlines the designs left open, and how is each budget enforced? |
 | **Answers** | Step 6 question Q4 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); decision-map item X3; the tracker's handed-over questions 11–24 (§2.2) |
 | **Feeds** | The process model's B1–B7 (CP7); the [testing strategy](testing.md)'s benchmarks (TS13); the roadmap (CP8); Milestone 1 (CP9) |
@@ -19,10 +19,10 @@ MB means 10⁶ bytes, as B1 and the spikes' results use it; MiB means 2²⁰ byt
 ## Summary
 
 - **One method for every measurement** (PF1–PF5): S1–S8's conditions, made rules. Each budget becomes a benchmark or test with its threshold, checked at every milestone gate.
-- **The final memory budgets,** for the owner (PF6–PF12):
+- **The final memory budgets,** accepted by the owner at Gate B (PF6–PF12):
   - **B1:** the core browser at 60 MB, plus the visible windows' tiles at 6.2 bytes per pixel (S6 measured 6.14), so 25.4 MB for a 2,560 × 1,600 window and 32.1 MB for a full-screen one here;
   - **B2:** a ready, empty renderer at 10 MB;
-  - **B3:** a typical page at 50 MB, as the median of the documents and content tiers, with **a ceiling for every corpus page**, from S8's measurements of Chrome;
+  - **B3:** a typical page at 50 MB, as the median of the documents and content tiers, with **a ceiling for every corpus page**, from S8's measurements of Chrome: 70–300 MB, at 12–50% of Chrome's cost;
   - **B4:** the network process at 25 MB;
   - **B5:** 16 renderers;
   - **B6:** a typical session at 1 GB;
@@ -107,7 +107,7 @@ MB means 10⁶ bytes, as B1 and the spikes' results use it; MiB means 2²⁰ byt
 | PF9 | **B4,** the network process, idle | **≤ 25 MB** (unchanged) | Chrome's network process took 13–16 MB on the corpus pages (S8, measured). **Hypothesis** for Axiom, measured at the network milestone |
 | PF10 | **B5,** the soft limit on renderers | **16** (unchanged) | 16 × B3 = 800 MB; Chromium's limit is soft too ([process model](security/process-model.md) §7) |
 | PF11 | **B6,** the whole browser in a typical session | **≤ 1 GB for 10 tabs of document and content pages on about 6 sites** (unchanged). Sessions with media or application pages are bounded instead by each page's ceiling, B5 and memory-pressure discarding | B1 + B4 + seven renderers at B3, plus the GPU process and headroom. **Hypothesis,** measured at the content milestone |
-| PF12 | **B7,** the cap on one renderer | **2 GiB,** a quarter of physical memory. Past it, the renderer is ended and the tab shows an error | S8's largest Chrome renderer set was about 0.5 GB (VS Code), so the cap stops runaway pages without touching real ones (measured). Unchanged |
+| PF12 | **B7,** the cap on one renderer | **2 GiB,** a quarter of physical memory. Past it, the renderer is ended and the tab shows an error | **Measured,** S8: the largest single Chrome renderer on the automated pages held about 0.5 GB (VS Code). On the pages measured by hand, Chrome's renderers together reached 1.3 GB (Figma, loaded) and 1.5 GB (Reddit, after scrolling), across five processes each; their single largest wasn't recorded. So the cap stops runaway pages without touching the corpus, by inference, with the least margin on Figma and Reddit. Unchanged |
 
 ### 4.1 Ceilings for the corpus pages
 
@@ -132,18 +132,31 @@ Values are rounded down to 5 MB. They are fixed numbers: they don't move with Ch
 - B3's median of 50 MB over the documents and content tiers needs typical pages far below their ceilings.
 - The caps bound the outliers, so B6's 1 GB session holds.
 
-| Page | Tier | Chrome's steady-state cost above about:blank (S8, measured) | Axiom's ceiling | Measured at (CP8 places it) |
-|---|---|---|---|---|
-| Wikipedia | Documents | 319 MB | **100 MB** (the tier's cap) | The documents milestone |
-| MDN | Documents | 145 MB | **70 MB** | The documents milestone, then script for its examples |
-| Google Maps | Media and maps | 627 MB | **300 MB** (the tier's cap) | The milestone that brings WebGL and the GPU process |
-| Three.js | Applications | 470 MB | **235 MB** | The milestone that brings WebGPU |
-| VS Code for the Web | Applications | 457 MB | **225 MB** | The applications milestone |
-| Google Search, Instagram, Reddit | Content | Chrome by hand, at Gate B | **150 MB** (the tier's cap) until measured | The content milestone |
-| YouTube, Twitch | Media | Chrome by hand | **300 MB** (the tier's cap) until measured | The media milestone |
-| Discord, Figma, Prism | Applications | Chrome by hand, signed in | **300 MB** (the tier's cap) until measured | Their milestones, signed in from L2 with test accounts |
+| Page | Tier | Chrome's steady-state cost above about:blank (S8, measured) | Axiom's ceiling | Share of Chrome's cost | Measured at (CP8 places it) |
+|---|---|---|---|---|---|
+| Wikipedia | Documents | 319 MB | **100 MB** (the tier's cap) | 31% | The documents milestone |
+| MDN | Documents | 145 MB | **70 MB** | 48% | The documents milestone, then script for its examples |
+| Google Search | Content | 582 MB, signed in, by hand | **150 MB** (the tier's cap) | 26% | The content milestone |
+| Instagram | Content | 578 MB, signed in, by hand | **150 MB** (the tier's cap) | 26% | The content milestone |
+| Reddit | Content | 1,260 MB, signed in, by hand | **150 MB** (the tier's cap) | 12% | The content milestone |
+| YouTube | Media | 908 MB, signed in, by hand | **300 MB** (the tier's cap) | 33% | The media milestone |
+| Twitch | Media | 401 MB, signed in, by hand | **200 MB** | 50% | The media milestone |
+| Google Maps | Media and maps | 627 MB | **300 MB** (the tier's cap) | 48% | The milestone that brings WebGL and the GPU process |
+| Discord | Applications | 427 MB, signed in, by hand | **210 MB** | 49% | Its milestone, signed in from L2 with a test account |
+| Three.js | Applications | 470 MB | **235 MB** | 50% | The milestone that brings WebGPU |
+| Figma | Applications | 1,111 MB, signed in, by hand | **300 MB** (the tier's cap) | 27% | Its milestone, signed in from L2 with a test account |
+| VS Code for the Web | Applications | 457 MB | **225 MB** | 49% | The applications milestone |
+| Prism | Applications | 494 MB, signed in, by hand | **245 MB** | 50% | Its milestone, signed in from L2 with a test account |
 
-**Every ceiling is a hypothesis** (RC2), measured at the milestone named, under PF1. A miss goes back to the owner as a revision (PF5). When S8's session by hand measures a page in Chrome, its ceiling becomes half of that figure, capped by its tier, and is recorded here.
+**Where the figures come from:**
+- **The five automated pages:** logged out, in Chrome Canary 158.0.8112.0 ([S8 results](research/s8-results.md) §5).
+- **The eight pages measured by hand:** signed in, by the owner, in Chrome Canary 158.0.8113.0, the next build (§7 of the results).
+
+  Their baseline is a fresh Canary on about:blank, measured after the session, so their costs include the dedicated profile's own state.
+
+**Every ceiling is a hypothesis** (RC2), measured at the milestone named, under PF1. A miss goes back to the owner as a revision (PF5).
+
+**The caps bind on seven pages.** On the content pages they bind hardest: signed-in feeds cost as much as applications in Chrome, so their ceilings are 12–26% of Chrome's cost, against about half elsewhere. ADR-0019 names that case among its conditions for revisiting ("S8's session by hand shows a corpus page's Chrome cost to differ from its assumed tier cap"), so it goes to the owner at Gate C. Until the owner decides otherwise, the ceilings above stand as the accepted rule gives them.
 
 ## 5. Time
 
@@ -158,7 +171,7 @@ Values are rounded down to 5 MB. They are fixed numbers: they don't move with Ch
 | # | Budget | Value | Evidence |
 |---|---|---|---|
 | PF16 | **No wakeups while idle** | A loaded static page with no timers or animations: **no idle wakeups** in its renderer over 30 s, and none in the browser or network processes beyond what the system's own events cause. Pages with their own timers: no wakeups beyond what they schedule, coalesced with the system's timer leeway | **Measured** possible: S6's compositor and S7's network process had no idle wakeups in most windows (AC3, PM8). Chrome's browser process used 0.45–0.9 s of CPU in every 30 s window of S8, whatever the page (measured) |
-| PF17 | **Hidden pages and energy impact** | Hidden pages: no rendering; timers once a second; chained timers once a minute after 5 minutes hidden and 30 s silent; video paused unless audible. Pages that animate or play: **energy impact no higher than Safari's** on the same page | **Sourced:** Chrome's throttling [C2]. Safari's energy figures come from S8's session by hand (pending); **hypothesis** until the media milestone measures both |
+| PF17 | **Hidden pages and energy impact** | Hidden pages: no rendering; timers once a second; chained timers once a minute after 5 minutes hidden and 30 s silent; video paused unless audible. Pages that animate or play: **energy impact no higher than Safari's** on the same page | **Sourced:** Chrome's throttling [C2]. Safari's figures for five pages, logged out, come from S8's session by hand, with a caveat ([S8 results](research/s8-results.md) §7.4); **hypothesis** until the media milestone measures both |
 
 ## 7. Build
 
@@ -179,8 +192,8 @@ Values are rounded down to 5 MB. They are fixed numbers: they don't move with Ch
 
 ## 9. Open questions
 
-1. **Safari's figures** for every corpus page, and Chrome's for the eight pages measured by hand, come from S8's session by hand (Gate B). §4.1's ceilings for those pages wait for them.
-2. **The ceilings' rule** (§4.1), half of Chrome's cost capped by tier, is a choice for the owner to accept at Gate B, as the final B1–B7 are.
+1. **The content tier's cap** (§4.1): it binds at 12–26% of Chrome's cost on the three content pages, signed in. ADR-0019's condition for revisiting is met, so it goes to the owner at Gate C.
+2. **Safari's figures:** only one run of the session by hand measured one page (S8 results §7.4). PF17's comparison waits for the corrected session, which needs the owner.
 3. **Values marked hypothesis** are measured at the milestones named. A miss returns to the owner as a revision (PF5).
 
 ## Sources

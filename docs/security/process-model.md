@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0004's acceptance (2026-10-17). The owner accepted SI1–SI7 as staged (SI3 limited to L1 and non-sensitive L2; out-of-process iframes required for L3) and B1–B7 as initial baselines. Spike S4 measurements are folded in ([S4 results](../research/s4-results.md)). **Refined at Step 5's Gate C** (2026-10-20), with the owner's approval: S5's and S7's metadata rules, ImageIO's place, and B1's scope (change record below) |
+| **Status** | **Binding** since ADR-0004's acceptance (2026-10-17). The owner accepted SI1–SI7 as staged (SI3 limited to L1 and non-sensitive L2; out-of-process iframes required for L3) and B1–B7 as initial baselines. Spike S4 measurements are folded in ([S4 results](../research/s4-results.md)). **Refined at Step 5's Gate C** (2026-10-20), with the owner's approval: S5's and S7's metadata rules, ImageIO's place, and B1's scope. **The final B1–B7** at Step 6's Gate B (2026-10-20), with [ADR-0019](../adr/0019-performance-methodology-and-budgets.md) (change record below) |
 | **Question** | Into which processes is Axiom split? What may each one do, how are sites assigned to processes, which rules govern IPC, and how much memory may each process use on the 8 GB M1? |
 | **Feeds** | ADR-0004; the architecture proposal (Step 4): event loop, pipeline, embedder API; Step 5 subsystems; Step 6 budgets and roadmap |
 | **Builds on** | [Threat model](threat-model.md); [macOS confinement note](../research/macos-process-confinement.md); [ADR-0001](../adr/0001-scope-and-target.md); [ADR-0002](../adr/0002-implementation-language.md); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [S2 results](../research/s2-results.md) |
-| **Last updated** | 2026-10-20: the change record's first entries |
+| **Last updated** | 2026-10-20: the final B1–B7 (§7) |
 
 Everything here is **planned**; nothing is implemented. Claims about other browsers are sourced (§11). Budgets are **targets**, to be validated (§7).
 
@@ -21,6 +21,7 @@ The model is binding, so it changes only with the owner's approval. Changes sinc
 | 2026-10-20 | **The network process, `/var`** (§4.1): the metadata of the `/var` symlink, which DNS-SD's client needs to reach `/var/run/mDNSResponder`. The kernel logs no denial for it | [S7 results](../research/s7-results.md) §3.1, §5, checked by removal | As above |
 | 2026-10-20 | **ImageIO in the media utility process** (§3, note 3; §4.2): ImageIO decodes AVIF there rather than in a renderer, because in a renderer it needs VideoToolbox's decoder service, a Mach service §4.1 denies renderers | [S5 results](../research/s5-results.md) §7; [images and media](../architecture/images-and-media.md) IM3 | Step 5's Gate C: "IM3's fallback (AVIF in the media utility process) is approved." |
 | 2026-10-20 | **B1's scope** (§7): ≤ 60 MB now covers the core browser process state, and each visible window's tile surfaces get a budget of their own, by their pixel dimensions, which Step 6 sets. One window's compositor state had left about 4 MB of the old B1 for everything else | [S6 results](../research/s6-results.md) §7 (S6-Q5) | After Step 5's Gate C ([OQ-23](../open-questions.md)): "Approved. In Step 6, budget visible window tile memory separately based on surface pixel dimensions (e.g. 25.2 MB for this Retina window), and maintain a 60 MB budget for the core browser process state." |
+| 2026-10-20 | **The final B1–B7** (§7), set by Step 6 as ADR-0004's D6 required: B1's tiles at ≤ 6.2 bytes per window pixel beside the core's 60 MB; B3's 50 MB median kept, with a ceiling for every corpus page, half of Chrome Canary 158's measured cost capped by tier; B6 bounded for sessions of document and content pages; B2, B4, B5 and B7 unchanged. The initial targets (2026-10-17) were B1 ≤ 60 MB in all, B3 ≤ 50 MB as a median, and B6 ≤ 1 GB for 10 tabs on about 6 sites, with B2, B4, B5 and B7 as now | [Performance budgets](../performance.md) §4 (PF6–PF12); [S6 results](../research/s6-results.md) §7; [S8 results](../research/s8-results.md) | Step 6's Gate B: "ADR-0019 (Performance Methodology and Budgets): Accepted as proposed, including the B1-B7 process model amendment (B1 tile scaling formula and B3 per-page memory ceilings)." |
 
 ---
 
@@ -181,17 +182,17 @@ The transport itself (Mach messages, or Unix-domain socket pairs) is chosen in S
 | Chrome 69 with Site Isolation, total browser memory, median | 685 MB | Paper [3], Figure 3 |
 | Unique sites open, median and 99th percentile | 6.0; 41.9 | Paper [3] |
 
-**Initial targets**, measured as each process's physical footprint, as in S2. They are validated by S4-Q3 and set finally in Step 6 (performance budgets, X3):
+**The final budgets** (Step 6's Gate B, 2026-10-20, [ADR-0019](../adr/0019-performance-methodology-and-budgets.md); the initial targets of 2026-10-17 are in the change record), measured as each process's physical footprint, under the conditions of the [performance budgets](../performance.md)' PF1–PF4. A page's cost includes the GPU and compositor memory allocated for it, charged to its renderer (PF4):
 
 | # | Budget | Target | Basis |
 |---|---|---|---|
-| B1 | Browser process, idle, one window: **the core browser process state,** with each visible window's tile surfaces budgeted separately, by their pixel dimensions (revised 2026-10-20; change record) | ≤ 60 MB, plus the tiles' budget, which Step 6 sets | S2's 20 MB, plus browser UI, profile and compositor. S6 measured one 2,560 × 1,600 window's tiles at 25.2 MB of surfaces ([S6 results](../research/s6-results.md) §7) |
-| B2 | Renderer, sandboxed and ready, empty document | ≤ 10 MB | S4 measured a sandboxed helper at 1.14 MiB, and 4.05 MiB once CoreText has drawn text. Engine state and an empty heap come on top |
-| B3 | Renderer, typical page (median) | ≤ 50 MB | Chrome's 42 MB median, for comparable content in 2018 |
-| B4 | Network process, idle | ≤ 25 MB | Excludes the disk cache's mapped files |
-| B5 | Renderer soft limit on 8 GB | 16 processes | 16 × B3 = 800 MB at typical pages. A soft limit, as in Chromium [2] |
-| B6 | Whole browser, typical session (10 tabs, about 6 sites) | ≤ 1 GB | B1 + B4 + about 7 renderers at B3, plus GPU and headroom |
-| B7 | Per-renderer cap | 2 GiB, a quarter of physical memory; to be set in Step 6 | Above it, the renderer is terminated and the tab shows an error (threat model SG11) |
+| B1 | Browser process, idle, one window | **≤ 60 MB for the core browser process state, plus each visible window's tiles at ≤ 6.2 bytes per window pixel** while idle (25.4 MB at 2,560 × 1,600; 32.1 MB at 2,880 × 1,800), ≤ 7 bytes during updates, the spares freed within 1 s | S2's 20 MB, plus browser UI, profile and compositor. S6 measured a window's tiles at 6.14 bytes a pixel ([S6 results](../research/s6-results.md) §7); PF6 |
+| B2 | Renderer, sandboxed and ready, empty document | ≤ 10 MB | S4 measured a sandboxed helper at 1.14 MiB, and 4.05 MiB once CoreText has drawn text. Engine state and an empty heap come on top; PF7 |
+| B3 | Renderer, typical page | **≤ 50 MB as the median over the documents and content tiers' corpus pages, and no corpus page above its ceiling:** half of Chrome Canary 158's measured cost, capped at 100 MB (documents), 150 MB (content), 300 MB (media and maps) and 300 MB (applications); the ceilings are listed in the [performance budgets](../performance.md) §4.1 | Chrome's 42 MB median, for comparable content in 2018 [3]; S8's census of the corpus ([S8 results](../research/s8-results.md)); PF8 |
+| B4 | Network process, idle | ≤ 25 MB | Excludes the disk cache's mapped files. Chrome's took 13–16 MB on the automated corpus pages (S8); PF9 |
+| B5 | Renderer soft limit on 8 GB | 16 processes | 16 × B3 = 800 MB at typical pages. A soft limit, as in Chromium [2]; PF10 |
+| B6 | Whole browser, typical session | **≤ 1 GB for 10 tabs of document and content pages on about 6 sites;** sessions with media or application pages are bounded by each page's ceiling, B5 and discarding under memory pressure | B1 + B4 + about 7 renderers at B3, plus GPU and headroom; PF11 |
+| B7 | Per-renderer cap | 2 GiB, a quarter of physical memory | Above it, the renderer is terminated and the tab shows an error (threat model SG11); PF12 |
 
 **Responding to memory pressure.** The browser listens for macOS memory-pressure events (macOS note §2.7):
 - **At warning:** it drops the spare renderer, trims caches, and discards the renderers of background tabs, oldest first. A discarded tab keeps its URL and state, and reloads when shown.

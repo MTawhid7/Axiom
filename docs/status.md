@@ -6,17 +6,17 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero: Step 6, standards, testing, budgets and the roadmap** (authorized 2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written, and spike S8 authorized. CP1–CP7 ✅, **at Gate B.** Step 5 is done and merged (2026-10-20): ADRs 0010–0017 are accepted. Production engine code is **not** authorized |
+| Phase | **Phase Zero: Step 6, standards, testing, budgets and the roadmap** (authorized 2026-10-20). **Gate A passed** (2026-10-20): the plan approved as written, and spike S8 authorized. CP1–CP7 ✅. **Gate B passed** (2026-10-20): ADRs 0018 and 0019 accepted, spike S9 authorized, and CP8–CP10 to run without pausing, to Gate C. Step 5 is done and merged (2026-10-20): ADRs 0010–0017 are accepted. Production engine code is **not** authorized |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 5** (merged with `--no-ff` on 2026-10-20) and is pushed. **Step 6 runs on branch `step-6`**, from `main` at `b4948ce`, pushed to `origin` as the owner authorized at Gate A, and kept pushed |
-| Current checkpoint | **Step 6: CP1–CP7 ✅; Gate B:** the owner reviews ADRs 0018 and 0019 and the final B1–B7 ([tracker](research/step-6-standards-budgets-roadmap.md)). Step 5: CP1–CP19 ✅ ([tracker](research/step-5-subsystems.md)) |
-| Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census,** is built (`spikes/s8/`, Python): its automated part is complete ([results](research/s8-results.md)), and its session by hand awaits the owner. Tooling under `tools/`, now with `s6-tails.py` and `png-region-stats.py`; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
+| Current checkpoint | **Step 6: CP1–CP7 ✅; Gate B passed;** spike S9, then CP8, the roadmap ([tracker](research/step-6-standards-budgets-roadmap.md)). Step 5: CP1–CP19 ✅ ([tracker](research/step-5-subsystems.md)) |
+| Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census** (`spikes/s8/`, Python), is complete in Chrome: automated, and by the owner's hand ([results](research/s8-results.md)). Its Safari runs need repeating with the corrected tool. Tooling under `tools/`, now with `s6-tails.py` and `png-region-stats.py`; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md), [S6](research/s6-results.md), [S7](research/s7-results.md). Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final**, with build thresholds T1–T4 |
 | | [ADR-0003](adr/0003-gc-handle-and-rooting-pattern.md): GC handle and rooting pattern, Pattern B (Nova style), with obligations C1–C5 |
 | | [ADR-0004](adr/0004-process-model-and-sandbox.md): process model, sandbox and JIT policy (2026-10-17), validated by spike S4. The owner confirmed S4's refinements |
 | | [Threat model](security/threat-model.md) (2026-10-17), amended: out-of-process iframes are required for L3 |
-| | [Process model](security/process-model.md), binding with ADR-0004 (2026-10-17); refined at Step 5's Gate C (2026-10-20) in its change record: S5's and S7's metadata rules, ImageIO's place, and B1's scope (the core browser at 60 MB, tiles budgeted by their pixels) |
+| | [Process model](security/process-model.md), binding with ADR-0004 (2026-10-17); refined at Step 5's Gate C (2026-10-20) in its change record: S5's and S7's metadata rules, ImageIO's place, and B1's scope (the core browser at 60 MB, tiles budgeted by their pixels). **The final B1–B7** at Step 6's Gate B (2026-10-20), with ADR-0019 |
 | | [ADR-0005](adr/0005-ipc-transport-and-interfaces.md): IPC, Mach transport, capabilities, IDL, `Untrusted<T>` (2026-10-17, Gate B) |
 | | [ADR-0006](adr/0006-event-loop-and-threading.md): event loop and threading, with EL11 amended for read-only lending of DOM arenas (2026-10-17, Gate B) |
 | | [ADR-0007](adr/0007-frame-tree-pipeline-and-input.md): frame tree, rendering pipeline, invalidation and input across frames (2026-10-17, Gate B); IV1 and IV2 amended for size container queries (2026-10-20, Step 5's Gate C) |
@@ -30,34 +30,52 @@
 | | [ADR-0015](adr/0015-html-parsing-and-the-dom.md): HTML parsing and the DOM (2026-10-20, Step 5's Gate C); XSLT deferred (OQ-22) |
 | | [ADR-0016](adr/0016-style-layout-and-paint.md): style, layout and paint, with `:visited` by partitioned history (2026-10-20, Step 5's Gate C) |
 | | [ADR-0017](adr/0017-javascript-engine-and-bindings.md): the JavaScript engine and bindings (2026-10-20, Step 5's Gate C) |
-| The corpus | 13 sites, set by the owner on 2026-10-20 ([OQ-2](open-questions.md)), and [defined](corpus.md) at Step 6's CP2. Eight sites' terms forbid automated access, even logged out, so they are measured by hand; five may be loaded by automation, with care |
+| | [ADR-0018](adr/0018-corpus-standards-and-testing.md): the corpus, the standards baseline and testing, X1 and X2 (2026-10-20, Step 6's Gate B); the automation boundary confirmed, the not-planned list approved |
+| | [ADR-0019](adr/0019-performance-methodology-and-budgets.md): performance methodology and budgets, X3, with the final B1–B7 (2026-10-20, Step 6's Gate B) |
+| The corpus | 13 sites, set by the owner on 2026-10-20 ([OQ-2](open-questions.md)), and [defined](corpus.md) at Step 6's CP2, binding since Gate B. Eight sites' terms forbid automated access, even logged out, so they are measured by hand; five may be loaded by automation, with care. Every page has a memory ceiling ([performance](performance.md) §4.1) |
 
-## Next steps: Gate B
+## Next steps: S9, then CP8–CP10
 
-**Work stops for the owner's Gate B decisions,** each with a recommendation:
-1. **[ADR-0018](adr/0018-corpus-standards-and-testing.md),** the corpus, the standards baseline and testing (X1, X2). Recommended: accept. It makes milestones' conformance measurable, as the charter's §8 asks, with targets a new engine has been shown to reach. It keeps the corpus's measurements within each site's terms, and keeps a test-only WebDriver server out of the browser you use.
-2. **[ADR-0019](adr/0019-performance-methodology-and-budgets.md),** performance methodology and budgets (X3), **with the final B1–B7 as an amendment to the process model:**
-   - B1: 60 MB for the core, plus tiles at 6.2 bytes per window pixel;
-   - B3: a 50 MB median, plus a ceiling for each corpus page at half of Chrome's measured cost, capped by tier;
-   - B2 and B4–B7: unchanged.
+**Between Gate B and Gate C, work runs without pausing,** as the owner approved:
+1. **Spike S9** ([testing](testing.md) §9): cargo-fuzz with AddressSanitizer and coverage, ThreadSanitizer, and wptrunner against Chrome Canary, on this Mac.
+2. **CP8, the roadmap;** **CP9, Milestone 1;** **CP10,** requirements traceability, the overview v2 and ADRs 0020 and 0021. Then **Gate C,** the final design review.
 
-   Recommended: accept. B1 follows your revision with S6's measured rate. Every value is labelled measured, sourced or hypothesis, and a missed budget comes back to you.
-3. **The automation boundary** ([corpus](corpus.md) §3): S8 automated only five pages, because eight sites' terms forbid automated access even logged out (Google Search through robots.txt, YouTube, Instagram, Reddit, Twitch, Discord, Figma, Prism). Recommended: confirm. The alternative would breach those sites' published terms; the session by hand covers those pages.
-4. **S8's session by hand,** which needs you at the keyboard, about one to two hours ([S8 results](research/s8-results.md) §7):
-   - **Chrome Canary, signed in:** `python3 -I spikes/s8/s8.py signin` once, to sign in to the sites you want measured; then `python3 -I spikes/s8/s8.py hand --browser chrome --mode signed-in` for the eight pages;
-   - **Chrome Canary, logged out:** the same command with `--mode logged-out`, for the five of them that work logged out;
-   - **Safari, all thirteen pages:** `--browser safari`.
-
-   Recommended: run it when convenient, before the content milestone at the latest. It sets eight pages' ceilings and Safari's baselines, and CP8–CP10 don't wait for it.
-   - **Optional:** after each page, save `chrome://histograms/Blink.UseCounter`, to record the features of the pages measured by hand. Recommended: yes; it takes seconds a page and fills the census's gap.
-   - **Optional:** turn on Safari's remote automation for the session (Settings → Developer → Allow remote automation), so the five automated pages run by themselves in Safari. Recommended: your choice. It lets local WebDriver clients drive Safari's isolated automation windows until you turn it off again.
-5. **Spike S9,** test tooling on this Mac ([testing](testing.md) §9): cargo-fuzz with AddressSanitizer, ThreadSanitizer, and wptrunner within 8 GB. Recommended: authorize. It confirms the fuzzing and WPT harnesses here before Milestone 1 depends on them. It installs cargo-fuzz under `target/`, plus one rustup component that can be removed.
-6. **The not-planned list** ([standards](standards.md) §5.3): DRM, plugins, Application Cache and Web SQL, device APIs that only one engine implements, WebXR, Gamepad, Web MIDI, speech, and Push. Recommended: accept. Any entry can be moved at a later gate.
-7. **The cadence:** CP8–CP10 without pausing (the roadmap, Milestone 1, then the final synthesis), to Gate C. Recommended: yes.
-
-Informational: whether to add GitHub's hosted runners for correctness checks is for Milestone 1 (TS17).
+**Optional for the owner, at any time,** each by hand with the corrected census tool ([S8 results](research/s8-results.md) §7.5):
+- Safari again, logged out and signed in, since the first session's runs counted earlier pages;
+- Chrome logged out, for the five pages that work without an account.
 
 ## Session log
+
+### 2026-10-20 — Session 15 (Gate B; S8 by hand; S9; Step 6 part 2)
+
+**Gate B, the owner's decisions** (2026-10-20):
+1. "ADR-0018 (Corpus, Standards Baseline, and Testing Strategy): Accepted as proposed."
+2. "ADR-0019 (Performance Methodology and Budgets): Accepted as proposed, including the B1-B7 process model amendment (B1 tile scaling formula and B3 per-page memory ceilings)."
+3. "Automation Boundary: Confirmed. Automating only the 5 permitted pages and reserving the other 8 for manual testing was the correct decision to respect site terms."
+4. "Spike S8 Manual Session: Completed. I have executed the manual testing sessions across both Chrome Canary and Safari. The formal results are recorded on disk: Chrome Canary (Signed-in, 8 sites): target/s8-results/20261020-181706-hand-chrome-signed-in/ Safari (Logged-out, 5 sites): target/s8-results/20261020-190125-hand-safari-logged-out/ Please integrate these baselines into docs/corpus.md, docs/performance.md, and s8-results.md to calibrate the final B3 ceilings for all 13 sites." With it: "I have used my secondary accounts for these tests," and Prism's URL for that account.
+5. "Spike S9 (Testing and Fuzzing Tooling): Authorized. Proceed with validating cargo-fuzz, AddressSanitizer/ThreadSanitizer, and wptrunner on this Mac."
+6. "Not-Planned List: Approved as written in docs/standards.md §5.3 (DRM, plugins, Web SQL, AppCache, WebXR, Web MIDI, etc.)."
+7. "Cadence: Approved. Proceed through CP8–CP10 (Roadmap, Milestone 1 specification, and Phase Zero final synthesis) without pausing up to Gate C."
+
+**Recorded:**
+- ADRs 0018 and 0019 accepted, with their decision histories;
+- the process model's §7 holds the final B1–B7, with a change-record entry;
+- the four documents binding;
+- the decision map (X1–X3 accepted), OQ-13 and OQ-23, the indexes and the tracker.
+
+**S8's session by hand, folded in** ([results](research/s8-results.md) §7):
+- **The baseline:** the session recorded none, so `s8.py blank` (new) measured a fresh Canary on about:blank: 207 MB without its extension renderers.
+- **Chrome's costs, signed in:** Reddit 1,260 MB, Figma 1,111, YouTube 908, Google Search 582, Instagram 578, Prism 494, Discord 427, Twitch 401.
+- **Every page's ceiling** by the accepted rule ([performance](performance.md) §4.1). The content cap binds at 12–26% of Chrome's cost, which meets one of ADR-0019's conditions for revisiting, so it goes to the owner at Gate C.
+- **Safari's runs need repeating.** The tool had the owner go back to the list in the same tab, so Safari kept earlier pages alive and later runs counted them; only the first run measures one page. The tool is corrected.
+- **Prism's new URL** is in `scratch/corpus-urls.txt` only; its `u=` stays out of the repository.
+
+**A deviation, stopped.** A first attempt at the baseline opened the dedicated profile by script: two runs on about:blank, 19:46–19:51, with no page loaded and no debugging connection. CO14 says that profile is never opened by automation. So the attempt was stopped and its records aren't used. The profile closed cleanly (`SessionEnded`), and `s8.py blank` now opens only a fresh profile.
+
+**Clean-up:**
+- Chrome Canary left two crash reports at 17:32–17:33, during the owner's `s8.py signin` (non-fatal guard faults). Both were removed from `~/Library/Logs/DiagnosticReports`.
+- One report, at 17:10, came from macOS's Software Update settings; it was left alone.
+- The fresh profiles were deleted after each run.
 
 ### 2026-10-20 — Session 14 (Gate A; Step 6 from CP2)
 

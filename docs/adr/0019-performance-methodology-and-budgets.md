@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-20), for the owner at Step 6's Gate B, with an amendment to the process model's budgets B1–B7 |
+| **Status** | **Accepted** (2026-10-20, Step 6's Gate B), with the amendment to the process model's budgets B1–B7: "Accepted as proposed, including the B1-B7 process model amendment" |
 | **Date** | 2026-10-20 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Performance budgets](../performance.md) (PF1–PF24); [the process model](../security/process-model.md) §7 and its change record; [ADR-0004](0004-process-model-and-sandbox.md) (D6); [ADR-0002](0002-implementation-language.md) (T1–T4); [S6 results](../research/s6-results.md); [S8 results](../research/s8-results.md); [the corpus](../corpus.md); [ADR-0018](0018-corpus-standards-and-testing.md); decision-map item X3; [OQ-13](../open-questions.md), [OQ-23](../open-questions.md) |
@@ -12,6 +12,8 @@
 | Date | Event |
 |---|---|
 | 2026-10-20 | Proposed at Step 6, CP7 |
+| 2026-10-20 | **Accepted** at Step 6's Gate B. The owner: "ADR-0019 (Performance Methodology and Budgets): Accepted as proposed, including the B1-B7 process model amendment (B1 tile scaling formula and B3 per-page memory ceilings)." The [process model](../security/process-model.md)'s §7 and change record carry the final B1–B7 |
+| 2026-10-20 | **The eight pages measured by hand get their ceilings,** by the accepted rule (half of Chrome's cost, capped by tier), from S8's session by hand, signed in ([S8 results](../research/s8-results.md) §7): Google Search, Instagram and Reddit 150 MB (the content cap); YouTube 300 MB (the media cap); Twitch 200 MB; Discord 210 MB; Figma 300 MB (the applications cap); Prism 245 MB. All thirteen are in the [performance budgets](../performance.md) §4.1. **A condition for revisiting is met:** the content pages' Chrome costs (578–1,260 MB) put their cap at 12–26% of Chrome's cost, so the cap goes to the owner at Gate C |
 
 ## Question
 
@@ -61,19 +63,19 @@ How is performance measured on this Mac, and what must Axiom meet: the final mem
 
 ## Decision
 
-**Proposed:** adopt [the performance budgets](../performance.md) (PF1–PF24) as binding, and **amend the process model's §7** with the final B1–B7:
+**Accepted:** adopt [the performance budgets](../performance.md) (PF1–PF24) as binding, and **amend the process model's §7** with the final B1–B7:
 
-| # | Budget | Final value (proposed) | Initial value (2026-10-17) |
+| # | Budget | Final value | Initial value (2026-10-17) |
 |---|---|---|---|
 | B1 | Browser process, idle, one window | **≤ 60 MB for the core, plus each visible window's tiles at ≤ 6.2 bytes per window pixel** (25.4 MB at 2,560 × 1,600; 32.1 MB at 2,880 × 1,800), ≤ 7 bytes during updates, the spares freed within 1 s | ≤ 60 MB in all, revised by the owner on 2026-10-20 to exclude tiles |
 | B2 | Renderer, sandboxed and ready, empty document | ≤ 10 MB | Unchanged |
-| B3 | Renderer, typical page | **≤ 50 MB, as the median over the documents and content tiers' corpus pages; and no corpus page above its ceiling:** half of Chrome Canary 158's measured cost, capped at 100 MB (documents), 150 MB (content), 300 MB (media and maps) and 300 MB (applications). So Wikipedia 100 MB, MDN 70, Maps 300, Three.js 235, VS Code 225; the tier's cap for the other pages until they are measured | ≤ 50 MB |
+| B3 | Renderer, typical page | **≤ 50 MB, as the median over the documents and content tiers' corpus pages; and no corpus page above its ceiling:** half of Chrome Canary 158's measured cost, capped at 100 MB (documents), 150 MB (content), 300 MB (media and maps) and 300 MB (applications). So Wikipedia 100 MB, MDN 70, Maps 300, Three.js 235, VS Code 225; the tier's cap for the other pages until they are measured (measured on 2026-10-20: decision history) | ≤ 50 MB |
 | B4 | Network process, idle | ≤ 25 MB | Unchanged |
 | B5 | Renderer soft limit | 16 | Unchanged |
 | B6 | Whole browser, typical session | **≤ 1 GB for 10 tabs of document and content pages on about 6 sites;** sessions with media or application pages bounded by each page's ceiling, B5 and discarding under memory pressure | ≤ 1 GB (10 tabs, about 6 sites) |
 | B7 | Per-renderer cap | 2 GiB | Unchanged |
 
-**A page's cost** includes the GPU and compositor memory allocated for it, charged to its renderer (PF4). The process model's change record gains this amendment when the owner accepts it.
+**A page's cost** includes the GPU and compositor memory allocated for it, charged to its renderer (PF4). The process model's change record has carried this amendment since the owner accepted it (2026-10-20).
 
 ## Rationale
 
@@ -106,7 +108,7 @@ How is performance measured on this Mac, and what must Axiom meet: the final mem
 
 ## Consequences
 
-- **The process model's §7 changes** on acceptance, with a change-record entry.
+- **The process model's §7 changed** on acceptance, with a change-record entry (2026-10-20).
 - **Every milestone's gate** runs its budgets as benchmarks (TS13), under PF1's conditions.
 - **The graphics, images and media milestones** charge GPU memory to pages.
 - **Milestone 1's budgets** (CP9) come from these: B2, B3's documents ceilings, PF13's frames and PF16's idle rule.

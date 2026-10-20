@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 6, CP5, 2026-10-20), with [ADR-0018](adr/0018-corpus-standards-and-testing.md), for the owner at Gate B; binding when it is accepted |
+| **Status** | **Binding** since [ADR-0018](adr/0018-corpus-standards-and-testing.md) was accepted (2026-10-20, Step 6's Gate B). Written at Step 6, CP5. Spike S9 (§9) authorized at Gate B |
 | **Question** | How is Axiom tested? Through which harnesses, oracles and fuzzers; how do tests stay deterministic; how are the security checks V1–V9 built; how are performance regressions caught; which routine keeps a locally built browser patched; where do tests run? |
 | **Answers** | Step 6 question Q3 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); decision-map item X2; the tracker's handed-over questions 4–12 (§2.2), with CP6 for the limits and benchmarks' thresholds |
 | **Feeds** | Budgets (CP6), which tests enforce; the roadmap (CP8), which places each harness and check; Milestone 1 (CP9); the L3 gate ([threat model](security/threat-model.md) §8) |
@@ -20,7 +20,7 @@ Rules are numbered TS1–TS18. Precedent and sources are dated (§2); the design
   - the test-only references the designs name: html5ever, xml5ever, Taffy, `regress`, `temporal_rs` and `num-bigint`;
   - the self-oracles: incremental equals rebuilt (IV14), cache-free style (ST22), chunked parsing equals whole (HD33), round trips.
 - **Determinism** (TS8): one virtual clock (EL24); injected fonts, settings and time; local test servers; no live network in automated tests, except the corpus pages that the corpus's rules let automation load.
-- **Fuzzing** (TS9–TS11): every parser and IPC decoder gets a target. cargo-fuzz with libFuzzer and AddressSanitizer is expected to work on this Mac's target, which **spike S9, proposed for Gate B,** would confirm before any milestone depends on it. Crashes become regression tests. ThreadSanitizer covers the threads, and Miri covers every crate with `unsafe`.
+- **Fuzzing** (TS9–TS11): every parser and IPC decoder gets a target. cargo-fuzz with libFuzzer and AddressSanitizer is expected to work on this Mac's target, which **spike S9, authorized at Gate B,** checks before any milestone depends on it. Crashes become regression tests. ThreadSanitizer covers the threads, and Miri covers every crate with `unsafe`.
 - **The checks V1–V9** are planned as tests, each with its construction and its trigger (TS14).
 - **The routine** (TS15, TS16):
   - weekly, an advisory check;
@@ -111,9 +111,9 @@ Rules are numbered TS1–TS18. Precedent and sources are dated (§2); the design
 | TS17 | **Where tests run:**<br>• **This Mac is authoritative** for every result that depends on the platform or the machine: performance, energy, sandboxing, the GPU, and macOS 27's frameworks.<br>• **GitHub's hosted runners** could add a second line for correctness only: the five checks, unit tests and WPT subsets, on macOS 26 with 3 CPUs and 7 GB [G1]. They would never be used for performance figures or sandbox results. A workflow would use no third-party actions beyond GitHub's own, pinned by commit, and no secrets.<br>Whether to use them is the owner's decision when Milestone 1 starts (CP9) |
 | TS18 | **WPT within 8 GB.** WPT runs by directory: a milestone's selection, never the whole suite. wptrunner's parallelism is sized to memory, starting at two browsers. Each directory's run time and peak memory are recorded, so the selection's cost is known before a gate depends on it |
 
-## 9. Spike S9, proposed for Gate B
+## 9. Spike S9
 
-Not authorized; designed here because trying the tools on this Mac is the only check (tracker §10).
+Designed here because trying the tools on this Mac is the only check (tracker §10). **Authorized at Gate B** (2026-10-20): "Spike S9 (Testing and Fuzzing Tooling): Authorized. Proceed with validating cargo-fuzz, AddressSanitizer/ThreadSanitizer, and wptrunner on this Mac."
 
 | ID | Question | Passes if |
 |---|---|---|
@@ -131,7 +131,7 @@ Except the rustup component, everything stays under `target/`, which git ignores
 
 ## 10. Open questions
 
-1. **Spike S9** (§9): authorize, or leave the tools' first trial to the first milestone that needs them. For the owner at Gate B.
+1. **Spike S9** (§9): authorized by the owner at Gate B (2026-10-20).
 2. **Hosted runners** (TS17): for the owner when Milestone 1 starts.
 3. **Seed corpora's home:** in the repository, if small and made only of generated or permitted inputs (TS10), or under `scratch/`. Settled when the first campaign runs.
 

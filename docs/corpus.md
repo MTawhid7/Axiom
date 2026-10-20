@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 6, CP2, 2026-10-20), with [ADR-0018](adr/0018-corpus-standards-and-testing.md), for the owner at Gate B; binding when it is accepted. **Baselines from spike S8** (CP3, §5): the five pages automation may load, in Chrome Canary; the other pages and Safari await the session by hand |
+| **Status** | **Binding** since [ADR-0018](adr/0018-corpus-standards-and-testing.md) was accepted (2026-10-20, Step 6's Gate B), with the automation boundary (§3) confirmed by the owner. Written at Step 6, CP2. **Baselines from spike S8** (§5): all thirteen pages in Chrome Canary, the five automated logged out, the eight others signed in by the owner's hand. Safari's runs need repeating ([S8 results](research/s8-results.md) §7.4) |
 | **Question** | Which pages is Axiom judged against? What does each need, and from which security level can it be used? How is each measured, repeatably and within its site's terms? |
 | **Answers** | Step 6 question Q1 ([tracker](research/step-6-standards-budgets-roadmap.md) §3), with S8; the tracker's handed-over questions 1 and 2 (§2.2) |
 | **Feeds** | Spike S8 (CP3); the standards baseline (CP4); testing (CP5); budgets (CP6); the roadmap's corpus targets and login track (CP8); Milestone 1 (CP9) |
@@ -17,7 +17,7 @@ Rules are numbered CO1–CO14. Each site's terms and robots file are quoted and 
 - **Each site's terms and robots file decide whether automation may load it** (CO3). Eight forbid automated access, logged out as well as logged in: Google Search, YouTube, Instagram, Reddit, Twitch, Discord, Figma and Prism. Five permit occasional automated loads, with care: Wikipedia, Google Maps, MDN, Three.js and VS Code for the Web. **This narrows S8's automated mode,** which the plan applied to every page that works logged out (§9).
 - **Automated loads identify themselves,** check robots.txt first, stay few and spaced, and never sign in (CO4).
 - **Pages whose sites forbid automation are measured by hand:** the owner drives a shipping browser, and tools sample its processes from outside (CO6). All eight of those sites have logins, so this is also how the logged-in experience is measured, as the owner asked.
-- **Accounts, as the owner decided at Gate A:** the owner's regular accounts, in a dedicated local profile, for S8; in Axiom, the owner's personal accounts wait for L3, and test accounts that aren't sensitive may be used from L2 (CO7, CO8).
+- **Accounts, as the owner decided at Gate A:** the owner's regular accounts, in a dedicated local profile, for S8; in Axiom, the owner's personal accounts wait for L3, and test accounts that aren't sensitive may be used from L2 (CO7, CO8). For the session by hand of 2026-10-20, the owner chose secondary accounts.
 - **Each page is measured loaded, during a defined interaction, and afterwards with no input,** in a 1,280 × 800-point window, in Safari and Chrome Canary (CO9–CO11).
 - **Repeatability:** baselines are live, dated and run three times. Saved copies are made only where the terms and licences allow it: the two documents and Three.js's example. The other sites are never captured (CO12).
 - **Nothing from a page is committed** but aggregate figures. Profiles that hold signed-in sessions stay in `scratch/` (CO13, CO14).
@@ -121,6 +121,7 @@ The runs use Chrome Canary through the DevTools Protocol, and Safari through Web
 - **The owner's regular accounts,** used in a dedicated local profile kept in `scratch/` (CO14).
 - **The owner signs in by hand,** once per site. Credentials are typed into the browser by the owner and are never seen, stored or read by code.
 - **Logged-in pages are measured only by hand** (CO6), whatever the site's terms say about automation.
+- **In practice,** the session by hand of 2026-10-20 used secondary accounts, the owner's choice: "I have used my secondary accounts for these tests."
 
 **CO8. Accounts in Axiom** (the owner's Gate A decision 3, under the threat model's §8):
 - **No credential before L2.** L0 never handles credentials, and L1 is for browsing without logging in.
@@ -178,7 +179,7 @@ Sites whose experience differs logged in are measured both ways where both are a
 - **This Mac:** AC power, Low Power Mode off and the Mac otherwise idle, checked with `pmset` and the load average, which is recorded.
 - **Repetition:** a cool-down between runs, and three runs of each page in each browser and mode, with the median and spread reported.
 - **The window:** 1,280 × 800 points at the top left of the screen. That is 2,560 × 1,600 pixels in the display's current scaled mode (1,440 × 900 points in a 2,880 × 1,800 framebuffer, [S6 results](research/s6-results.md) §2), and each run records the mode.
-- **Browsers:** Safari 27.2 (22625.2.8.11.6), for WebKit, and Chrome Canary 158.0.8112.0, for Chromium (observed 2026-10-20, from each application's `Info.plist`). Each run records the versions, and Canary updates itself daily. Microsoft Edge Canary, also installed, would only repeat Chromium.
+- **Browsers:** Safari 27.2 (22625.2.8.11.6), for WebKit, and Chrome Canary 158.0.8112.0, for Chromium (observed 2026-10-20, from each application's `Info.plist`). Each run records the versions, and Canary updates itself daily: the session by hand that evening ran Chrome Canary 158.0.8113.0 and Safari 27.2 (22625.2.8.11.9). Microsoft Edge Canary, also installed, would only repeat Chromium.
 - **Profiles:**
   - automated runs use a fresh temporary profile under `target/`, deleted after each run;
   - pages measured by hand logged out use a fresh temporary profile too;
@@ -197,7 +198,24 @@ Chrome Canary 158.0.8112.0, 2026-10-20: the medians of three valid runs ([S8 res
 | Three.js | 1,100 | 24 | 0.84 | 461 | 674 | 470 |
 | VS Code for the Web | 2,259 | 2,449 | 8.96 | 656 | 665 | 457 |
 
-The page's cost leaves out three component-extension renderers of Chrome's own, which run on about:blank and exit before the steady state (S8 results §5). The eight pages measured by hand, and Safari for all thirteen, wait for the owner's session (S8 results §7).
+The page's cost leaves out three component-extension renderers of Chrome's own, which run on about:blank and exit before the steady state (S8 results §5).
+
+### Baselines by hand, from S8 (Gate B)
+
+Chrome Canary 158.0.8113.0, signed in, 2026-10-20: the medians of three runs by the owner ([S8 results](research/s8-results.md) §7). The cost is above a fresh Canary on about:blank measured after the session, so it includes the dedicated profile's own state (§7.1 of the results).
+
+| Page | All Chrome's processes, 30 s after the interaction (MB) | The page's cost above about:blank (MB) | CPU in those 30 s (s) |
+|---|---|---|---|
+| Google Search | 789 | 582 | 3.0 |
+| YouTube | 1,115 | 908 | 14.1 |
+| Instagram | 785 | 578 | 2.3 |
+| Reddit | 1,467 | 1,260 | 10.8 |
+| Twitch | 608 | 401 | 13.0 |
+| Discord | 634 | 427 | 1.3 |
+| Figma | 1,319 | 1,111 | 4.4 |
+| Prism | 715 | 494 | 10.0 |
+
+Interaction by hand varies, so the spread is wide: Reddit's cost ran from 495 to 1,631 MB. **Safari** was measured logged out on five of these pages, but the census tool kept the earlier pages open, so only one run measures one page (Google Search: 738 MB across Safari's processes after 30 s without input). The tool is corrected; repeating Safari, Chrome logged out by hand, and Safari on the other eight pages need the owner (§7.4–§7.5 of the results).
 
 ## 6. Repeatability and captures
 
@@ -244,8 +262,8 @@ The roadmap (CP8) places each site at the first milestone and level where it can
 
 ## 10. Open questions
 
-1. **Features of the eight pages measured by hand.** S8 can't instrument them. **Optional, by hand:** after each page, the owner saves Chrome's own `chrome://histograms/Blink.UseCounter` page from the census profile. That page counts the features the browser saw used, records the browser's own statistics, and holds no page content. Decided by the owner at Gate B. Without it, these pages' features stay inference.
-2. **Safari for the five automated pages.** Safari's automation needs its remote automation enabled (Develop → Allow Remote Automation, or `safaridriver --enable` with an administrator's password), a setting only the owner may change. Without it, Safari is measured by hand for every page.
+1. **Features of the eight pages measured by hand.** S8 can't instrument them. **Optional, by hand:** after each page, the owner saves Chrome's own `chrome://histograms/Blink.UseCounter` page from the census profile. That page counts the features the browser saw used, records the browser's own statistics, and holds no page content. Not saved in the session of 2026-10-20, so these pages' features stay inference.
+2. **Safari for the five automated pages.** Safari's automation needs its remote automation enabled (Develop → Allow Remote Automation, or `safaridriver --enable` with an administrator's password), a setting only the owner may change. It stayed off at Gate B, so Safari is measured by hand for every page, as the corrected census tool now does.
 3. **Test accounts at L2:** which sites, and each site's rules on additional accounts (CP8).
 4. **When to read terms again:** before each census and each milestone's corpus checks (CO3). Whether a changed clause should stop a census automatically, as a changed robots file does, is CP5's to decide.
 

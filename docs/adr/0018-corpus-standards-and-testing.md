@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-20), for the owner at Step 6's Gate B |
+| **Status** | **Accepted** (2026-10-20, Step 6's Gate B): "Accepted as proposed." The automation boundary confirmed; the not-planned list approved; spike S9 authorized (decision history) |
 | **Date** | 2026-10-20 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [The corpus](../corpus.md) (CO1–CO14); [the standards baseline](../standards.md) (SB1–SB12); [the testing strategy](../testing.md) (TS1–TS18); [S8 results](../research/s8-results.md); decision-map items X1 and X2; [OQ-2](../open-questions.md), [OQ-22](../open-questions.md); the [charter](../charter.md) §8 and principle 5; the [threat model](../security/threat-model.md) §8–§9; [ADR-0009](0009-embedder-api-and-shell.md) (EM9); [ADR-0010](0010-dependency-and-supply-chain-policy.md) |
@@ -12,6 +12,10 @@
 | Date | Event |
 |---|---|
 | 2026-10-20 | Proposed at Step 6, CP7 |
+| 2026-10-20 | **Accepted** at Step 6's Gate B. The owner: "ADR-0018 (Corpus, Standards Baseline, and Testing Strategy): Accepted as proposed." |
+| 2026-10-20 | **The automation boundary** ([corpus](../corpus.md) CO3) confirmed at Gate B: "Automation Boundary: Confirmed. Automating only the 5 permitted pages and reserving the other 8 for manual testing was the correct decision to respect site terms." |
+| 2026-10-20 | **The not-planned list** ([standards](../standards.md) §5.3) approved at Gate B: "Not-Planned List: Approved as written in docs/standards.md §5.3 (DRM, plugins, Web SQL, AppCache, WebXR, Web MIDI, etc.)." |
+| 2026-10-20 | **Spike S9** ([testing](../testing.md) §9) authorized at Gate B: "Spike S9 (Testing and Fuzzing Tooling): Authorized. Proceed with validating cargo-fuzz, AddressSanitizer/ThreadSanitizer, and wptrunner on this Mac." |
 
 ## Question
 
@@ -75,7 +79,7 @@ Plus S8's census of five pages ([S8 results](../research/s8-results.md)), and wp
 
 ## Decision
 
-**Proposed:** adopt [the corpus](../corpus.md) (CO1–CO14), [the standards baseline](../standards.md) (SB1–SB12) and [the testing strategy](../testing.md) (TS1–TS18) as binding. In short:
+**Accepted:** adopt [the corpus](../corpus.md) (CO1–CO14), [the standards baseline](../standards.md) (SB1–SB12) and [the testing strategy](../testing.md) (TS1–TS18) as binding. In short:
 1. **The corpus** is the owner's 13 pages in four tiers. Automation loads only the pages whose sites' terms and robots files permit it, identified in its user agent, at most five times per census, never signed in. The rest are measured by hand, with only process sampling. Accounts follow the owner's Gate A decision. Copies are kept only where terms and licences permit, and never committed.
 2. **The standards baseline:**
    - specifications pinned by body;
@@ -95,7 +99,7 @@ Plus S8's census of five pages ([S8 results](../research/s8-results.md)), and wp
    - weekly advisory checks, and the OS-dependent checks after every macOS update;
    - this Mac authoritative.
 
-Spike S9 ([testing](../testing.md) §9) and the hosted runners (TS17) are separate decisions for the owner.
+Spike S9 ([testing](../testing.md) §9) was authorized at Gate B. The hosted runners (TS17) are the owner's choice at Milestone 1.
 
 ## Rationale
 

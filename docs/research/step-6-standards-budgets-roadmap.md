@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **CP1–CP7 ✅** (2026-10-20). **At Gate B:** ADRs 0018 and 0019 proposed, with the final B1–B7. **Gate A passed** (2026-10-20). Spike S8's automated part is complete; its session by hand awaits the owner |
+| **Status** | **CP1–CP7 ✅** (2026-10-20). **Gate B passed** (2026-10-20): ADRs 0018 and 0019 accepted, with the final B1–B7; spike S9 authorized; CP8–CP10 to run without pausing, to Gate C. **Gate A passed** (2026-10-20). Spike S8 is complete in Chrome; its Safari runs need repeating (§11) |
 | **Authorized** | 2026-10-20, by the owner: "Step 6 Authorization: Authorized. Proceed with creating branch step-6 from main and drafting the Phase Zero Step 6 plan (standards baseline, testing strategy, performance budgets, and Milestone 1 roadmap) for Gate A review." Design documents only; each spike needs its own authorization. **Spike S8 authorized at Gate A** (2026-10-20), for the questions it names (§10.1) |
 | **Branch** | `step-6`, from `main` at `b4948ce` (the Step 5 merge). Pushed to `origin` as the owner authorized at Gate A, after CP1's commit was amended (§11), and kept pushed as checkpoints land |
 | **Feeds** | Decision-map items X1–X3; the roadmap and Milestone 1's acceptance criteria (charter §8); the final design review of Phase Zero; the questions earlier steps handed to Step 6 (§2.2) |
@@ -48,6 +48,13 @@ Phase Zero's last step turns the accepted architecture into work that can be bui
 | "Account Policy: Approved as recommended: For Spike S8 measurements in shipping browsers, use my regular accounts via the dedicated local profile. For Axiom engine testing, sensitive personal accounts will wait for Level 3 (L3) verification, while non-sensitive test accounts may be used starting at Level 2 (L2)." | [Corpus](../corpus.md) CO7 and CO8; the roadmap's login track (CP8) |
 | "URL Parameter Scrubbing: Approved. Please amend the local CP1 commit to remove the identifying parameters (Prism's u= and Figma's t=) from the committed repository documents, while preserving the full URLs in scratch/ for Spike S8." | CP1's commit amended before the first push (`e86ea98` became `a73ccd9`); the full URLs stay in `scratch/corpus-urls.txt` ([corpus](../corpus.md) CO13) |
 | "Push Branch: Authorized. Push branch step-6 to origin after amending the commit, and keep it pushed as checkpoints land." | `step-6` pushed on 2026-10-20 at `a73ccd9`, and kept pushed |
+| **Gate B (2026-10-20):** "ADR-0018 (Corpus, Standards Baseline, and Testing Strategy): Accepted as proposed." | [ADR-0018](../adr/0018-corpus-standards-and-testing.md) accepted: the [corpus](../corpus.md), the [standards baseline](../standards.md) and the [testing strategy](../testing.md) are binding |
+| "ADR-0019 (Performance Methodology and Budgets): Accepted as proposed, including the B1-B7 process model amendment (B1 tile scaling formula and B3 per-page memory ceilings)." | [ADR-0019](../adr/0019-performance-methodology-and-budgets.md) accepted: the [performance budgets](../performance.md) are binding, and the [process model](../security/process-model.md)'s §7 and change record carry the final B1–B7 |
+| "Automation Boundary: Confirmed. Automating only the 5 permitted pages and reserving the other 8 for manual testing was the correct decision to respect site terms." | [Corpus](../corpus.md) CO3 stands as written |
+| "Spike S8 Manual Session: Completed. I have executed the manual testing sessions across both Chrome Canary and Safari. The formal results are recorded on disk: Chrome Canary (Signed-in, 8 sites): target/s8-results/20261020-181706-hand-chrome-signed-in/ Safari (Logged-out, 5 sites): target/s8-results/20261020-190125-hand-safari-logged-out/ Please integrate these baselines into docs/corpus.md, docs/performance.md, and s8-results.md to calibrate the final B3 ceilings for all 13 sites." With it: "I have used my secondary accounts for these tests," and Prism's URL for that account | [S8 results](s8-results.md) §7; the [corpus](../corpus.md)'s baselines (§5) and CO7; every page's ceiling in the [performance budgets](../performance.md) §4.1. Prism's new URL differs from the first only in `u=`, which stays out of the repository (CO13); `scratch/corpus-urls.txt` holds it. The Safari runs need repeating: the tool kept earlier pages open in Safari (§11) |
+| "Spike S9 (Testing and Fuzzing Tooling): Authorized. Proceed with validating cargo-fuzz, AddressSanitizer/ThreadSanitizer, and wptrunner on this Mac." | S9 runs before CP8 ([testing](../testing.md) §9; §10 here) |
+| "Not-Planned List: Approved as written in docs/standards.md §5.3 (DRM, plugins, Web SQL, AppCache, WebXR, Web MIDI, etc.)." | [Standards](../standards.md) §5.3 |
+| "Cadence: Approved. Proceed through CP8–CP10 (Roadmap, Milestone 1 specification, and Phase Zero final synthesis) without pausing up to Gate C." | CP8–CP10 run without pausing, to Gate C |
 
 ### 2.1 Binding inputs
 
@@ -221,7 +228,8 @@ Step 6's outputs are judged against these criteria. CP10 checks every one and re
 | CP4 | The standards baseline and support matrix (X1) | ✅ 2026-10-20 (§11; [standards baseline](../standards.md)) |
 | CP5 | The testing and fuzzing strategy (X2) | ✅ 2026-10-20 (§11; [testing strategy](../testing.md)). Spike S9 designed for Gate B |
 | CP6 | Performance methodology and budgets (X3) | ✅ 2026-10-20 (§11; [performance budgets](../performance.md)). The final B1–B7 and the corpus pages' ceilings for the owner at Gate B |
-| CP7 | Synthesis of part 1: ADRs (Proposed); the final budgets for the owner; decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-20 (§11; ADRs [0018](../adr/0018-corpus-standards-and-testing.md) and [0019](../adr/0019-performance-methodology-and-budgets.md) proposed). **Gate B** |
+| CP7 | Synthesis of part 1: ADRs (Proposed); the final budgets for the owner; decision map, open questions, indexes, status. **Gate B** | ✅ 2026-10-20 (§11; ADRs [0018](../adr/0018-corpus-standards-and-testing.md) and [0019](../adr/0019-performance-methodology-and-budgets.md) proposed). **Gate B passed** 2026-10-20: both ADRs accepted |
+| (Gate B) | The owner's decisions recorded; S8's session by hand folded in, with every page's ceiling; spike S9, authorized at Gate B | In progress (§11) |
 | | **Part 2: the roadmap** | |
 | CP8 | The roadmap: milestones, security levels, corpus targets, decision points | Not started |
 | CP9 | Milestone 1: scope and measurable acceptance criteria | Not started |
@@ -332,7 +340,7 @@ One spike is designed now, so that its evidence can reach CP4–CP6; a second on
 | Spike | Area | Question | Why sources can't settle it | What it decides |
 |---|---|---|---|---|
 | **S8** | The corpus census (designed here, §10.1) | What do the owner's 13 pages use and cost in two shipping engines on this Mac? | The pages are specific, change over time, and are measured nowhere for this machine. Feature use and memory per page need measuring | The corpus's tiers and needs (CP2); the standards' priorities (CP4); memory and time baselines (CP6) |
-| (S9) | Test tooling on this Mac (**designed at CP5**, [testing](../testing.md) §9, for Gate B) | Does fuzzing with `cargo-fuzz` and libFuzzer run on nightly Rust for this Mac's target, with coverage? Do the sanitizers work? Does wptrunner run here within memory? | Tool support for `aarch64-apple-darwin` changes with toolchains; trying it is the only check | X2's fuzzing tools; WPT's cost on 8 GB |
+| (S9) | Test tooling on this Mac (**designed at CP5**, [testing](../testing.md) §9; **authorized at Gate B**, 2026-10-20) | Does fuzzing with `cargo-fuzz` and libFuzzer run on nightly Rust for this Mac's target, with coverage? Do the sanitizers work? Does wptrunner run here within memory? | Tool support for `aarch64-apple-darwin` changes with toolchains; trying it is the only check | X2's fuzzing tools; WPT's cost on 8 GB |
 
 **No spike is planned for these areas:** the standards baseline (sources and wpt.fyi settle it); the roadmap and Milestone 1 (they assemble decisions already taken); and performance methodology, which S1–S7 already exercised.
 
@@ -551,6 +559,27 @@ Part 1 put together:
 Every relative link resolves; the four standard checks pass.
 
 **Gate B.** The owner reviews the part 1 ADRs and the final budgets. The decisions, with recommendations, are in [status](../status.md), "Next steps".
+
+### Gate B — passed 2026-10-20
+
+The owner's decisions, quoted in full in §2:
+- **[ADR-0018](../adr/0018-corpus-standards-and-testing.md) accepted** as proposed: the corpus, the standards baseline and the testing strategy are binding. **The automation boundary confirmed;** **the not-planned list approved** as written.
+- **[ADR-0019](../adr/0019-performance-methodology-and-budgets.md) accepted** as proposed, with the B1–B7 amendment. The [process model](../security/process-model.md)'s §7 now holds the final budgets, and its change record the amendment, with the owner's words.
+- **S8's session by hand,** run by the owner with secondary accounts: Chrome Canary signed in (eight pages) and Safari logged out (five pages). Folded into the [S8 results](s8-results.md) §7, the [corpus](../corpus.md) §5 and the [performance budgets](../performance.md) §4.1:
+  - **The baseline.** The session recorded none, so a fresh Canary was measured on about:blank afterwards (`s8.py blank`, new): 207 MB without its extension renderers. **A first attempt opened the dedicated profile** (two runs on about:blank, with no page and no debugging connection). CO14 says that profile is never opened by automation, so the attempt was stopped and its records aren't used, and the tool now opens only a fresh profile.
+  - **Chrome's costs, signed in:** Reddit 1,260 MB, Figma 1,111, YouTube 908, Google Search 582, Instagram 578, Prism 494, Discord 427, Twitch 401.
+  - **Every page's ceiling, by the accepted rule:** Google Search, Instagram and Reddit 150 MB; YouTube and Figma 300 MB; Twitch 200; Discord 210; Prism 245. The content cap binds at 12–26% of Chrome's cost. ADR-0019 names that among its conditions for revisiting, so it goes to the owner at Gate C.
+  - **Safari's runs need repeating.** The tool asked the owner to go back to the list in the same tab after each page, and Safari kept the earlier pages alive, so later runs counted them. Only the first run measures one page. **The tool is corrected:**
+    - Safari quits between pages;
+    - each run records its own baseline;
+    - by hand, Safari covers every page of the mode.
+  - **Not measured:** Chrome logged out by hand; Safari on the other eight pages; the eight pages' features (`chrome://histograms` wasn't saved).
+  - **Prism's URL for the secondary account** is kept only in `scratch/corpus-urls.txt`, beside the first.
+- **Spike S9 authorized;** it runs before CP8.
+- **The cadence:** CP8–CP10 without pausing, to Gate C.
+- **Clean-up:** two crash reports that Chrome Canary left at 17:32–17:33, during the owner's `s8.py signin` (non-fatal guard faults; parent `python3`), were removed from `~/Library/Logs/DiagnosticReports`. A third, at 17:10, came from macOS's Software Update settings, not from S8, and was left.
+
+Every relative link resolves; the four standard checks and S8's tests pass.
 
 ## Sources
 

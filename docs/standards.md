@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (Step 6, CP4, 2026-10-20), with [ADR-0018](adr/0018-corpus-standards-and-testing.md), for the owner at Gate B; binding when it is accepted |
+| **Status** | **Binding** since [ADR-0018](adr/0018-corpus-standards-and-testing.md) was accepted (2026-10-20, Step 6's Gate B), with the not-planned list (§5.3) approved as written. Written at Step 6, CP4 |
 | **Question** | Which specifications does Axiom implement, at which dated versions, and how fully? Which suites check each, and what pass rate counts at each milestone? |
 | **Answers** | Step 6 question Q2 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); decision-map item X1; the tracker's handed-over question 3 (§2.2) |
 | **Feeds** | Testing (CP5): the suites and how expectations are kept; the roadmap (CP8): what each milestone completes; Milestone 1 (CP9): its conformance criteria |
@@ -184,6 +184,8 @@ Rules are numbered SB1–SB12. Precedent and sources are dated (§2). The design
 | WebRTC and media capture | WebRTC, Media Capture and Streams | Staged | WPT `webrtc/`, `mediacapture-streams/` | None on the automated pages (S8); Discord's voice channels would need them (inference) |
 
 ### 5.3 Not planned
+
+**Approved by the owner at Gate B** (2026-10-20): "Not-Planned List: Approved as written in docs/standards.md §5.3 (DRM, plugins, Web SQL, AppCache, WebXR, Web MIDI, etc.)." An entry moves only at a later gate, with its reason.
 
 | Feature | Reason |
 |---|---|
