@@ -283,7 +283,7 @@ The overview §4 traces seven scenarios end to end through the rules: opening a 
   - ICU4X segments text, `unicode-bidi` runs the bidi algorithm, and hyphenation is staged.
 - **Graphics** ([ADR-0012](adr/0012-graphics-images-and-media.md), [graphics](architecture/graphics.md) GR1–GR14):
   - Metal directly, through `platform`; wgpu wasn't admitted;
-  - the window server composites retained CoreAnimation layers, and Axiom redraws only damaged tiles, **in the GPU/compositor process from M2,** into IOSurfaces it owns (Round 1, RV1-02);
+  - the window server composites retained CoreAnimation layers, and Axiom redraws only damaged tiles, **in the GPU/compositor process from M2,** into IOSurfaces it owns (Round 1, RV1-02), reusing a spare only when `IOSurfaceIsInUse` says no process reads it (GR12; Round 2, RV2-05);
   - Axiom's own pipelines;
   - **paths are rasterized in the renderer** (GR5). GPU filling was faster but coarser at the edges, and its amendment is deferred to the graphics milestone (OQ-24);
   - Display P3 at 8 bits, with every surface colour-tagged;
@@ -397,7 +397,7 @@ The proposed crates ([overview](architecture/overview.md) §2), each named and s
   - this Mac is authoritative.
 - **Performance** ([performance](performance.md), PF1–PF24):
   - **the conditions** (PF1): a release build, AC power with Low Power Mode off, a load average below 3.0, cool-downs, three runs, the median with its range;
-  - **a page's cost** includes the GPU and compositor memory allocated on its behalf (PF4);
+  - **a page's cost** includes the GPU and compositor memory allocated on its behalf (PF4), which the GPU process accounts by page from M2, since macOS charges tiles to it (Round 2, RV2-05; S10);
   - frames from S6's budgets, and the GPU process's hop to the browser within 1 ms (PF13; S10 measured 48.8 µs); no task over 50 ms; pauses as in §4.6;
   - no idle wakeups on a static page, and Chrome's throttling of hidden pages; energy no higher than Safari's on animating pages;
   - the build within T1–T4.

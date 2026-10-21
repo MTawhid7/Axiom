@@ -164,7 +164,7 @@ Every finding: **Accepted** as proposed, 2026-10-21 (§5.5, item 1). Where a cou
 | RV2-02 | Low | M1 | CP1: graphics §3 and §9; the pipeline's header; layout §7; OQ-3, OQ-13, OQ-16, OQ-24; performance §9; the status's ADR-0019 row; RQ24, RQ29; the roadmap's summary; script and heap's summary and §4; EL24; EM10, EM12; the engine's §3; images §1; the overview §5.4; the threat model §10; ADR-0009's decision 7 and history. **Found by the sweep and added:** OQ-20's reason, which predates RV1-07, and script and heap's summary of C4, which predates RV1-04 |
 | RV2-03 | Medium | M1 | CP2, with item 2's configuration: [testing](../testing.md) TS2, TS8 and the summary; [Milestone 1](../milestone-1.md) MA4, MA8; [EM5](../architecture/embedder-api.md)'s defaults, a column per request, and EM9; EL24; ADRs 0006, 0009, 0018, 0021 |
 | RV2-04 | Medium | M1 (M2, M3, M8) | CP2, with item 3's placement: [IR10](../security/process-model.md) by process type; GR13; EM4; PF19's watchdog over every helper; SW3's `sessionStorage` copy, **SW10's Web Locks in the browser**, SW13's tests; IPC's new families; MA7's helper-recovery test; the roadmap's M2; ADRs 0004, 0009, 0013, 0019, 0020, 0021 |
-| RV2-05 | Medium | M2 | CP3 |
+| RV2-05 | Medium | M2 | CP3: [PF4](../performance.md)'s accounting by page in the GPU process; [GR12](../architecture/graphics.md)'s protocol for reusing tiles across processes, and GR8; PL8's note; IPC's question 4 answered; the roadmap's M2; ADRs 0005, 0007, 0012, 0019, 0020 |
 | RV2-06 | Medium | M4 | CP5 |
 | RV2-07 | Medium | M4 | CP5 |
 | RV2-08 | Medium | M4 | CP5 |
@@ -182,7 +182,7 @@ Every finding: **Accepted** as proposed, 2026-10-21 (§5.5, item 1). Where a cou
 |---|---|---|---|
 | CP1 | "Update the master Handover report (docs/handover-phase-0.md), decision map, and clean up stale statements" | RV2-01, RV2-02 | Done, `docs(review-r2-cp1)` |
 | CP2 | "Process model, helper crashes, IPC never-blocking, and test configs" | RV2-03, RV2-04, RV2-13, RV2-14 | Done, `docs(review-r2-cp2)` |
-| CP3 | "GPU process memory accounting and tile reuse protocols" | RV2-05 | Pending |
+| CP3 | "GPU process memory accounting and tile reuse protocols" | RV2-05 | Done, `docs(review-r2-cp3)` |
 | CP4 | "Storage key ancestor bit, File API design, and storage quotas" | RV2-10, RV2-11, RV2-12 | Pending |
 | CP5 | "Accessibility geometry, tiered VoiceOver enablement, and test harnesses" | RV2-06–RV2-09 | Pending |
 | CP6 | "Style & layout hooks for CSS Interop 2026" | RV2-15 | Pending |

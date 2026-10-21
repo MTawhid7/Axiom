@@ -70,6 +70,7 @@
   - **RV2-13:** IR5 and IP16 cover every process that serves several peers; a child's sends never block a thread (EL1), with a bounded local backlog drained on Mach's send-possible notification; PF21's bound per peer; SG11's note; a stalled-renderer test at M1 and M2.
   - **RV2-14:** IP13 takes PF21's rule, with one exception for a service worker's answer; IR6 names the network process; IP7 bars `iosurface` from renderers' interfaces; IPC's families gain network control, locks and video frames; IPC's question 3 answered.
   - **Also fixed:** a blank line Round 1's CP1 had left inside the process model's change record, which kept its Round 1 rows from rendering as a table.
+- **CP3, the GPU process's memory and tiles (RV2-05).** PF4: the GPU process accounts its allocations by page and reports them, since macOS charges tiles to it (S10), with `IOSurfaceSetOwnershipIdentity` tested at M2 as the alternative. GR12: a spare tile is drawn into only when `IOSurfaceIsInUse` says no process reads it, the browser deleting each port right after lookup, with a bounded pool allocated ahead, tested at M2 with a window. IPC's question 4 answered; M2's content; PL8's and GR8's notes.
 
 ### 2026-10-21 — Session 19 (the owner's decisions on Round 1's results; Round 2)
 

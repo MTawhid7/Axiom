@@ -219,7 +219,7 @@ CP5–CP10 refine these. Each row names the ends and their threads.
 | 1 | Does a QoS override on a one-way message boost a receiver waiting in `kevent64`? | The first implementation milestone (IP20) |
 | 2 | The IDL's syntax and the generator's design | The implementation milestone that builds IPC |
 | 3 | Timeouts for synchronous requests, backlog sizes and queue limits per interface | **Answered** at Step 6 by [PF21](../performance.md): queue limits, the browser's backlog, and no timeout of their own for synchronous requests, which IP13 now says too (Round 2, RV2-14) |
-| 4 | Do browser-allocated surfaces get charged to the renderer they serve (macOS runtime note §6.1)? | CP6 |
+| 4 | Do browser-allocated surfaces get charged to the renderer they serve (macOS runtime note §6.1)? | **Answered** by S10 ([results](../research/s10-results.md) §4, §7): memory is charged to the process that allocates it, so tiles are the GPU process's and a renderer's memory entries its own. The GPU process accounts by page (PF4; Round 2, RV2-05) |
 
 ## Sources
 
