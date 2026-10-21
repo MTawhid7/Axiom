@@ -319,11 +319,11 @@ The overview §4 traces seven scenarios end to end through the rules: opening a 
   - **a pure-Rust shell with objc2.** Its milestone first validates objc2-defined classes for text input and accessibility, with a Swift shell behind the same API as the fallback;
   - one bundle, signed by the stable local identity (Round 1, RV1-17), built by a script without Xcode.
 - **Accessibility** ([ADR-0014](adr/0014-accessibility.md), [accessibility](architecture/accessibility.md) AX1–AX12):
-  - renderers build each document's tree when an assistive technology asks, and push it, then its updates;
-  - the browser answers every query from its cache, stitching frames together by token;
+  - renderers build each document's tree when an assistive technology asks, and push it, then its updates; **in tiers since Round 2** (RV2-07): full trees while VoiceOver or Switch Control runs, a basic tree for any other client, off again after idle;
+  - the browser answers every query from its cache, stitching frames together by token, with bounds in the space of the layers it holds and hit tests refined asynchronously (Round 2, RV2-06);
   - text navigation uses macOS's text markers;
   - the bridge is Axiom's own, not AccessKit;
-  - system accessibility settings become media features;
+  - system accessibility settings become media features, invert colours among them; macOS's eight web notifications, and live regions in full by M7 (Round 2, RV2-09); the platform-mapping tests run against the shell's build (RV2-08);
   - the settings list and the reserved key equivalents are approved.
 
 ### 4.11 Language, `unsafe` and dependencies

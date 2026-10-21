@@ -165,10 +165,10 @@ Every finding: **Accepted** as proposed, 2026-10-21 (§5.5, item 1). Where a cou
 | RV2-03 | Medium | M1 | CP2, with item 2's configuration: [testing](../testing.md) TS2, TS8 and the summary; [Milestone 1](../milestone-1.md) MA4, MA8; [EM5](../architecture/embedder-api.md)'s defaults, a column per request, and EM9; EL24; ADRs 0006, 0009, 0018, 0021 |
 | RV2-04 | Medium | M1 (M2, M3, M8) | CP2, with item 3's placement: [IR10](../security/process-model.md) by process type; GR13; EM4; PF19's watchdog over every helper; SW3's `sessionStorage` copy, **SW10's Web Locks in the browser**, SW13's tests; IPC's new families; MA7's helper-recovery test; the roadmap's M2; ADRs 0004, 0009, 0013, 0019, 0020, 0021 |
 | RV2-05 | Medium | M2 | CP3: [PF4](../performance.md)'s accounting by page in the GPU process; [GR12](../architecture/graphics.md)'s protocol for reusing tiles across processes, and GR8; PL8's note; IPC's question 4 answered; the roadmap's M2; ADRs 0005, 0007, 0012, 0019, 0020 |
-| RV2-06 | Medium | M4 | CP5 |
-| RV2-07 | Medium | M4 | CP5 |
-| RV2-08 | Medium | M4 | CP5 |
-| RV2-09 | Low | M4 | CP5 |
+| RV2-06 | Medium | M4 | CP5: [AX2](../architecture/accessibility.md)'s bounds in the space of the nearest layer-backed scroll or animation node, and advances per grapheme cluster; AX4's hit-test policy; PL16's note; ADRs 0007, 0014 |
+| RV2-07 | Medium | M4 | CP5: AX7's tiers (full by KVO on VoiceOver and Switch Control, basic for other clients, off again after idle, 60 s a hypothesis); AX12; ADR-0014 |
+| RV2-08 | Medium | M4 | CP5: AX11's placement of each suite; [TS2](../testing.md)'s Get Computed Role and Label from M4; EM9's note; ADRs 0009, 0014, 0018 |
+| RV2-09 | Low | M4 | CP5: AX4's eight web notifications and `ariaNotify`; AX10's `inverted-colors`; live regions in full by M7 (the design's §9; the roadmap's M7); ADRs 0014, 0020 |
 | RV2-10 | Medium | M3 | CP4: [SW1](../architecture/storage-and-workers.md)'s key with an ancestor chain bit; SW9, SW10, SW11 and SW13 by the whole key; SI3 (a) and the process model's change record; NW8's note on why the network key has no bit; NW11's check at M2; ADRs 0004, 0013 |
 | RV2-11 | Medium | M3 | CP4: the storage design's new §5.5, SW14–SW17 (blob data; **the `blob:` URL store in the browser,** a choice the finding left open, made because the frame tree already relies on the browser's records, a relaunch of the network process mustn't lose them, and Chromium's registry is in its browser process; the user's files read by the browser; tests); SG1, EM5, IP15's one exception, SW11; the frame tree §4; the [standards](../standards.md)' §5.2 row; the core thread's duties; ADRs 0004–0007, 0009, 0013, 0018 |
 | RV2-12 | Low | M3 | CP4: the storage design's open question 2 answered; SW3's 5 MiB; SG10; PF24's quota per site over its keys; ADRs 0004, 0019. **Also fixed:** the storage design's §6 still sent locks to the network process, which CP2 moved, and its §7 said the browser holds no web storage, now with the copies it keeps |
@@ -184,7 +184,7 @@ Every finding: **Accepted** as proposed, 2026-10-21 (§5.5, item 1). Where a cou
 | CP2 | "Process model, helper crashes, IPC never-blocking, and test configs" | RV2-03, RV2-04, RV2-13, RV2-14 | Done, `docs(review-r2-cp2)` |
 | CP3 | "GPU process memory accounting and tile reuse protocols" | RV2-05 | Done, `docs(review-r2-cp3)` |
 | CP4 | "Storage key ancestor bit, File API design, and storage quotas" | RV2-10, RV2-11, RV2-12 | Done, `docs(review-r2-cp4)` |
-| CP5 | "Accessibility geometry, tiered VoiceOver enablement, and test harnesses" | RV2-06–RV2-09 | Pending |
+| CP5 | "Accessibility geometry, tiered VoiceOver enablement, and test harnesses" | RV2-06–RV2-09 | Done, `docs(review-r2-cp5)` |
 | CP6 | "Style & layout hooks for CSS Interop 2026" | RV2-15 | Pending |
 
 ## 6. The stopping rule

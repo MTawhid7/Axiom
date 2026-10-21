@@ -143,7 +143,7 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 
 The owner's own accounts arrive (§6), with **session restore** (RV1-22).
 
-**M7, media (L3).** The media milestone's row ([images and media](architecture/images-and-media.md) §8): the media utility process with demuxers, VideoToolbox and AudioToolbox, video layers, audio output and Media Source Extensions; and AVIF through ImageIO there (IM3). It keeps L3: V1, V2 and V5 cover the new process, its endpoints and its `platform` code before the gate (MS2).
+**M7, media (L3).** The media milestone's row ([images and media](architecture/images-and-media.md) §8): the media utility process with demuxers, VideoToolbox and AudioToolbox, video layers, audio output and Media Source Extensions; and AVIF through ImageIO there (IM3); **live regions in full and `ariaNotify`,** which Twitch's chat needs (Round 2, RV2-09; [accessibility](architecture/accessibility.md) §9). It keeps L3: V1, V2 and V5 cover the new process, its endpoints and its `platform` code before the gate (MS2).
 
 **M8, applications (L3).** Dedicated, shared and service workers (EL §4.6; SW), `SharedArrayBuffer` and `Atomics` under cross-origin isolation, Web Locks and the origin private file system, EditContext, Temporal and off-thread compilation, the bytecode cache. **VS Code for the Web uses WebAssembly** (S8); if its corpus interaction needs it, its target moves to M9, decided at M8's plan.
 
