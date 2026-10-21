@@ -105,7 +105,7 @@ The owner's authorizations (2026-10-21). Each covers only the questions it names
 | Spike | When | The owner's words | State |
 |---|---|---|---|
 | S10 | "Authorized Immediately (Pre-Milestone 1)" | "GPU process IPC hop latency, display list validation, and zero-copy texture sharing." | Authorized |
-| S12 | As S10 | "ThreadSanitizer workaround routes on macOS 27 (-Z external-clangrt)." | Authorized |
+| S12 | As S10 | "ThreadSanitizer workaround routes on macOS 27 (-Z external-clangrt)." | **Done** (2026-10-21): both routes work ([results](../research/s12-results.md)) |
 | S15 | As S10 | "Stable self-signed codesigning persistence across rebuilds." | Authorized |
 | S11 | "Authorized Before Milestone 3" | "Spike S11 (GC pauses & 32-bit slot width)" | Authorized, not started |
 | S13 | As S11 | "Spike S13 (WebIDL build times)" | Authorized, not started |
