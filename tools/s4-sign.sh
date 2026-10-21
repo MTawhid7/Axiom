@@ -3,9 +3,13 @@
 # runtime, as Axiom's helpers would be signed (ADR-0004 D2), with no paid
 # developer account.
 #
-# Usage: tools/s4-sign.sh [--release] [--out DIR]
-#   --release   build with the release profile (default: dev)
-#   --out DIR   where the signed copies go (default: target/s4/bin)
+# Usage: tools/s4-sign.sh [--release] [--out DIR] [--identity ID --keychain PATH]
+#   --release        build with the release profile (default: dev)
+#   --out DIR        where the signed copies go (default: target/s4/bin)
+#   --identity ID    sign with this identity (a certificate's SHA-1, or its
+#                    name) instead of ad hoc: spike S15's stable local
+#                    identity (the review's RV1-17)
+#   --keychain PATH  the keychain that holds the identity (S15's own file)
 #
 # Signed copies:
 #   s4-broker        hardened runtime, no entitlements
@@ -25,12 +29,17 @@ PROFILE=debug
 CARGO_FLAGS=()
 OUT="$ROOT/target/s4/bin"
 
-usage() { sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'; }
+IDENTITY=-
+KEYCHAIN=
+
+usage() { sed -n '2,27p' "$0" | sed 's/^# \{0,1\}//'; }
 
 while [ $# -gt 0 ]; do
   case $1 in
     --release) PROFILE=release; CARGO_FLAGS+=(--release) ;;
     --out) OUT=$2; shift ;;
+    --identity) IDENTITY=$2; shift ;;
+    --keychain) KEYCHAIN=$2; shift ;;
     -h | --help) usage; exit 0 ;;
     *) echo "s4-sign: unknown argument $1" >&2; usage >&2; exit 2 ;;
   esac
@@ -44,7 +53,8 @@ mkdir -p "$OUT"
 # sign <built-binary> <copy-name> <identifier> <runtime|plain> [entitlements-plist]
 sign() {
   local source="target/$PROFILE/$1" copy="$OUT/$2" identifier=$3 kind=$4 entitlements=${5:-}
-  local args=(--sign - --force --identifier "$identifier")
+  local args=(--sign "$IDENTITY" --force --identifier "$identifier")
+  [ -n "$KEYCHAIN" ] && args+=(--keychain "$KEYCHAIN")
   [ "$kind" = runtime ] && args+=(--options runtime)
   [ -n "$entitlements" ] && args+=(--entitlements "$entitlements")
   cp -f "$source" "$copy"
@@ -61,4 +71,4 @@ sign s4-helper s4-helper-jit1 org.axiom.s4.helper-jit1 runtime spikes/s4/sandbox
 sign s4-helper s4-helper-plain org.axiom.s4.helper-plain plain
 sign s4-text s4-text org.axiom.s4.text runtime
 
-echo "signed copies in $OUT"
+echo "signed copies in $OUT ($([ "$IDENTITY" = - ] && echo "ad hoc" || echo "identity $IDENTITY"))"

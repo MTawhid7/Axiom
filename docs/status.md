@@ -93,6 +93,11 @@
 - **A sweep for stale statements** after CP1–CP6 fixed seven more (RQ18's JIT timing, ADR-0020's consequences, IPC's L0 staging, the content tier's table, ADR-0019's B3, and B1's and B3's summaries).
 - **Spike S12, ThreadSanitizer routes** ([results](research/s12-results.md)): **both work.** The nightly of 2026-10-21 (rustc 1.101.0, 19833af72) runs ThreadSanitizer with its own runtime on macOS 27.2; the April nightly S9 used runs it with `-Z external-clangrt` and Apple clang 21's runtime. Each passes the clean test and reports S9's planted race (2 reports, exit 66 with `abort_on_error=0`); the April nightly's own runtime still crashes before `main`. **Recommended for M1:** a nightly of 2026-10-21 or later with its own runtime, `-Z external-clangrt` as the fallback (TS11, MA7, MA10).
   - **Side effects:** the toolchain `nightly-2026-10-21` installed beside `nightly` (removable with `rustup toolchain uninstall`); rustup updated itself from 1.29.0 to 1.29.1 during that install, which I didn't intend; two crash reports moved from `~/Library/Logs/DiagnosticReports` into the results under `target/`.
+- **Spike S15, a stable local signing identity** ([results](research/s15-results.md)): **both questions pass.**
+  - **S15-Q1:** under a self-signed identity (untrusted, `CSSMERR_TP_NOT_TRUSTED`, yet usable by `codesign`), S4's 18 probes, the JIT matrix with `allow-jit` and `single-jit`, CoreText in its profile, start-up and IPC give the same output as ad hoc, but for the helpers' directory.
+  - **S15-Q2:** a rebuild under the identity reads the first build's Keychain item with no dialog, where an ad-hoc rebuild is refused (`errSecAuthFailed`); the item trusts the designated requirement, `identifier … and certificate root = H"…"`, which the rebuild satisfies. Privacy permissions (TCC) need the shell as an app bundle and the owner's clicks: left to M1's shell checkpoint.
+  - **The probe** (`spikes/s15/probe`) has `unsafe` only in `src/platform/`; `tools/s4-sign.sh` gains `--identity` and `--keychain`.
+  - **No side effects:** the throwaway keychain under `target/` was created and deleted with its key; the search list, the login keychain and trust settings were untouched.
 
 ### 2026-10-21 — Session 17 (the review's Round 1)
 

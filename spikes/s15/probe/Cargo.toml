@@ -1,0 +1,15 @@
+[package]
+name = "s15-probe"
+description = "Spike S15: a probe for a stable local signing identity. Two builds that differ only in a compiled-in tag add and read a generic password in S15's own keychain file, with user interaction disallowed, to see whether a rebuild keeps the first build's Keychain access. unsafe only in src/platform/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+# No dependencies beyond std: Security.framework's legacy keychain functions are
+# reached through hand-written declarations in src/platform/, checked against
+# SDK 27.0's SecKeychain.h and SecKeychainItem.h.
+
+[lints]
+workspace = true

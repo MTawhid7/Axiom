@@ -63,3 +63,7 @@ allow spikes/s6/compositor src/platform/
 allow spikes/s7/net src/platform/
 
 allow spikes/s9/race src/planted/
+
+# Spike S15 (the review's RV1-17): Security.framework's legacy keychain functions,
+# under invariants K1–K4 (spikes/s15/probe/src/platform/mod.rs).
+allow spikes/s15/probe src/platform/

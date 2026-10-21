@@ -106,7 +106,7 @@ The owner's authorizations (2026-10-21). Each covers only the questions it names
 |---|---|---|---|
 | S10 | "Authorized Immediately (Pre-Milestone 1)" | "GPU process IPC hop latency, display list validation, and zero-copy texture sharing." | Authorized |
 | S12 | As S10 | "ThreadSanitizer workaround routes on macOS 27 (-Z external-clangrt)." | **Done** (2026-10-21): both routes work ([results](../research/s12-results.md)) |
-| S15 | As S10 | "Stable self-signed codesigning persistence across rebuilds." | Authorized |
+| S15 | As S10 | "Stable self-signed codesigning persistence across rebuilds." | **Done** (2026-10-21): S4's probes and the JIT entitlements behave as ad hoc, and Keychain access survives a rebuild; privacy permissions by hand at M1 ([results](../research/s15-results.md)) |
 | S11 | "Authorized Before Milestone 3" | "Spike S11 (GC pauses & 32-bit slot width)" | Authorized, not started |
 | S13 | As S11 | "Spike S13 (WebIDL build times)" | Authorized, not started |
 | S14 | As S11 | "Spike S14 (WebAssembly & WasmGC)" | Authorized, not started |
