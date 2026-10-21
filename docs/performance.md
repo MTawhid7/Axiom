@@ -203,7 +203,7 @@ The documents, media and applications tiers keep their ceilings as above.
 
 ## 9. Open questions
 
-1. **The content tier's cap** (§4.1): it binds at 12–26% of Chrome's cost on the three content pages, signed in. ADR-0019's condition for revisiting was met, and the owner kept the cap at Gate C as the baseline hypothesis for review ([OQ-25](open-questions.md)). Axiom's own measurements at M4 and M5 test it.
+1. **The content tier's cap** (§4.1): it binds at 12–26% of Chrome's cost on the three content pages, signed in. ADR-0019's condition for revisiting was met, and the owner kept the cap at Gate C as the baseline hypothesis for review ([OQ-25](open-questions.md)). **Answered in Round 1** (RV1-05): the content pages are gated by a slope and a plateau on a normalized workload, with 150 MB a stretch target (§4.1); Chrome's slope comes from the census addendum, before M4.
 2. **Safari's figures:** measured with the corrected tool for the ten pages that work logged out (S8 results §7.4), so PF17 has Safari's energy impact for those pages. They were taken under the owner's advanced tasks, so the media milestone measures Safari again beside Axiom, with the same interaction.
 3. **Values marked hypothesis** are measured at the milestones named. A miss returns to the owner as a revision (PF5).
 

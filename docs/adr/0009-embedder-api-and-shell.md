@@ -14,6 +14,7 @@
 | 2026-10-17 | Proposed at Step 4, CP12 |
 | 2026-10-17 | **Accepted** by the owner at Gate B: "ADR-0009 (Embedder API & Pure-Rust Shell): Accepted." OQ-11 is resolved, subject to the shell milestone's validation (decision 6) |
 | 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1): RV1-15, "Require headless embedder text dumps at M1, crash reporting at M2, and console logging at M3." And RV1-01, "Implement a script-free screenshot harness for Milestone 1". EM9 is amended in the [embedder API](../architecture/embedder-api.md): the headless embedder writes a PNG per test without script, and its diagnostics are staged (dumps at M1, crash reports at M2, the console at M3). Decision 5 records it |
+| 2026-10-21 | **Amendment recorded** in Round 2's first checkpoint ([the review](../review/README.md) §5.6, RV2-02; the owner: "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed."): decision 7 and EM12 follow Round 1's RV1-17, "Validate local self-signed codesigning persistence via Spike S15.", and [ADR-0004](0004-process-model-and-sandbox.md) D2's amendment: the bundle is signed by the stable local identity S15 validated, with ad hoc as the fallback (MA10). EM10 now says single-process mode is a test mode (RV1-07) |
 
 ## Question
 
@@ -61,7 +62,7 @@ See [embedder API](../architecture/embedder-api.md) §4. The language question t
 4. **The browser's own UI is native, never web content** (EM8).
 5. **A headless embedder** with offscreen surfaces, synthetic input and virtual time, for WPT and reference tests. Single-process mode uses the same API (EM9–EM10). **As amended in Round 1** (RV1-01, RV1-15): it writes a reference test's PNG without script, and dumps the DOM, styles, boxes and fragments, the display list and the network log as text from M1, with crash reports at M2 and the console at M3.
 6. **OQ-11: a pure-Rust shell with objc2.** The shell milestone first validates an objc2-defined view class for text input and accessibility, a menu bar and a bundle. A Swift shell can sit behind the same API if that validation fails (EM11).
-7. **One ad-hoc-signed bundle** holding the shell and helper executables, built by a script without Xcode (EM12).
+7. **One ad-hoc-signed bundle** holding the shell and helper executables, built by a script without Xcode (EM12). **As amended** (Round 1, RV1-17; recorded in Round 2, RV2-02): signed by the stable local identity, with ad hoc as the fallback.
 
 ## Rationale
 

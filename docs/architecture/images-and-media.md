@@ -38,7 +38,7 @@ Everything here is **planned**; nothing is implemented. Rules are numbered IM1�
 
 | Input | Consequence here |
 |---|---|
-| **AC4, PL7–PL8:** the browser never decodes images; display lists carry decoded pixels in shared memory or IOSurfaces, as resources of their renderer, counted against its budget | IM1 |
+| **AC4, PL7–PL8:** the browser never decodes images; display lists carry decoded pixels in Mach memory entries (IOSurfaces only in the compositor, as amended in Round 1, RV1-09), as resources of their renderer, counted against its budget | IM1 |
 | **Process model §3, note 3:** images are decoded in the renderer, with no decoder process per image, by safe Rust decoders by preference; ImageIO only inside a renderer or the GPU process; images the browser shows, such as favicons, are decoded by safe Rust decoders or in a renderer | IM1–IM3 |
 | **Process model §3:** media decoding with system codecs belongs to a utility process | IM10 |
 | **PL10:** image decoding runs on the helper pool | IM1 |

@@ -175,7 +175,7 @@ No new dependency is proposed.
 
 ## 7. Security
 
-- **Paint emits only PL7's validated primitives,** which the browser validates again before drawing (PL9). Fonts and image bytes never leave the renderer (TX14, IM1).
+- **Paint emits only PL7's validated primitives,** which the compositor validates again before drawing (PL9): from M2 in the GPU/compositor process, at M1 in the browser (as amended in Round 1, RV1-02). Fonts and image bytes never leave the renderer (TX14, IM1).
 - **Untrusted structure, bounded work.** Layout's only parsing is SVG's geometry syntax, such as path data, in safe Rust (rule 5). A hostile document can still be deep or huge: recursion depth is bounded wherever the document controls it, using explicit work stacks past a limit, and every quantity saturates instead of overflowing (LY1). Exhaustion harms only the attacker's tab, but a stack overflow would abort the renderer (inference).
 - **No other frame's content is visible.** The compositor routes input by frame token (IN1), and a renderer hit-tests and measures only its own frames (LY25). A child frame learns only its own visible rectangle from the browser, the information IntersectionObserver exposes (LY28), never its parent's layout.
 - **Form controls and scrollbars need no AppKit in the renderer** (LY24, HD27), as the process model requires.

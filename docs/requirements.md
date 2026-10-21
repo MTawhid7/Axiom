@@ -47,12 +47,12 @@ Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone th
 |---|---|---|---|---|
 | RQ22 | No rewrite from L0 to L3 (AC1) | [ADR-0007](adr/0007-frame-tree-pipeline-and-input.md); overview §6; MS4 | M2, M5, M6 | Each level changes process selection only; the interfaces' tests pass unchanged |
 | RQ23 | The browser is the authority (AC2) | FT1–FT10 | M2 | Records and routing in the browser; V3 at M5 |
-| RQ24 | Idle costs nothing (AC3) | EL1–EL3; PM8 | M1 (one process), M2 (each process) | PF16: no idle wakeups over 30 s |
+| RQ24 | Idle costs nothing (AC3) | EL1–EL3; PM8 | M1, in each process (as amended in Round 1, RV1-07: real processes from M1) | PF16: no idle wakeups over 30 s |
 | RQ25 | The browser never decodes images or parses web fonts (AC4) | PL7–PL9; TX7 | M2 | Display lists validated at the process boundary; decoding only in renderers |
 | RQ26 | One single-threaded heap per agent (AC5) | [ADR-0008](adr/0008-script-agents-and-heap.md) SH1 | M3 | The engine's tests; Miri where `unsafe` |
 | RQ27 | A deterministic, testable core (AC6) | EL24; EM9; IV14 | M1 | MA8: chunking and repetition independence; the virtual clock |
 | RQ28 | Memory is designed and budgeted (AC7) | Each design's memory section; ADR-0019 | Every gate | The budgets (MS7) |
-| RQ29 | IPC: Mach, endpoints as capabilities, generated safe decoders, `Untrusted<T>` | [ADR-0005](adr/0005-ipc-transport-and-interfaces.md) | M1 (in-process channels, generated code), M2 (across processes) | Decoders fuzzed (TS9); V2 |
+| RQ29 | IPC: Mach, endpoints as capabilities, generated safe decoders, `Untrusted<T>` | [ADR-0005](adr/0005-ipc-transport-and-interfaces.md) | M1 (Mach channels between processes, generated code: as amended in Round 1, RV1-07), M2 (audit-token pinning) | Decoders fuzzed (TS9); V2 |
 | RQ30 | One wait per thread; a browser core thread; one thread and heap per event loop | [ADR-0006](adr/0006-event-loop-and-threading.md) | M1 (threads), M3 (the HTML event loop) | Idle checks (PF16); ThreadSanitizer when its runtime works (S9-Q2) |
 | RQ31 | Five owned stages; a compiler-checked lifecycle; reuse at each stage | ADR-0007 | M1 | IV14's self-oracle (MA8) |
 | RQ32 | Pattern B's heap with `SliceStack`; the node arena never compacted | ADR-0003; ADR-0008 (with SH10's amendment) | M1 (the node arena), M3 (the JavaScript heap) | The collector's pause budget (PF15); stable identities (HD33) |

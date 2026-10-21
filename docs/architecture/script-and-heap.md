@@ -24,7 +24,7 @@ Everything here is **planned**; nothing is implemented. Rules are numbered SH1�
 - **C2–C5** (SH8–SH11):
   - **C2:** hot link fields are laid out so that no index arithmetic sits in a dependent chain of loads.
   - **C3:** every write of a handle-valued field goes through generated setters, the insertion point for any future barrier.
-  - **C4:** the plan is a stop-the-world mark–compact collector now, then incremental marking in idle periods and a generational nursery, ordered by measurement (V8 and SpiderMonkey both went this way).
+  - **C4:** version 0 is a stop-the-world mark–compact collector. **As amended in Round 1** (RV1-04), the end-state is fixed before M3, not ordered by later measurement: a generational nursery, incremental marking driven by allocation as well as idle periods, parallel marking in pauses, and non-moving tenured arenas with selective evacuation (SH10), with spike S11's measurements.
   - **C5:** memory handed to platform APIs lives outside the heap and never moves.
 - **Bindings are generated, safe and mechanical** (SH12). The value representation leaves room for a JIT under J1–J7 (SH13).
 
@@ -96,7 +96,7 @@ From sources read on 2026-10-17 (Sources).
 
 | Level | What changes |
 |---|---|
-| L0 | All of it. Agents and heaps are per event-loop thread inside one process |
+| L0 | All of it. Agents and heaps are per event-loop thread, in renderer processes from M1 (as amended in Round 1, RV1-07; one process only in single-process test mode) |
 | L1–L3 | Nothing. Each agent's heap moves with its event loop into a renderer. Cross-process messages are copied, as cross-thread messages in another process would be (SH2) |
 | From L2 | A JIT may appear in `renderer-jit` if J1's evidence supports it (SH13) |
 

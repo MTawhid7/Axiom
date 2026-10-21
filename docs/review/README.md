@@ -55,7 +55,8 @@
 2. **The owner decides each finding,** in the disposition log (§5): **accepted**, **rejected** or **deferred**, with a reason; a deferred finding names when it returns.
 3. **Accepted changes are made in checkpoints** on `architecture-review`, as Round 1's [actions](round-1/04-round-2-actions.md#5-how-accepted-findings-become-changes) describe:
    - an ADR's change is an amendment, recorded in its decision history with the finding's ID;
-   - a spike needs its own authorization.
+   - a spike needs its own authorization;
+   - **the entry documents change with the rules** (added in Round 2, RV2-01): a checkpoint that changes a rule also updates the [handover](../handover-phase-0.md) and the [decision map](../decision-map.md) wherever they summarize it, and the round's last checkpoint searches them, and every living document, for each finding's old wording, as [Round 2's verification](round-2/02-verification.md#2-method) §2 did, with the phrases RV2-02 found added.
 4. **The next round** verifies the changes, then reviews what the previous round didn't cover in depth.
 5. **`architecture-review` merges into `main`** only when the owner says so.
 
@@ -159,8 +160,8 @@ Every finding: **Accepted** as proposed, 2026-10-21 (§5.5, item 1). Where a cou
 
 | ID | Severity | Blocks | Changed |
 |---|---|---|---|
-| RV2-01 | Medium | M1 | CP1 |
-| RV2-02 | Low | M1 | CP1 |
+| RV2-01 | Medium | M1 | CP1: the [handover](../handover-phase-0.md), brought up to Round 1 throughout (its status, summary, diagram, ADR table, budgets, roadmap, spikes, trade-offs, deferred decisions, assumptions, risks, open questions and §11's flagged areas); the [decision map](../decision-map.md)'s F2, F3, P7, X1–X4 and Review rows; §4's new step |
+| RV2-02 | Low | M1 | CP1: graphics §3 and §9; the pipeline's header; layout §7; OQ-3, OQ-13, OQ-16, OQ-24; performance §9; the status's ADR-0019 row; RQ24, RQ29; the roadmap's summary; script and heap's summary and §4; EL24; EM10, EM12; the engine's §3; images §1; the overview §5.4; the threat model §10; ADR-0009's decision 7 and history. **Found by the sweep and added:** OQ-20's reason, which predates RV1-07, and script and heap's summary of C4, which predates RV1-04 |
 | RV2-03 | Medium | M1 | CP2, with item 2's configuration |
 | RV2-04 | Medium | M1 (M2, M3, M8) | CP2, with item 3's placement |
 | RV2-05 | Medium | M2 | CP3 |
@@ -179,7 +180,7 @@ Every finding: **Accepted** as proposed, 2026-10-21 (§5.5, item 1). Where a cou
 
 | Checkpoint | The owner's name | Findings | State |
 |---|---|---|---|
-| CP1 | "Update the master Handover report (docs/handover-phase-0.md), decision map, and clean up stale statements" | RV2-01, RV2-02 | Pending |
+| CP1 | "Update the master Handover report (docs/handover-phase-0.md), decision map, and clean up stale statements" | RV2-01, RV2-02 | Done, `docs(review-r2-cp1)` |
 | CP2 | "Process model, helper crashes, IPC never-blocking, and test configs" | RV2-03, RV2-04, RV2-13, RV2-14 | Pending |
 | CP3 | "GPU process memory accounting and tile reuse protocols" | RV2-05 | Pending |
 | CP4 | "Storage key ancestor bit, File API design, and storage quotas" | RV2-10, RV2-11, RV2-12 | Pending |

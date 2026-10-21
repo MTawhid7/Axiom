@@ -6,7 +6,7 @@
 | **Question** | What data structures make up the pipeline, from the DOM through style, the box tree, the fragment tree and the per-frame display list to the browser's compositor? Who owns each one, on which thread, and what crosses a process boundary? How are strings and atoms represented? |
 | **Answers** | Step 4 questions Q2, Q8, Q9 and Q10 ([tracker](../research/step-4-architecture-proposal.md) §3): P2, and the representation part of P4 |
 | **Feeds** | ADR-0007; CP7 (invalidation), CP8 (hit testing and accessibility), CP10 (the heap's DOM arenas); Step 5 (text, graphics, style, layout) |
-| **Builds on** | [Process model](../security/process-model.md) §3 (the browser composites; the Rule of 2); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [event loop and threading](event-loop-and-threading.md); [IPC](ipc.md); [frame tree](frame-tree-and-navigation.md); [S4 results](../research/s4-results.md) (CoreText in a sandbox) |
+| **Builds on** | [Process model](../security/process-model.md) §3 (the GPU/compositor process composites from M2, as amended in Round 1; the Rule of 2); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [event loop and threading](event-loop-and-threading.md); [IPC](ipc.md); [frame tree](frame-tree-and-navigation.md); [S4 results](../research/s4-results.md) (CoreText in a sandbox) |
 | **Last updated** | 2026-10-21: Round 1's accepted findings; S10's measurements in PL8 and PL9 |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered PL1–PL16. Precedent is sourced (§2); the design is inference unless marked otherwise. The algorithms behind each stage belong to Step 5.

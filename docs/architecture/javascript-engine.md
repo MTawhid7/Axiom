@@ -64,7 +64,7 @@ Read on 2026-10-19; dates in brackets are the last commits to each file, from Gi
 - **The interpreter's own speed matters most for `RegExp`:** half of V8's jitless slowdown was its regular expression interpreter. Axiom's `RegExp` must be fast as an interpreter from the start (JE20).
 - **Rust engines differ most in their collectors:** Brimstone's is "very unsafe"; Nova's and Axiom's Pattern B are safe, at the cost of scoping discipline that the borrow checker enforces.
 - **Even Ladybird's new JIT keeps the interpreter's caches as its only baseline,** so feedback designed for the interpreter (JE8) is the right preparation for any later tier (JE30).
-- **V8 reuses `temporal_rs` for Temporal.** DP1 (g) makes builtins Axiom's own, so Axiom uses it as a reference instead (JE22).
+- **V8 reuses `temporal_rs` for Temporal.** DP1 (g) makes builtins Axiom's own, so Axiom uses it as a reference instead (JE22). **As amended in Round 1** (RV1-08): Temporal's arithmetic is a replaceable detail (DP2), so `temporal_rs` is graded before M3 and reused behind Axiom's interface if it passes.
 
 ## 4. Build or reuse
 

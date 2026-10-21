@@ -69,8 +69,8 @@ Read on 2026-10-18; dates in brackets are the last commits to each file, from Gi
 
 **Observations** (inference):
 - **All three engines present through CoreAnimation layer trees on macOS.** Firefox's measurements show why: when the window server composites retained layers, a small change costs a small redraw, and scrolling can move content without redrawing it.
-- **The engines rasterize page content in a GPU process,** or, in Firefox, in the compositor's process. Axiom's compositor lives in the browser until a GPU process exists, which constrains GR5.
-- **Chromium chose an abstraction over Metal (Dawn), but in a sandboxed GPU process** that also implements WebGPU. Axiom's compositor runs in the unsandboxed browser for now, and macOS is its only platform.
+- **The engines rasterize page content in a GPU process,** or, in Firefox, in the compositor's process. Axiom's compositor lived in the browser when this was written, which constrained GR5; **as amended in Round 1** (RV1-02), it moves into the sandboxed GPU/compositor process at M2, and runs as a browser thread behind its interface at M1.
+- **Chromium chose an abstraction over Metal (Dawn), but in a sandboxed GPU process** that also implements WebGPU. Axiom's compositor runs in its own sandboxed GPU/compositor process from M2 (Round 1, RV1-02), and macOS is its only platform.
 
 **Apple's guidance:**
 - On tile-based deferred rendering: tile memory "saves time and energy by avoiding accessing device memory as much as possible", with "energy consumption that's significantly less than accessing device memory". Multi-pass algorithms that store intermediate results "copy intermediate data to device memory many times" [A1].
@@ -170,7 +170,7 @@ Read on 2026-10-18; dates in brackets are the last commits to each file, from Gi
 
 | | Alternative | Assessment |
 |---|---|---|
-| A | **wgpu in the browser's compositor** | It would give portability, which Axiom doesn't need, at the cost of a large `unsafe` tree in the most privileged process. Rejected for the compositor; still a candidate for WebGPU in the GPU process (GR10) |
+| A | **wgpu in the browser's compositor** | It would give portability, which Axiom doesn't need, at the cost of a large `unsafe` tree in the most privileged process, the browser, where the compositor ran when this was assessed (from M2 it runs in the GPU/compositor process: Round 1, RV1-02). Rejected for the compositor; still a candidate for WebGPU in the GPU process (GR10) |
 | B | **One `CAMetalLayer` per window, redrawn each frame** | Simpler, but it has no partial presentation, and scrolling must redraw. Firefox's measurements show the cost (§3). Rejected (GR2) |
 | C | **Skia,** as Chromium and Ladybird use | Mature and fast, but C++, in the browser process, for orchestration that DP1 makes core. Rejected |
 | D | **Vello's compute renderer** | It is experimental by its own description (§3). Rejected for now; its GPU renderer is one of S6's candidates for path filling |

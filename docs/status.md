@@ -31,7 +31,7 @@
 | | [ADR-0016](adr/0016-style-layout-and-paint.md): style, layout and paint, with `:visited` by partitioned history (2026-10-20, Step 5's Gate C) |
 | | [ADR-0017](adr/0017-javascript-engine-and-bindings.md): the JavaScript engine and bindings (2026-10-20, Step 5's Gate C) |
 | | [ADR-0018](adr/0018-corpus-standards-and-testing.md): the corpus, the standards baseline and testing, X1 and X2 (2026-10-20, Step 6's Gate B); the automation boundary confirmed, the not-planned list approved |
-| | [ADR-0019](adr/0019-performance-methodology-and-budgets.md): performance methodology and budgets, X3, with the final B1–B7 (2026-10-20, Step 6's Gate B); the content tier's 150 MB cap kept at Gate C as the baseline hypothesis for review ([OQ-25](open-questions.md)) |
+| | [ADR-0019](adr/0019-performance-methodology-and-budgets.md): performance methodology and budgets, X3, with the final B1–B7 (2026-10-20, Step 6's Gate B); the content tier's 150 MB cap kept at Gate C as the baseline hypothesis for review ([OQ-25](open-questions.md)), and replaced in Round 1 by a slope and a plateau on a normalized workload, 150 MB a stretch target (RV1-05) |
 | | [ADR-0020](adr/0020-roadmap-and-security-levels.md): the roadmap and its security levels, M1–M9 and L0–L3, accepted as the baseline under review (2026-10-20, Step 6's Gate C) |
 | | [ADR-0021](adr/0021-milestone-1.md): Milestone 1, static documents, accepted as M1's specification baseline (2026-10-20, Step 6's Gate C); **starting it is on hold** |
 | | The [overview](architecture/overview.md) v2 and the [requirements](requirements.md) (RQ1–RQ66), approved as the Phase Zero baseline (2026-10-20, Step 6's Gate C) |
@@ -59,6 +59,11 @@
 
 **Done:**
 - **The dispositions recorded:** [the review](review/README.md) §5.5 (the owner's words), §5.6 (the findings), §5.7 (the checkpoints); the round's status rows; the [index](README.md); this status.
+- **CP1, the entry documents and stale statements (RV2-01, RV2-02).**
+  - **The [handover](handover-phase-0.md) rewritten for Round 1,** as the external review's starting point: its status, summary and "what the review changed"; the redrawn diagram; each ADR's amendments; the GPU/compositor process, real processes from M1 and the signing identity in §4.3; B1a and B1b; the collector's end-state, the slot width, the reuse line, text's rules, the two executors, the content tier's gate, the amended roadmap and Milestone 1; spikes S10, S12 and S15; trade-offs, deferred decisions, assumptions, risks and open questions; and a note on each of §11's thirty flagged areas that Round 1 or 2 answered.
+  - **The [decision map](decision-map.md):** Round 1's notes on F2, F3, P7 and X1–X4; the Review row "Under way".
+  - **The review's process** (§4): the entry documents change with the rules, and the last checkpoint of a round searches for each finding's old wording.
+  - **The stale statements** RV2-02 listed, corrected, and two more the sweep found: OQ-20's reason (it predates RV1-07) and script and heap's summary of C4 (it predates RV1-04).
 
 ### 2026-10-21 — Session 19 (the owner's decisions on Round 1's results; Round 2)
 

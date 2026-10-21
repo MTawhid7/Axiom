@@ -208,7 +208,7 @@ From the [charter](../charter.md) §8:
 | Criterion | Evidence | State |
 |---|---|---|
 | The owner has approved an architecture proposal and a roadmap | This overview v2, the [roadmap](../roadmap.md) and [ADR-0020](../adr/0020-roadmap-and-security-levels.md), at Gate C | **Met** (2026-10-20), as the baseline under review |
-| Every foundational decision has an Accepted ADR | The [decision map](../decision-map.md): F1–F5, P1–P7, I1–I5 and X1–X4 accepted; I6, WebAssembly, deliberately open and placed at M8's gate (MS9) | **Met** |
+| Every foundational decision has an Accepted ADR | The [decision map](../decision-map.md): F1–F5, P1–P7, I1–I5 and X1–X4 accepted; I6, WebAssembly, deliberately open and placed at M8's gate (MS9), its architecture re-placed before M3 in Round 1 (RV1-13) | **Met** |
 | The target-site corpus is defined | The [corpus](../corpus.md), binding since Gate B | **Met** |
 | The measurable acceptance criteria for Milestone 1 are written | [Milestone 1](../milestone-1.md) (MA4–MA9) and [ADR-0021](../adr/0021-milestone-1.md) | **Met** (2026-10-20): accepted as M1's specification baseline |
 

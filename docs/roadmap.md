@@ -29,7 +29,7 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 
 - **Security climbs before the attack surface widens** (MS2): the sandbox at M2, site locks at M5, out-of-process iframes and V1–V9 at M6. Media codecs, the GPU process and WebAssembly arrive after L3, and each of those milestones keeps L3's checks green for what it adds.
 - **No script from the web before L1** (MS3), so the first engine that runs web script runs it sandboxed.
-- **Every interface exists from M1** (MS4): L0 is one process with every channel, record and replica, so L1–L3 change process selection, not interfaces (AC1).
+- **Every interface exists from M1** (MS4): L0 has every channel, record and replica, in real sandboxed renderer and network processes since Round 1 (RV1-07), so L1–L3 change process selection, not interfaces (AC1).
 - **Every milestone's criteria take one shape** (MS7): conformance targets, corpus checks, budgets, the level's security checks, fuzzing of what it adds, and no regressions.
 - **The login track** (MS8): cookies and storage at L1, without logins; test accounts at L2 (M5); the owner's own accounts at L3 (M6). The three sites M5 targets set no limit on a person's accounts, but require accurate details and forbid automated creation (§6).
 - **Every decision point has a milestone** (MS9): WebAssembly before M9; a JIT not before L2, on the applications' evidence; passkeys before M6; and the deferred decisions of Step 5.

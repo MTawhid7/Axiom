@@ -198,7 +198,7 @@ ADR-0001 gates sensitive use "until the isolation milestone is verified". The le
 
 ## 10. Open questions raised
 
-- **OQ-16.** How can Axiom support WebAuthn and passkeys without a paid developer account? Candidates are roaming security keys over USB HID, or obtaining the entitlement. Needed before L3, because high-value accounts increasingly use passkeys.
+- **OQ-16.** How can Axiom support WebAuthn and passkeys without a paid developer account? Candidates are roaming security keys over USB HID, or obtaining the entitlement; **Round 1** (RV1-21) added the hybrid transport (§9). Needed before L3, because high-value accounts increasingly use passkeys.
 - Inputs to existing questions: OQ-4 (JIT policy), via SG12 and V7; OQ-5 (per-agent heaps), because an agent cluster must live in one process [6].
 
 ## 11. Sources

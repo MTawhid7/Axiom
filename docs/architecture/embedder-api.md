@@ -119,7 +119,7 @@ From documentation read on 2026-10-17 (Sources).
 | # | Rule |
 |---|---|
 | EM9 | **A headless embedder implements the same API without AppKit.** It provides offscreen presentation (the compositor renders into an offscreen texture, read back for reference tests and screenshots), synthetic input injected at the compositor's sink, virtual time through the deterministic scheduler (EL24), and logged answers to decision requests. It runs WPT, reference tests, crash tests and fuzzing harnesses (Step 6), on this Mac, without a window. `content_shell` plays this role for Chromium [C1].<br>**As amended in Round 1** (2026-10-21):<br>• **A script-free reference-test path** (RV1-01; [testing](../testing.md) TS2): given a URL, it loads it, waits natively for the load event and for pending images and fonts, writes a PNG of the offscreen texture, and exits, so wptrunner can run reference tests before script exists. WPT's host names resolve through a hosts file that only the test build accepts.<br>• **Diagnostics for one developer** (RV1-15), staged: **from M1,** test-only commands dump, as text in stable formats that tests can compare, the DOM, a node's computed style, the box and fragment trees, the display list and the network log; **from M2,** a crashed helper's report is moved into a local directory the owner controls, with the build identifier (IP18), as S9's script already does for test crashes; **from M3,** console messages reach the embedder's log and the test runners (JE27). A developer-tools protocol stays later (JE27).<br>Every dump and log is test-only or local: none leaves this Mac |
-| EM10 | **Single-process mode uses the same API.** The shell can't tell whether the engine runs one process (L0) or many (L1–L3). That is a property of the engine's process manager |
+| EM10 | **Single-process mode uses the same API.** The shell can't tell whether the engine runs one process (single-process test mode) or many (every level from M1, as amended in Round 1, RV1-07). That is a property of the engine's process manager |
 
 ### 4.5 The shell's language and packaging
 
@@ -138,7 +138,7 @@ From documentation read on 2026-10-17 (Sources).
 
 | # | Rule |
 |---|---|
-| EM12 | **One application bundle** contains the shell and the helper executables (`renderer`, `renderer-jit` later, `network`, and `gpu` and `utility` later). They are signed ad hoc with the hardened runtime, each with its own entitlements ([process model](../security/process-model.md) §10; `tools/s4-sign.sh`). A script builds the bundle, without Xcode |
+| EM12 | **One application bundle** contains the shell and the helper executables (`renderer`, `renderer-jit` later, `network`, and `gpu` and `utility` later). They are signed with the hardened runtime, each with its own entitlements, by the stable local identity, with ad hoc as the fallback (**as amended in Round 1**, RV1-17; [S15 results](../research/s15-results.md)) ([process model](../security/process-model.md) §10; `tools/s4-sign.sh`). A script builds the bundle, without Xcode |
 
 ## 5. Staging
 
