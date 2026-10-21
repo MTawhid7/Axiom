@@ -4,7 +4,7 @@
 |---|---|
 | **Status** | Living document. Started at Step 5, CP2 |
 | **Purpose** | Every dependency proposed for the engine, with the record the [dependency policy](dependency-policy.md) requires (DP6). Nothing listed here is added to the workspace until its approval (DP5) and, for code, an authorized milestone |
-| **Last updated** | 2026-10-20 (Gate C: CP3's, CP4's and CP5's entries decided; S6-Q4's evidence) |
+| **Last updated** | 2026-10-21 (Round 1: `encoding_rs` 0.8.42 graded; Temporal's and BigInt's candidates). Earlier: 2026-10-20 (Gate C: CP3's, CP4's and CP5's entries decided; S6-Q4's evidence) |
 
 **How to read it.** Each entry gives the fields of DP6. The values used are:
 - **class:** required platform facility, replaceable implementation detail, or foundational dependency (DP5);
@@ -135,14 +135,14 @@ AccessKit was considered and not adopted, by design rather than grade: its macOS
 ### From CP13–CP17: part 2
 
 **No runtime dependency.** The parsers, the DOM, style, layout, paint, the JavaScript engine and the WebIDL generator are Axiom's own (DP1 (a), (b), (g), (h)); `Intl` uses ICU4X, already proposed at CP3 (TX2, JE21). The part 2 documents name **test references** and **data**, each recorded here, with its group (`test` or `build`) and license, when a test or the build first uses it:
-- test references: `html5ever` and `xml5ever` (HD33), `regress`, `temporal_rs` and `num-bigint` (JE32), and Taffy as a candidate (LY32);
+- test references: `html5ever` and `xml5ever` (HD33), `regress`, `temporal_rs` and `num-bigint` (JE32), and Taffy as a candidate (LY32). **Since Round 1** (RV1-08), `temporal_rs` is also the candidate for Temporal's arithmetic, graded under DP8 before M3, and `num-bigint`, or a crate with arithmetic over limb slices, the candidate for BigInt's, graded before M4 (JE13, JE22);
 - data: webref's curated IDL (WB1), html5lib-tests (HD33), css-parsing-tests (ST36) and test262 (JE32).
 
 ## 4. Considered and not admitted
 
 | Dependency | Reason | Recorded at |
 |---|---|---|
-| `encoding_rs` | Graded `ub-risk-3` at 0.8.33 by Google, so DP8 bars it. Axiom writes its own encodings in safe Rust and uses `encoding_rs` as a test reference (TX3). It would be reconsidered only if a newer version earns a published grade of `ub-risk-2` or better | CP3 |
+| `encoding_rs` | Graded `ub-risk-3` at 0.8.33 by Google, so DP8 bars it. Axiom writes its own encodings in safe Rust and uses `encoding_rs` as a test reference (TX3). **Graded again by Axiom's own audit** (Round 1, RV1-08; 2026-10-21; [audit](../research/encoding-rs-audit.md)): **0.8.42 is `ub-risk-3`** as it builds on this Mac, with `simd-accel` off: safety comments on 22 of 143 compiled `unsafe` blocks; uninitialized pages made a `&mut [u8]` behind an empty `asm!` barrier; and `simdutf8` 0.1.5's NEON validator, ungraded, unconditional on aarch64. DP8 still bars it. Reconsidered on a release that fixes all three, by a new audit (DP15); the owner approves this one with the dependency | CP3; Round 1 |
 | `zune-jpeg` | Graded `ub-risk-3` at 0.4.19 by Google, so DP8 bars it. JPEG uses a safe decoder instead (IM2) | CP5 |
 | `httparse` | A Google delta audit (1.8.0 → 1.9.4) graded it `ub-risk-4`, so DP8 bars it. HTTP/1.1 parsing is Axiom's own (NW3) | CP6 |
 | `flate2` | Graded `ub-risk-3` at 1.0.28 by Google (`ub-risk-2` at 1.1.0 by Chromium). Unneeded: `miniz_oxide` is used directly (NW13). **But S5 found that `png` 0.18.1 requires it** for its encoder, so it enters the renderer with `png` (§3, CP5); its version's grade then matters as part of `png`'s tree | CP6 |

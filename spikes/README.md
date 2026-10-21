@@ -60,6 +60,7 @@ This directory holds validation experiments. The code is **throwaway and not pro
   | `tools/s8-report.py` | S8: Markdown tables from the census's records, pooling runs from several directories, leaving out runs whose page wasn't visible throughout, with each web-features identifier's Baseline status; `--blank` takes `s8.py blank`'s baseline for runs by hand without their own |
   | `tools/s9-measure.sh` | S9: cargo-fuzz and the coverage component under `target/`; the fuzzing runs and the coverage report; ThreadSanitizer's tests, moving any crash report into the results; WPT's sparse checkout, ChromeDriver for the installed Canary, and a wptrunner run that samples memory |
   | `tools/wpt-pass-rates.py` | Pass rates of WPT directories from wpt.fyi's summaries, with the median of Chrome, Firefox and Safari; `--manifest` and `--types` count one type of test, such as reference tests; `--tests` counts only a listed subset |
+  | `tools/unsafe-census.py` | The `unsafe` a crate compiles in one configuration (features, target), with its safety comments and kinds of operation, for DP8 audits; first used for `encoding_rs` (RV1-08) |
   | `tools/wpt-script-deps.py` | The architecture review's RV1-01: how many of a WPT directory's tests contain script, from a manifest and a checkout; `--list-free` writes the tests without script, for `wpt-pass-rates.py --tests` |
 
   `cargo bench -p s1-bench` runs one pass of the S1 runtime suites. `cargo run -p s2-window -- --smoke` checks the S2 window's rendering (it opens a window briefly).

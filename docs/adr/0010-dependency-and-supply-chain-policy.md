@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-18), by the owner at Step 5's Gate B, including CP3's refinement of DP10 |
+| **Status** | **Accepted** (2026-10-18), by the owner at Step 5's Gate B, including CP3's refinement of DP10. **DP1 (g) and DP2 amended by the architecture review's Round 1** (2026-10-21): Temporal's and BigInt's arithmetic are replaceable details (RV1-08) |
 | **Date** | 2026-10-18 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Dependency policy](../technology/dependency-policy.md) (the full rules, DP1–DP23); [dependency register](../technology/dependency-register.md); [charter](../charter.md) G1 and principle 4; [ADR-0002](0002-implementation-language.md) and the [language evaluation](../technology/language-evaluation.md) §12, §15.3–§15.4; [threat model](../security/threat-model.md) TA4, TA5, §9; [process model](../security/process-model.md) PM2; [Step 5 tracker](../research/step-5-subsystems.md); decision-map item X4 |
@@ -15,6 +15,7 @@
 | 2026-10-18 | The policy written at CP2. DP10 refined at CP3: applying it showed that a tree-wide `ub-risk-1` rule excluded every Rust font stack while admitting C through the exception |
 | 2026-10-18 | Proposed at Step 5, CP9 |
 | 2026-10-18 | **Accepted** by the owner at Gate B: "ADR-0010 (Dependency and Supply-Chain Policy): Accepted as proposed, including the DP10 refinement." The [policy](../technology/dependency-policy.md) is binding. At the same gate the owner chose Axiom's license, "MIT OR Apache-2.0" (OQ-21), which every license on DP17's allow-list is compatible with |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1), RV1-08: "Reclassify WHATWG text encodings, Temporal calendar arithmetic, and BigInt as replaceable details behind clean interfaces (DP2)." "Audit and grade modern encoding_rs (SIMD off) before Milestone 1, and temporal_rs before Milestone 3." DP1 (g) and DP2 are amended in the [dependency policy](../technology/dependency-policy.md): the arithmetic behind Temporal and BigInt is supporting infrastructure, behind interfaces the engine owns; the Encoding Standard's codecs already were. The [audit of `encoding_rs`](../research/encoding-rs-audit.md) 0.8.42 graded it `ub-risk-3`, which DP8 doesn't admit |
 
 ## Question
 
