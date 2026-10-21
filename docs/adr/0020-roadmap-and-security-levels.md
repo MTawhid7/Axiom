@@ -99,6 +99,6 @@ The [roadmap](../roadmap.md)'s sources: Chromium's Site Isolation page, Mozilla'
 ## Consequences
 
 - **Milestone 1** is defined by [ADR-0021](0021-milestone-1.md); its implementation needs the owner's separate authorization.
-- **The open questions** gain their milestones: OQ-3 (M8's gate), OQ-7 (M1's plan), OQ-16 (before M6), OQ-18 (M6), OQ-20 (M2), OQ-9 (recorded).
+- **The open questions** gain their milestones: OQ-3 (M8's gate), OQ-7 (M1's plan), OQ-16 (before M6), OQ-18 (M6), OQ-20 (M2), OQ-9 (recorded). **As amended in Round 1:** OQ-3's architecture before M3 (RV1-13), OQ-20 at M1 (RV1-07).
 - **Corpus checks for pages measured by hand** need the owner at each gate from M4 on.
 - **The overview v2** maps its levels onto these milestones.

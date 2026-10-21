@@ -186,7 +186,7 @@ CP5–CP10 refine these. Each row names the ends and their threads.
 
 | Level | What changes |
 |---|---|
-| L0 | All endpoints live in one process, as in-memory channels or Mach ports within the process. Interfaces and generated code are those of L1 |
+| L0 | All endpoints live in one process, as in-memory channels or Mach ports within the process. Interfaces and generated code are those of L1. **As amended in Round 1** (RV1-07): from M1 the renderer and network endpoints are in their own sandboxed processes, over Mach channels and memory entries; one process remains only for automated tests, fuzzing and Miri (IP2) |
 | L1 | Channels cross processes over Mach. Launch, pinning and violation handling run for real. Nothing in any interface changes (AC1) |
 | L2 | Site locks join the validators' records (IP10). The interfaces are unchanged |
 | L3 | Out-of-process iframes add channels, one frame-host channel per frame. They add no new kind of channel |

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): RQ45 and RQ46 for RV1-01 (CP1); RQ12, RQ35 and RQ53 for RV1-02, RV1-07 and RV1-09 (CP2); §8's open items for RV1-11 and RV1-13 (CP5) |
+| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): RQ45 and RQ46 for RV1-01 (CP1); RQ12, RQ35 and RQ53 for RV1-02, RV1-07 and RV1-09 (CP2); §8's open items and RQ18 for RV1-11 and RV1-13 (CP5) |
 | **Question** | Does every requirement trace from its source to the milestone that verifies it, and to the check that does? |
 | **Answers** | Part of Step 6 question Q7 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the tracker's handed-over question 30 (§2.2). Planned since Step 1 |
 | **Builds on** | The [charter](charter.md); the accepted ADRs; the [threat model](security/threat-model.md) and [process model](security/process-model.md); the [corpus](corpus.md), [standards](standards.md), [testing](testing.md) and [performance](performance.md) documents; the [roadmap](roadmap.md) and [Milestone 1](milestone-1.md) |
@@ -36,7 +36,7 @@ Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone th
 | RQ15 | No sensitive logins before isolation is verified | ADR-0001 R3; Gate A's account policy | M5 (test accounts), M6 (the owner's) | The login track (MS8); MA7's refusal below L2 |
 | RQ16 | Untrusted input is parsed only where the Rule of 2 allows | Threat model; SC2; DP10 | Every gate | Review; the register's groups (DP9); `unsafe` policy |
 | RQ17 | `unsafe` only in the listed modules, each with its invariants | ADR-0002; AC9 | Every commit | `tools/check-unsafe-policy.sh`; Miri on crates with `unsafe` (TS11); V5 at L3 |
-| RQ18 | The JIT policy: none before L2, never for sensitive sites, a global switch | [ADR-0004](adr/0004-process-model-and-sandbox.md) J1–J7 | M6 (V7); M8's gate (whether to build one) | V7's tests; MS9 |
+| RQ18 | The JIT policy: none before L2, never for sensitive sites, a global switch | [ADR-0004](adr/0004-process-model-and-sandbox.md) J1–J7 | M6 (V7); M5's gate, whether to build one (moved from M8's in Round 1, RV1-13) | V7's tests; MS9 |
 | RQ19 | Every dependency justified, classed, graded, audited, and its advisories watched | [ADR-0010](adr/0010-dependency-and-supply-chain-policy.md) DP1–DP23 | Every adoption, from M1 | The register (DP6); `cargo-vet` and `cargo-deny` (DP15, DP16); weekly advisory checks (TS15) |
 | RQ20 | Fixes arrive only through rebuilds, on a routine | Threat model §9; DP20 | M1 onward | TS15: weekly checks, rebuilds before next use |
 | RQ21 | The checks that depend on macOS run again after every macOS update | TS16 | M1 onward | The OS-dependent suites |

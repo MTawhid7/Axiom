@@ -20,7 +20,7 @@ MB means 10⁶ bytes, as B1 and the spikes' results use it; MiB means 2²⁰ byt
 
 - **One method for every measurement** (PF1–PF5): S1–S8's conditions, made rules. Each budget becomes a benchmark or test with its threshold, checked at every milestone gate.
 - **The final memory budgets,** accepted by the owner at Gate B (PF6–PF12):
-  - **B1:** the core browser at 60 MB, plus the visible windows' tiles at 6.2 bytes per pixel (S6 measured 6.14), so 25.4 MB for a 2,560 × 1,600 window and 32.1 MB for a full-screen one here;
+  - **B1:** the core browser at 60 MB, plus the visible windows' tiles at 6.2 bytes per pixel (S6 measured 6.14), so 25.4 MB for a 2,560 × 1,600 window and 32.1 MB for a full-screen one here; **split in Round 1** (RV1-02) into B1a, the browser's 60 MB, and B1b, the GPU/compositor process's 15 MB (hypothesis) plus the tiles, from M2;
   - **B2:** a ready, empty renderer at 10 MB;
   - **B3:** a typical page at 50 MB, as the median of the documents and content tiers, with **a ceiling for every corpus page**, from S8's measurements of Chrome: 70–300 MB, at 12–50% of Chrome's cost;
   - **B4:** the network process at 25 MB;
@@ -113,7 +113,7 @@ MB means 10⁶ bytes, as B1 and the spikes' results use it; MiB means 2²⁰ byt
 
 **The rule:** a page's steady-state cost in Axiom (PF4) is at most **half of Chrome Canary 158's** for the same page, as S8 measured it on 2026-10-20, and at most **its tier's cap**:
 - documents 100 MB;
-- content 150 MB;
+- content 150 MB, **a stretch target since Round 1** (RV1-05): the content pages are gated by a slope and a plateau on a normalized workload (below);
 - media and maps 300 MB;
 - applications 300 MB.
 
@@ -136,9 +136,9 @@ Values are rounded down to 5 MB. They are fixed numbers: they don't move with Ch
 |---|---|---|---|---|---|
 | Wikipedia | Documents | 319 MB | **100 MB** (the tier's cap) | 31% | The documents milestone |
 | MDN | Documents | 145 MB | **70 MB** | 48% | The documents milestone, then script for its examples |
-| Google Search | Content | 582 MB, signed in, by hand | **150 MB** (the tier's cap) | 26% | The content milestone |
-| Instagram | Content | 578 MB, signed in, by hand | **150 MB** (the tier's cap) | 26% | The content milestone |
-| Reddit | Content | 1,260 MB, signed in, by hand | **150 MB** (the tier's cap) | 12% | The content milestone |
+| Google Search | Content | 582 MB, signed in, by hand | **150 MB**, a stretch target; gated by slope and plateau (Round 1) | 26% | The content milestone |
+| Instagram | Content | 578 MB, signed in, by hand | **150 MB**, a stretch target; gated by slope and plateau (Round 1) | 26% | The content milestone |
+| Reddit | Content | 1,260 MB, signed in, by hand | **150 MB**, a stretch target; gated by slope and plateau (Round 1) | 12% | The content milestone |
 | YouTube | Media | 908 MB, signed in, by hand | **300 MB** (the tier's cap) | 33% | The media milestone |
 | Twitch | Media | 401 MB, signed in, by hand | **200 MB** | 50% | The media milestone |
 | Google Maps | Media and maps | 627 MB | **300 MB** (the tier's cap) | 48% | The milestone that brings WebGL (M9) |
@@ -156,7 +156,7 @@ Values are rounded down to 5 MB. They are fixed numbers: they don't move with Ch
 
 **Every ceiling is a hypothesis** (RC2), measured at the milestone named, under PF1. A miss goes back to the owner as a revision (PF5).
 
-**The caps bind on seven pages.** On the content pages they bind hardest: signed-in feeds cost as much as applications in Chrome, so their ceilings are 12–26% of Chrome's cost, against about half elsewhere. ADR-0019 names that case among its conditions for revisiting ("S8's session by hand shows a corpus page's Chrome cost to differ from its assumed tier cap"), so it went to the owner at Gate C. **The owner kept the cap** (2026-10-20): "Keep the 150 MB ceiling as the baseline hypothesis for review." So the ceilings above stand as the accepted rule gives them, and the architecture review examines the cap ([OQ-25](open-questions.md)).
+**The caps bind on seven pages** (for the content tier, superseded in Round 1 by the gate below; the paragraph records Gate C's reasoning). On the content pages they bind hardest: signed-in feeds cost as much as applications in Chrome, so their ceilings are 12–26% of Chrome's cost, against about half elsewhere. ADR-0019 names that case among its conditions for revisiting ("S8's session by hand shows a corpus page's Chrome cost to differ from its assumed tier cap"), so it went to the owner at Gate C. **The owner kept the cap** (2026-10-20): "Keep the 150 MB ceiling as the baseline hypothesis for review." So the ceilings above stand as the accepted rule gives them, and the architecture review examines the cap ([OQ-25](open-questions.md)).
 
 **The content tier, as amended in Round 1** (RV1-05; the owner: "Replace the flat static 150 MB cap with a normalized workload (standardized 50-item scroll depth)." "Gate on memory growth slope per 100 items scrolled plus post-GC idle plateau recovery; retain 150 MB as a stretch target. Enforce zero-copy resource sharing."). The finding: Reddit's runs in Chrome spread from 495 to 1,631 MB with the depth of the owner's scrolling, a feed keeps whatever its own script holds, and a flat cap at an uncontrolled depth measures the workload more than the engine ([RV1-05](review/round-1/02-findings.md#rv1-05-the-content-tiers-150-mb-cap)). So **Google Search, Instagram and Reddit are gated on a normalized workload, by a slope and a plateau:**
 - **The workload:** load the page; scroll to its 50th item (a result or a post); wait 30 s without input. By the owner's hand for the pages measured by hand (CO6), with the items reached recorded.

@@ -269,9 +269,9 @@ Recorded in ADRs 0018 and 0019, the [tracker](../research/step-6-standards-budge
 | 7 | CP8–CP10 without pausing, to Gate C | Approved |
 
 **The budgets accepted** (process model §7; [performance](../performance.md) §4):
-- **B1:** the core browser at most 60 MB, plus each visible window's tiles at 6.2 bytes per window pixel.
+- **B1:** the core browser at most 60 MB, plus each visible window's tiles at 6.2 bytes per window pixel. **Split in Round 1** (RV1-02): B1a, the browser's 60 MB; B1b, the GPU/compositor process's 15 MB (hypothesis) plus the tiles, from M2.
 - **B2:** a ready renderer at most 10 MB. **B4:** the network process at most 25 MB. **B5:** 16 renderers. **B7:** 2 GiB per renderer.
-- **B3:** a 50 MB median over the documents and content pages, and every corpus page within its ceiling: half of Chrome's measured cost, capped by tier. The ceilings run from 70 MB (MDN) to 300 MB.
+- **B3:** a 50 MB median over the documents and content pages, and every corpus page within its ceiling: half of Chrome's measured cost, capped by tier. The ceilings run from 70 MB (MDN) to 300 MB. **As amended in Round 1** (RV1-05): the content pages are gated by a slope and a plateau on a normalized workload, with 150 MB a stretch target.
 - **B6:** 1 GB for 10 tabs of document and content pages.
 
 **Gate C (2026-10-20),** the final design review of Phase Zero. The owner: "Step 6 Gate C is approved, completing the Phase Zero architectural baseline. We are deferring implementation (Milestone 1 kickoff) until the architecture and roadmap undergo independent, multi-round adversarial review."
@@ -281,7 +281,7 @@ Recorded in ADRs 0018 and 0019, the [tracker](../research/step-6-standards-budge
 | 1 | [ADR-0020](../adr/0020-roadmap-and-security-levels.md), the roadmap and its security levels | Accepted as the proposed baseline, under review |
 | 2 | [ADR-0021](../adr/0021-milestone-1.md), Milestone 1 | Accepted as M1's specification baseline: MA1–MA12 as written |
 | 3 | This overview v2, with the [requirements](../requirements.md) | Approved as the Phase Zero baseline; the requirements complete for Phase Zero |
-| 4 | The content tier's 150 MB cap | Kept as the baseline hypothesis for review ([OQ-25](../open-questions.md)) |
+| 4 | The content tier's 150 MB cap | Kept as the baseline hypothesis for review ([OQ-25](../open-questions.md)). **Replaced in Round 1** (RV1-05): a slope and a plateau on a normalized workload, with 150 MB a stretch target |
 | 5 | Safari's census by hand, second session | Folded into the [S8 results](../research/s8-results.md) §7.4 |
 | 6 | A handover report | Written: the [Phase Zero handover](../handover-phase-0.md) |
 | 7 | Merging `step-6` into `main`, and the branch `architecture-review` from `main` | Authorized, once the above are committed with every check green; both pushed |
