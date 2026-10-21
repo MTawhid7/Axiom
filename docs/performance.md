@@ -28,7 +28,7 @@ MB means 10⁶ bytes, as B1 and the spikes' results use it; MiB means 2²⁰ byt
   - **B6:** a typical session at 1 GB;
   - **B7:** a renderer's cap at 2 GiB.
 
-  A page's cost includes the GPU and compositor memory allocated for it, charged to its renderer.
+  A page's cost includes the GPU and compositor memory allocated for it, charged to its renderer: since Round 2, accounted by page in the GPU process, which macOS charges for it (PF4, RV2-05).
 - **Time** (PF13–PF15):
   - S6's frame budgets;
   - no long task of the engine's own (none over 50 ms, the Long Tasks threshold);

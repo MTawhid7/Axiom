@@ -83,7 +83,7 @@ All sourced in [IPC](../architecture/ipc.md) §3.
 
 ## Assumptions
 
-- Mach messages keep working for unsandboxed-to-sandboxed processes signed ad hoc (shown by S4).
+- Mach messages keep working for unsandboxed-to-sandboxed processes signed ad hoc (shown by S4), and under the stable local identity Round 1 adopted (S15, RV1-17).
 - A safe-Rust generator can produce decoders fast enough for display-list traffic (to measure when built).
 
 ## Risks and unresolved issues

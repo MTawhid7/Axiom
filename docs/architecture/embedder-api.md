@@ -21,7 +21,7 @@ Everything here is **planned**; nothing is implemented. Rules are numbered EM1â€
 - **Commands flow in, events and requests for decisions flow out** (EM4, EM5). The shell creates web views, navigates them and forwards input. The engine reports navigation, title, progress and crashes. It asks the shell to decide what only a user interface can: new windows, permissions, dialogs, downloads, file choices, authentication, context menus. WKWebView's navigation and UI delegates are the model.
 - **Presentation, input, IME and accessibility cross the boundary as objects the shell hosts** (EM6). The compositor draws into a layer in the shell's view, and the view's event, text-input and accessibility entry points delegate to the engine's sinks and mirrors.
 - **The browser's own UI is native, never web content** (EM8). No privileged web pages exist that a compromised renderer could aim at.
-- **A headless embedder** (EM9) implements the same API without AppKit: offscreen surfaces, synthetic input and virtual time, for WPT, reference tests and fuzzing.
+- **A headless embedder** (EM9) implements the same API without AppKit: offscreen surfaces, synthetic input and, in single-process mode, virtual time (Round 2, RV2-03), for WPT, reference tests and fuzzing.
 - **OQ-11: pure Rust, with objc2** (EM11). S2 showed AppKit, Metal and CoreText working from Rust. Defining Objective-C classes, which IME and accessibility need, is the first thing the shell milestone validates. A Swift shell could sit behind the same message API if that fails, so the engine's architecture doesn't depend on the answer.
 
 ## 1. Binding inputs

@@ -84,7 +84,7 @@ How is performance measured on this Mac, and what must Axiom meet: the final mem
 | B6 | Whole browser, typical session | **≤ 1 GB for 10 tabs of document and content pages on about 6 sites;** sessions with media or application pages bounded by each page's ceiling, B5 and discarding under memory pressure | ≤ 1 GB (10 tabs, about 6 sites) |
 | B7 | Per-renderer cap | 2 GiB | Unchanged |
 
-**A page's cost** includes the GPU and compositor memory allocated for it, charged to its renderer (PF4). The process model's change record has carried this amendment since the owner accepted it (2026-10-20).
+**A page's cost** includes the GPU and compositor memory allocated for it, charged to its renderer (PF4). The process model's change record has carried this amendment since the owner accepted it (2026-10-20). **As amended in Round 2** (RV2-05): the GPU process accounts for that memory by page, since macOS charges it to the process that allocates it.
 
 ## Rationale
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are made in checkpoints (§5.3), and the three spikes authorized before Milestone 1, S10, S12 and S15, are done (§5.2). **The owner approved the results** and **commissioned Round 2** (2026-10-21, §5.4). **Round 2 delivered** (2026-10-21): Round 1's changes verified; 15 findings, no Critical or High, so **the stopping rule is met** for the scope commissioned (§6, §8). **Disposed by the owner the same day: all 15 accepted** (§5.5–§5.7), the changes made in checkpoints CP1–CP6; **an independent external review follows,** which the owner commissions before the merge into `main` |
+| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are made in checkpoints (§5.3), and the three spikes authorized before Milestone 1, S10, S12 and S15, are done (§5.2). **The owner approved the results** and **commissioned Round 2** (2026-10-21, §5.4). **Round 2 delivered** (2026-10-21): Round 1's changes verified; 15 findings, no Critical or High, so **the stopping rule is met** for the scope commissioned (§6, §8). **Disposed by the owner the same day: all 15 accepted** (§5.5–§5.7), the changes made and verified in checkpoints CP1–CP6, and `architecture-review` pushed; **an independent external review follows,** which the owner commissions before the merge into `main` |
 | **Question** | How is the Phase Zero baseline reviewed before Milestone 1 starts: in what format, with which severities, how do findings become changes, and when does the review end? |
 | **Builds on** | The owner's decision 8 at Step 6's Gate C (2026-10-20): Milestone 1 waits "until the architecture and roadmap undergo independent, multi-round adversarial review"; the recommendation in [status](../status.md) for the review's brief; the findings format the [handover](../handover-phase-0.md) §3 suggests |
 | **Last updated** | 2026-10-21 |
@@ -22,7 +22,7 @@
 | Round | Date | Documents | Findings | State |
 |---|---|---|---|---|
 | 1 | 2026-10-21 | [Risk matrix](round-1/01-risk-matrix.md) · [Findings](round-1/02-findings.md) · [Challenged assumptions](round-1/03-challenged-assumptions.md) · [Actions before Round 2](round-1/04-round-2-actions.md) | 22: 2 Critical, 6 High, 10 Medium, 4 Low | All accepted (2026-10-21); changes made (§5.3); the spikes' results and the choices approved (§5.4) |
-| 2 | 2026-10-21 | [Risk matrix](round-2/01-risk-matrix.md) · [Verification of Round 1](round-2/02-verification.md) · [Findings](round-2/03-findings.md) · [Actions](round-2/04-actions.md) | 15: 0 Critical, 0 High, 10 Medium, 5 Low | All accepted (2026-10-21, §5.5); changes in checkpoints (§5.7). The stopping rule is met for the scope commissioned |
+| 2 | 2026-10-21 | [Risk matrix](round-2/01-risk-matrix.md) · [Verification of Round 1](round-2/02-verification.md) · [Findings](round-2/03-findings.md) · [Actions](round-2/04-actions.md) | 15: 0 Critical, 0 High, 10 Medium, 5 Low | All accepted (2026-10-21, §5.5); changes made and verified (§5.7). The stopping rule is met for the scope commissioned |
 
 ## 3. Findings and severities
 
@@ -186,6 +186,11 @@ Every finding: **Accepted** as proposed, 2026-10-21 (§5.5, item 1). Where a cou
 | CP4 | "Storage key ancestor bit, File API design, and storage quotas" | RV2-10, RV2-11, RV2-12 | Done, `docs(review-r2-cp4)` |
 | CP5 | "Accessibility geometry, tiered VoiceOver enablement, and test harnesses" | RV2-06–RV2-09 | Done, `docs(review-r2-cp5)` |
 | CP6 | "Style & layout hooks for CSS Interop 2026" | RV2-15 | Done, `docs(review-r2-cp6)` |
+
+**Verified before the push** (2026-10-21), as the owner asked: "Once CP1–CP6 are verified and committed, push architecture-review to origin."
+- **Each finding's change** was found in the documents its row above names, against the "done when" of [Round 2's actions](round-2/04-actions.md).
+- **The round's final sweep** (§4's new step) searched every living document, the handover included, for each finding's old wording, Round 1's and Round 2's. It found and corrected what Round 2's own changes had left: the summaries of PF4's charge and of virtual time, IN9's enablement, and three ADR records that read as current (ADR-0004's option O1, ADR-0005's evidence on signing, ADR-0012's constraints). The remaining hits are records that are meant to stay: the owner's quoted words, session logs, research notes.
+- **The five checks** passed before every commit.
 
 ## 6. The stopping rule
 

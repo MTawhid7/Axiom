@@ -21,7 +21,7 @@ Everything here is **planned**; nothing is implemented. Rules are numbered EL1â€
 - **The HTML event loop's task selection is ours to define** (EL16). Discrete input first, then a due rendering update, then other tasks in arrival order, then idle work. Continuous input is coalesced into the next rendering update.
 - **The browser drives frames** (EL19â€“EL22). The compositor owns one display link per window and pauses it when no one has asked for a frame. Each vsync it offers a frame to the event loops that subscribed. It never waits for a renderer: a late frame is composited at the next vsync, and compositor-driven scrolling continues meanwhile.
 - **Background work is throttled in steps** (EL18, EL23): timer alignment for hidden documents, task roles and darwin-background for hidden renderers, using public interfaces only.
-- **Tests run the same loops deterministically** (EL24): a virtual clock and a single-threaded scheduler drive every event loop, and single-process mode runs the production threads in one process.
+- **Tests run the same loops deterministically** (EL24): a virtual clock and a single-threaded scheduler drive every event loop, and single-process mode runs the production threads in one process. **As amended in Round 2** (RV2-03): that is how time-dependent and scheduler tests run; conformance runs in real processes on the host clock.
 
 ## 1. Binding inputs
 

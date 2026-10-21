@@ -28,7 +28,7 @@ What draws the display list, and how is it presented? How are images decoded, wi
 
 ## Requirements and constraints
 
-- **PL6–PL9, AC4:** per-frame display lists of validated primitives; the browser composites and never decodes.
+- **PL6–PL9, AC4:** per-frame display lists of validated primitives; the browser composites and never decodes. (**As amended in Round 1,** RV1-02: from M2 the GPU/compositor process composites; decision 12.)
 - **IV7, IV8:** redraw only damage; scroll and animate from property trees.
 - **AC3:** idle costs nothing.
 - **Process model §3:** web-supplied GPU work and media decoding outside the browser. B1: the browser at ≤ 60 MB idle with one window.

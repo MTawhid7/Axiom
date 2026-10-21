@@ -194,7 +194,7 @@ The transport itself (Mach messages, or Unix-domain socket pairs) is chosen in S
 | Chrome 69 with Site Isolation, total browser memory, median | 685 MB | Paper [3], Figure 3 |
 | Unique sites open, median and 99th percentile | 6.0; 41.9 | Paper [3] |
 
-**The final budgets** (Step 6's Gate B, 2026-10-20, [ADR-0019](../adr/0019-performance-methodology-and-budgets.md); the initial targets of 2026-10-17 are in the change record), measured as each process's physical footprint, under the conditions of the [performance budgets](../performance.md)' PF1–PF4. A page's cost includes the GPU and compositor memory allocated for it, charged to its renderer (PF4):
+**The final budgets** (Step 6's Gate B, 2026-10-20, [ADR-0019](../adr/0019-performance-methodology-and-budgets.md); the initial targets of 2026-10-17 are in the change record), measured as each process's physical footprint, under the conditions of the [performance budgets](../performance.md)' PF1–PF4. A page's cost includes the GPU and compositor memory allocated for it, charged to its renderer (PF4); since Round 2 the GPU process accounts for that memory by page, because macOS charges it to the process that allocates it (RV2-05):
 
 | # | Budget | Target | Basis |
 |---|---|---|---|
