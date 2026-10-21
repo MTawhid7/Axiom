@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are made in checkpoints (§5.3), and the three spikes authorized before Milestone 1, S10, S12 and S15, are done (§5.2). **The owner approved the results** and **commissioned Round 2** (2026-10-21, §5.4) |
+| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are made in checkpoints (§5.3), and the three spikes authorized before Milestone 1, S10, S12 and S15, are done (§5.2). **The owner approved the results** and **commissioned Round 2** (2026-10-21, §5.4). **Round 2 delivered** (2026-10-21): Round 1's changes verified; 15 findings, no Critical or High, so **the stopping rule is met** for the scope commissioned (§6, §8); for the owner's disposition |
 | **Question** | How is the Phase Zero baseline reviewed before Milestone 1 starts: in what format, with which severities, how do findings become changes, and when does the review end? |
 | **Builds on** | The owner's decision 8 at Step 6's Gate C (2026-10-20): Milestone 1 waits "until the architecture and roadmap undergo independent, multi-round adversarial review"; the recommendation in [status](../status.md) for the review's brief; the findings format the [handover](../handover-phase-0.md) §3 suggests |
 | **Last updated** | 2026-10-21 |
@@ -22,7 +22,7 @@
 | Round | Date | Documents | Findings | State |
 |---|---|---|---|---|
 | 1 | 2026-10-21 | [Risk matrix](round-1/01-risk-matrix.md) · [Findings](round-1/02-findings.md) · [Challenged assumptions](round-1/03-challenged-assumptions.md) · [Actions before Round 2](round-1/04-round-2-actions.md) | 22: 2 Critical, 6 High, 10 Medium, 4 Low | All accepted (2026-10-21); changes made (§5.3); the spikes' results and the choices approved (§5.4) |
-| 2 | 2026-10-21 | In progress: commissioned by the owner (§5.4, decision 6) | — | — |
+| 2 | 2026-10-21 | [Risk matrix](round-2/01-risk-matrix.md) · [Verification of Round 1](round-2/02-verification.md) · [Findings](round-2/03-findings.md) · [Actions](round-2/04-actions.md) | 15: 0 Critical, 0 High, 10 Medium, 5 Low | Delivered, commissioned by the owner (§5.4, decision 6); for the owner's disposition. The stopping rule is met for the scope commissioned |
 
 ## 3. Findings and severities
 
@@ -169,3 +169,24 @@ The owner, 2026-10-21: "The Round 1 remediation and spike results (S10, S12, S15
 - **External sources** were read on 2026-10-21, through an automated fetch; quotations were checked against the fetched text.
 
 **Independence is limited.** Round 1 was written by Claude (Opus 5.5) at the owner's request, and the baseline was also written with Claude's help (see the ADRs' "recorded by Claude"). A reviewer from another model family, or a person, would add independence that this round can't.
+
+## 8. Round 2's coverage and limits
+
+**The baseline:** `architecture-review` at `ec7c6b3` (2026-10-21).
+
+**Read in full:** the designs for accessibility, storage and workers, style, layout and paint, the embedder API and IPC; the process model's IPC rules (IR1–IR10); the disposition log, and each document its "Changed" column names.
+
+**Read by rule, section or targeted search:**
+- the handover, the decision map and the status, for the verification;
+- the event loop (EL1, EL8, EL24), the pipeline (PL15, PL16), graphics (GR8, GR12, GR13), the frame tree's special documents, networking (NW8, NW10, NW11), the threat model (SG1, SG10, SG11), testing (TS2, TS3, TS8), performance (PF4, PF19, PF21, PF24) and Milestone 1 (MA1, MA4, MA8, MA10);
+- S10's results;
+- every living document, for each Round 1 finding's old wording ([verification](round-2/02-verification.md#2-method) §2).
+
+**Not reviewed,** because the owner's commission didn't name them: the requirements' trace (RQ1–RQ66), the methods of S1–S4, the decision map's couplings beyond staleness, dated facts older than six months, invalidation (IV), HTML and the DOM, the JavaScript engine's details, and networking beyond its keys. A finding there could still be Critical or High; the stopping rule is met for the scope reviewed ([Round 2's actions](round-2/04-actions.md#6-after-the-stopping-rule) §6).
+
+**Evidence:**
+- **No spike was run.** The findings rest on the documents, S10's results and primary sources.
+- **External sources** were read on 2026-10-21. Every quotation was checked against a copy downloaded with `curl` (Chromium's sources and commit messages, WPT's files at the pinned revision, the CSS drafts, Fetch, Chrome's blog), except one search summary, marked secondary in the findings. Automated fetches return processed text, so no quotation rests on one alone.
+- **SDK headers** are those of the Command Line Tools' `MacOSX27.0.sdk`, on this Mac.
+
+**Independence is limited,** as in Round 1: Round 2 was also written by Claude (Opus 5.5), which helped write the baseline and Round 1.
