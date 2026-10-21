@@ -1,7 +1,7 @@
 # Axiom — Design Documentation
 
 Axiom is a from-first-principles browser engine for personal use on macOS. **The project is in Phase Zero: research, requirements and architecture.**
-- **Phase Zero's baseline is approved** (Step 6's Gate C, 2026-10-20): every ADR is accepted, and the architecture proposal, the roadmap and Milestone 1's specification are the baseline. **Next:** an independent, multi-round review of that baseline, on branch `architecture-review`, starting from the [handover](handover-phase-0.md). The spikes S1–S9, all complete, remain in `spikes/` as throwaway code.
+- **Phase Zero's baseline is approved** (Step 6's Gate C, 2026-10-20): every ADR is accepted, and the architecture proposal, the roadmap and Milestone 1's specification are the baseline. **Now:** an independent, multi-round review of that baseline, on branch `architecture-review`, starting from the [handover](handover-phase-0.md). **Round 1** is written ([the review](review/README.md), 2026-10-21) and awaits the owner's dispositions. The spikes S1–S9, all complete, remain in `spikes/` as throwaway code.
 - **Not authorized:** production engine code. Milestone 1 is on hold until the review is done.
 
 These documents are the project's source of truth. Conversation history is not.
@@ -26,6 +26,11 @@ These documents are the project's source of truth. Conversation history is not.
 | [milestone-1.md](milestone-1.md) | Milestone 1, static documents at L0: its scope, the baseline it pins, its measurable acceptance criteria, and what starting it requires the owner to authorize | **Binding** as M1's specification ([ADR-0021](adr/0021-milestone-1.md), accepted 2026-10-20); starting it on hold |
 | [requirements.md](requirements.md) | Every requirement, from the charter, the ADRs and the binding documents, traced to the milestone and the check that verify it | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C) |
 | [handover-phase-0.md](handover-phase-0.md) | The Phase Zero handover: the blueprint across the 21 ADRs, the findings of spikes S1–S9, trade-offs, deferred decisions, assumptions, known risks, open questions, and the areas flagged for critical review. The independent review's starting point | The Phase Zero baseline (2026-10-21) |
+| [review/](review/README.md) | The independent architecture review: its process, finding format and severities, rounds, the owner's disposition log and the stopping rule | Living; Round 1 awaiting dispositions (2026-10-21) |
+| ↳ [round-1/01-risk-matrix.md](review/round-1/01-risk-matrix.md) | Round 1's executive risk matrix by severity and area, what blocks Milestone 1, and short answers to the five focus areas | Round 1 (2026-10-21) |
+| ↳ [round-1/02-findings.md](review/round-1/02-findings.md) | Round 1's 22 findings (RV1-01–RV1-22): evidence, failure modes, counter-proposals and the rules each would amend | Round 1 (2026-10-21) |
+| ↳ [round-1/03-challenged-assumptions.md](review/round-1/03-challenged-assumptions.md) | ADR by ADR, what is outdated, over-optimistic, contradictory or sound against current engines; the handover's assumptions and thirty flagged areas | Round 1 (2026-10-21) |
+| ↳ [round-1/04-round-2-actions.md](review/round-1/04-round-2-actions.md) | The changes required before Milestone 1 and later milestones; proposed spikes S10–S15; how accepted findings become changes; Round 2's scope | Round 1 (2026-10-21) |
 | [open-questions.md](open-questions.md) | Unresolved questions and the evidence each needs | Living |
 | [status.md](status.md) | Current state and session handoffs | Living |
 | [adr/](adr/) | Architecture Decision Records | See each ADR |

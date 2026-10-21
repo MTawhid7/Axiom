@@ -6,10 +6,10 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero's baseline is complete:** Step 6's **Gate C passed** (2026-10-20), the final design review. ADRs 0020 and 0021 are accepted, and the architecture proposal (the overview v2, with the requirements) is approved as the Phase Zero baseline. **Next: an independent, multi-round adversarial review** of the architecture and roadmap, on branch `architecture-review` ([handover](handover-phase-0.md)). **Milestone 1 is on hold:** no crate skeleton and no production code (the owner's decision 8) |
+| Phase | **Phase Zero's baseline is complete:** Step 6's **Gate C passed** (2026-10-20), the final design review. ADRs 0020 and 0021 are accepted, and the architecture proposal (the overview v2, with the requirements) is approved as the Phase Zero baseline. **The independent, multi-round adversarial review is under way,** on branch `architecture-review`: **Round 1 is written** (2026-10-21) and awaits the owner's dispositions ([the review](review/README.md)). **Milestone 1 is on hold:** no crate skeleton and no production code (the owner's decision 8) |
 | Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes Step 6,** merged with `--no-ff` on 2026-10-21 right after this entry was committed, and pushed, as the owner instructed at Gate C. **`architecture-review`** is branched from that `main` and pushed, for the review cycle. The step branches `step-2b` to `step-6` are kept |
-| Current checkpoint | **Step 6 is done:** CP1–CP11 ✅, Gates A–C passed ([tracker](research/step-6-standards-budgets-roadmap.md)). **The review cycle** hasn't started: its plan and process are the owner's to set ("Next steps") |
-| Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census** (`spikes/s8/`, Python), is complete: in Chrome, automated and by the owner's hand; in Safari, by the owner's hand, logged out, with the corrected tool ([results](research/s8-results.md)). **S9, the test tools** (`spikes/s9/`), is complete ([results](research/s9-results.md)): fuzzing and wptrunner work here; the installed nightly's ThreadSanitizer doesn't. Tooling under `tools/`, now with `s6-tails.py` and `png-region-stats.py`; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
+| Current checkpoint | **Step 6 is done:** CP1–CP11 ✅, Gates A–C passed ([tracker](research/step-6-standards-budgets-roadmap.md)). **Review Round 1 is delivered** (2026-10-21): 22 findings, 2 Critical and 6 High, with the review's process and an empty disposition log for the owner ([the review](review/README.md); "Next steps") |
+| Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census** (`spikes/s8/`, Python), is complete: in Chrome, automated and by the owner's hand; in Safari, by the owner's hand, logged out, with the corrected tool ([results](research/s8-results.md)). **S9, the test tools** (`spikes/s9/`), is complete ([results](research/s9-results.md)): fuzzing and wptrunner work here; the installed nightly's ThreadSanitizer doesn't. Tooling under `tools/`, now with `s6-tails.py`, `png-region-stats.py` and, from the review's Round 1, `wpt-script-deps.py`; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md), [S6](research/s6-results.md), [S7](research/s7-results.md), [S8](research/s8-results.md), [S9](research/s9-results.md). The [handover](handover-phase-0.md) summarizes them all. Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
 | | [ADR-0002](adr/0002-implementation-language.md): Rust (stable, 2024 edition), **final**, with build thresholds T1–T4 |
@@ -37,24 +37,83 @@
 | | The [overview](architecture/overview.md) v2 and the [requirements](requirements.md) (RQ1–RQ66), approved as the Phase Zero baseline (2026-10-20, Step 6's Gate C) |
 | The corpus | 13 sites, set by the owner on 2026-10-20 ([OQ-2](open-questions.md)), and [defined](corpus.md) at Step 6's CP2, binding since Gate B. Eight sites' terms forbid automated access, even logged out, so they are measured by hand; five may be loaded by automation, with care. Every page has a memory ceiling ([performance](performance.md) §4.1) |
 
-## Next steps: the independent architecture review
+## Next steps: the owner's dispositions of Round 1
 
-**Work stops here for the owner.** At Gate C the owner deferred implementation "until the architecture and roadmap undergo independent, multi-round adversarial review", to run on branch `architecture-review` in a dedicated review cycle, with another LLM agent as reviewer. Milestone 1 stays on hold. **Decisions for the owner,** each with a recommendation:
-1. **The review's brief and process.** Recommended: let the review cycle's first checkpoint be a written plan on `architecture-review`, put to the owner like any step's CP1:
-   - the scope, with the [handover](handover-phase-0.md) §11 as the first agenda;
-   - a findings format and a disposition log, where each finding is accepted, rejected or deferred, with the owner's reason;
-   - how accepted findings become ADR amendments or document changes;
-   - a stopping rule: for example, stop when a round raises no critical or major finding.
+**Work stops here for the owner.** Round 1 of the independent review is on `architecture-review`, in [the review](review/README.md):
+- a [risk matrix](review/round-1/01-risk-matrix.md);
+- 22 [findings](review/round-1/02-findings.md): 2 Critical, 6 High, 10 Medium, 4 Low;
+- the [challenged assumptions](review/round-1/03-challenged-assumptions.md);
+- the [actions before Round 2](review/round-1/04-round-2-actions.md).
 
-   **Why:** findings then land in the same records as every other decision, and the end of the review is a decision, not a feeling.
-2. **What the reviewer sees.** Recommended: point the reviewer at `architecture-review` on GitHub, starting from the handover. **Why:** the repository is public, the branch is fixed at the approved baseline, and the reviewer then needs nothing outside the documents. The raw measurement records under `target/` stay on this Mac.
-3. **Optional, before M4: the census's remaining runs by hand,** Chrome logged out for the five pages that work without an account, and Safari signed in ([S8 results](research/s8-results.md) §7.5). Recommended: not before the review, which may change what the census should measure. **Why:** the ceilings rest on Chrome's figures, which are complete.
+**Nothing in the baseline has changed.** Each finding waits for a disposition in the review's log.
+
+**Decisions for the owner,** each with a recommendation:
+1. **The review's process** ([the review](review/README.md) §3–§6: the finding format, severities, the disposition log, the stopping rule). **Recommended:** approve it as written. **Why:** findings then land in the same records as every other decision, and the cycle ends by a rule, not a feeling.
+2. **RV1-01, Milestone 1's CSS target** (Critical). **Recommended:** accept:
+   - an interim target over the 5,652 script-free tests;
+   - a script-free harness at M1;
+   - the full target at M3.
+
+   **Why:** 196 of the 5,848 tests use script, so 97% is out of reach without it (the ceiling is 96.65%), and the WebDriver harness MA4 names runs script in the page.
+3. **RV1-02, the compositor's process** (Critical). **Recommended:** accept designing the GPU/compositor process now, building it at M2, and spike S10 to measure the hop. **Why:** Safari (since 2023), Chrome and Ladybird composite outside the browser. Certifying L3 on a topology M9 replaces leaves the most privileged process exposed through M6–M8, and repeats V1–V9.
+4. **RV1-03, cross-site agents** (High). **Recommended:** accept the single rule: separate agents and remote proxies from M1. **Why:** accepted documents contradict each other, and resolving it later is a retrofit.
+5. **RV1-07, Milestone 1 in one process** (High). **Recommended:** accept the fuller option: real renderer and network processes at M1, under the profiles S4, S5 and S7 already wrote, with single-process mode kept for tests. The minimum option is the fallback. **Why:** M1 is the longest milestone, and its process-specific defects would otherwise all surface at M2.
+6. **The other High findings:**
+   - RV1-04, the collector's end-state;
+   - RV1-05, the content cap as a slope and a plateau on a normalized workload;
+   - RV1-06, the slot width;
+   - RV1-08, reuse for Temporal, BigInt and the encodings.
+
+   **Recommended:** accept, with RV1-04 and RV1-06 decided on spike S11's evidence before M3, and `encoding_rs` graded before M1. **Why:** each is cheap to decide now and expensive after M3 or M4.
+7. **The Medium and Low findings** (RV1-09 to RV1-22). **Recommended:** accept, with RV1-10's single-rasterizer alternative recorded but not adopted. **Why:** each is a document change, or a decision with an easy default, needed by its milestone.
+8. **The proposed spikes, S10–S15, and a census addendum by hand** ([actions](review/round-1/04-round-2-actions.md#4-proposed-spikes) §4). The addendum takes up the census's remaining runs by hand, which the previous "Next steps" left optional before M4. **Recommended:**
+   - authorize S10, S12 and S15 first, since they inform decisions due before M1;
+   - then S11 and S13, before M3;
+   - S14 before M3 fixes the object model;
+   - the addendum by hand before M4.
+
+   **Why:** each answers a question one decision rests on.
+9. **Round 2.** **Recommended:** run it after the accepted changes are made, if possible by a reviewer from another model family or by a person, on the scope in the actions' §6. **Why:** Round 1 shares its model family with the assistant that helped write the baseline, which limits its independence.
 
 **For your information:**
-- **ThreadSanitizer** still waits for a nightly whose runtime works on macOS 27; Milestone 1 pins one at its start (MA10).
+- **`architecture-review` is pushed** with this round. It has been pushed since Gate C, so it is kept pushed as checkpoints land (CLAUDE.md).
+- **A new tool,** `tools/wpt-script-deps.py`, counts a WPT directory's script-dependent tests; RV1-01's figures come from it.
+- **ThreadSanitizer** still waits for a nightly whose runtime works on macOS 27; RV1-11 proposes not to depend on it.
 - **A deviation of Gate B's session, recorded there:** two unused records from the stopped attempt on the dedicated profile remain under `target/`. They can be deleted if you prefer.
 
 ## Session log
+
+### 2026-10-21 — Session 17 (the review's Round 1)
+
+**The owner's commission** (2026-10-21): an "uncompromising, rigorous, adversarial review" of the Phase Zero baseline, with "no polite praise, generic approval, or surface-level summaries".
+- **Five focus areas:** the staging from L0 to L3; CoreText beside HarfRust and `skrifa`; the content tier's 150 MB cap; the JavaScript engine and its binding layer; ThreadSanitizer.
+- **Four deliverables:** a risk matrix, detailed findings with counter-proposals, challenged assumptions, and actions for Round 2.
+- **The plan:** the session began in plan mode, and the owner approved its plan before anything was written: the documents, one read-only tool, a commit on `architecture-review` and its push.
+
+**Done:**
+- **[The review](review/README.md)'s process:** the finding format, severities, the disposition log (every finding awaiting) and the stopping rule.
+- **Round 1:** the [risk matrix](review/round-1/01-risk-matrix.md), the [findings](review/round-1/02-findings.md), the [challenged assumptions](review/round-1/03-challenged-assumptions.md) and the [actions before Round 2](review/round-1/04-round-2-actions.md).
+  - **RV1-01 (Critical):** Milestone 1's `css/CSS2` target of 97% can't be met without script. 196 of the 5,848 in-scope tests use script, so the ceiling is 96.65%. And wptrunner's WebDriver reference-test executor runs script in the page (observed in S9's checkout, `executorwebdriver.py` lines 1410 and 1451).
+  - **RV1-02 (Critical):** the unsandboxed browser composites through L3, while Safari (since 2023), Chrome and Ladybird (2026) composite in a separate process; GR14's later move is undesigned.
+  - **Six High:** the documents disagree on when cross-site frames become separate agents (RV1-03); the collector's end-state against PF14 and PF15 (RV1-04); the content cap as a gate (RV1-05); the width of heap slots (RV1-06); Milestone 1 in one process (RV1-07); scope against one developer (RV1-08).
+  - **Ten Medium and four Low:** among them, renderers' IOKit access (RV1-09), the text model's gaps (RV1-10), concurrency checks without ThreadSanitizer (RV1-11), panics and overflow (RV1-16), and the signing identity (RV1-17).
+- **[`tools/wpt-script-deps.py`](../tools/wpt-script-deps.py):** standard library only, with `--help`. It counts the script-dependent tests of a WPT directory from a manifest.
+- **Updated:** the [index](README.md) and this status.
+
+**Evidence:**
+- **Nothing was re-measured.** The one new count (RV1-01) ran over S9's local WPT checkout at `0f26972422`, and S8's raw records were consulted for `-webkit-font-smoothing` (RV1-10).
+- **External sources were read on 2026-10-21,** each listed with its dates in the findings:
+  - WebKit's bugs and WebContent profile;
+  - Chromium's renderer profile, Viz README, `harfbuzz_face.cc` and FIDO code;
+  - V8's concurrent-marking post, Oilpan's README and JavaScriptCore's Riptide;
+  - Apple's TN3127;
+  - Servo's blog and Ladybird's newsletter;
+  - the Rustls ECH announcement and the GPU.zip paper;
+  - the Miri, loom and Shuttle READMEs, and winit's AppKit view.
+
+**Not changed:** no ADR, design or binding document. The baseline stands until the owner's dispositions.
+
+**Clean-up:** nothing to clean. The session ran reads, a counting script in its scratchpad (superseded by the new tool) and the five checks, and produced no crash reports.
 
 ### 2026-10-20 to 2026-10-21 — Session 16 (Gate C; Safari's census; the handover; the merge)
 
