@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 1, awaiting the owner's dispositions** (2026-10-21). This page summarizes; the [findings](02-findings.md) carry the evidence |
+| **Status** | **Round 1, disposed** (2026-10-21): the owner accepted every finding ([the disposition log](../README.md#5-the-disposition-log)). This page summarizes; the [findings](02-findings.md) carry the evidence |
 | **Question** | Which flaws, gaps and outdated assumptions in the Phase Zero baseline matter most, and which must be settled before Milestone 1 starts? |
 | **See also** | [Findings](02-findings.md) · [Challenged assumptions](03-challenged-assumptions.md) · [Actions for Round 2](04-round-2-actions.md) · [The review process](../README.md) |
 | **Last updated** | 2026-10-21 |

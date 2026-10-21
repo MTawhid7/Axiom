@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 1, awaiting the owner's dispositions** (2026-10-21) |
+| **Status** | **Round 1, disposed** (2026-10-21): the owner accepted every finding ([the disposition log](../README.md#5-the-disposition-log)) |
 | **Question** | Which assumptions in ADRs 0001–0021, and in the handover's list, are outdated, over-optimistic or contradictory against WebKit, Blink and V8, Gecko, Ladybird and Servo as of 2024–2026, and which hold and should not be reopened? |
 | **See also** | [Risk matrix](01-risk-matrix.md) · [Findings](02-findings.md) · [Actions for Round 2](04-round-2-actions.md) |
 | **Last updated** | 2026-10-21 |

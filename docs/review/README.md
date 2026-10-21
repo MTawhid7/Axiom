@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Living.** Round 1 delivered on 2026-10-21; **awaiting the owner's dispositions** (§5). No finding changes the baseline until the owner accepts it |
+| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are being made in checkpoints (§5.3); spikes S10, S12 and S15 are authorized (§5.2) |
 | **Question** | How is the Phase Zero baseline reviewed before Milestone 1 starts: in what format, with which severities, how do findings become changes, and when does the review end? |
 | **Builds on** | The owner's decision 8 at Step 6's Gate C (2026-10-20): Milestone 1 waits "until the architecture and roadmap undergo independent, multi-round adversarial review"; the recommendation in [status](../status.md) for the review's brief; the findings format the [handover](../handover-phase-0.md) §3 suggests |
 | **Last updated** | 2026-10-21 |
@@ -21,7 +21,7 @@
 
 | Round | Date | Documents | Findings | State |
 |---|---|---|---|---|
-| 1 | 2026-10-21 | [Risk matrix](round-1/01-risk-matrix.md) · [Findings](round-1/02-findings.md) · [Challenged assumptions](round-1/03-challenged-assumptions.md) · [Actions before Round 2](round-1/04-round-2-actions.md) | 22: 2 Critical, 6 High, 10 Medium, 4 Low | Awaiting the owner's dispositions |
+| 1 | 2026-10-21 | [Risk matrix](round-1/01-risk-matrix.md) · [Findings](round-1/02-findings.md) · [Challenged assumptions](round-1/03-challenged-assumptions.md) · [Actions before Round 2](round-1/04-round-2-actions.md) | 22: 2 Critical, 6 High, 10 Medium, 4 Low | All accepted (2026-10-21); changes in progress (§5.3) |
 
 ## 3. Findings and severities
 
@@ -60,32 +60,69 @@
 
 ## 5. The disposition log
 
-The owner's decisions, in the owner's words. "Changed" names the commit and documents that carry an accepted change.
+The owner's decisions, in the owner's words. "Changed" names the checkpoint (§5.3) and the documents that carry an accepted change; `git log --grep 'review-r1-cpN'` finds a checkpoint's commit.
+
+**Round 1's dispositions** (the owner, 2026-10-21) begin: "I have reviewed the Round 1 risk matrix, findings, and recommendations in docs/review/round-1/. Here are my formal dispositions to be recorded in docs/review/README.md §5 and status documents."
+
+**The review's process** (§3–§6): "Approved as written in docs/review/README.md (§3–§6), including finding formats, severities, the disposition log, and the stopping rule."
+
+### 5.1 Findings
 
 | ID | Severity | Blocks | Disposition | The owner's words | Date | Changed |
 |---|---|---|---|---|---|---|
-| RV1-01 | Critical | M1 | Awaiting | | | |
-| RV1-02 | Critical | M1 | Awaiting | | | |
-| RV1-03 | High | M1 | Awaiting | | | |
-| RV1-04 | High | M3 | Awaiting | | | |
-| RV1-05 | High | M4 | Awaiting | | | |
-| RV1-06 | High | M3 | Awaiting | | | |
-| RV1-07 | High | M1 | Awaiting | | | |
-| RV1-08 | High | M1, M3 | Awaiting | | | |
-| RV1-09 | Medium | M1 | Awaiting | | | |
-| RV1-10 | Medium | M1 | Awaiting | | | |
-| RV1-11 | Medium | M1 | Awaiting | | | |
-| RV1-12 | Medium | M4 | Awaiting | | | |
-| RV1-13 | Medium | M3 | Awaiting | | | |
-| RV1-14 | Medium | M4 | Awaiting | | | |
-| RV1-15 | Medium | M1 | Awaiting | | | |
-| RV1-16 | Medium | M1 | Awaiting | | | |
-| RV1-17 | Medium | M1 | Awaiting | | | |
-| RV1-18 | Medium | M1, M3 | Awaiting | | | |
-| RV1-19 | Low | M5 | Awaiting | | | |
-| RV1-20 | Low | M5 | Awaiting | | | |
-| RV1-21 | Low | M6 | Awaiting | | | |
-| RV1-22 | Low | M6 | Awaiting | | | |
+| RV1-01 | Critical | M1 | **Accepted** | "Adopt an interim CSS2 conformance target over the 5,652 script-free tests (shipping browser median on that subset)." "Implement a script-free screenshot harness for Milestone 1 (modeled on wptrunner's executorservo.py); move full 97% CSS2 target and WebDriver runner to Milestone 3 when JavaScript lands." "Run the test harness end-to-end at M1 Checkpoint 2 rather than Checkpoint 10." | 2026-10-21 | CP1 (pending) |
+| RV1-02 | Critical | M1 | **Accepted** | "Formally design the sandboxed GPU/compositor process topology now (Renderer → GPU Process → Browser CALayer tree)." "Build the separate GPU/compositor process at Milestone 2; split Budget B1 accordingly." "Ensure Level 3 (L3) security certification at Milestone 6 is performed on the final multi-process topology." | 2026-10-21 | CP2 (pending) |
+| RV1-03 | High | M1 | **Accepted** | "Adopt the single binding rule: cross-site frames are separate agents with independent event loops and heaps behind remote proxies from Milestone 1." "Correct conflicting staging text in overview.md §6, frame-tree-and-navigation.md §5, and roadmap.md M5." | 2026-10-21 | CP3 (pending) |
+| RV1-04 | High | M3 | **Accepted** | "Fix the GC end-state before Milestone 3 via an amendment to ADR-0008: generational nursery, allocation-driven incremental marking, parallel marking in pauses, and non-moving tenured arenas with selective evacuation." "Evaluate pause times on a 1M-object heap in Spike S11." | 2026-10-21 | CP6 (pending) |
+| RV1-05 | High | M4 | **Accepted** | "Replace the flat static 150 MB cap with a normalized workload (standardized 50-item scroll depth)." "Gate on memory growth slope per 100 items scrolled plus post-GC idle plateau recovery; retain 150 MB as a stretch target. Enforce zero-copy resource sharing." | 2026-10-21 | CP6 (pending) |
+| RV1-06 | High | M3 | **Accepted** | "Evaluate compact 32-bit heap slots vs. 64-bit NaN-boxed slots in Spike S11 before Milestone 3 freezes the object model." | 2026-10-21 | CP6 (pending) |
+| RV1-07 | High | M1 | **Accepted** (the recommended option) | "Run real, sandboxed renderer and network processes from Milestone 1 using the profiles validated in Spikes S4, S5, and S7." "Retain single-process mode strictly for rapid automated testing, fuzzing, and Miri." | 2026-10-21 | CP2 (pending) |
+| RV1-08 | High | M1, M3 | **Accepted** | "Reclassify WHATWG text encodings, Temporal calendar arithmetic, and BigInt as replaceable details behind clean interfaces (DP2)." "Audit and grade modern encoding_rs (SIMD off) before Milestone 1, and temporal_rs before Milestone 3." | 2026-10-21 | CP4 (pending) |
+| RV1-09 | Medium | M1 | **Accepted** | "Renderers write pixels into shared memory entries; only the compositor owns IOSurfaces; renderer profiles explicitly deny iokit-open." | 2026-10-21 | CP2 (pending) |
+| RV1-10 | Medium | M1 | **Accepted** | "Establish explicit rules for CoreText emoji advance metrics and -webkit-font-smoothing. Retain the hybrid CoreText + HarfRust/skrifa architecture; reject the single-rasterizer alternative." | 2026-10-21 | CP5 (pending) |
+| RV1-11 | Medium | M1 | **Accepted** | "Structure concurrency verification in order: Miri race detection → loom primitives → deterministic schedule exploration on EL24 → TSan via updated nightly or -Z external-clangrt." | 2026-10-21 | CP5 (pending) |
+| RV1-12 | Medium | M4 | **Accepted** | "RV1-12 to RV1-14 (Corpus Capabilities, WebAssembly/JIT Timing, Site Compatibility): Accepted. Schedule for Milestones 3–5 as outlined in 04-round-2-actions.md." | 2026-10-21 | CP5 (pending) |
+| RV1-13 | Medium | M3 | **Accepted** | As RV1-12 | 2026-10-21 | CP5 (pending) |
+| RV1-14 | Medium | M4 | **Accepted** | As RV1-12 | 2026-10-21 | CP5 (pending) |
+| RV1-15 | Medium | M1 | **Accepted** | "Require headless embedder text dumps at M1, crash reporting at M2, and console logging at M3." | 2026-10-21 | CP1 (pending) |
+| RV1-16 | Medium | M1 | **Accepted** | "Enforce panic = "abort" per binary; enforce checked arithmetic / overflow checks in parsers and IPC validators." | 2026-10-21 | CP1 (pending) |
+| RV1-17 | Medium | M1 | **Accepted** | "Validate local self-signed codesigning persistence via Spike S15." | 2026-10-21 | CP5 (pending) |
+| RV1-18 | Medium | M1, M3 | **Accepted** | "Split generated WebIDL crates by interface group; measure compile times in Spike S13." | 2026-10-21 | CP5 (pending) |
+| RV1-19 | Low | M5 | **Accepted** | "RV1-19 to RV1-22 (Timing Side-Channels, Rustls ECH, Passkeys, Product Gaps): Accepted. Correct stale facts and schedule resolutions for Milestones 5–6." | 2026-10-21 | CP5 (pending) |
+| RV1-20 | Low | M5 | **Accepted** | As RV1-19 | 2026-10-21 | CP5 (pending) |
+| RV1-21 | Low | M6 | **Accepted** | As RV1-19 | 2026-10-21 | CP5 (pending) |
+| RV1-22 | Low | M6 | **Accepted** | As RV1-19 | 2026-10-21 | CP5 (pending) |
+
+**Where the owner's words differ from a counter-proposal, the owner's words govern.** Where a counter-proposal offered a choice the owner's words don't make, the checkpoint records the choice it made and why, for the owner to overrule.
+
+### 5.2 Spikes
+
+The owner's authorizations (2026-10-21). Each covers only the questions it names (CLAUDE.md), and the questions are those of the [actions](round-1/04-round-2-actions.md#4-proposed-spikes) §4.
+
+| Spike | When | The owner's words | State |
+|---|---|---|---|
+| S10 | "Authorized Immediately (Pre-Milestone 1)" | "GPU process IPC hop latency, display list validation, and zero-copy texture sharing." | Authorized |
+| S12 | As S10 | "ThreadSanitizer workaround routes on macOS 27 (-Z external-clangrt)." | Authorized |
+| S15 | As S10 | "Stable self-signed codesigning persistence across rebuilds." | Authorized |
+| S11 | "Authorized Before Milestone 3" | "Spike S11 (GC pauses & 32-bit slot width)" | Authorized, not started |
+| S13 | As S11 | "Spike S13 (WebIDL build times)" | Authorized, not started |
+| S14 | As S11 | "Spike S14 (WebAssembly & WasmGC)" | Authorized, not started |
+| Census addendum, by hand | "Authorized Before Milestone 4" | "Manual census addendum (Chrome memory-infra traces & UseCounters on normalized feeds)." | Authorized, not started; the owner's hand (CO6) |
+
+### 5.3 Checkpoints
+
+**The owner's cadence:** "1. Update docs/review/README.md §5 with these formal dispositions. 2. Apply the accepted documentation changes as clean, atomic checkpoints on architecture-review" (CP1–CP5 below). "3. Execute the authorized Pre-M1 Spikes (S10, S12, S15). 4. Run all five validation checks after each checkpoint. Keep architecture-review pushed to origin."
+
+| Checkpoint | The owner's name | Findings | State |
+|---|---|---|---|
+| CP1 | "M1 Conformance & Test Harness" | RV1-01, RV1-15, RV1-16 | Pending |
+| CP2 | "Multi-Process Topology & GPU Process Design" | RV1-02, RV1-07, RV1-09 | Pending |
+| CP3 | "Frame Tree & Cross-Site Agents" | RV1-03 | Pending |
+| CP4 | "Developer Scope & Dependencies" | RV1-08, with `encoding_rs` graded | Pending |
+| CP5 | "Text, Concurrency & Roadmap Updates" | RV1-10, RV1-11, RV1-12–RV1-14, RV1-17–RV1-22 (RV1-15 and RV1-16 are CP1's) | Pending |
+| CP6 | Added: the collector, slot width and the memory gate | RV1-04, RV1-05, RV1-06 | Pending |
+
+**CP6 is added** because the five named checkpoints leave out three accepted findings, and their changes are documents too. Their evidence follows from S11 and the census addendum, which are authorized for later; CP6 records the decisions and the questions those spikes answer.
 
 ## 6. The stopping rule
 

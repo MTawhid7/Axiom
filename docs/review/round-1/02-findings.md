@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 1, awaiting the owner's dispositions** (2026-10-21). A finding changes nothing until the owner accepts it; the [review process](../README.md) records each disposition |
+| **Status** | **Round 1, disposed** (2026-10-21): the owner accepted every finding, in the words the [disposition log](../README.md#5-the-disposition-log) records. Where those words differ from a counter-proposal here, they govern. The findings stay as written, as the round's record |
 | **Question** | Where is the Phase Zero baseline wrong, inconsistent, outdated or over-optimistic, and what should change, and when? |
 | **Covers** | The baseline approved at Step 6's Gate C: the [handover](../../handover-phase-0.md), ADRs 0001–0021, the [threat model](../../security/threat-model.md) and [process model](../../security/process-model.md), the designs under `architecture/`, the [standards](../../standards.md), [testing](../../testing.md), [performance](../../performance.md), [roadmap](../../roadmap.md) and [Milestone 1](../../milestone-1.md) documents, and spikes S1–S9 |
 | **Summary** | [Risk matrix](01-risk-matrix.md) |

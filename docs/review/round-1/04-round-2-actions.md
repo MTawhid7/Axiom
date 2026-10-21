@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 1, awaiting the owner's dispositions** (2026-10-21). Nothing here is authorized: each change follows the owner's disposition of its finding, and each spike needs its own authorization (CLAUDE.md, "Authorization and review gates") |
+| **Status** | **Round 1, disposed** (2026-10-21): the owner accepted every finding, and authorized spikes S10, S12 and S15 now, S11, S13 and S14 before M3, and the census addendum before M4 ([the disposition log](../README.md#5-the-disposition-log)). The changes below are made in the checkpoints the log lists (§5.3 there) |
 | **Question** | Which documentation changes must be made before implementation can safely start, which can wait for their milestone, which spikes would settle the open evidence, and what should Round 2 examine? |
 | **See also** | [Risk matrix](01-risk-matrix.md) · [Findings](02-findings.md) · [Challenged assumptions](03-challenged-assumptions.md) · [The review process](../README.md) |
 | **Last updated** | 2026-10-21 |
