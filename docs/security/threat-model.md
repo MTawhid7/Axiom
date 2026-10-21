@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** by the owner (2026-10-17), with one amendment: out-of-process iframes are a prerequisite for L3 (§8, check V9) |
+| **Status** | **Accepted** by the owner (2026-10-17), with one amendment: out-of-process iframes are a prerequisite for L3 (§8, check V9). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): L1 and V1 for the GPU/compositor process and renderers without IOKit (RV1-02, RV1-09; CP2) |
 | **Question** | What does Axiom protect, from whom, through which entry points, and where does trust change? When may it be used for sensitive logins? |
 | **Feeds** | [Process model](process-model.md), ADR-0004, the security sections of the architecture (Step 4), the testing strategy (Step 6) |
 | **Builds on** | [ADR-0001](../adr/0001-scope-and-target.md) (R3 and the defaults), [ADR-0002](../adr/0002-implementation-language.md) (the `unsafe` policy), [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md) (one heap per agent) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Claims follow the [research conventions](../research/README.md): **sourced facts** cite a numbered source (§11), and **inference**, **hypothesis** and **background** are marked as such. Everything about Axiom itself is **planned**, not implemented.
 
@@ -83,7 +83,8 @@ Each entry point for untrusted input, with the process that must handle it (the 
 | HTTP, TLS, DNS, decompression | Network bytes | Network process | Safe Rust where we write it; a sandbox around the process |
 | IPC endpoints of more privileged processes | **Every** message from a less privileged process | Browser, network and GPU processes | The IPC trust rules IR1–IR10 ([process model](process-model.md) §6) |
 | GPU work from WebGL and WebGPU (later) | Shaders and commands | GPU process | Validation before the Metal compiler; never in the browser process |
-| Display lists, accessibility trees and other renderer output | Renderer-generated data | Browser (later the GPU process) | Safe Rust decoding and validation; renderers never draw outside their area |
+| Display lists, accessibility trees and other renderer output | Renderer-generated data | Display lists: the GPU/compositor process from M2, the browser at M1 only (Round 1, RV1-02). Accessibility trees and other output: the browser | Safe Rust decoding and validation; renderers never draw outside their area |
+| Layer commits from the GPU/compositor process (from M2) | Layer trees, IOSurface ports, scroll and animation nodes, hit-test regions | Browser | Bounded decoding in safe Rust; checks against the browser's own records (IR1, IR2) |
 | Browser interface | Page-controlled titles, URLs, dialogs, fullscreen requests, permission requests, downloads, drag and drop, clipboard writes, external URL schemes | Browser | Spoof-resistant URL display; browser-drawn prompts; the browser's own user-activation tracking; downloads marked as quarantined (background); a prompt before launching another app |
 | Local network and `localhost` | Requests from public sites | Network process | Private Network Access-style checks (Step 5) |
 | Updates and dependencies | Upstream code | Build time | Pinned `Cargo.lock`; advisory monitoring (§9) |
@@ -163,7 +164,7 @@ ADR-0001 gates sensitive use "until the isolation milestone is verified". The le
 | Level | Name | What must be true | Permitted use |
 |---|---|---|---|
 | **L0** | Prototype | Anything goes, including a single process and no sandbox | Local test pages and public documents. **Never credentials** |
-| **L1** | Sandboxed | Web content is parsed and run only in renderer processes under a deny-by-default sandbox. A separate, sandboxed network process. The browser process parses no web content. IPC follows IR1–IR10. SG1, SG4–SG7, SG9 and SG11 hold | General browsing **without logging in** |
+| **L1** | Sandboxed | Web content is parsed and run only in renderer processes under a deny-by-default sandbox. A separate, sandboxed network process. The browser process parses no web content and, as amended in Round 1 (RV1-02), consumes no renderer display lists: the GPU/compositor process does. IPC follows IR1–IR10. SG1, SG4–SG7, SG9 and SG11 hold | General browsing **without logging in** |
 | **L2** | Site-isolated | Renderers are locked to one site. Credentials and storage are mediated with lock checks. ORB-style response blocking is on. Third-party state is partitioned by top-level site. SG2, SG3 and SG10 hold | Logging in to accounts that are **not** sensitive |
 | **L3** | Sensitive-use gate passed | **Out-of-process iframes:** every cross-site frame renders in a process locked to its own site (the owner's amendment, 2026-10-17). Checks V1–V9 pass, and their evidence is recorded | Email, banking, and accounts with write access |
 
@@ -171,7 +172,7 @@ ADR-0001 gates sensitive use "until the isolation milestone is verified". The le
 
 | # | Check |
 |---|---|
-| V1 | **Sandbox escape tests.** From inside each process type, an automated suite tries the operations that type must not perform: reading user files, opening sockets, spawning programs, and looking up Mach services outside its allowlist. Every attempt is denied |
+| V1 | **Sandbox escape tests.** From inside each process type, the GPU/compositor process included, an automated suite tries the operations that type must not perform: reading user files, opening sockets, spawning programs, looking up Mach services outside its allowlist, and, from a renderer, opening IOKit user clients (Round 1, RV1-09). Every attempt is denied |
 | V2 | **IPC fuzzing.** Every message decoder of every privileged endpoint is fuzzed, with coverage reported, and the campaign ends without open findings |
 | V3 | **Lock enforcement tests.** A test renderer that lies about its origin is caught and terminated, for cookies, storage, navigation commits and requests |
 | V4 | **Cross-site leak tests.** The relevant WPT suites (CORS, COOP and COEP, ORB, cookies) pass. A test confirms that cross-site no-CORS responses carrying HTML, JSON or XML never reach the renderer's memory |

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-17). The owner accepted its parts with amendments, and instructed that it move to Accepted once spike S4-Q1 and S4-Q2 passed on this Mac. They passed the same day ([S4 results](../research/s4-results.md)). The owner then confirmed the refinements S4 made |
+| **Status** | **Accepted** (2026-10-17). The owner accepted its parts with amendments, and instructed that it move to Accepted once spike S4-Q1 and S4-Q2 passed on this Mac. They passed the same day ([S4 results](../research/s4-results.md)). The owner then confirmed the refinements S4 made. **D1 amended by the architecture review's Round 1** (2026-10-21): the GPU/compositor process from M2, real processes from M1, and renderers without IOKit (RV1-02, RV1-07, RV1-09) |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Threat model](../security/threat-model.md), [process model](../security/process-model.md), [macOS confinement note](../research/macos-process-confinement.md), [Step 3 tracker](../research/step-3-security-and-process-model.md), [ADR-0001](0001-scope-and-target.md) (R3, consequence 4), [ADR-0002](0002-implementation-language.md) (`unsafe` policy), [ADR-0003](0003-gc-handle-and-rooting-pattern.md) (one heap per agent), [S2 results](../research/s2-results.md), [S4 results](../research/s4-results.md) |
@@ -16,6 +16,7 @@
 | 2026-10-17 | **Spike S4: S4-Q1 and S4-Q2 pass** ([S4 results](../research/s4-results.md)). A custom deny-by-default profile applies to an ad-hoc-signed, hardened-runtime helper built against SDK 27.0, by three methods. All 18 probes behave as specified. S4 also refines three decisions, recorded below: the browser compiles profiles (D2); J3's explicit rule is required (D7); J5 adds `single-jit` (D7) |
 | 2026-10-17 | **Accepted**, by the owner's instruction of the same day: "Once S4-Q1 and S4-Q2 pass, ADR-0004 moves to Accepted" |
 | 2026-10-17 | **Owner confirms S4's three refinements:** browser-compiled profile bytecode (D2), the required explicit `(deny dynamic-code-generation)` (J3), and `com.apple.security.cs.single-jit` on `renderer-jit` (J5). They "are well-justified by the S4 empirical data and strengthen both our security posture and memory budgets" |
+| 2026-10-21 | **Amendments accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1):<br>• **RV1-02:** "Formally design the sandboxed GPU/compositor process topology now (Renderer → GPU Process → Browser CALayer tree)." "Build the separate GPU/compositor process at Milestone 2; split Budget B1 accordingly." "Ensure Level 3 (L3) security certification at Milestone 6 is performed on the final multi-process topology."<br>• **RV1-07** ("Accepted (Recommended Option)"): "Run real, sandboxed renderer and network processes from Milestone 1 using the profiles validated in Spikes S4, S5, and S7." "Retain single-process mode strictly for rapid automated testing, fuzzing, and Miri."<br>• **RV1-09:** "Renderers write pixels into shared memory entries; only the compositor owns IOSurfaces; renderer profiles explicitly deny iokit-open."<br>D1 is amended below, and the [process model](../security/process-model.md) records the changes (§3 note 1, §4, §7, §9, §10, and its change record). Spike S10 is authorized to measure the hop, validation and zero-copy sampling before M2 |
 
 ## Question
 
@@ -90,13 +91,18 @@ The answer must meet ADR-0001 R3: a compromised renderer must expose neither cre
 
 | Process | Role | Confinement |
 |---|---|---|
-| Browser | UI, navigation, frame tree, policy, profile; composites until a GPU process exists | Hardened runtime, no sandbox. Never parses web content |
-| Renderer (many) | All interpretation of web content | Deny-by-default Seatbelt profile; no files, network, window server or process launching |
+| Browser | UI, navigation, frame tree, policy, profile; the CoreAnimation layer tree, scrolling and compositor animation on layers, input routing. **As amended in Round 1:** composites display lists only at M1, as a thread behind the compositor's interface | Hardened runtime, no sandbox. Never parses web content; from M2, consumes no display lists |
+| Renderer (many) | All interpretation of web content | Deny-by-default Seatbelt profile; no files, network, window server, IOKit or process launching. Pixels go only into Mach memory entries (Round 1, RV1-09) |
 | Network (1) | HTTP, TLS, DNS, cache, cookie jar, web storage, ORB, CORS | Seatbelt: outbound network and its own data directory only |
-| GPU (0 or 1) | Arrives with the first web-supplied GPU work (WebGL, WebGPU, hardware video) | Seatbelt: Metal only |
+| GPU/compositor (1, from M2) | **As amended in Round 1** (RV1-02): validates every renderer's display lists, rasterizes tiles into IOSurfaces it owns, and sends the browser layer commits. Takes no web-supplied GPU work; WebGL and WebGPU (M9) run where M9's plan places them | Seatbelt: Metal only |
 | Utility (on demand) | Media decoding and other isolated jobs | Seatbelt, per kind of job |
 
 The full capability matrix is in the [process model](../security/process-model.md) §4.
+
+**D1 as amended in Round 1** (2026-10-21; RV1-02, RV1-07, RV1-09):
+- **The topology is renderer → GPU/compositor process → browser,** from M2. The browser holds the layer tree and scrolls and animates layers itself, so input never waits on the GPU process ([process model](../security/process-model.md) §3, note 1). L3's checks at M6 run on this topology.
+- **Real, sandboxed renderer and network processes from M1,** under the profiles S4, S5 and S7 wrote. The compositor runs as a browser thread at M1, behind the interface the GPU process serves from M2. Single-process mode is kept strictly for automated tests, fuzzing and Miri.
+- **Renderers have no IOKit:** they write pixels into Mach memory entries, the compositor samples them and owns every IOSurface, and every renderer profile denies `iokit-open` explicitly, as J3 denies code generation.
 
 **D2. Confinement.**
 - **Option O1.** Each helper is its own executable, signed ad hoc with the hardened runtime and only the entitlements it needs. It applies its own deny-by-default profile at the top of `main`, before any untrusted input or resource reaches it.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): RQ45 and RQ46 for RV1-01 (CP1) |
+| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): RQ45 and RQ46 for RV1-01 (CP1); RQ12, RQ35 and RQ53 for RV1-02, RV1-07 and RV1-09 (CP2) |
 | **Question** | Does every requirement trace from its source to the milestone that verifies it, and to the check that does? |
 | **Answers** | Part of Step 6 question Q7 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the tracker's handed-over question 30 (§2.2). Planned since Step 1 |
 | **Builds on** | The [charter](charter.md); the accepted ADRs; the [threat model](security/threat-model.md) and [process model](security/process-model.md); the [corpus](corpus.md), [standards](standards.md), [testing](testing.md) and [performance](performance.md) documents; the [roadmap](roadmap.md) and [Milestone 1](milestone-1.md) |
@@ -30,7 +30,7 @@ Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone th
 | # | Requirement | Source | Verified at | How |
 |---|---|---|---|---|
 | RQ11 | L0 never handles credentials | Threat model §8 | M1 | No credential store, no script engine, password forms refused below L2 (MA7) |
-| RQ12 | L1: web content parsed and run only in sandboxed renderers; a sandboxed network process; the browser parses no web content; IPC by IR1–IR10; SG1, SG4–SG7, SG9, SG11 | Threat model §8; [process model](security/process-model.md) §4 | M2 | V1's escape suite in each process type; every IPC decoder fuzzed (V2's L1 part) |
+| RQ12 | L1: web content parsed and run only in sandboxed renderers; a sandboxed network process; the browser parses no web content and consumes no display lists, which the GPU/compositor process does (Round 1, RV1-02); renderers without IOKit (RV1-09); IPC by IR1–IR10; SG1, SG4–SG7, SG9, SG11 | Threat model §8; [process model](security/process-model.md) §4 | M1 (sandboxed helpers, RV1-07), M2 (the GPU process, V1 and V2) | S4's probes in each helper at M1; V1's escape suite in each process type; every IPC decoder fuzzed (V2's L1 part) |
 | RQ13 | L2: renderers locked to one site; credentials and storage mediated with lock checks; ORB; third-party state partitioned; SG2, SG3, SG10 | Threat model §8 | M5 | V3's lock-enforcement tests; V4's cross-site leak suites |
 | RQ14 | L3: out-of-process iframes and V1–V9 | Threat model §8; OQ-18 | M6 | V1–V9 pass, evidence recorded |
 | RQ15 | No sensitive logins before isolation is verified | ADR-0001 R3; Gate A's account policy | M5 (test accounts), M6 (the owner's) | The login track (MS8); MA7's refusal below L2 |
@@ -63,7 +63,7 @@ Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone th
 | # | Requirement | Source | Verified at | How |
 |---|---|---|---|---|
 | RQ34 | Text: ICU4X, HarfRust, CoreText for system fonts, a Rust path for web fonts | [ADR-0011](adr/0011-text-fonts-and-unicode.md) | M1 (system fonts), M4 (web fonts) | Unicode's conformance files (TS6); fuzzed font paths at M4 |
-| RQ35 | Graphics: Metal, CoreAnimation layers, damage-limited tiles, Display P3 | [ADR-0012](adr/0012-graphics-images-and-media.md) GR | M1; M9 (the GPU process) | S6's frame budgets (PF13) |
+| RQ35 | Graphics: Metal, CoreAnimation layers, damage-limited tiles, Display P3; the GPU/compositor process from M2 (Round 1, RV1-02) | [ADR-0012](adr/0012-graphics-images-and-media.md) GR | M1; M2 (the GPU/compositor process); M9 (WebGL, WebGPU) | S6's frame budgets and the hop's (PF13); S10 |
 | RQ36 | Images and media: safe decoders in renderers; AVIF and media in the media utility process | ADR-0012 IM | M1 (PNG, JPEG, GIF, WebP), M7 (media, AVIF) | Decoders fuzzed (TS9); the media corpus checks at M7 |
 | RQ37 | Networking: own URL parser and framing, rustls with the system verifying, partitioned caches and cookies | [ADR-0013](adr/0013-networking-storage-and-workers.md) NW | M1 (HTTP/1.1, HTTP/2, TLS), M2 (cache, cookies, CORS), M4 (HTTP/3), M5 (ORB) | WPT's `fetch/`, `cookies/`, `cors/` at their milestones |
 | RQ38 | Storage and workers behind endpoints | ADR-0013 SW | M3 (Web Storage), M5 (IndexedDB, Cache API), M8 (workers) | WPT's `webstorage/`, `IndexedDB/`, `workers/`, `service-workers/` |
@@ -91,7 +91,7 @@ Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone th
 | # | Requirement | Source | Verified at | How |
 |---|---|---|---|---|
 | RQ52 | One method for every measurement | [ADR-0019](adr/0019-performance-methodology-and-budgets.md) PF1–PF5 | Every measurement | PF1's conditions, recorded with each figure (MA9) |
-| RQ53 | B1: the core browser at most 60 MB, plus tiles at 6.2 bytes per window pixel | PF6; process model §7 | M1 (with B2, one process: MA6), M2 (the browser process alone) | `footprint` after 30 s idle |
+| RQ53 | B1: the core browser at most 60 MB, plus tiles at 6.2 bytes per window pixel; split in Round 1 (RV1-02) into B1a, the browser's 60 MB, and B1b, the GPU/compositor process's 15 MB (hypothesis) plus the tiles | PF6; process model §7 | M1 (the browser with its tiles: MA6), M2 (B1a and B1b apart) | `footprint` after 30 s idle |
 | RQ54 | B2: a ready renderer with an empty document at most 10 MB | PF7 | M2 | `footprint` |
 | RQ55 | B3: a 50 MB median over the documents and content pages, and every corpus page within its ceiling | PF8; performance §4.1 | M1 (Wikipedia, MDN), M4 (the median, with the content pages), M7–M9 (their pages) | `footprint` after 30 s without input, GPU memory charged (PF4) |
 | RQ56 | B4: the network process idle at most 25 MB | PF9 | M2 | `footprint` |

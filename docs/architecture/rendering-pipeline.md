@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP6. PL10 updated for the amendment of AC5 (OQ-19) |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP6. PL10 updated for the amendment of AC5 (OQ-19). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): PL7–PL9, PL15, PL16 and §5 for the GPU/compositor process and renderers without IOKit (RV1-02, RV1-09; CP2) |
 | **Question** | What data structures make up the pipeline, from the DOM through style, the box tree, the fragment tree and the per-frame display list to the browser's compositor? Who owns each one, on which thread, and what crosses a process boundary? How are strings and atoms represented? |
 | **Answers** | Step 4 questions Q2, Q8, Q9 and Q10 ([tracker](../research/step-4-architecture-proposal.md) §3): P2, and the representation part of P4 |
 | **Feeds** | ADR-0007; CP7 (invalidation), CP8 (hit testing and accessibility), CP10 (the heap's DOM arenas); Step 5 (text, graphics, style, layout) |
 | **Builds on** | [Process model](../security/process-model.md) §3 (the browser composites; the Rule of 2); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [event loop and threading](event-loop-and-threading.md); [IPC](ipc.md); [frame tree](frame-tree-and-navigation.md); [S4 results](../research/s4-results.md) (CoreText in a sandbox) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered PL1–PL16. Precedent is sourced (§2); the design is inference unless marked otherwise. The algorithms behind each stage belong to Step 5.
 
@@ -24,15 +24,15 @@ Everything here is **planned**; nothing is implemented. Rules are numbered PL1�
 - **The DOM's arenas are built to be lendable** (PL2). They hold no interior mutability, which the compiler checks, and style results go in side tables that can be written in disjoint slices. So parallel style and layout can be switched on later without redesign.
 - **Style and layout run on the event loop's thread for now** (PL10). At Gate B the owner amended criterion AC5 and rule EL11 to allow read-only lending of the DOM arenas during a rendering stage that the borrow checker freezes (OQ-19). Parallel style and layout are built only when profiling justifies them.
 - **Fragments are immutable** (PL5), each with the constraints that produced it, as in LayoutNG, which retired whole classes of invalidation bugs.
-- **Each frame has its own display list** (PL6–PL9). Items carry only validated primitives: geometry, glyph images from an atlas the renderer rasterized, decoded image pixels, references to child frames. They point into property trees (transforms, scrolling, clips, effects) instead of nesting them, so the browser's compositor can scroll and animate without the renderer. **The browser never decodes an image or parses a font** (AC4).
-- **The browser composites** (PL9). It embeds each child frame's latest output where its parent's display list references it, as Chromium's surfaces do.
+- **Each frame has its own display list** (PL6–PL9). Items carry only validated primitives: geometry, glyph images from an atlas the renderer rasterized, decoded image pixels, references to child frames. They point into property trees (transforms, scrolling, clips, effects) instead of nesting them, so the compositor can scroll and animate without the renderer. **The browser never decodes an image or parses a font** (AC4).
+- **The compositor composites** (PL9): from M2 in the sandboxed GPU/compositor process, which sends the browser layer commits; at M1 as a browser thread (Round 1, RV1-02). It embeds each child frame's latest output where its parent's display list references it, as Chromium's surfaces do.
 - **Strings** (PL11): one representation for JavaScript and the DOM, with 8-bit or 16-bit storage per string, as SpiderMonkey has done since 2014. Names are atoms that every thread can compare.
 
 ## 1. Binding inputs
 
 | Input | Consequence here |
 |---|---|
-| **Rule of 2 and process model §3, note 1:** the browser composites renderer display lists of simple primitives, and never decodes images or parses fonts | PL6–PL9 |
+| **Rule of 2 and process model §3, note 1:** the browser composites renderer display lists of simple primitives, and never decodes images or parses fonts. **As amended in Round 1** (RV1-02): from M2 the GPU/compositor process composites them, and the browser receives layer commits | PL6–PL9, PL15, PL16 |
 | **SI4, FT12:** each frame produces its own display list | PL6, PL9 |
 | **ADR-0003:** one GC heap per agent for JavaScript and the DOM; Pattern B's typed arenas and `u32` handles; obligation C5, that glyph and pixel buffers need not live in the GC heap | PL2, PL7 |
 | **AC5, EL10–EL11**, as amended at Gate B (OQ-19): nothing GC-managed crosses a process; a GC heap is never lent as a whole, but DOM arenas may be lent read-only for a rendering stage frozen by the borrow checker | PL2, PL10 |
@@ -64,8 +64,8 @@ From documentation read on 2026-10-17 (Sources).
 | 2 | Style | Computed styles: immutable, shared, reference-counted values | A side table indexed by node | The document | Event loop (PL10) |
 | 3 | Box construction | Box tree: block, inline, anonymous and replaced boxes, with a child frame as a replaced box | Per-document arenas, outside the heap | The document | Event loop |
 | 4 | Layout | Fragment tree: immutable fragments, each with the constraints that produced it | Per-document arenas, outside the heap | The document | Event loop (PL10) |
-| 5 | Paint | Display list for one frame, with its property trees | Built in the renderer, sent to the browser through a ring (IP14) | The frame | Event loop builds it; a helper may encode it |
-| 6 | Composite | One picture per window from the frames' display lists | The browser's compositor | The browser | Compositor (EL6) |
+| 5 | Paint | Display list for one frame, with its property trees | Built in the renderer, sent to the compositor through a ring (IP14) | The frame | Event loop builds it; a helper may encode it |
+| 6 | Composite | One layer tree per window from the frames' display lists, its tiles rasterized into IOSurfaces | The compositor: the GPU/compositor process from M2, the browser at M1 (Round 1, RV1-02) | That process | Its raster thread; the browser's compositor thread applies the layer commits (EL6) |
 
 ## 4. Design
 
@@ -93,15 +93,15 @@ From documentation read on 2026-10-17 (Sources).
 
 - rectangles, rounded rectangles, borders, shadows and gradients;
 - **text as glyph images** from an atlas that the renderer rasterized with CoreText inside its sandbox (S4-Q5). The item gives atlas entries and positions, never font data or glyph IDs to look up;
-- **images as decoded pixels** in a resource that the renderer decoded and shares (shared memory, or an IOSurface), referenced by ID;
+- **images as decoded pixels** in a resource that the renderer decoded and shares, a Mach memory entry, referenced by ID (**as amended in Round 1,** RV1-09: never an IOSurface);
 - **child frames** by token (FT3), with a rectangle;
 - **hit-test regions** (CP8);
 - later, video frames from a media utility process and canvas contents, each as a resource.
 
 | # | Rule |
 |---|---|
-| PL8 | **Resources belong to their renderer.** Images and glyph atlases are registered with the compositor by resource messages (IP14), reference-counted by the display lists that use them, and released when unused. They count against the renderer's memory budget, charged to it where macOS allows (macOS runtime note §6.1, a hypothesis). **The browser never decodes or parses them** (AC4). It only uploads pixels it receives to the GPU. If Step 5 moves glyph rasterization into a GPU process, glyph runs by font are an item only that process may receive, never the browser |
-| PL9 | **The browser's compositor validates, then composites.** It decodes each display list with generated decoders (IP8). Then it checks that every resource belongs to the sending renderer, every property-tree reference exists and the trees are acyclic, every count and size is within bounds, every number is finite, and every child-frame token names a child of that frame in the browser's frame tree (FT1), so no renderer can embed another tab's frame. A violation is `Terminate` (IP11). It then composes each window: the root frame's list, with each child frame's latest output embedded where its parent refers to it, under the parent's clip and transform at that point. Chromium's surface draw quads work the same way [C1]. Step 5 designs the rasterizer behind it (I2) |
+| PL8 | **Resources belong to their renderer.** Images and glyph atlases are registered with the compositor by resource messages (IP14), reference-counted by the display lists that use them, and released when unused. They count against the renderer's memory budget, charged to it where macOS allows (macOS runtime note §6.1, a hypothesis). **The compositor never decodes or parses them** (AC4). **As amended in Round 1** (RV1-05, RV1-09): renderers write pixels only into Mach memory entries, and **the compositor samples them in place** where Metal allows (a buffer made over the page-aligned mapping without a copy, read as a linear texture), or else with one blit into a texture it owns; the renderer's copy stays the only long-lived one. Spike S10 measures both paths. If Step 5 moves glyph rasterization into a GPU process, glyph runs by font are an item only that process may receive, never the browser |
+| PL9 | **The compositor validates, then composites** (**as amended in Round 1,** RV1-02: in the GPU/compositor process from M2, a browser thread at M1, with the frame tree's parent and child facts sent by the browser). It decodes each display list with generated decoders (IP8). Then it checks that every resource belongs to the sending renderer, every property-tree reference exists and the trees are acyclic, every count and size is within bounds, every number is finite, and every child-frame token names a child of that frame in the browser's frame tree (FT1), so no renderer can embed another tab's frame. A violation is `Terminate` (IP11). It then composes each window: the root frame's list, with each child frame's latest output embedded where its parent refers to it, under the parent's clip and transform at that point. Chromium's surface draw quads work the same way [C1]. Step 5 designs the rasterizer behind it (I2). From M2 the result goes to the browser as layer commits, which the browser validates again in bounded form (process model §3, note 1) |
 
 ### 4.4 Threads
 
@@ -122,17 +122,17 @@ From documentation read on 2026-10-17 (Sources).
 | # | Rule |
 |---|---|
 | PL14 | **Display lists travel as updates.** A frame's display list goes to the compositor as changes to the previous one: items keyed by stable IDs, and property-tree nodes added, changed or removed. An unchanged object's items are reused, as Chromium copies them [C1]. Updates travel through a single-writer ring (IP14). At most one update is sent per offered frame (EL21, IP17) |
-| PL15 | **Scroll offsets and compositor animations live in the property trees** that the compositor holds. So the compositor can scroll and animate between updates without the renderer (CP7) |
-| PL16 | **Hit-test data rides with the display list:** regions per frame, tagged with the frame, the scroll node, and whether listeners may block scrolling. The browser routes input from it (CP8) |
+| PL15 | **Scroll offsets and compositor animations live in the property trees** that the compositor holds. So the compositor can scroll and animate between updates without the renderer (CP7). **As amended in Round 1** (RV1-02): the GPU process holds the full trees; each layer commit carries the browser the scroll and animation nodes its layers need, and **the browser scrolls and animates layers** between commits, without the renderer or the GPU process. It sends new offsets to the GPU process, which rasterizes the tiles they expose (IV8), and to the renderer, which runs `scroll` events |
+| PL16 | **Hit-test data rides with the display list:** regions per frame, tagged with the frame, the scroll node, and whether listeners may block scrolling. The browser routes input from it (CP8). **As amended in Round 1** (RV1-02): from M2 the GPU process checks the regions and forwards them with the layer commit, and the browser checks that each frame's regions lie within that frame's bounds before routing by them |
 
 ## 5. Staging
 
 | Level | What changes |
 |---|---|
-| L0 | The renderer's stages and the compositor run in one process. Display lists still go through the same encoder, decoder and validator |
-| L1–L2 | Display lists and resources cross from renderers to the browser through rings and shared memory. Nothing in the format changes |
+| L0 | Renderers are sandboxed processes from M1 (Round 1, RV1-07); the compositor runs as a browser thread behind its interface. Display lists cross from renderers through rings and memory entries, through the same encoder, decoder and validator |
+| L1–L2 | From M2, display lists and resources go to the GPU/compositor process, and the browser receives layer commits (RV1-02). Nothing in the format changes |
 | L3 | Child frames in other processes are embedded by token, as every child frame always was (FT12, PL9) |
-| GPU process | The compositor's rasterizing moves to it. The display-list format and validation stay. Glyph runs by font may then be allowed to that process only (PL8) |
+| GPU process (M2) | The compositor's validation and rasterizing move to it; the browser keeps the layer tree, scrolling, animation and input. The display-list format and validation stay. Glyph runs by font may then be allowed to that process only (PL8) |
 
 ## 6. Alternatives considered
 

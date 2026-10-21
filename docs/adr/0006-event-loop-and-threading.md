@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B |
+| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B. **§4.2's threads amended by the architecture review's Round 1** (2026-10-21): the browser's compositor thread and the GPU/compositor process (RV1-02) |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Event loop and threading](../architecture/event-loop-and-threading.md) (the full design, EL1–EL24); [macOS runtime note](../research/macos-runtime-facilities.md); [process model](../security/process-model.md) (PM6, PM8, SI7, IR5, IR6); [ADR-0003](0003-gc-handle-and-rooting-pattern.md); [Step 4 tracker](../research/step-4-architecture-proposal.md); decision-map item P1 |
@@ -13,6 +13,7 @@
 |---|---|
 | 2026-10-17 | Proposed at Step 4, CP12 |
 | 2026-10-17 | **Accepted** by the owner at Gate B: "ADR-0006 (Event Loop & Threading): Accepted." The same decisions amend rule EL11 (OQ-19): "Amend criterion AC5 and rule EL11 to allow read-only scoped lending of DOM arenas to helper threads during borrow-checker-frozen rendering stages. Keep the actual parallel style/layout implementation deferred until profiling benchmarks justify it." Decision 4 records the amendment |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1), RV1-02: "Formally design the sandboxed GPU/compositor process topology now (Renderer → GPU Process → Browser CALayer tree)." "Build the separate GPU/compositor process at Milestone 2; split Budget B1 accordingly." "Ensure Level 3 (L3) security certification at Milestone 6 is performed on the final multi-process topology." The [event loop](../architecture/event-loop-and-threading.md)'s §4.2 is amended: from M2 the GPU/compositor process receives, validates and rasterizes display lists, and the browser's compositor thread keeps frame scheduling, layer commits, scrolling, animation and input. EL6 and the thread roles' interfaces are unchanged |
 
 ## Question
 

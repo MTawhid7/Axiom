@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B. **IP11 amended by the architecture review's Round 1** (2026-10-21): panic-free validators with checked arithmetic (RV1-16) |
+| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B. **IP11 amended by the architecture review's Round 1** (2026-10-21): panic-free validators with checked arithmetic (RV1-16); IP2 and the compositing family for real processes from M1 and the GPU/compositor process (RV1-07, RV1-02) |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [IPC](../architecture/ipc.md) (the full design, IP1–IP22); [process model](../security/process-model.md) §6 (R1–R6, IR1–IR10); [ADR-0004](0004-process-model-and-sandbox.md) D3; [S4 results](../research/s4-results.md); [macOS runtime note](../research/macos-runtime-facilities.md); [Step 4 tracker](../research/step-4-architecture-proposal.md); OQ-17 |
@@ -14,6 +14,7 @@
 | 2026-10-17 | Proposed at Step 4, CP12 |
 | 2026-10-17 | **Accepted** by the owner at Gate B: "ADR-0005 (Mach IPC): Accepted." OQ-17 is resolved |
 | 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1), RV1-16: "Enforce panic = "abort" per binary; enforce checked arithmetic / overflow checks in parsers and IPC validators." IP11 is amended in the [IPC design](../architecture/ipc.md): validators are panic-free by lint and use checked arithmetic |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1), RV1-07: "Run real, sandboxed renderer and network processes from Milestone 1 using the profiles validated in Spikes S4, S5, and S7." "Retain single-process mode strictly for rapid automated testing, fuzzing, and Miri." And RV1-02: "Formally design the sandboxed GPU/compositor process topology now (Renderer → GPU Process → Browser CALayer tree)." "Build the separate GPU/compositor process at Milestone 2; split Budget B1 accordingly." "Ensure Level 3 (L3) security certification at Milestone 6 is performed on the final multi-process topology." IP2 now confines single-process mode to tests, fuzzing and Miri, so Mach channels and memory entries run from M1; the compositing family gains the GPU process's channels: display lists from renderers, layer commits to the browser |
 
 ## Question
 

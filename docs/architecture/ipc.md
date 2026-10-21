@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0005's acceptance (2026-10-17, Gate B). Written at Step 4, CP4. Answers OQ-17. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): IP11 for RV1-16 (CP1) |
+| **Status** | **Binding** since ADR-0005's acceptance (2026-10-17, Gate B). Written at Step 4, CP4. Answers OQ-17. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): IP11 for RV1-16 (CP1); IP2 for RV1-07 (CP2) |
 | **Question** | How do Axiom's processes and threads exchange messages? Which transport carries them, how are interfaces defined and checked, how do handles and bulk data move, and how are the IPC trust rules IR1–IR10 enforced by construction rather than by care? |
 | **Answers** | Step 4 question Q5 ([tracker](../research/step-4-architecture-proposal.md) §3); OQ-17 |
 | **Feeds** | ADR-0005; CP5 (frame tree and navigation), CP6 (display lists), CP8 (input and accessibility), CP9 (embedder API), CP10 (agents and messaging) |
@@ -89,7 +89,7 @@ From source and documentation read on 2026-10-17 (Sources).
 | # | Rule |
 |---|---|
 | IP1 | **Mach messages carry everything between processes** (resolves OQ-17). The reasons, from §2–§3: every handle Axiom passes is a port right, IOSurfaces included (R2); the audit trailer identifies the sender of each message (R3); small round trips are 24% faster than over sockets; priority can travel with a message (IP20); a helper waits on its ports and its timers in one `kevent64` call (EL2); and ports take guards and queue limits (IP5, IP16). The only other channel is the one descriptor through which a helper receives its sandbox profile at launch, before its first Mach message (S4, ADR-0004 D2) |
-| IP2 | **The same channels work in one process.** Between threads of one process, and in single-process mode (L0), a channel is an in-memory queue with the same API (R6). Tests use it with the deterministic scheduler (EL24). Messages are encoded and decoded in every configuration, so the decoders that guard the browser run in every test |
+| IP2 | **The same channels work in one process.** Between threads of one process, and in single-process mode, a channel is an in-memory queue with the same API (R6). **As amended in Round 1** (RV1-07): single-process mode exists strictly for automated tests, fuzzing and Miri; from M1 the browser, renderers and the network process talk over Mach channels and memory entries (IP14), so IR7's copy-then-validate runs from the first milestone. Tests use it with the deterministic scheduler (EL24). Messages are encoded and decoded in every configuration, so the decoders that guard the browser run in every test |
 
 ### 4.2 Channels and endpoints
 
@@ -176,7 +176,7 @@ CP5–CP10 refine these. Each row names the ends and their threads.
 | Launch and control | Browser core ⇄ helper control thread | Hello, build identifier, shutdown, memory pressure, interrupting a script (EL17) | CP5 |
 | Frame host | Browser core ⇄ renderer event loop, per frame | Navigation commits, frame-tree changes, cross-frame messages through the browser | CP5 |
 | Loader and storage | Renderer event loop ⇄ network I/O and storage threads | Fetch-shaped requests bound to the site lock; cookies and web storage, including the synchronous reads | CP5 |
-| Compositing | Renderer event loop ⇄ browser compositor | Frame subscriptions and offers (EL20, EL21); display-list updates; hit-test data | CP6, CP7 |
+| Compositing | Renderer event loop ⇄ browser compositor; **from M2** (Round 1, RV1-02), renderer event loop → GPU/compositor process, and GPU/compositor process ⇄ browser compositor | Frame subscriptions and offers (EL20, EL21); display-list updates and resources; hit-test data; from M2, layer commits with IOSurface ports, and scroll offsets back | CP6, CP7 |
 | Input | Browser compositor or core → renderer event loop | Routed input events and their acknowledgements | CP8 |
 | Text input and accessibility | Renderer event loop → browser main thread | The mirrors that answer AppKit's synchronous queries | CP8 |
 | Embedder | Browser main thread ⇄ browser core | The engine/embedder API as messages | CP9 |

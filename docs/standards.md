@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0018](adr/0018-corpus-standards-and-testing.md) was accepted (2026-10-20, Step 6's Gate B), with the not-planned list (§5.3) approved as written. Written at Step 6, CP4. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): SB10 and SB11 for RV1-01 (CP1) |
+| **Status** | **Binding** since [ADR-0018](adr/0018-corpus-standards-and-testing.md) was accepted (2026-10-20, Step 6's Gate B), with the not-planned list (§5.3) approved as written. Written at Step 6, CP4. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): SB10 and SB11 for RV1-01 (CP1); the WebGL and WebGPU rows for RV1-02 (CP2) |
 | **Question** | Which specifications does Axiom implement, at which dated versions, and how fully? Which suites check each, and what pass rate counts at each milestone? |
 | **Answers** | Step 6 question Q2 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); decision-map item X1; the tracker's handed-over question 3 (§2.2) |
 | **Feeds** | Testing (CP5): the suites and how expectations are kept; the roadmap (CP8): what each milestone completes; Milestone 1 (CP9): its conformance criteria |
@@ -176,8 +176,8 @@ Rules are numbered SB1–SB12. Precedent and sources are dated (§2). The design
 | Canvas 2D | HTML §4.12.5, `OffscreenCanvas` | Staged | WPT `html/canvas/` | MDN, Maps, Three.js, VS Code (S8) |
 | Images | PNG (with APNG), JPEG, GIF, WebP, AVIF, JPEG XL, BMP, ICO; ICC profiles, CICP ([images and media](architecture/images-and-media.md)) | To the specification | WPT `html/semantics/embedded-content/the-img-element/`, `css/css-images/`; each format's conformance images | JPEG, PNG, GIF, SVG and WebP on the automated pages; no AVIF among them (S8) |
 | Media | HTML media elements, Media Source Extensions 2, Web Audio 1.1, WebCodecs, WebVTT; the codecs the corpus needs | Staged | WPT `media-source/`, `webaudio/`, `webcodecs/`, `html/semantics/embedded-content/media-elements/`, `webvtt/` | YouTube, Twitch, Instagram (inference) |
-| WebGL | WebGL 1 and 2 | Staged, with the GPU process ([graphics](architecture/graphics.md)) | Khronos's WebGL conformance tests; WPT `webgl/` | Maps (S8) |
-| WebGPU | WebGPU, WGSL | Staged, with the GPU process | The WebGPU conformance test suite (CTS) | Three.js (S8); Maps probed it (S8) |
+| WebGL | WebGL 1 and 2 | Staged, at M9, never in the browser ([graphics](architecture/graphics.md) GR10) | Khronos's WebGL conformance tests; WPT `webgl/` | Maps (S8) |
+| WebGPU | WebGPU, WGSL | Staged, at M9, never in the browser (GR10) | The WebGPU conformance test suite (CTS) | Three.js (S8); Maps probed it (S8) |
 | WebAssembly | WebAssembly 2 and 3; its JavaScript and Web APIs; JSPI | Staged; how it is built is OQ-3 | WebAssembly's specification tests; WPT `wasm/` | Maps and VS Code (S8); Figma (inference) |
 | Logins | Credential Management, WebAuthn (passkeys, OQ-16), FedCM | Staged with the login track (CP8) | WPT `credential-management/`, `webauthn/`, `fedcm/` | Logins (CO8) |
 | Clipboard, fullscreen, notifications, permissions | Clipboard API, Fullscreen, Notifications, Permissions, Page Visibility, Screen Wake Lock | Staged, each when the corpus needs it | WPT `clipboard-apis/`, `fullscreen/`, `notifications/`, `permissions/`, `page-visibility/`, `screen-wake-lock/` | Discord, VS Code (inference) |

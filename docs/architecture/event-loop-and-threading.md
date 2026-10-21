@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0006's acceptance (2026-10-17, Gate B). Written at Step 4, CP3. EL11 amended at Gate B (OQ-19) |
+| **Status** | **Binding** since ADR-0006's acceptance (2026-10-17, Gate B). Written at Step 4, CP3. EL11 amended at Gate B (OQ-19). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): the browser's compositor thread and the GPU/compositor process's threads, §4.2 (RV1-02; CP2) |
 | **Question** | How does each Axiom process run its work? Which threads exist, how does each one wait, how is the HTML event loop implemented and scheduled, what drives frame production, and how do agents and workers map onto threads and heaps? |
 | **Answers** | Step 4 questions Q1–Q3 and the first half of Q4 ([tracker](../research/step-4-architecture-proposal.md) §3); OQ-5 in part |
 | **Feeds** | ADR-0006; CP4 (IPC), CP5 (frame tree), CP6 (pipeline), CP7 (invalidation), CP8 (input), CP9 (embedder API), CP10 (script and heap) |
 | **Builds on** | [Process model](../security/process-model.md); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [ADR-0004](../adr/0004-process-model-and-sandbox.md); [macOS runtime note](../research/macos-runtime-facilities.md); [S2 results](../research/s2-results.md); [S4 results](../research/s4-results.md) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered EL1–EL24. Precedent is sourced (§3, Sources); the design is inference unless marked otherwise.
 
@@ -81,7 +81,7 @@ From documentation and source read on 2026-10-17 (Sources). How each engine wait
 **Observations** (inference):
 - **The engines checked put input first.** Chromium gives it the highest priority, and Firefox routes it to the compositor first. Chromium and Ladybird align continuous input with frames.
 - **Chromium, WebKit and Ladybird drive rendering from the compositor or the display's clock,** not from a free-running timer in the content process. Ladybird also lists a local timer and a watchdog as sources; what triggers them wasn't checked.
-- **Chromium multiplexes all frames of a renderer onto one main thread** and adds a compositor thread to keep scrolling smooth. In Axiom the browser composites and scrolls (alternative E in §5).
+- **Chromium multiplexes all frames of a renderer onto one main thread** and adds a compositor thread to keep scrolling smooth. In Axiom the browser scrolls, and the compositor composites: the GPU/compositor process from M2 (Round 1, RV1-02; alternative E in §5).
 - **Servo's script threads are the closest precedent for EL15.** It runs one script thread per event loop, keyed by browsing context group and registered domain, which is the similar-origin window agent's boundary.
 - **Ladybird's stage threads are the closest precedent for EL11.** They never touch the GC heap, and a runtime check forbids it.
 - **Throttling levels have been tuned in practice** for years (Chrome since 2021). Axiom starts from them (EL18) instead of inventing its own.
@@ -113,7 +113,7 @@ From documentation and source read on 2026-10-17 (Sources). How each engine wait
 |---|---|---|---|---|
 | **Main** | 1 | AppKit only: windows, views and the shell's UI; taking in `NSEvent`s; answering IME and accessibility queries from state mirrored onto this thread (macOS note item 13); creating each window's display link | User-interactive | AppKit's run loop |
 | **Core** | 1 | The engine's authority: frame tree, navigation and session history (CP5), process launch and site locks, permissions and user activation, the engine side of the embedder API (CP9), endpoints for renderers' and the network process's control messages | User-interactive | kqueue |
-| **Compositor** | 1 | Display links and frame scheduling (§4.5); receiving and validating per-frame display lists; compositing and presenting, with explicit Core Animation transactions (macOS note item 11); compositor-driven scrolling and animation (CP7); coarse hit testing (CP8) | User-interactive | A non-AppKit `CFRunLoop` |
+| **Compositor** | 1 | Display links and frame scheduling (§4.5); applying the layer commits of the compositor in explicit Core Animation transactions (macOS note item 11); compositor-driven scrolling and animation on layers (CP7); coarse hit testing (CP8). **As amended in Round 1** (RV1-02): receiving, validating and compositing display lists is this thread's work only at M1, behind the compositor's interface; from M2 it is the GPU/compositor process's | User-interactive | A non-AppKit `CFRunLoop` |
 | **Workers** | Bounded pool | Profile I/O, compiling sandbox profiles, decoding favicons with safe Rust, writing downloads | Utility; user-initiated when the user waits for the result | Condition variable or kqueue |
 
 **Why a core thread separate from the main thread** (inference; alternative D in §5):
@@ -140,7 +140,7 @@ From documentation and source read on 2026-10-17 (Sources). How each engine wait
 
 Storage runs on its own thread so that a slow network can't delay a synchronous cookie read. If storage later moves into its own process ([process model](../security/process-model.md) §3, note 2), only its deployment changes (AC1).
 
-**GPU and utility processes.** When a GPU process exists, it takes over the compositor thread's rasterizing and presenting (process model §3, note 1), with a device thread and a presentation thread. Frame scheduling and the display-list interface don't change (AC1). A utility process runs one thread loop per job, at the job's QoS. Real-time audio, later, uses an `os_workgroup` thread (macOS runtime note §5.4).
+**GPU/compositor and utility processes.** **As amended in Round 1** (RV1-02): from M2 the GPU/compositor process takes over the compositor thread's validation and rasterizing (process model §3, note 1), with a receiving thread for renderers' updates and resources, and a raster thread that validates them, records Metal work and sends the browser layer commits. The browser's compositor thread keeps frame scheduling, applies layer commits, and scrolls, animates and routes input. Frame scheduling and the display-list interface don't change (AC1). A utility process runs one thread loop per job, at the job's QoS. Real-time audio, later, uses an `os_workgroup` thread (macOS runtime note §5.4).
 
 ### 4.3 Data across threads
 
@@ -238,11 +238,11 @@ Storage runs on its own thread so that a slow network can't delay a synchronous 
 
 | Level | What changes in this design |
 |---|---|
-| L0 | All threads run in one process: the renderer's and network process's threads live in the browser process and talk over in-process channels |
-| L1 | Renderer and network threads move into their own sandboxed processes. Thread roles and messages are unchanged |
+| L0 | **As amended in Round 1** (RV1-07): renderer and network threads run in their own sandboxed processes from M1 and talk over Mach channels; the compositor's threads run in the browser. Single-process mode, with every thread in one process, exists strictly for automated tests, fuzzing and Miri |
+| L1 | Audit tokens, crash containment and the GPU/compositor process (M2, RV1-02). Thread roles and messages are unchanged |
 | L2 | Site locks. No change here |
 | L3 | Out-of-process iframes. Each frame's event loop runs in the process of its own site. No change here: a frame already has its own subscription and display list (§4.5) |
-| GPU process | Rasterizing and presenting move from the browser's compositor thread to the GPU process. Frame scheduling is unchanged |
+| GPU/compositor process (M2) | Validation and rasterizing move from the browser's compositor thread to the GPU process; presenting (CoreAnimation commits), scrolling, animation and input stay in the browser. Frame scheduling is unchanged |
 
 ## 5. Alternatives considered
 
@@ -252,7 +252,7 @@ Storage runs on its own thread so that a slow network can't delay a synchronous 
 | B | **A central I/O thread per process** that receives all IPC and forwards it (Chromium's IO thread) | An extra hop on every message. Its real benefit, handling a request while an event loop is busy, comes from the renderer's control thread instead. Rejected for EL4 |
 | C | **Grand Central Dispatch queues as event loops** | GCD's threads are anonymous and shared, while heap confinement depends on one heap per thread. Rejected for event loops. Leaf jobs go to Axiom's own bounded pools, whose QoS Axiom sets (EL9) |
 | D | **Browser logic on AppKit's main thread** (Chromium, Firefox and WebKit do this) | Simpler, but the engine then competes with the shell's UI and AppKit's nested loops, and needs AppKit to run tests. Rejected for the core thread (EL6) |
-| E | **A compositor thread in each renderer** (Chromium) | Needed when the renderer composites. In Axiom the browser composites and scrolls (process model §3), so renderers don't need one. CP7 revisits this if it changes |
+| E | **A compositor thread in each renderer** (Chromium) | Needed when the renderer composites. In Axiom the compositor composites, in the GPU/compositor process from M2, and the browser scrolls (process model §3), so renderers don't need one. CP7 revisits this if it changes |
 | F | **A fixed-rate frame timer in each renderer** | Costs wakeups while idle (AC3) and can't follow variable refresh rates. Rejected for EL19–EL22 |
 
 ## 6. Criteria check

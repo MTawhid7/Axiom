@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Approved: v2, the Phase Zero baseline** (2026-10-20, Step 6's Gate C): "Architecture Proposal as a Whole: Approved as the Phase Zero baseline." Written at Step 6, CP10, refining v1 (Step 5, CP18) and v0 (Step 4, CP11): Step 6's budgets, the roadmap's milestones and the readiness checks added (§5.3, §5.4, §6, §9). **Under independent review** on branch `architecture-review` before any milestone starts ([handover](../handover-phase-0.md) §11). The owner accepted ADRs 0005–0007 and 0009 at Step 4's Gate B (2026-10-17) and ADR-0008 at its Gate C (2026-10-18); at Step 5's Gate B, ADRs 0010 and 0014 (2026-10-18), then ADR-0013 once spike S7 met its condition (2026-10-19); and at Step 5's Gate C (2026-10-20), ADRs 0011, 0012 and 0015–0017, with the amendments to ADR-0007 and ADR-0008. The proposal as a whole is approved at the end of Phase Zero (Step 6). **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): §2's failure semantics (RV1-16, CP1) |
+| **Status** | **Approved: v2, the Phase Zero baseline** (2026-10-20, Step 6's Gate C): "Architecture Proposal as a Whole: Approved as the Phase Zero baseline." Written at Step 6, CP10, refining v1 (Step 5, CP18) and v0 (Step 4, CP11): Step 6's budgets, the roadmap's milestones and the readiness checks added (§5.3, §5.4, §6, §9). **Under independent review** on branch `architecture-review` before any milestone starts ([handover](../handover-phase-0.md) §11). The owner accepted ADRs 0005–0007 and 0009 at Step 4's Gate B (2026-10-17) and ADR-0008 at its Gate C (2026-10-18); at Step 5's Gate B, ADRs 0010 and 0014 (2026-10-18), then ADR-0013 once spike S7 met its condition (2026-10-19); and at Step 5's Gate C (2026-10-20), ADRs 0011, 0012 and 0015–0017, with the amendments to ADR-0007 and ADR-0008. The proposal as a whole is approved at the end of Phase Zero (Step 6). **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): §2's failure semantics (RV1-16, CP1); §1, §2 and §6 for the GPU/compositor process, real processes from M1 and renderers without IOKit (RV1-02, RV1-07, RV1-09; CP2) |
 | **Question** | How do the parts fit together: processes × threads × pipeline; the crate structure, its `unsafe` map and its dependencies; what happens end to end in common scenarios; and how does the system grow from L0 to L3 without a rewrite? |
 | **Answers** | Step 4 question Q16 ([Step 4 tracker](../research/step-4-architecture-proposal.md) §3) and the check of AC1–AC10; Step 5's CP18 ([Step 5 tracker](../research/step-5-subsystems.md) §6.1): the crates refined, a summary of the [register](../technology/dependency-register.md), scenarios traced through the subsystems' rules, and the check of SC1–SC10 |
 | **Builds on** | Step 3: [threat model](../security/threat-model.md), [process model](../security/process-model.md), [ADR-0004](../adr/0004-process-model-and-sandbox.md). Step 4: [event loop and threading](event-loop-and-threading.md), [IPC](ipc.md), [frame tree and navigation](frame-tree-and-navigation.md), [rendering pipeline](rendering-pipeline.md), [invalidation](invalidation.md), [input and accessibility](input-and-accessibility.md), [embedder API](embedder-api.md), [script and heap](script-and-heap.md). Step 5: the [dependency policy](../technology/dependency-policy.md), [text and fonts](text-and-fonts.md), [graphics](graphics.md), [images and media](images-and-media.md), [networking](networking.md), [storage and workers](storage-and-workers.md), [accessibility](accessibility.md), [HTML and the DOM](html-and-dom.md), [style](style.md), [layout and paint](layout-and-paint.md), [the JavaScript engine](javascript-engine.md), [WebIDL bindings](bindings.md) |
@@ -15,30 +15,37 @@ Everything here is **planned**; nothing is implemented. This document adds no ne
 ```
  Browser process (trusted, hardened, unsandboxed)
  ┌────────────────────────────────────────────────────────────────────────────┐
- │ main thread (AppKit)     core thread               compositor thread      │
- │ shell UI · NSEvents ──▶  frame tree · navigation   display links · frames │
- │ IME mirror · AX cache    session & visited history validate · Metal tiles │
- │                          process manager · policy  hit test · scroll      │
- │            ◀── embedder API (IDL messages) ──▶     ◀── frame offers ──▶   │
+ │ main thread (AppKit)     core thread               compositor thread       │
+ │ shell UI · NSEvents ──▶  frame tree · navigation   display links · frames  │
+ │ IME mirror · AX cache    session & visited history CALayer tree · scroll   │
+ │                          process manager · policy  hit test · animation    │
+ │            ◀── embedder API (IDL messages) ──▶     ◀── layer commits       │
  └──────────────────────┬──────────────────────────────────┬──────────────────┘
           Mach IPC: browser-created channels (capabilities), audit-token pinned
- ┌──────────────────────┴───────────────────┐   ┌──────────┴───────────────────┐
- │ Renderer (sandboxed, site-locked from L2) │   │ Network process (sandboxed)  │
- │ event-loop thread per agent:              │◀─▶│ I/O thread: rustls, HTTP/1-3,│
- │   JS heap + DOM · parse · style · layout  │   │ quinn-proto, DNS-SD, ORB     │
- │   · paint → display list per frame        │   │ worker pool: SecTrust, disk  │
- │ helper pool: decode, glyph & path raster, │   │ storage thread: cookies,     │
- │   compile scripts and stylesheets         │   │ cache index, redb stores     │
- │ CoreText (system fonts) · safe decoders   │   └──────────────────────────────┘
- └───────────────────────────────────────────┘   later: GPU, media utility (AVIF)
+ ┌──────────────────────┴────────────────────┐   ┌─────────┴────────────────────┐
+ │ Renderer (sandboxed, site-locked from L2) │   │ GPU/compositor (sandboxed,   │
+ │ event-loop thread per agent:              │──▶│ from M2): validate display   │
+ │   JS heap + DOM · parse · style · layout  │   │ lists · property trees ·     │
+ │   · paint → display list per frame        │   │ Metal tiles → IOSurfaces     │
+ │ helper pool: decode, glyph & path raster, │   └──────────────────────────────┘
+ │   compile scripts and stylesheets         │   ┌──────────────────────────────┐
+ │ CoreText (system fonts) · safe decoders   │◀─▶│ Network process (sandboxed)  │
+ │ pixels in Mach memory entries, no IOKit   │   │ I/O thread: rustls, HTTP/1-3,│
+ └───────────────────────────────────────────┘   │ quinn-proto, DNS-SD, ORB     │
+                                                 │ worker pool: SecTrust, disk  │
+                                                 │ storage thread: cookies,     │
+                                                 │ cache index, redb stores     │
+                                                 └──────────────────────────────┘
+                                                  later: media utility (AVIF)
 ```
 
 | Layer | Holds | Rules |
 |---|---|---|
 | **Shell** (browser main thread) | Windows, tabs, menus, prompts; the mirrors that answer AppKit's synchronous IME and accessibility queries; the accessibility bridge | EM1, EM6, IN7, IN9, AX4–AX8 |
 | **Core** (browser core thread) | The authoritative frame tree, navigation, session and visited history, process launch and site locks, policy, profile data | FT1–FT10, EM7, ST10 |
-| **Compositor** (browser compositor thread) | Display links, frame offers, validation, Metal tiles in CoreAnimation layers, hit testing, scrolling, snapping, scrollbars and compositor animation | EL19–EL22, PL9, IV8, IN1, GR1–GR9, LY17, LY18 |
-| **Renderers** | One thread and heap per agent; the HTML parser, the DOM, the JavaScript engine and its bindings, style, layout and paint to a display list per frame; text, image decoding and rasterization on the helper pool | EL15, SH1, PL1–PL7, HD, ST, LY, JE, WB, TX, IM1–IM10 |
+| **Compositor** (browser compositor thread) | Display links, frame offers, the CoreAnimation layer tree with the GPU process's IOSurfaces as contents, hit testing, scrolling, snapping, scrollbars and compositor animation on layers | EL19–EL22, PL15, PL16, IV8, IN1, GR2, GR7–GR9, LY17, LY18 |
+| **GPU/compositor process** (from M2; a browser thread at M1) | Validation of every renderer's display lists, their property trees and resources, Metal tiles rendered into IOSurfaces, layer commits to the browser (Round 1, RV1-02) | PL8, PL9, GR1–GR6, GR10–GR14 |
+| **Renderers** | One thread and heap per agent; the HTML parser, the DOM, the JavaScript engine and its bindings, style, layout and paint to a display list per frame; text, image decoding and rasterization on the helper pool, into Mach memory entries, with no IOKit (RV1-09) | EL15, SH1, PL1–PL7, HD, ST, LY, JE, WB, TX, IM1–IM10 |
 | **Network process** | URLs, HTTP/1.1–3, TLS, DNS, cache, cookies and storage behind endpoints bound to each document's facts | FT11, EL8, NW1–NW18, SW1–SW13 |
 | **IPC** | Mach channels created only by the browser; IDL-generated safe decoders; `Untrusted<T>` validation | IP1–IP22 |
 
@@ -48,7 +55,7 @@ A proposal for the implementation milestones; final names and splits are set whe
 
 | Crate | Purpose | Process | Dependencies | `unsafe` |
 |---|---|---|---|---|
-| `platform` | All FFI: Mach IPC, kqueue and run loops, sandbox entry and profile compilation, `posix_spawn`, shared memory and IOSurfaces, QoS, wait-on-address; CoreText and CoreGraphics; Security's trust evaluation, DNS-SD, SystemConfiguration; Metal and CoreAnimation; ImageIO, in the media utility process | All | `objc2` and its framework crates, `block2`, `dispatch2` | **Yes**, in listed modules (ADR-0002 §15.3), under stated invariants |
+| `platform` | All FFI: Mach IPC, kqueue and run loops, sandbox entry and profile compilation, `posix_spawn`, Mach memory entries and IOSurfaces (the latter in the compositor and the browser only), QoS, wait-on-address; CoreText and CoreGraphics; Security's trust evaluation, DNS-SD, SystemConfiguration; Metal and CoreAnimation; ImageIO, in the media utility process | All | `objc2` and its framework crates, `block2`, `dispatch2` | **Yes**, in listed modules (ADR-0002 §15.3), under stated invariants |
 | `gc` | Pattern B heap: typed arenas, handles, scopes, `SliceStack`, the collector | Renderer | — | **None** (SH7) |
 | `js` | The JavaScript engine: parser, compiled scripts, bytecode, interpreter, objects, strings, builtins, `RegExp`, `Intl`, Temporal (JE1–JE32) | Renderer | ICU4X (TX2) | No |
 | `webidl`, `bindings` | The WebIDL compiler (a build tool) and its generated glue (WB1–WB23) | Build; renderer | — (webref's IDL as data) | No: generated code is safe (WB2) |
@@ -62,11 +69,12 @@ A proposal for the implementation milestones; final names and splits are set whe
 | `ipc`, `idl` | Channels, the in-process transport, `Untrusted<T>`; the IPC generator | All; build | — | No |
 | `event-loop` | Thread loops, the HTML event loop, the deterministic test scheduler | All | — | No |
 | `core`, `frame-tree`, `embedder-api` | The browser's authority: records, navigation, history, policy, process manager; the API to the shell | Browser | — | No |
-| `compositor`, `display-list` | Validation, layers, tiles and Metal pipelines; the display-list format shared with renderers | Browser (later GPU) | — | No (Metal via `platform`) |
+| `compositor`, `display-list` | Validation, property trees, tiles and Metal pipelines, layer commits; the display-list format shared with renderers | GPU/compositor from M2; the browser at M1 (Round 1, RV1-02) | — | No (Metal via `platform`) |
+| `presenter` | The browser's half of compositing: each window's CoreAnimation layer tree from layer commits, scrolling and animation on layers, hit testing (Round 1, RV1-02) | Browser | — | No (CoreAnimation via `platform`) |
 | `net` | URLs, HTTP/1.1, HTTP/2, HTTP/3, WebSockets, cache, cookies, Fetch's policy, CORS and ORB (NW1–NW18) | Network | rustls with `aws-lc-rs`, `quinn-proto`, `miniz_oxide`, `brotli-decompressor`, `ruzstd` | No in Axiom's code; `aws-lc-sys` is C and assembly under DP10's exception |
 | `storage` | Web storage, IndexedDB, the Cache API, quotas (SW1–SW13) | Network | `redb` (SQLite as the fallback) | No |
 | `headless` | The headless embedder for tests and WPT (EM9) | Test | — | No |
-| Executables | `axiom` (shell and browser), `axiom-renderer`, `axiom-network`; later `axiom-renderer-jit`, `axiom-gpu`, `axiom-utility` | — | — | — |
+| Executables | `axiom` (shell and browser), `axiom-renderer`, `axiom-network` from M1 (Round 1, RV1-07); `axiom-gpu` from M2 (RV1-02); later `axiom-renderer-jit`, `axiom-utility` | — | — | — |
 
 **Dependency rules:**
 - engine crates never depend on `shell` (EM3);
@@ -206,12 +214,12 @@ From the [charter](../charter.md) §8:
 
 | Level | Built | Unchanged from the level before | Milestones ([roadmap](../roadmap.md)) |
 |---|---|---|---|
-| **L0** | One process. Every thread role, channel, record and replica exists; helpers are threads; channels are in-memory or Mach within the process | — | M1, static documents |
-| **L1** | Renderers (one per tab) and the network process become sandboxed processes with browser-compiled profiles. Launch pins audit tokens | Every interface, record and protocol | M2, the sandboxed engine; M3, script; M4, the modern document |
+| **L0** | **The browser with sandboxed renderer and network processes** (Round 1, RV1-07), under S4's, S5's and S7's profiles, over Mach channels. Every thread role, channel, record and replica exists. The compositor runs as a browser thread behind its interface. Single-process mode exists strictly for automated tests, fuzzing and Miri | — | M1, static documents |
+| **L1** | L0's processes hardened: audit tokens pinned at launch, V1's and V2's L1 parts, crash containment. **The GPU/compositor process** (RV1-02): from M2 the browser consumes no display lists | Every interface, record and protocol | M2, the sandboxed engine; M3, script; M4, the modern document |
 | **L2** | Site locks; separate agents and event loops for cross-site frames in their embedder's process (SI3), reached through remote window proxies (WB20); partitioning and ORB at the endpoints | Every interface | M5, site isolation and logins |
 | **L3** | Cross-site frames in renderers locked to their own sites; V1–V9 pass | Every interface: only process selection changes | M6, the sensitive-use gate; then M7 media, M8 applications, M9 the GPU and WebAssembly, each keeping L3 |
 
-**The GPU process** arrives with the first web-supplied GPU work. The process model allows it from L2; the roadmap places it at M9, after L3, with WebGL and WebGPU (MS5).
+**The GPU/compositor process** arrives at M2 (Round 1, RV1-02; the owner: "Build the separate GPU/compositor process at Milestone 2"), so L3's checks at M6 run on the final topology: renderer → GPU/compositor process → browser ([process model](../security/process-model.md) §3, note 1). **Web-supplied GPU work** (WebGL, WebGPU) arrives at M9, in a process M9's plan places, never the browser (MS5).
 
 ## 7. Decisions at Step 4's gates
 

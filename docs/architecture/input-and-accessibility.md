@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP8 |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP8. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): IN1 for the GPU/compositor process (RV1-02; CP2) |
 | **Question** | How does the browser route pointer, wheel, keyboard, IME and gesture input to frames that may live in different processes? How are focus, scrolling, user activation and accessibility handled, when AppKit asks synchronous questions and the browser may never block on a renderer? |
 | **Answers** | Step 4 question Q13 ([tracker](../research/step-4-architecture-proposal.md) §3); the input-routing part of SI4 |
 | **Feeds** | ADR-0007; CP9 (embedder API: input and accessibility at the shell boundary); Step 5 (the accessibility bridge, I5) |
 | **Builds on** | [macOS runtime note](../research/macos-runtime-facilities.md) §7, §8, §11 items 13–14; [event loop and threading](event-loop-and-threading.md); [IPC](ipc.md); [frame tree](frame-tree-and-navigation.md); [rendering pipeline](rendering-pipeline.md) (PL16); [invalidation](invalidation.md) (IV8, IV9) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered IN1–IN12. Precedent and specification text are sourced (§2); the design is inference unless marked otherwise.
 
@@ -64,7 +64,7 @@ NSEvent (main thread)
 
 | # | Rule |
 |---|---|
-| IN1 | **Input enters at the compositor.** The main thread passes each `NSEvent` to the compositor thread at once, without engine logic (EL6). The compositor hit-tests the latest composited picture of that window. It walks the frames' hit-test regions (PL16), each mapped through its parent's embedding transform and clip, and finds the target frame and the scroll node under the point. **Regions too complex to decide,** such as those under a clip path or an unusual transform, are marked imprecise by their renderer. For those, the compositor asks the candidate frame's renderer and waits at most a deadline, queueing the gesture's later events meanwhile (IR5) |
+| IN1 | **Input enters at the compositor.** The main thread passes each `NSEvent` to the compositor thread at once, without engine logic (EL6). The compositor hit-tests the latest composited picture of that window. **As amended in Round 1** (RV1-02): from M2 this compositor thread stays in the browser, holding the layer tree and the hit-test regions that arrive with the GPU process's layer commits, so input never waits on the GPU process. It walks the frames' hit-test regions (PL16), each mapped through its parent's embedding transform and clip, and finds the target frame and the scroll node under the point. **Regions too complex to decide,** such as those under a clip path or an unusual transform, are marked imprecise by their renderer. For those, the compositor asks the candidate frame's renderer and waits at most a deadline, queueing the gesture's later events meanwhile (IR5) |
 | IN2 | **The renderer finishes the job.** The target frame's event loop receives the event in that frame's coordinates, finds the DOM element, and dispatches. It then acknowledges: handled, or default prevented. The browser measures acknowledgement time for hang detection ([event loop](event-loop-and-threading.md) §4.7) |
 | IN3 | **Gestures are latched.** A gesture is routed to the frame chosen at its start until it ends: a button press through its release, a scroll from its began phase through the end of its momentum, a touch sequence. This uses the phases that `NSEvent` carries (macOS runtime note §7). Scroll gestures also latch to a scroll node |
 
@@ -101,7 +101,7 @@ NSEvent (main thread)
 
 | Level | What changes |
 |---|---|
-| L0 | All of it, in one process: the compositor routes events to event loops, and the mirrors and caches exist |
+| L0 | All of it: the browser's compositor thread routes events to event loops, which run in renderer processes from M1 (Round 1, RV1-07), and the mirrors and caches exist. From M2 the compositor thread keeps routing while the GPU/compositor process rasterizes (RV1-02) |
 | L1–L3 | Nothing in this design. A cross-site frame already received input through the browser at L0, so moving it to another process changes no path (AC1) |
 
 ## 6. Alternatives considered

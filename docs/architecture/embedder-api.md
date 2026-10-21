@@ -144,7 +144,7 @@ From documentation read on 2026-10-17 (Sources).
 
 | Level | What changes |
 |---|---|
-| L0 | The shell and engine run in one process. The engine's helpers are threads. The headless embedder's script-free test path and dumps exist from M1 (EM9) |
+| L0 | The shell and the engine's browser side run in one process; **as amended in Round 1** (RV1-07), renderers and the network process are sandboxed helpers from M1, and single-process mode is kept strictly for automated tests, fuzzing and Miri. The headless embedder's script-free test path and dumps exist from M1 (EM9) |
 | L1–L3 | The engine's process manager launches helpers; the embedder API doesn't change (EM10) |
 
 ## 6. Alternatives considered
