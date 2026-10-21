@@ -169,9 +169,9 @@ Every finding: **Accepted** as proposed, 2026-10-21 (§5.5, item 1). Where a cou
 | RV2-07 | Medium | M4 | CP5 |
 | RV2-08 | Medium | M4 | CP5 |
 | RV2-09 | Low | M4 | CP5 |
-| RV2-10 | Medium | M3 | CP4 |
-| RV2-11 | Medium | M3 | CP4 |
-| RV2-12 | Low | M3 | CP4 |
+| RV2-10 | Medium | M3 | CP4: [SW1](../architecture/storage-and-workers.md)'s key with an ancestor chain bit; SW9, SW10, SW11 and SW13 by the whole key; SI3 (a) and the process model's change record; NW8's note on why the network key has no bit; NW11's check at M2; ADRs 0004, 0013 |
+| RV2-11 | Medium | M3 | CP4: the storage design's new §5.5, SW14–SW17 (blob data; **the `blob:` URL store in the browser,** a choice the finding left open, made because the frame tree already relies on the browser's records, a relaunch of the network process mustn't lose them, and Chromium's registry is in its browser process; the user's files read by the browser; tests); SG1, EM5, IP15's one exception, SW11; the frame tree §4; the [standards](../standards.md)' §5.2 row; the core thread's duties; ADRs 0004–0007, 0009, 0013, 0018 |
+| RV2-12 | Low | M3 | CP4: the storage design's open question 2 answered; SW3's 5 MiB; SG10; PF24's quota per site over its keys; ADRs 0004, 0019. **Also fixed:** the storage design's §6 still sent locks to the network process, which CP2 moved, and its §7 said the browser holds no web storage, now with the copies it keeps |
 | RV2-13 | Medium | M1 (M2) | CP2: IR5; [IP16](../architecture/ipc.md); PF21; SG11; MA7's containment test; the roadmap's M2; ADRs 0004, 0005, 0019, 0021 |
 | RV2-14 | Low | M1 | CP2: IP7, IP13, §4.12, §8's question 3; IR6; ADRs 0004, 0005. Question 4 is closed with RV2-05 (CP3). **Also fixed:** a blank line Round 1's CP1 left inside the process model's change record, which split the table so that its Round 1 rows didn't render as one |
 | RV2-15 | Low | M4 | CP6 |
@@ -183,7 +183,7 @@ Every finding: **Accepted** as proposed, 2026-10-21 (§5.5, item 1). Where a cou
 | CP1 | "Update the master Handover report (docs/handover-phase-0.md), decision map, and clean up stale statements" | RV2-01, RV2-02 | Done, `docs(review-r2-cp1)` |
 | CP2 | "Process model, helper crashes, IPC never-blocking, and test configs" | RV2-03, RV2-04, RV2-13, RV2-14 | Done, `docs(review-r2-cp2)` |
 | CP3 | "GPU process memory accounting and tile reuse protocols" | RV2-05 | Done, `docs(review-r2-cp3)` |
-| CP4 | "Storage key ancestor bit, File API design, and storage quotas" | RV2-10, RV2-11, RV2-12 | Pending |
+| CP4 | "Storage key ancestor bit, File API design, and storage quotas" | RV2-10, RV2-11, RV2-12 | Done, `docs(review-r2-cp4)` |
 | CP5 | "Accessibility geometry, tiered VoiceOver enablement, and test harnesses" | RV2-06–RV2-09 | Pending |
 | CP6 | "Style & layout hooks for CSS Interop 2026" | RV2-15 | Pending |
 

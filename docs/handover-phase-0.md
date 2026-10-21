@@ -303,9 +303,10 @@ The overview §4 traces seven scenarios end to end through the rules: opening a 
 - **DNS-SD** for names and HTTPS records.
 - **Partitioning** of connections, TLS sessions, the cache and cookies; third-party cookies blocked.
 - **Fetch's policy enforced from bound endpoints:** CORS, CORP, COEP, ORB, mixed content, Referrer-Policy, HSTS, Local Network Access.
-- **Web storage lives in the network process,** by storage key, in one engine: `redb` if it passes its audit, otherwise SQLite. `localStorage` is cached in the renderer, and IndexedDB values are never parsed outside it.
+- **Web storage lives in the network process,** by storage key (the origin, the top-level site, and an ancestor chain bit since Round 2, RV2-10), in one engine: `redb` if it passes its audit, otherwise SQLite. `localStorage` is cached in the renderer, and IndexedDB values are never parsed outside it.
 - **Service workers** intercept within Fetch. Shared and service workers run in a renderer locked to their site.
 - **Web Locks are arbitrated in the browser,** as Chromium's are, so a relaunch of the network process can't break mutual exclusion (Round 2, RV2-04, the owner's choice).
+- **Blobs and files** (Round 2, RV2-11): small blobs stay in their renderer, and shared or large ones move to the network process; the `blob:` URL store is the browser's, keyed by storage key; the user's files are read by the browser and reach renderers only as data (SW14–SW17).
 - **Later:** Encrypted Client Hello, planned with DNS over HTTPS at M5's plan: rustls has had experimental client-side ECH since 2024-06 (Round 1, RV1-20).
 
 ### 4.10 The shell, the embedder API and accessibility

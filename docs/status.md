@@ -71,6 +71,11 @@
   - **RV2-14:** IP13 takes PF21's rule, with one exception for a service worker's answer; IR6 names the network process; IP7 bars `iosurface` from renderers' interfaces; IPC's families gain network control, locks and video frames; IPC's question 3 answered.
   - **Also fixed:** a blank line Round 1's CP1 had left inside the process model's change record, which kept its Round 1 rows from rendering as a table.
 - **CP3, the GPU process's memory and tiles (RV2-05).** PF4: the GPU process accounts its allocations by page and reports them, since macOS charges tiles to it (S10), with `IOSurfaceSetOwnershipIdentity` tested at M2 as the alternative. GR12: a spare tile is drawn into only when `IOSurfaceIsInUse` says no process reads it, the browser deleting each port right after lookup, with a bounded pool allocated ahead, tested at M2 with a window. IPC's question 4 answered; M2's content; PL8's and GR8's notes.
+- **CP4, storage and the File API (RV2-10, RV2-11, RV2-12).**
+  - **RV2-10:** the storage key gains an ancestor chain bit (SW1, SI3 (a)), and shared workers, Web Locks, `BroadcastChannel` and the origin private file system use the whole key; NW8 keeps its key, now with the reason; NW11's partitioned cookies are checked at M2.
+  - **RV2-11:** the File API designed in the storage design's §5.5 (SW14–SW17): small blobs in their renderer, shared or large ones in the network process; **the `blob:` URL store in the browser,** a choice the finding left open (the frame tree already relies on the browser's records, a network relaunch mustn't lose them, and Chromium's registry is browser-side); the user's files read by the browser and passed as data, so SG1, EM5 and IP15 agree, with IP15's one exception for the origin private file system; a row in the standards' §5.2.
+  - **RV2-12:** the storage design's open question 2 answered; SW3's 5 MiB; SG10 lists all a network process holds; PF24's quota per site over its keys.
+  - **Also fixed:** the storage design's §6 still sent Web Locks to the network process, which CP2 moved, and its §7's "the browser holds no web storage" now names the opaque copies the browser keeps.
 
 ### 2026-10-21 — Session 19 (the owner's decisions on Round 1's results; Round 2)
 

@@ -101,7 +101,7 @@ From documentation read on 2026-10-17 (Sources).
 | Permission (camera, microphone, location, notifications) | Records and defaults; never granted to a renderer directly | Prompt; the decision is stored in the profile | Denied, and not stored |
 | JavaScript dialog (alert, confirm, prompt) and `beforeunload` | Pauses the event loop (EL17) | A sheet attached to the tab | Dismissed: `confirm` answers false, `prompt` null; `beforeunload` lets the navigation proceed |
 | Download | Classifies the response; writes the file and marks it quarantined | Location and confirmation; the downloads list | Cancelled |
-| File chooser | Gives the renderer read access only to the chosen files, through a capability (IP15) | `NSOpenPanel` | Cancelled: no files |
+| File chooser | Reads the chosen files for the renderer, which receives their bytes as data or a read-only memory entry, never a descriptor (SG1; the File API's SW16; **as amended in Round 2,** RV2-11) | `NSOpenPanel` | Cancelled: no files |
 | HTTP authentication, certificate errors | Interstitial pages are internal documents (FT10) | Credentials prompt; the security indicator | Cancelled: the request fails, and the interstitial stays |
 | Context menu | The hit-tested element's data, with URLs checked against its records (IN10) | The menu | None shown |
 | External protocols (`mailto:`) | Requires user activation | Confirmation, then `NSWorkspace` | Refused |

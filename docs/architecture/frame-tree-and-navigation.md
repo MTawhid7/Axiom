@@ -131,7 +131,7 @@ From source and documentation read on 2026-10-17 (Sources).
   - **Sensitive sites** get a dedicated, no-JIT renderer and are never placed in another site's process (SI5, J4).
   - **Cross-site child frames** stay in their embedder's renderer, in a separate agent and event loop, only at L1 and non-sensitive L2 (SI3). From L3 they always get a renderer locked to their own site.
   - **As amended in Round 1** (RV1-03; the owner: "Adopt the single binding rule: cross-site frames are separate agents with independent event loops and heaps behind remote proxies from Milestone 1."): **from M1, every cross-site frame is its own agent,** with its own event loop and heap, reached only through remote window proxies (WB20), in whichever process it renders: its embedder's renderer at L0–L2 (at L2 only for sites that aren't sensitive, SI3), a renderer locked to its own site from L3. L2 adds site locks, not agents. Documents of different sites never share an agent, as HTML's agent clusters require.
-- **Special documents** derive their origin and process from the browser's records of the initiator or creator: `about:blank`, `about:srcdoc`, `data:`, `blob:`. Error pages are internal documents, committed in a renderer with an internal lock, never in the failing site's process.
+- **Special documents** derive their origin and process from the browser's records of the initiator or creator: `about:blank`, `about:srcdoc`, `data:`, `blob:`. For `blob:`, those records are the browser's `blob:` URL store ([storage](storage-and-workers.md) SW15; Round 2, RV2-11). Error pages are internal documents, committed in a renderer with an internal lock, never in the failing site's process.
 
 ### 4.5 Loading and storage
 

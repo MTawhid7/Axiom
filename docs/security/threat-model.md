@@ -125,7 +125,7 @@ Each goal names the adversary it addresses and the security level (§8) by which
 
 | ID | Goal | Against | Level |
 |---|---|---|---|
-| SG1 | **No file access from renderers.** A compromised renderer can't read or write any user file, run a program, or persist. Files the user picks for upload are read by the browser and passed as data | AD2 | L1 |
+| SG1 | **No file access from renderers.** A compromised renderer can't read or write any user file, run a program, or persist. Files the user picks for upload are read by the browser and passed as data, or as a read-only memory entry, never as a descriptor (the File API's SW16; Round 2, RV2-11) | AD2 | L1 |
 | SG2 | **Credentials stay with their site.** A renderer obtains only the cookies and storage of the site it is locked to. `HttpOnly` cookies never reach a renderer. No renderer holds the cookie jar | AD2 | L2 |
 | SG3 | **No cross-site data in a renderer** unless the other site opts in (CORS). This defeats both AD2 and Spectre-class reads by AD1, because the data is never in the attacker's address space | AD1, AD2 | L2 |
 | SG4 | **No direct network access from renderers.** Every request goes through the network process, which derives the initiator from the renderer's site lock rather than trusting a claimed origin. It enforces CORS, SameSite, mixed-content rules and response blocking in the style of ORB [7] | AD2 | L1 (lock checks from L2) |
@@ -134,7 +134,7 @@ Each goal names the adversary it addresses and the security level (§8) by which
 | SG7 | **Transport security.** TLS is validated against the system trust store. There is no silent downgrade, HSTS is honoured, and mixed content is blocked | AD3 | L1 |
 | SG8 | **The web's own security model, implemented correctly** and tested with WPT: same-origin policy, CORS, CSP, SameSite (Lax by default), frame-ancestors and X-Frame-Options, COOP and COEP, sandboxed iframes, Referrer-Policy | AD1 | Each feature, when it ships |
 | SG9 | **Renderers can't attack each other.** They can't name, signal or share memory with each other except through channels the browser brokers | AD2 | L1 |
-| SG10 | **Helpers are compartments too.** A compromised network process exposes traffic and cookies, but not user files, the interface, or other secrets. A compromised GPU process exposes rendered pixels, but not cookies or files | AD4 | L2 |
+| SG10 | **Helpers are compartments too.** A compromised network process exposes traffic and cookies, and, as Round 2 noted (RV2-12), every site's web storage, databases, caches and shared blobs (SW1, SW14), but not user files, the interface, or other secrets. A compromised GPU process exposes rendered pixels, but not cookies or files | AD4 | L2 |
 | SG11 | **Containment.** A crashed, hung or memory-hungry renderer affects only its own tabs. The browser never blocks waiting for a child process. **As amended in Round 2** (RV2-13): nor does any process that serves several renderers, so one renderer can't stall another's loads or drawing ([process model](process-model.md) IR5; [IPC](../architecture/ipc.md) IP16) | AD1, AD2 | L1 |
 | SG12 | **No executable memory where it isn't needed.** Only the JIT renderer variant can create executable memory, and that is enforced by the kernel through entitlements. Sensitive sites run without a JIT. A global switch turns every JIT off | AD2 | Before any JIT |
 
