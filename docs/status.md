@@ -86,6 +86,10 @@
   - **Site compatibility:** SB13, a Safari-compatible user agent with an Axiom token, frozen per milestone (Safari 27.2 on this Mac today); SB14, interventions as data outside the engine.
   - **Signing and builds:** ADR-0004 D2's stable local identity if S15 passes; the bindings split by interface group, with S13 before M3.
   - **The Low findings:** pixel stealing in the threat model and PL9 from M5; the stale ECH fact corrected (in the handover too); PDFs in Preview and WebRTC on the not-planned list.
+- **CP6, added: the collector, the slot width and the memory gate (RV1-04–RV1-06).**
+  - **The collector's end-state** (ADR-0008's decision 8, SH10): a generational nursery; incremental marking driven by allocation as well as idle time; parallel marking in pauses, on arenas lent read-only (EL11's second exception); non-moving tenured arenas with selective evacuation. Concurrent marking's possibility and the barrier's semantics are decided with S11 before M3.
+  - **The slot width** (JE9, JE10): open until S11, between 64-bit NaN-boxed slots and 32-bit slots; values in registers stay NaN-boxed.
+  - **The content tier's gate** (the performance §4.1): a normalized workload to the 50th item; a slope per 100 items at most half of Chrome's; a plateau after a collection; 150 MB a stretch target; zero-copy resources a rule. OQ-25 is answered. B6 is derived again at M6's plan, with out-of-process frames' renderers counted.
 
 ### 2026-10-21 — Session 17 (the review's Round 1)
 
