@@ -79,6 +79,13 @@
 - **CP4, scope and dependencies (RV1-08).** The arithmetic behind Temporal and BigInt becomes a replaceable detail behind the engine's interfaces (DP1 (g), DP2), with `temporal_rs` graded before M3 and BigInt's candidate before M4; the builtins and `RegExp` stay core.
   - **`encoding_rs` 0.8.42 graded `ub-risk-3`** by Axiom's audit ([audit](research/encoding-rs-audit.md)), with SIMD off on this Mac: safety comments on 22 of its 143 compiled `unsafe` blocks; uninitialized pages treated as initialized behind an empty `asm!` barrier; and `simdutf8`'s NEON validator, ungraded, an unconditional dependency on aarch64, so "SIMD off" can't be had here by feature. DP8 still bars it, and the encodings stay Axiom's own behind Axiom's interface (TX3). The owner approves the audit with the dependency (DP15).
   - **A new tool,** [`tools/unsafe-census.py`](../tools/unsafe-census.py): the `unsafe` a crate compiles in one configuration, for the DP8 audits still due (`vello_cpu`, `smallvec`, `temporal_rs`).
+- **CP5, text, concurrency and the roadmap (RV1-10–RV1-14, RV1-17–RV1-22).**
+  - **Text:** TX22, metrics follow the rasterizer (CoreText's advances and bounds for `sbix` faces such as Apple Color Emoji); TX23, `-webkit-font-smoothing` on both paths; TX24, optical sizing with one instance for metrics and raster; TX13's calibration metric; the single-rasterizer alternative recorded as the owner rejected it.
+  - **Concurrency:** TS11 in the owner's order: Miri, loom, schedule exploration on EL24, then ThreadSanitizer by S12's route.
+  - **The roadmap:** WebSockets to M4, with targets naming their exclusions; WebAssembly's architecture before M3 and the JIT at M5's gate; downloads, find in page and zoom at M5, session restore at M6; ECH with DNS over HTTPS at M5's plan; passkeys' hybrid transport before M6; JPEG's decoder at M1's plan.
+  - **Site compatibility:** SB13, a Safari-compatible user agent with an Axiom token, frozen per milestone (Safari 27.2 on this Mac today); SB14, interventions as data outside the engine.
+  - **Signing and builds:** ADR-0004 D2's stable local identity if S15 passes; the bindings split by interface group, with S13 before M3.
+  - **The Low findings:** pixel stealing in the threat model and PL9 from M5; the stale ECH fact corrected (in the handover too); PDFs in Preview and WebRTC on the not-planned list.
 
 ### 2026-10-21 — Session 17 (the review's Round 1)
 

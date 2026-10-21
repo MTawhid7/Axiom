@@ -28,6 +28,7 @@ The model is binding, so it changes only with the owner's approval. Changes sinc
 | 2026-10-21 | **Real processes from M1** (§9): sandboxed renderer and network processes at L0; single-process mode only for automated tests, fuzzing and Miri | [RV1-07](../review/round-1/02-findings.md#rv1-07-milestone-1-in-one-process) | RV1-07: "Run real, sandboxed renderer and network processes from Milestone 1 using the profiles validated in Spikes S4, S5, and S7." "Retain single-process mode strictly for rapid automated testing, fuzzing, and Miri." |
 | 2026-10-21 | **Renderers without IOKit** (§4.1, §10): pixels only in Mach memory entries; an explicit `iokit-open` denial in every renderer profile; every IOSurface owned by the compositor | [RV1-09](../review/round-1/02-findings.md#rv1-09-iosurfaces-in-renderers) | RV1-09: "Renderers write pixels into shared memory entries; only the compositor owns IOSurfaces; renderer profiles explicitly deny iokit-open." |
 | 2026-10-21 | **B1 split** (§7): B1a, the browser's core at ≤ 60 MB; B1b, the GPU/compositor process at ≤ 15 MB (hypothesis) plus the tiles' 6.2 bytes per window pixel | RV1-02; S6's measurements | RV1-02: "split Budget B1 accordingly" |
+| 2026-10-21 | **The signing identity** (§10): a stable local identity, if S15 passes; ad hoc as the fallback | [RV1-17](../review/round-1/02-findings.md#rv1-17-the-signing-identity); Apple's TN3127 | RV1-17: "Validate local self-signed codesigning persistence via Spike S15." |
 ---
 
 ## 1. Summary
@@ -239,7 +240,7 @@ From the [macOS confinement note](../research/macos-process-confinement.md):
 
 - **Executables.**
   - The browser executable has the hardened runtime and no sandbox. Later it gains the hardened runtime's resource-access entitlements for the camera and microphone. By TN3125's categories these are unrestricted (inference).
-  - One helper executable per privilege set: `renderer`, `renderer-jit` (later), `network`, `gpu` (from M2) and `utility`. Each is signed ad hoc with the hardened runtime and its own entitlements. Only `renderer-jit` carries `allow-jit`, together with `single-jit`.
+  - One helper executable per privilege set: `renderer`, `renderer-jit` (later), `network`, `gpu` (from M2) and `utility`. Each is signed ad hoc with the hardened runtime and its own entitlements. **As amended in Round 1** (RV1-17): with a stable local signing identity instead, if spike S15 passes, so that privacy decisions and Keychain approvals persist across rebuilds (ADR-0004 D2). Only `renderer-jit` carries `allow-jit`, together with `single-jit`.
   - Whether helpers must be `.app` bundles is settled by S4.
 - **Profiles.** The browser compiles each profile once, from the repository, and hands the bytecode to the helper, which applies it at the top of `main` (S4: 17 µs). Every profile except `renderer-jit`'s contains an explicit `(deny dynamic-code-generation)`, because default deny doesn't cover it (S4).
 - **Graphics.** Renderers write pixels only into Mach memory entries and never touch IOKit (RV1-09). The GPU/compositor process renders tiles into IOSurfaces it owns and sends them to the browser as Mach ports, which the browser sets as layer contents (RV1-02). Neither renderers nor the GPU process connect to the window server.

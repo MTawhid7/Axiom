@@ -286,7 +286,7 @@ The overview §4 traces seven scenarios end to end through the rules: opening a 
 - **Fetch's policy enforced from bound endpoints:** CORS, CORP, COEP, ORB, mixed content, Referrer-Policy, HSTS, Local Network Access.
 - **Web storage lives in the network process,** by storage key, in one engine: `redb` if it passes its audit, otherwise SQLite. `localStorage` is cached in the renderer, and IndexedDB values are never parsed outside it.
 - **Service workers** intercept within Fetch. Shared and service workers run in a renderer locked to their site.
-- **Later:** Encrypted Client Hello, once rustls has the client side; DNS over HTTPS at M5's plan.
+- **Later:** Encrypted Client Hello, once rustls has the client side; DNS over HTTPS at M5's plan. (**Corrected** 2026-10-21, the review's RV1-20: rustls has had experimental client-side ECH since 2024-06; ECH is planned with DNS over HTTPS at M5's plan.)
 
 ### 4.10 The shell, the embedder API and accessibility
 
@@ -493,7 +493,7 @@ Each is taken by the owner at its milestone, on its evidence ([roadmap](roadmap.
 | Parallel style and layout (PL10) | Allowed by design | When profiling justifies them |
 | Incremental marking, a nursery (SH10) | Planned | When a corpus page breaks the pause budget |
 | XSLT (OQ-22) | Deferred by the owner | When a site the owner uses needs it |
-| Encrypted Client Hello | Later | When rustls has the client side |
+| Encrypted Client Hello | Later | When rustls has the client side (**corrected** 2026-10-21, RV1-20: it has had experimental client-side ECH since 2024-06; planned with DNS over HTTPS at M5's plan) |
 | Printing, anchor positioning, view transitions, vertical text, colour fonts, JPEG XL, WebTransport and others | Later rows of the designs | After M9, each in a milestone planned when it starts |
 | The content tier's 150 MB cap (OQ-25) | Kept as the baseline hypothesis for review | The review; then M4 and M5 measure it |
 
@@ -612,7 +612,7 @@ Each item is an **assessment**: a claim or decision this handover thinks most de
 17. **Young crates on the critical path:** HarfRust, `read-fonts` and `skrifa`, `vello_cpu`, `quinn-proto`, `redb`; and `smallvec`'s grade. Their maintenance, audits and maturity as of the review's date.
 18. **WebGPU's implementation** is open until M9 (GR10), and wgpu isn't admitted in the browser. Writing a WebGPU implementation is a large piece of work, and it would run in the GPU process under DP10.
 19. **Rust's own features:** explicit tail calls (`become`, JE6), and nightly sanitizers on macOS 27 (S9-Q2).
-20. **Network privacy:** post-quantum key exchange is on (S7); Encrypted Client Hello waits for rustls's client side; DNS over HTTPS is at M5's plan.
+20. **Network privacy:** post-quantum key exchange is on (S7); Encrypted Client Hello waits for rustls's client side; DNS over HTTPS is at M5's plan. (**Corrected** 2026-10-21, RV1-20: rustls has had experimental client-side ECH since 2024-06.)
 21. **Accessibility through Axiom's own bridge** rather than AccessKit (AX8), whose macOS adapter lacked rich text and hypertext when Step 5 read it (ADR-0014's condition for revisiting).
 22. **Unicode's version:** ICU4X implements 17.0.0 while 18.0.0 is out (standards §8).
 

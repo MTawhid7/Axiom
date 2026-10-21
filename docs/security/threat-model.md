@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** by the owner (2026-10-17), with one amendment: out-of-process iframes are a prerequisite for L3 (§8, check V9). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): L1 and V1 for the GPU/compositor process and renderers without IOKit (RV1-02, RV1-09; CP2) |
+| **Status** | **Accepted** by the owner (2026-10-17), with one amendment: out-of-process iframes are a prerequisite for L3 (§8, check V9). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): L1 and V1 for the GPU/compositor process and renderers without IOKit (RV1-02, RV1-09; CP2); NG4 and §9 for rendering-timing side channels and passkeys (RV1-19, RV1-21; CP5) |
 | **Question** | What does Axiom protect, from whom, through which entry points, and where does trust change? When may it be used for sensitive logins? |
 | **Feeds** | [Process model](process-model.md), ADR-0004, the security sections of the architecture (Step 4), the testing strategy (Step 6) |
 | **Builds on** | [ADR-0001](../adr/0001-scope-and-target.md) (R3 and the defaults), [ADR-0002](../adr/0002-implementation-language.md) (the `unsafe` policy), [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md) (one heap per agent) |
@@ -151,7 +151,7 @@ The web platform encodes the same rule:
 | NG1 | Protection against malware already running as the user, or against a root or kernel compromise | Such software can read the profile and the screen directly (TA1, TA2) |
 | NG2 | Physical attacks, such as an unlocked or stolen machine | FileVault and the OS cover these |
 | NG3 | Anonymity and strong resistance to fingerprinting | A Tor-class design is a different product. Storage partitioning against cross-site tracking is in scope, as a standards decision |
-| NG4 | Side channels other than cross-site transient execution: power, acoustic, or cross-process microarchitectural attacks | They need OS and hardware mitigations [3] |
+| NG4 | Side channels other than cross-site transient execution: power, acoustic, or cross-process microarchitectural attacks | They need OS and hardware mitigations [3]. **As amended in Round 1** (RV1-19): rendering-timing attacks across frames, such as pixel stealing, are *not* excluded; §9 and the rendering pipeline's PL9 cover them |
 | NG5 | Reputation services such as Safe Browsing | They need a cloud service, which ADR-0001 rules out. Phishing defence rests on a clear interface and on binding credentials to sites |
 | NG6 | Denial-of-service resistance beyond containment | A page can always use CPU in its own process. Axiom contains it (SG11) and throttles background work |
 | NG7 | Extensions, sync and multiple profiles | ADR-0001 |
@@ -193,7 +193,8 @@ ADR-0001 gates sensitive use "until the isolation milestone is verified". The le
 | **System parsers inside renderers** | A bug in CoreText or ImageIO compromises a renderer (AD2). A sandbox escape still needs a second bug |
 | **Spectre inside one site's process** | Accepted. Same-site data may share a process |
 | **Cross-site iframes before out-of-process iframes exist** | At L1 and non-sensitive L2 only, a cross-site iframe may share its embedder's process. The [process model](process-model.md) §5 limits the exposure: partitioned third-party state, ORB, and no sensitive site rendered inside another site's process. L3 requires out-of-process iframes |
-| **WebAuthn and passkeys** | **Hypothesis:** the platform authenticator needs an Apple entitlement that ad-hoc signing can't claim. Chrome's main executable carries `com.apple.developer.web-browser.public-key-credential` (observed with `codesign -d` on this machine). New open question OQ-16 |
+| **WebAuthn and passkeys** | **Hypothesis:** the platform authenticator needs an Apple entitlement that ad-hoc signing can't claim. Chrome's main executable carries `com.apple.developer.web-browser.public-key-credential` (observed with `codesign -d` on this machine). New open question OQ-16. **Round 1** (RV1-21): roaming keys over USB HID and the hybrid transport (a phone as the authenticator, as Chromium implements it) need no restricted entitlement, to be checked before M6 |
+| **Rendering-timing side channels across frames** (Round 1, RV1-19) | GPU.zip (IEEE S&P 2024) stole pixels from cross-origin frames through the timing of filters drawn on the GPU; it needed the frame to load with cookies, SVG filters on frames, and GPU rendering. Axiom blocks third-party cookies (NW11), but its compositor applies a parent's effect nodes to child frames (PL6, PL9), and same-site cross-origin frames, or a Storage Access grant, still carry credentials. **Mitigation, from M5:** PL9 doesn't apply effects whose cost depends on pixel values to a cross-origin child frame's output, or applies them only in forms whose cost doesn't; V4 tests it ([RV1-19](../review/round-1/02-findings.md#rv1-19-rendering-timing-side-channels)) |
 
 ## 10. Open questions raised
 

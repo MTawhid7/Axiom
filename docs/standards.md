@@ -2,14 +2,14 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0018](adr/0018-corpus-standards-and-testing.md) was accepted (2026-10-20, Step 6's Gate B), with the not-planned list (§5.3) approved as written. Written at Step 6, CP4. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): SB10 and SB11 for RV1-01 (CP1); the WebGL and WebGPU rows for RV1-02 (CP2) |
+| **Status** | **Binding** since [ADR-0018](adr/0018-corpus-standards-and-testing.md) was accepted (2026-10-20, Step 6's Gate B), with the not-planned list (§5.3) approved as written. Written at Step 6, CP4. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): SB10 and SB11 for RV1-01 (CP1); the WebGL and WebGPU rows for RV1-02 (CP2); SB5, the new §5.4 (SB13, SB14), §5.3 and the WebRTC row for RV1-10, RV1-14 and RV1-22 (CP5) |
 | **Question** | Which specifications does Axiom implement, at which dated versions, and how fully? Which suites check each, and what pass rate counts at each milestone? |
 | **Answers** | Step 6 question Q2 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); decision-map item X1; the tracker's handed-over question 3 (§2.2) |
 | **Feeds** | Testing (CP5): the suites and how expectations are kept; the roadmap (CP8): what each milestone completes; Milestone 1 (CP9): its conformance criteria |
 | **Builds on** | The [charter](charter.md)'s principle 5 and §8; Step 5's criterion SC5 and every subsystem document's §2; [ADR-0001](adr/0001-scope-and-target.md); the [corpus](corpus.md) and spike S8's census ([S8 results](research/s8-results.md)); [OQ-22](open-questions.md) |
 | **Last updated** | 2026-10-21: Round 1's accepted findings |
 
-Rules are numbered SB1–SB12. Precedent and sources are dated (§2). The design is inference unless marked otherwise.
+Rules are numbered SB1–SB14. Precedent and sources are dated (§2). The design is inference unless marked otherwise.
 
 ## Summary
 
@@ -115,7 +115,7 @@ Rules are numbered SB1–SB12. Precedent and sources are dated (§2). The design
 |---|---|
 | SB3 | **Every feature area has one support class,** and a feature that differs from its area has its own:<br>• **To the specification:** implemented as specified; the suites' expectations are targets (SB10).<br>• **Approximate:** no specification defines the behaviour precisely enough (SB5); measured, not targeted.<br>• **Staged:** implemented to the specification at a milestone the roadmap names (CP8).<br>• **Deferred:** no milestone until a decision or a use case: XSLT (OQ-22).<br>• **Not planned:** outside the charter's scope or outside the standards, with the reason (§5.3) |
 | SB4 | **A staged API isn't exposed until it works.** An interface, property, CSS feature or media type is either absent, or present and implemented to its class. A stub that answers feature detection while doing nothing would mislead pages into code paths that then fail. Where `@supports`, `CSS.supports()`, `canPlayType()` or `isTypeSupported()` answer, they answer for what Axiom actually does |
-| SB5 | **Approximate behaviour is listed here, with its reason, and nowhere else:**<br>• **`execCommand`** ([HTML and the DOM](architecture/html-and-dom.md) HD28): its draft "is incomplete and it is not expected that it will advance beyond draft status", and its features "are not implemented consistently or fully by user agents". Axiom follows the engines where they agree, and the draft elsewhere.<br>• **Automatic table layout** ([layout and paint](architecture/layout-and-paint.md) LY10): CSS 2.1 says that "UAs are not required to implement this algorithm", and CSS Table 3 "is not yet ready for implementation".<br>• **`Error.prototype.stack`** ([the JavaScript engine](architecture/javascript-engine.md) JE25): no specification; its format follows the engines.<br>• **`Date.parse`'s legacy formats** (JE22): implementation-defined beyond the specified format; the engines' common formats.<br>Code and tests for these carry an "approximate" mark. **Adding an entry** needs the evidence that no specification settles the behaviour, and is reported to the owner at the next gate |
+| SB5 | **Approximate behaviour is listed here, with its reason, and nowhere else:**<br>• **`execCommand`** ([HTML and the DOM](architecture/html-and-dom.md) HD28): its draft "is incomplete and it is not expected that it will advance beyond draft status", and its features "are not implemented consistently or fully by user agents". Axiom follows the engines where they agree, and the draft elsewhere.<br>• **Automatic table layout** ([layout and paint](architecture/layout-and-paint.md) LY10): CSS 2.1 says that "UAs are not required to implement this algorithm", and CSS Table 3 "is not yet ready for implementation".<br>• **`Error.prototype.stack`** ([the JavaScript engine](architecture/javascript-engine.md) JE25): no specification; its format follows the engines.<br>• **`-webkit-font-smoothing`** ([text and fonts](architecture/text-and-fonts.md) TX23; Round 1, RV1-10): no specification; it follows WebKit on macOS, and three of S8's automated pages use it.<br>• **`Date.parse`'s legacy formats** (JE22): implementation-defined beyond the specified format; the engines' common formats.<br>Code and tests for these carry an "approximate" mark. • **Per-site interventions** (SB14): each entry is approximate by definition.<br>**Adding an entry** needs the evidence that no specification settles the behaviour, and is reported to the owner at the next gate |
 
 ## 5. The support matrix
 
@@ -181,7 +181,7 @@ Rules are numbered SB1–SB12. Precedent and sources are dated (§2). The design
 | WebAssembly | WebAssembly 2 and 3; its JavaScript and Web APIs; JSPI | Staged; how it is built is OQ-3 | WebAssembly's specification tests; WPT `wasm/` | Maps and VS Code (S8); Figma (inference) |
 | Logins | Credential Management, WebAuthn (passkeys, OQ-16), FedCM | Staged with the login track (CP8) | WPT `credential-management/`, `webauthn/`, `fedcm/` | Logins (CO8) |
 | Clipboard, fullscreen, notifications, permissions | Clipboard API, Fullscreen, Notifications, Permissions, Page Visibility, Screen Wake Lock | Staged, each when the corpus needs it | WPT `clipboard-apis/`, `fullscreen/`, `notifications/`, `permissions/`, `page-visibility/`, `screen-wake-lock/` | Discord, VS Code (inference) |
-| WebRTC and media capture | WebRTC, Media Capture and Streams | Staged | WPT `webrtc/`, `mediacapture-streams/` | None on the automated pages (S8); Discord's voice channels would need them (inference) |
+| WebRTC and media capture | WebRTC, Media Capture and Streams | **Not planned** until a corpus interaction needs it (Round 1, RV1-22; §5.3) | WPT `webrtc/`, `mediacapture-streams/` | None on the automated pages (S8); Discord's voice channels would need them (inference) |
 
 ### 5.3 Not planned
 
@@ -196,6 +196,17 @@ Rules are numbered SB1–SB12. Precedent and sources are dated (§2). The design
 | WebXR, Gamepad, Web MIDI, the Web Speech API | No use in the corpus, and hardware or services this Mac's single user doesn't need. Revisit on corpus evidence |
 | Push API | Needs a push service run by a browser vendor. Notifications while a page is open are staged with the rest (§5.2) |
 | Browser extensions, sync and accounts | Charter non-goals |
+| **Viewing PDFs in the engine** (Round 1, RV1-22) | A PDF parser and renderer would be a large new attack surface for one convenience (inference). PDFs are downloaded, quarantined and opened in Preview (roadmap M5) |
+| **WebRTC and media capture** (Round 1, RV1-22) | No corpus interaction needs them: Discord's is scrolling a channel's history ([corpus](corpus.md) §5), not voice. Revisit when an interaction does |
+
+### 5.4 Site compatibility (Round 1)
+
+Added by the owner's disposition of RV1-14 (2026-10-21; [RV1-14](review/round-1/02-findings.md#rv1-14-site-compatibility)). No document had decided the `User-Agent` string, Client Hints, or how per-site workarounds are held, and each affects every live load from M1.
+
+| # | Rule |
+|---|---|
+| SB13 | **A Safari-compatible user agent with an Axiom token.** The `User-Agent` header and `navigator.userAgent` send Safari's string on macOS, as the Safari on this Mac sends it, with an Axiom product token appended: `Axiom/<version> (+https://github.com/MTawhid7/Axiom)`. The token identifies Axiom, and its automated loads as CO4 asks; the repository is public. **The string is frozen per milestone,** read from the Safari shipping on this Mac at the milestone's plan (Safari 27.2 on 2026-10-21, observed with `defaults read`). **Why Safari's:** sites write macOS code paths for Safari's engine, and every corpus page served Safari in S8's census by hand; a Chrome-compatible string would invite code paths for Blink-only features (inference). **No User-Agent Client Hints** (`Sec-CH-UA`, `navigator.userAgentData`) until a corpus page needs them; Safari doesn't send them either (background) |
+| SB14 | **Per-site interventions are data outside the engine.** A file of entries, each with the site, its override (at first the user-agent string only), the corpus evidence that requires it, and the condition for removing it. No intervention lives in an engine code path, and every entry is listed as approximate behaviour (SB5). WebKit's `Quirks.cpp` and Firefox's webcompat interventions are the precedent, there compiled in or shipped as an add-on ([RV1-14](review/round-1/02-findings.md#rv1-14-site-compatibility)'s sources) |
 
 ## 6. Pass rates
 

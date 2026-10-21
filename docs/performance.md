@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0019](adr/0019-performance-methodology-and-budgets.md) was accepted (2026-10-20, Step 6's Gate B), with the final B1–B7 amending the [process model](security/process-model.md), as ADR-0004's D6 requires. Written at Step 6, CP6. **Every corpus page's ceiling** set from S8's measurements of Chrome, the eight measured by hand included (§4.1). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): PF4, PF6 and PF13 for the GPU/compositor process and zero-copy resources (RV1-02, RV1-09; CP2) |
+| **Status** | **Binding** since [ADR-0019](adr/0019-performance-methodology-and-budgets.md) was accepted (2026-10-20, Step 6's Gate B), with the final B1–B7 amending the [process model](security/process-model.md), as ADR-0004's D6 requires. Written at Step 6, CP6. **Every corpus page's ceiling** set from S8's measurements of Chrome, the eight measured by hand included (§4.1). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): PF4, PF6 and PF13 for the GPU/compositor process and zero-copy resources (RV1-02, RV1-09; CP2); PF18 for RV1-18 (CP5) |
 | **Question** | How is performance measured on this Mac, and what are the budgets: memory, time, energy and idle, and build? What are the limits and deadlines the designs left open, and how is each budget enforced? |
 | **Answers** | Step 6 question Q4 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); decision-map item X3; the tracker's handed-over questions 11–24 (§2.2) |
 | **Feeds** | The process model's B1–B7 (CP7); the [testing strategy](testing.md)'s benchmarks (TS13); the roadmap (CP8); Milestone 1 (CP9) |
@@ -179,7 +179,7 @@ Values are rounded down to 5 MB. They are fixed numbers: they don't move with Ch
 
 | # | Budget | Value | Evidence |
 |---|---|---|---|
-| PF18 | **T1–T4,** with the generated code counted | T1 incremental rebuild 5 s (revisit above 30 s); T2 clean build 5 min (20 min); T3 compiler memory 3 GiB (5 GiB); T4 one `rustc` 1.5 GiB (3 GiB). **The bindings generator's output counts in all four,** which settles the bindings' open question 1 | ADR-0002, accepted 2026-10-17 |
+| PF18 | **T1–T4,** with the generated code counted | T1 incremental rebuild 5 s (revisit above 30 s); T2 clean build 5 min (20 min); T3 compiler memory 3 GiB (5 GiB); T4 one `rustc` 1.5 GiB (3 GiB). **The bindings generator's output counts in all four,** which settles the bindings' open question 1. **Round 1** (RV1-18): spike S13 measures generated bindings before M3, split by interface group, and style's generated code is measured at M1's third checkpoint | ADR-0002, accepted 2026-10-17 |
 
 ## 8. Limits and deadlines
 

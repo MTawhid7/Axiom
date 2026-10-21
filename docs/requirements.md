@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): RQ45 and RQ46 for RV1-01 (CP1); RQ12, RQ35 and RQ53 for RV1-02, RV1-07 and RV1-09 (CP2) |
+| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): RQ45 and RQ46 for RV1-01 (CP1); RQ12, RQ35 and RQ53 for RV1-02, RV1-07 and RV1-09 (CP2); §8's open items for RV1-11 and RV1-13 (CP5) |
 | **Question** | Does every requirement trace from its source to the milestone that verifies it, and to the check that does? |
 | **Answers** | Part of Step 6 question Q7 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the tracker's handed-over question 30 (§2.2). Planned since Step 1 |
 | **Builds on** | The [charter](charter.md); the accepted ADRs; the [threat model](security/threat-model.md) and [process model](security/process-model.md); the [corpus](corpus.md), [standards](standards.md), [testing](testing.md) and [performance](performance.md) documents; the [roadmap](roadmap.md) and [Milestone 1](milestone-1.md) |
@@ -114,5 +114,5 @@ Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone th
 ## 8. Gaps
 
 **None:** every requirement above has a milestone and a check. Two items are deliberately open and placed rather than gaps:
-- **WebAssembly** (I6, OQ-3), decided at M8's gate for M9 (roadmap MS9);
-- **ThreadSanitizer** for RQ30 and RQ49, until a nightly whose runtime works on macOS 27 is pinned (S9-Q2; MA10).
+- **WebAssembly** (I6, OQ-3), decided at M8's gate for M9 (roadmap MS9). **Re-placed in Round 1** (RV1-13): its architecture before M3, with spike S14;
+- **ThreadSanitizer** for RQ30 and RQ49, until a nightly whose runtime works on macOS 27 is pinned (S9-Q2; MA10). **As amended in Round 1** (RV1-11): TS11 checks concurrency in order, Miri, loom and schedule exploration on EL24 first, and ThreadSanitizer by the route spike S12 finds.

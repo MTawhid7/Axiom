@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** as the baseline under review, since [ADR-0020](adr/0020-roadmap-and-security-levels.md) was accepted (2026-10-20, Step 6's Gate C). Written at Step 6, CP8. No milestone starts before the independent architecture review on branch `architecture-review`; a change it brings returns to the owner under MS12. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): §4.1 for RV1-01 and RV1-15 (CP1); MS3–MS5, §4.1, §7 and §10 for the GPU/compositor process at M2 and real processes from M1 (RV1-02, RV1-07; CP2); MS5 and §4.1's M1, M3 and M5 for cross-site agents from M1 (RV1-03; CP3) |
+| **Status** | **Binding** as the baseline under review, since [ADR-0020](adr/0020-roadmap-and-security-levels.md) was accepted (2026-10-20, Step 6's Gate C). Written at Step 6, CP8. No milestone starts before the independent architecture review on branch `architecture-review`; a change it brings returns to the owner under MS12. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): §4.1 for RV1-01 and RV1-15 (CP1); MS3–MS5, §4.1, §7 and §10 for the GPU/compositor process at M2 and real processes from M1 (RV1-02, RV1-07; CP2); MS5 and §4.1's M1, M3 and M5 for cross-site agents from M1 (RV1-03; CP3); MS5, §4.1, §5 and §7 for corpus capabilities, WebAssembly's and the JIT's timing, site compatibility, the Low findings and JPEG (RV1-12–RV1-14, RV1-19–RV1-22; CP5) |
 | **Question** | Which milestones lead from a static-document engine at L0 to the sensitive-use gate at L3 and the app web? What does each build, at which security level, against which corpus pages? Where does each decision point fall, and how does an implementation milestone run? |
 | **Answers** | Step 6 question Q5 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the tracker's handed-over questions 2 and 25–28 (§2.2); the [corpus](corpus.md)'s open question 3 |
 | **Feeds** | Milestone 1's definition (CP9); requirements traceability (CP10); the [overview](architecture/overview.md) v2's staging (CP10) |
@@ -74,12 +74,12 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 |---|---|---|---|---|---|
 | **M1** | **Static documents** | L0 | The browser with sandboxed renderer and network processes (RV1-07), the shell and the headless embedder; HTML and the DOM without script; style; CSS 2.1's visual formatting model, tables included; text with system fonts; images; paint and the compositor; URLs, HTTP/1.1 and HTTP/2 over rustls | Wikipedia and MDN, readable, from local copies and live | Xcode (OQ-7); `vello_cpu`'s and `smallvec`'s grades; surfaces allocated ahead; AWS-LC's jitter entropy; objc2's classes (EM11) |
 | **M2** | **The sandboxed engine** | L1 | **The GPU/compositor process** (RV1-02); audit tokens; V1's and V2's L1 parts; the browser's authority over frames, navigation and history; crashes contained; the disk cache, the cookie jar and CORS | The same pages, sandboxed | QoS overrides (OQ-20) |
-| **M3** | **Script** | L1 | The JavaScript engine and the bindings' first stage; the event loop's tasks, microtasks and timers; script elements and modules; `fetch`; Web Storage and `document.cookie`; canvas 2D | MDN in full: its live examples, in cross-site frames | The storage engine (SW2) |
-| **M4** | **The modern document** | L1 | Flexbox, grid and the rest of layout's second stage; SVG; style's second stage (scoping, `:has()`, container queries, animations); Shadow DOM and custom elements; web fonts; the accessibility tree; HTTP/3 | Wikipedia in full; Google Search, Instagram, Reddit, logged out | GR5's amendment (OQ-24) |
-| **M5** | **Site isolation and logins** | L2 | Site locks in process selection and endpoints (cross-site frames are their own agents from M1: RV1-03); ORB, COEP and CORP; IndexedDB, the Cache API and quotas; the login track's L2 steps; V3 and V4 | Google Search, Instagram, Reddit, signed in with test accounts | DNS over HTTPS; a JIT may be considered from here (J1) |
-| **M6** | **The sensitive-use gate** | L3 | Out-of-process iframes: every cross-site frame in a renderer locked to its site; V1–V9 complete, with their evidence recorded; the login track's L3 steps | The content sites with the owner's own accounts | Passkeys (OQ-16), before it starts; password saving |
+| **M3** | **Script** | L1 | The JavaScript engine and the bindings' first stage; the event loop's tasks, microtasks and timers; script elements and modules; `fetch`; Web Storage and `document.cookie`; canvas 2D | MDN in full: its live examples, in cross-site frames | The storage engine (SW2); **WebAssembly's architecture** (OQ-3), with S14 (RV1-13) |
+| **M4** | **The modern document** | L1 | Flexbox, grid and the rest of layout's second stage; SVG; style's second stage (scoping, `:has()`, container queries, animations); Shadow DOM and custom elements; web fonts; the accessibility tree; HTTP/3; **WebSockets**, and dedicated workers if the census addendum shows the content pages use them (RV1-12) | Wikipedia in full; Google Search, Instagram (without video), Reddit (without its interactive posts in frames), logged out | GR5's amendment (OQ-24) |
+| **M5** | **Site isolation and logins** | L2 | Site locks in process selection and endpoints (cross-site frames are their own agents from M1: RV1-03); ORB, COEP and CORP; IndexedDB, the Cache API and quotas; the login track's L2 steps; V3 and V4; **downloads, find in page and zoom** (RV1-22) | Google Search, Instagram, Reddit, signed in with test accounts | DNS over HTTPS with Encrypted Client Hello (RV1-20); **a JIT (J1), decided at its gate** on M3's and M4's measurements (RV1-13) |
+| **M6** | **The sensitive-use gate** | L3 | Out-of-process iframes: every cross-site frame in a renderer locked to its site; V1–V9 complete, with their evidence recorded; the login track's L3 steps; **session restore** (RV1-22) | The content sites with the owner's own accounts | Passkeys (OQ-16), before it starts, with the hybrid transport among the candidates (RV1-21); password saving |
 | **M7** | **Media** | L3 | The media utility process: demuxers, VideoToolbox and AudioToolbox, video layers, audio, Media Source Extensions; AVIF through ImageIO in it (IM3) | YouTube, Twitch | Demuxers; media instances per site |
-| **M8** | **Applications** | L3 | Dedicated, shared and service workers; WebSockets; `SharedArrayBuffer` and `Atomics` with cross-origin isolation; the engine's second stage (Temporal, off-thread compilation); EditContext | VS Code for the Web, Discord, Prism | A JIT (J1), on the applications' measurements; WebAssembly (OQ-3), for M9 |
+| **M8** | **Applications** | L3 | Dedicated, shared and service workers; `SharedArrayBuffer` and `Atomics` with cross-origin isolation; the engine's second stage (Temporal, off-thread compilation); EditContext | VS Code for the Web, Discord, Prism | WebAssembly's implementation (OQ-3), for M9 |
 | **M9** | **The GPU and WebAssembly** | L3 | WebGL and WebGPU, in a process M9's plan places, never the browser (the GPU/compositor process exists since M2); WebAssembly, as OQ-3 decides | Google Maps, Three.js, Figma | — |
 
 ### 4.1 What each milestone contains
@@ -121,13 +121,16 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 - web fonts through the Rust path (TX7);
 - `Intl` on ICU4X and BigInt;
 - HTTP/3 over `quinn-proto`;
+- **WebSockets** over HTTP/1.1 and HTTP/2, moved from M8 (Round 1, RV1-12): small next to M4's scope, and the corpus's chat pages (Twitch, Discord) depend on them; **dedicated workers** too, if the census addendum's use counters show the content pages use them;
 - the accessibility tree and cache (AX).
 
 **M5, site isolation and logins (L2).** Site locks join process selection and every endpoint (IP10; [networking](architecture/networking.md) §8's L2 row). Cross-site frames remain their own agents and event loops in their embedder's process (SI3, non-sensitive sites only), as they have been since M1, reached through remote window proxies (WB20; Round 1, RV1-03). Then:
 - ORB, Local Network Access, COEP and CORP in full;
 - IndexedDB, the Cache API, quotas and eviction (PF24), behind lock checks;
 - the login track's L2 steps (§6);
-- V3's lock-enforcement tests and V4's cross-site leak suites.
+- V3's lock-enforcement tests and V4's cross-site leak suites, with a pixel-stealing test (RV1-19);
+- **the daily features the owner needs before L3** (Round 1, RV1-22): downloads, which the browser writes and quarantines (process model §3), PDFs among them, opened in Preview; find in page; zoom;
+- **Encrypted Client Hello with DNS over HTTPS,** planned at M5's plan (RV1-20).
 
 **M6, the sensitive-use gate (L3).** Process selection puts every cross-site frame in a renderer locked to its own site ([frame tree](architecture/frame-tree-and-navigation.md) §5's L3 row; IPC's frame-host channels). **V1–V9 pass, with their evidence recorded** (TS14):
 - the escape suites (V1);
@@ -136,11 +139,11 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 - the JIT policy (V7): it holds trivially while no JIT exists, and its switch is tested;
 - the threat-model review (V8) and the out-of-process iframe tests (V9).
 
-The owner's own accounts arrive (§6).
+The owner's own accounts arrive (§6), with **session restore** (RV1-22).
 
 **M7, media (L3).** The media milestone's row ([images and media](architecture/images-and-media.md) §8): the media utility process with demuxers, VideoToolbox and AudioToolbox, video layers, audio output and Media Source Extensions; and AVIF through ImageIO there (IM3). It keeps L3: V1, V2 and V5 cover the new process, its endpoints and its `platform` code before the gate (MS2).
 
-**M8, applications (L3).** Dedicated, shared and service workers (EL §4.6; SW), WebSockets over HTTP/1.1 and HTTP/2, `SharedArrayBuffer` and `Atomics` under cross-origin isolation, Web Locks and the origin private file system, EditContext, Temporal and off-thread compilation, the bytecode cache. **VS Code for the Web uses WebAssembly** (S8); if its corpus interaction needs it, its target moves to M9, decided at M8's plan.
+**M8, applications (L3).** Dedicated, shared and service workers (EL §4.6; SW), `SharedArrayBuffer` and `Atomics` under cross-origin isolation, Web Locks and the origin private file system, EditContext, Temporal and off-thread compilation, the bytecode cache. **VS Code for the Web uses WebAssembly** (S8); if its corpus interaction needs it, its target moves to M9, decided at M8's plan.
 
 **M9, the GPU and WebAssembly (L3).** WebGL and WebGPU ([graphics](architecture/graphics.md) §8), in a process M9's plan places: the compositor's own, or, as recommended, one of their own, since the compositor's process holds every site's pixels (GR10). The GPU/compositor process exists since M2 (Round 1, RV1-02). WebAssembly, as OQ-3 decides, through JE31's interface. It keeps L3 for WebGL's and WebGPU's new surface (MS2).
 
@@ -155,16 +158,18 @@ The owner's own accounts arrive (§6).
 | Wikipedia | Documents | M1, readable, with formulas as their alternative text; **in full at M4** (formulas as SVG images) | L0, logged out |
 | MDN | Documents | M1, readable, without its live examples; **in full at M3** | L0, logged out |
 | Google Search | Content | M4 | L1 logged out; M5 test account (L2); M6 the owner's (L3) |
-| Instagram | Content | M4, the logged-out view | As Google Search |
-| Reddit | Content | M4 | As Google Search |
+| Instagram | Content | M4, the logged-out view, **without its feed's video until M7** (RV1-12) | As Google Search |
+| Reddit | Content | M4, **without its interactive posts in frames,** which may need WebGL or WebAssembly (M9; inference, RV1-12) | As Google Search |
 | YouTube | Media | M7 | L3: logged out, and the owner's account |
-| Twitch | Media | M7 | As YouTube |
+| Twitch | Media | M7, its chat over WebSockets from M4 (RV1-12) | As YouTube |
 | VS Code for the Web | Applications | M8, or M9 if its interaction needs WebAssembly | L3, logged out |
 | Discord | Applications | M8 | L3, the owner's account |
 | Prism | Applications | M8 | L3, the owner's account |
 | Google Maps | Media and maps | M9 (WebGL; S8 saw it use WebAssembly) | L3, logged out |
 | Three.js | Applications | M9 (WebGPU) | L3 |
 | Figma | Applications | M9 (WebAssembly; WebGL or WebGPU) | L3, the owner's account |
+
+**Re-placed in Round 1** (RV1-12): MS6 required every capability a target needs, and three targets came before theirs: Twitch's chat needed WebSockets (M8) at M7, Instagram's feed video (M7) at M4, and Reddit's interactive posts (M9) at M4. WebSockets move to M4, and the targets name what they exclude. **The census addendum by hand,** authorized before M4, saves Chrome's use counters for the eight pages measured by hand ([corpus](corpus.md) §10); the targets are placed again on its evidence, by MS6, before M4's plan.
 
 ## 6. The login track
 
@@ -195,14 +200,16 @@ The secondary accounts the owner used for S8's session by hand may serve, if the
 
 | Decision | Where it stands | Taken at | Evidence it needs |
 |---|---|---|---|
-| **WebAssembly** (OQ-3): our own engine or an embedded one | Open; JE31 lists what Axiom's engine must offer | M8's gate, for M9 | JE31's interface; the corpus's use (S8: Google Maps and VS Code use it; Figma needs it) |
-| **A JIT** (J1) | Policy accepted (J1–J7); whether to build one is open | Not before L2 (J1); at M8's gate, on the applications' measurements | The interpreter on corpus scripts, from M3; S3's dispatch results |
+| **WebAssembly** (OQ-3): our own engine or an embedded one | Open; JE31 lists what Axiom's engine must offer | **Its architecture before M3** (Round 1, RV1-13): own or embedded, WasmGC's objects as arena kinds, Wasm frames in the register file, tiering under J6; its implementation for M9 | Spike S14 (authorized before M3): an interpreter against Cranelift here, and WasmGC's support; JE31's interface; the corpus's use (S8: Google Maps and VS Code use it; Figma needs it) |
+| **A JIT** (J1) | Policy accepted (J1–J7); whether to build one is open | Not before L2 (J1); **at M5's gate** (Round 1, RV1-13), the first L2 milestone, before the script-heavy content pages are used signed in | The interpreter on the content pages' scripts, at M3 and M4; S3's dispatch results |
 | **The GPU/compositor process** | **Designed in Round 1** (RV1-02; process model §3, note 1) | Built at M2 | Spike S10: the hop, validation at display rate, zero-copy sampling (authorized 2026-10-21) |
 | **Where WebGL and WebGPU run** | Open; recommended: a process of their own, apart from the compositor's (GR10) | M9's plan | The memory cost of a second Metal process; WebGL's and WebGPU's needs |
-| **Passkeys** (OQ-16) | Open | Before M6 starts | Whether a restricted entitlement can be had; roaming security keys over USB HID |
+| **Passkeys** (OQ-16) | Open | Before M6 starts | Whether a restricted entitlement can be had; roaming security keys over USB HID; **the hybrid transport** (a phone as the authenticator), which needs no restricted entitlement (Round 1, RV1-21), checked for feasibility with CoreBluetooth under the signing identity (RV1-17) |
 | **Xcode** (OQ-7) | Open; no design needs it (GR14) | M1's plan | Whether profiling or Metal debugging needs Instruments |
 | **QoS overrides** (OQ-20) | Open | M1, the first milestone with Mach messages between processes (Round 1, RV1-07) | A measurement of a receiving thread in `kevent64` |
-| **DNS over HTTPS** | Later ([networking](architecture/networking.md) §8) | M5's plan | The owner's privacy needs once logins begin |
+| **DNS over HTTPS**, **with Encrypted Client Hello** (Round 1, RV1-20) | Later ([networking](architecture/networking.md) §8); rustls has had experimental client-side ECH since 2024-06 | M5's plan | The owner's privacy needs once logins begin; ECH's keys come from DNS records |
+| **The user-agent string** (SB13; Round 1, RV1-14) | Policy set: Safari-compatible, with an Axiom token | M1's plan, before its live loads | The Safari shipping on this Mac then |
+| **JPEG's decoder** (IM2; Round 1, RV1-22) | `jpeg-decoder` is in maintenance mode | M1's plan | Its grade (DP8), or a decoder of Axiom's own, which adds scope (RV1-08) |
 | **GR5's amendment** (OQ-24) and **surfaces allocated ahead** | Deferred to the graphics milestone (the owner, 2026-10-20); S6 §8 | Surfaces at M1, the first rendering milestone; GR5 at M4, with path-heavy SVG | A GPU filler of analytic quality, measured on the same contents |
 | **`vello_cpu`'s and `smallvec`'s grades** | Adopted subject to grading (the owner, 2026-10-20); `smallvec`'s grade open | M1 | DP8's grades, on the versions adopted |
 | **The storage engine** (SW2): `redb` or SQLite | Open | M3 | The crash tests of the first storage milestone |

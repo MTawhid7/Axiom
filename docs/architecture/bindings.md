@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0017](../adr/0017-javascript-engine-and-bindings.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP17. No Step 4 interface changes (SC1). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): WB20 and §8, remote window proxies in the first script stage (RV1-03; CP3) |
+| **Status** | **Binding** since [ADR-0017](../adr/0017-javascript-engine-and-bindings.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP17. No Step 4 interface changes (SC1). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): WB20 and §8, remote window proxies in the first script stage (RV1-03; CP3); WB22, the bindings split by interface group (RV1-18; CP5) |
 | **Question** | How are the WebIDL bindings generated: platform objects in the heap, argument conversion, rooting conventions, prototypes and realms, exceptions, cross-origin objects, and the hot path of event dispatch? |
 | **Answers** | Step 5 question Q13 ([tracker](../research/step-5-subsystems.md) §3); the bindings part of the handed-over question 18 (§2.2); closes [HTML and the DOM](html-and-dom.md)'s JavaScript facet (HD30) |
 | **Feeds** | Part 2's ADRs (CP18); every subsystem that exposes an interface to script |
@@ -119,7 +119,7 @@ No new dependency is proposed: the IDL is data, and the generator is Axiom's.
 
 | Rule | Decision |
 |---|---|
-| WB22 | **Generated code has a size budget.** Several hundred interfaces generate a great deal of code; the generator shares conversion helpers and emits property tables as static data rather than per-member code wherever behaviour allows. Step 6 measures the generated code's size, its build time (T1–T4) and its effect on a ready renderer's footprint (B2) |
+| WB22 | **Generated code has a size budget.** Several hundred interfaces generate a great deal of code; the generator shares conversion helpers and emits property tables as static data rather than per-member code wherever behaviour allows. Step 6 measures the generated code's size, its build time (T1–T4) and its effect on a ready renderer's footprint (B2). **As amended in Round 1** (RV1-18; the owner: "Split generated WebIDL crates by interface group; measure compile times in Spike S13."): the generated glue is split into crates by interface group, so no crate holds it all, and spike S13 (authorized before M3) measures T1–T4 for bindings generated from webref's IDL with stub implementations, as one crate and split |
 | WB23 | **Tests at boundaries.** **Oracles:**<br>• WPT's `idlharness.js` tests against the same IDL files [T1], and WPT's `webidl/` directory, which tests the JavaScript binding itself;<br>• the generator's golden tests: IDL in, Rust out, reviewed as diffs;<br>• the engine's stress pacing, collecting at every allocation (JE32), which exercises every generated rooting decision;<br>• S1's dispatch case, as WB17's benchmark |
 
 ## 6. Interfaces with neighbouring subsystems

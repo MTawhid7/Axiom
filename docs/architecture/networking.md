@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0013](../adr/0013-networking-storage-and-workers.md)'s acceptance (2026-10-19), which the owner pre-approved at Gate B (2026-10-18), effective once S7-Q1, S7-Q3 and S7-Q4 passed. Written at Step 5, CP6. **Spike S7** ([results](../research/s7-results.md)) settled NW6 as written, confirmed NW1, NW5 and NW7, and wrote NW17's profile. **Verification in the worker pool** (NW6), which S7 proposed, was confirmed by the owner at Step 5's Gate C (2026-10-20) |
+| **Status** | **Binding** since [ADR-0013](../adr/0013-networking-storage-and-workers.md)'s acceptance (2026-10-19), which the owner pre-approved at Gate B (2026-10-18), effective once S7-Q1, S7-Q3 and S7-Q4 passed. Written at Step 5, CP6. **Spike S7** ([results](../research/s7-results.md)) settled NW6 as written, confirmed NW1, NW5 and NW7, and wrote NW17's profile. **Verification in the worker pool** (NW6), which S7 proposed, was confirmed by the owner at Step 5's Gate C (2026-10-20). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): open question 4, Encrypted Client Hello (RV1-20; CP5) |
 | **Question** | How does the network process fetch: URLs and sites, HTTP/1.1, HTTP/2 and HTTP/3, TLS and certificate verification against the system's trust store, DNS, connections, the HTTP cache and cookies? How does it enforce Fetch's policy from the browser's records? |
 | **Answers** | Step 5 question Q6 ([tracker](../research/step-5-subsystems.md) §3); decision-map item I3; the tracker's handed-over questions 7–10 (§2.2); [text and fonts](text-and-fonts.md) open question 5 (IDNA in the browser) |
 | **Feeds** | ADR-0013 (CP9); spike S7 (tracker §10); CP7 (storage, service workers); CP13 (the parser's input streams); CP16 (`URL`, `fetch`) |
 | **Builds on** | The [threat model](../security/threat-model.md) (SG2, SG4, SG7, SG8, SG10; attack surfaces); the [process model](../security/process-model.md) (§3, §4, SI1–SI7, IR1–IR10, B4); [frame tree and navigation](frame-tree-and-navigation.md) FT7, FT10, FT11; [event loop and threading](event-loop-and-threading.md) EL1, EL2, EL8, EL18, EL24; [IPC](ipc.md) IP14, IP16, IP17; the [dependency policy](../technology/dependency-policy.md) |
-| **Last updated** | 2026-10-20: NW6's verification in the worker pool confirmed |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered NW1–NW18. Precedent is sourced (§3); the design is inference unless marked otherwise.
 
@@ -189,12 +189,13 @@ Grades are Google's published audits for the version named (google/supply-chain 
 | 1 | The network process's sandbox rules, and rustls against Network framework | **Settled by spike S7** (2026-10-19): NW6, NW17 |
 | 2 | The storage format for the cache and the cookie jar | CP7 |
 | 3 | DNS over HTTPS, and the settings that control it | Step 6, with the owner (embedder API open question 2) |
-| 4 | Encrypted Client Hello, once the client side is available in rustls and the DNS records are deployed | A later milestone |
+| 4 | Encrypted Client Hello, once the client side is available in rustls and the DNS records are deployed | A later milestone. **Corrected in Round 1** (RV1-20): rustls has had experimental client-side ECH since 2024-06-13 [P1]. ECH is planned with DNS over HTTPS at M5's plan, since its keys come from DNS records and the server's name stays private only if the lookup does too (background) |
 
 ## Sources
 
 All read on 2026-10-18. Dates in brackets are the last commits to each file, from GitHub's API.
 
+- [P1] Prossimo (ISRG), "Encrypted Client Hello (ECH) Support for Rustls", 2024-06-13, read 2026-10-21 (Round 1, RV1-20) — https://memorysafety.org/blog/rustls-ech-support
 - [W1] WHATWG, Fetch Standard (Living Standard, last updated 2026-10-06), §2.7 "Network partition keys", §2.8 "HTTP cache partitions", §2.9 "Port blocking" — https://fetch.spec.whatwg.org/
 - [I1] IETF datatracker, `draft-ietf-httpbis-rfc6265bis` — https://datatracker.ietf.org/doc/draft-ietf-httpbis-rfc6265bis/
 - [O1] "Opaque Response Blocking (ORB)", README of `annevk/orb` — https://github.com/annevk/orb

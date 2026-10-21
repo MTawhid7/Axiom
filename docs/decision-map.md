@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | Living document |
-| **Last updated** | 2026-10-21 |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 This map lists every major architectural decision, its layer, its status, and how the decisions constrain one another. Decisions are layered by **how expensive they are to reverse**.
 
@@ -45,7 +45,7 @@ X  Cross-cutting    standards baseline · conformance testing · fuzzing · perf
 | I3 | HTTP/TLS/DNS transport | **Accepted** (2026-10-19), the owner's Gate B condition met: S7-Q1, S7-Q3 and S7-Q4 pass ([S7 results](research/s7-results.md)). State-machine protocols on one I/O thread; our own URL parser and HTTP framing; rustls, with `aws-lc-rs` and the system verifying certificates, which S7-Q2 settled against Network framework; DNS-SD; partitioned caches and cookies; Fetch's policy from bound endpoints; storage in the network process. The network process's profile is S7's eight rules, whose two metadata rules the process model's change record notes. **Verification in the worker pool,** off the I/O thread (NW6), confirmed at Step 5's Gate C (2026-10-20) | [ADR-0013](adr/0013-networking-storage-and-workers.md), [networking](architecture/networking.md), [storage and workers](architecture/storage-and-workers.md) |
 | I4 | Image and media decoders | **Accepted** (2026-10-20, Step 5's Gate C), with I2's, in ADR-0012: safe Rust decoders in the renderer, JPEG included (S5-Q5); ImageIO for AVIF only, under the dependency policy's exception, **in the media utility process** (IM3's fallback, approved by the owner); media in a sandboxed utility process | [ADR-0012](adr/0012-graphics-images-and-media.md), [images and media](architecture/images-and-media.md) |
 | I5 | Accessibility bridge (NSAccessibility) | **Accepted** (2026-10-18, Step 5's Gate B): trees pushed by renderers; the browser's cache; text markers; our own bridge. The settings list and the reserved key equivalents approved as written | [ADR-0014](adr/0014-accessibility.md), [accessibility](architecture/accessibility.md) |
-| I6 | WebAssembly: our own or embedded | Open; placed by the [roadmap](roadmap.md) at M8's gate, before M9 ([ADR-0020](adr/0020-roadmap-and-security-levels.md), accepted 2026-10-20 at Step 6's Gate C) | [OQ-3](open-questions.md) |
+| I6 | WebAssembly: our own or embedded | Open; placed by the [roadmap](roadmap.md) at M8's gate, before M9 ([ADR-0020](adr/0020-roadmap-and-security-levels.md), accepted 2026-10-20 at Step 6's Gate C). **Re-placed in Round 1** (RV1-13): its architecture before M3, with spike S14 | [OQ-3](open-questions.md) |
 | X1 | Standards baseline and support matrix | **Accepted** (2026-10-20, Step 6's Gate B) in [ADR-0018](adr/0018-corpus-standards-and-testing.md): the [standards baseline](standards.md), with the [corpus](corpus.md); the not-planned list approved as written, and the corpus's automation boundary confirmed | Step 6 |
 | X2 | Testing and fuzzing strategy | **Accepted** (2026-10-20, Step 6's Gate B) in [ADR-0018](adr/0018-corpus-standards-and-testing.md): the [testing strategy](testing.md); spike S9 authorized | Step 6 |
 | X3 | Performance methodology and budgets | **Accepted** (2026-10-20, Step 6's Gate B) in [ADR-0019](adr/0019-performance-methodology-and-budgets.md): the [performance budgets](performance.md), with the final B1–B7 amending the [process model](security/process-model.md) | Step 6 |
