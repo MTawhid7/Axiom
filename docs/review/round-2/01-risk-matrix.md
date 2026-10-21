@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 2, for the owner's disposition** (2026-10-21). This page summarizes; the [findings](03-findings.md) carry the evidence, and the [verification](02-verification.md) Round 1's changes |
+| **Status** | **Round 2, disposed** (2026-10-21): the owner accepted every finding as proposed ([the disposition log](../README.md#55-round-2s-dispositions)). This page summarizes; the [findings](03-findings.md) carry the evidence, and the [verification](02-verification.md) Round 1's changes |
 | **Question** | Do Round 1's changes hold; what do the subsystems Round 1 deferred get wrong; and is the stopping rule met? |
 | **See also** | [Verification of Round 1](02-verification.md) · [Findings](03-findings.md) · [Actions](04-actions.md) · [The review process](../README.md) |
 | **Last updated** | 2026-10-21 |

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 2, for the owner's disposition** (2026-10-21). Every one of Round 1's 22 accepted findings is resolved in the binding documents; ten leave stale statements elsewhere, and two expose gaps that Round 2 raises as findings |
+| **Status** | **Round 2, disposed** (2026-10-21; [the disposition log](../README.md#55-round-2s-dispositions)). Every one of Round 1's 22 accepted findings is resolved in the binding documents; ten leave stale statements elsewhere, and two expose gaps that Round 2 raises as findings |
 | **Question** | Do the CP1–CP6 amendments "completely resolve findings RV1-01 through RV1-22 without introducing regressions or contradictions" (the owner's commission, [the review](../README.md#54-decisions-on-round-1s-results) §5.4)? |
 | **Baseline** | `architecture-review` at `ec7c6b3` (2026-10-21): Round 1's six checkpoints, the sweep for stale statements, spikes S10, S12 and S15, and the owner's decisions on their results |
 | **See also** | [Risk matrix](01-risk-matrix.md) · [Findings](03-findings.md) · [Actions](04-actions.md) · [Round 1's findings](../round-1/02-findings.md) |

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are made in checkpoints (§5.3), and the three spikes authorized before Milestone 1, S10, S12 and S15, are done (§5.2). **The owner approved the results** and **commissioned Round 2** (2026-10-21, §5.4). **Round 2 delivered** (2026-10-21): Round 1's changes verified; 15 findings, no Critical or High, so **the stopping rule is met** for the scope commissioned (§6, §8); for the owner's disposition |
+| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are made in checkpoints (§5.3), and the three spikes authorized before Milestone 1, S10, S12 and S15, are done (§5.2). **The owner approved the results** and **commissioned Round 2** (2026-10-21, §5.4). **Round 2 delivered** (2026-10-21): Round 1's changes verified; 15 findings, no Critical or High, so **the stopping rule is met** for the scope commissioned (§6, §8). **Disposed by the owner the same day: all 15 accepted** (§5.5–§5.7), the changes made in checkpoints CP1–CP6; **an independent external review follows,** which the owner commissions before the merge into `main` |
 | **Question** | How is the Phase Zero baseline reviewed before Milestone 1 starts: in what format, with which severities, how do findings become changes, and when does the review end? |
 | **Builds on** | The owner's decision 8 at Step 6's Gate C (2026-10-20): Milestone 1 waits "until the architecture and roadmap undergo independent, multi-round adversarial review"; the recommendation in [status](../status.md) for the review's brief; the findings format the [handover](../handover-phase-0.md) §3 suggests |
 | **Last updated** | 2026-10-21 |
@@ -22,7 +22,7 @@
 | Round | Date | Documents | Findings | State |
 |---|---|---|---|---|
 | 1 | 2026-10-21 | [Risk matrix](round-1/01-risk-matrix.md) · [Findings](round-1/02-findings.md) · [Challenged assumptions](round-1/03-challenged-assumptions.md) · [Actions before Round 2](round-1/04-round-2-actions.md) | 22: 2 Critical, 6 High, 10 Medium, 4 Low | All accepted (2026-10-21); changes made (§5.3); the spikes' results and the choices approved (§5.4) |
-| 2 | 2026-10-21 | [Risk matrix](round-2/01-risk-matrix.md) · [Verification of Round 1](round-2/02-verification.md) · [Findings](round-2/03-findings.md) · [Actions](round-2/04-actions.md) | 15: 0 Critical, 0 High, 10 Medium, 5 Low | Delivered, commissioned by the owner (§5.4, decision 6); for the owner's disposition. The stopping rule is met for the scope commissioned |
+| 2 | 2026-10-21 | [Risk matrix](round-2/01-risk-matrix.md) · [Verification of Round 1](round-2/02-verification.md) · [Findings](round-2/03-findings.md) · [Actions](round-2/04-actions.md) | 15: 0 Critical, 0 High, 10 Medium, 5 Low | All accepted (2026-10-21, §5.5); changes in checkpoints (§5.7). The stopping rule is met for the scope commissioned |
 
 ## 3. Findings and severities
 
@@ -61,7 +61,7 @@
 
 ## 5. The disposition log
 
-The owner's decisions, in the owner's words. "Changed" names the checkpoint (§5.3) and the documents that carry an accepted change; `git log --grep 'review-r1-cpN'` finds a checkpoint's commit.
+The owner's decisions, in the owner's words. "Changed" names the checkpoint (§5.3 for Round 1, §5.7 for Round 2) and the documents that carry an accepted change; `git log --grep 'review-rR-cpN'` finds a checkpoint's commit, for round R.
 
 **Round 1's dispositions** (the owner, 2026-10-21) begin: "I have reviewed the Round 1 risk matrix, findings, and recommendations in docs/review/round-1/. Here are my formal dispositions to be recorded in docs/review/README.md §5 and status documents."
 
@@ -140,6 +140,51 @@ The owner, 2026-10-21: "The Round 1 remediation and spike results (S10, S12, S15
 | 4 | Strategic Choices (WPT fonts, single ordered stream, browser layer animation, B1 split) | "All approved as implemented." | None needed: the documents already carry them (CP1, CP2) |
 | 5 | Branch Merge | "Wait on merging architecture-review into main until Round 2 is complete, preserving main as the verified baseline." | This log and the status |
 | 6 | Commission Round 2 | "Authorized. Please proceed immediately with executing Round 2 of the architecture review on branch architecture-review": verify "that the CP1–CP6 amendments completely resolve findings RV1-01 through RV1-22 without introducing regressions or contradictions"; "Conduct an in-depth audit of the deferred subsystems: Accessibility (ADR-0014), Storage & Workers (ADR-0013), Style Cascade & Layout Algorithms (LY1–LY32, ST1–ST36), Embedder API (EM1–EM12), and granular IPC protocols (IP13–IP22)"; "Evaluate whether the stopping rule (zero Critical or High findings) is met." | §2; Round 2's documents |
+
+### 5.5 Round 2's dispositions
+
+The owner, 2026-10-21: "I have reviewed the Round 2 findings and actions in docs/review/round-2/." "Before concluding the review phase and merging into main, I will commission one final, independent external review with Gemini to ensure complete cross-model validation." "Here are my formal dispositions and instructions:"
+
+| # | The owner's heading | The owner's words | Recorded in |
+|---|---|---|---|
+| 1 | Dispose Findings | "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." | §5.6 |
+| 2 | Test Configuration (RV2-03) | "Approved as recommended." "Run WPT conformance suites (MA4's gate) in real, sandboxed processes on host time"; "Run time-dependent and scheduler tests in single-process mode on EL24's virtual clock"; "Run visual reference tests under both configurations at milestone review gates." | CP2 (§5.7) |
+| 3 | Web Locks Placement (RV2-04) | "Approved. Arbitrate Web Locks in the browser process (matching Chromium's LockManager pattern) so that helper process crashes/restarts cannot violate mutual exclusion." | CP2 (§5.7) |
+| 4 | Checkpoints Execution | "Approved. Please proceed with applying all six checkpoints (CP1–CP6) as outlined in docs/review/round-2/04-actions.md §5" | §5.7 |
+| 5 | Post-Checkpoint State | "Run all five validation checks after each commit." "Once CP1–CP6 are verified and committed, push architecture-review to origin." "DO NOT merge into main yet. Notify me when the branch is pushed so I can initiate Gemini's review." | The [status](../status.md) |
+
+### 5.6 Round 2's findings
+
+Every finding: **Accepted** as proposed, 2026-10-21 (§5.5, item 1). Where a counter-proposal offered a choice, the owner's items 2 and 3 make it, or the checkpoint records the choice it made, for the owner to overrule.
+
+| ID | Severity | Blocks | Changed |
+|---|---|---|---|
+| RV2-01 | Medium | M1 | CP1 |
+| RV2-02 | Low | M1 | CP1 |
+| RV2-03 | Medium | M1 | CP2, with item 2's configuration |
+| RV2-04 | Medium | M1 (M2, M3, M8) | CP2, with item 3's placement |
+| RV2-05 | Medium | M2 | CP3 |
+| RV2-06 | Medium | M4 | CP5 |
+| RV2-07 | Medium | M4 | CP5 |
+| RV2-08 | Medium | M4 | CP5 |
+| RV2-09 | Low | M4 | CP5 |
+| RV2-10 | Medium | M3 | CP4 |
+| RV2-11 | Medium | M3 | CP4 |
+| RV2-12 | Low | M3 | CP4 |
+| RV2-13 | Medium | M1 (M2) | CP2 |
+| RV2-14 | Low | M1 | CP2 |
+| RV2-15 | Low | M4 | CP6 |
+
+### 5.7 Round 2's checkpoints
+
+| Checkpoint | The owner's name | Findings | State |
+|---|---|---|---|
+| CP1 | "Update the master Handover report (docs/handover-phase-0.md), decision map, and clean up stale statements" | RV2-01, RV2-02 | Pending |
+| CP2 | "Process model, helper crashes, IPC never-blocking, and test configs" | RV2-03, RV2-04, RV2-13, RV2-14 | Pending |
+| CP3 | "GPU process memory accounting and tile reuse protocols" | RV2-05 | Pending |
+| CP4 | "Storage key ancestor bit, File API design, and storage quotas" | RV2-10, RV2-11, RV2-12 | Pending |
+| CP5 | "Accessibility geometry, tiered VoiceOver enablement, and test harnesses" | RV2-06–RV2-09 | Pending |
+| CP6 | "Style & layout hooks for CSS Interop 2026" | RV2-15 | Pending |
 
 ## 6. The stopping rule
 

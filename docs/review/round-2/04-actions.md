@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 2, for the owner's disposition** (2026-10-21). If the owner rejects or defers a finding, its rows fall away, and the [disposition log](../README.md#5-the-disposition-log) records why |
+| **Status** | **Round 2, disposed** (2026-10-21): the owner accepted every finding, approved the six checkpoints of §5, and chose option 3 of §6 before the merge, an independent external review ([the disposition log](../README.md#55-round-2s-dispositions)). The changes are made in those checkpoints (§5.7 there) |
 | **Question** | Which changes does each finding need, and before which milestone; how are they made; and, with the stopping rule met, what comes next? |
 | **See also** | [Risk matrix](01-risk-matrix.md) · [Verification of Round 1](02-verification.md) · [Findings](03-findings.md) · [The review process](../README.md) |
 | **Last updated** | 2026-10-21 |

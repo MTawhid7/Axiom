@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 2, for the owner's disposition** (2026-10-21). Fifteen findings: no Critical, no High, ten Medium, five Low. They stay as written, as the round's record; the owner's words in the [disposition log](../README.md#5-the-disposition-log) will govern where they differ |
+| **Status** | **Round 2, disposed** (2026-10-21): the owner accepted all fifteen findings as proposed, in the words the [disposition log](../README.md#55-round-2s-dispositions) records. They stay as written, as the round's record; where the owner's words differ, they govern |
 | **Question** | Where are the subsystems Round 1 deferred wrong, inconsistent, outdated or incomplete, and what did Round 1's own changes leave behind? |
 | **Covers** | The baseline on `architecture-review` at `ec7c6b3` (2026-10-21): Round 1's amendments ([verification](02-verification.md)), and in depth the [accessibility](../../architecture/accessibility.md) design (ADR-0014), [storage and workers](../../architecture/storage-and-workers.md) (ADR-0013), [style](../../architecture/style.md) (ST1–ST36) and [layout](../../architecture/layout-and-paint.md) (LY1–LY32), the [embedder API](../../architecture/embedder-api.md) (EM1–EM12) and [IPC](../../architecture/ipc.md) (IP13–IP22), as the owner commissioned |
 | **Summary** | [Risk matrix](01-risk-matrix.md) · [Verification of Round 1](02-verification.md) · [Actions](04-actions.md) |
