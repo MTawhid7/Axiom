@@ -188,6 +188,8 @@ No new dependency is proposed.
 | Next | Flexbox and grid; tables (approximate); multi-column layout; sticky positioning; vertical writing modes; snapping and anchoring; containment and `content-visibility`; ResizeObserver and IntersectionObserver; SVG; clip paths, masks and filters; form controls and scrollbars |
 | Later | Printing and paged media; anchor positioning; grid lanes and gap decorations; ruby; `shape-outside`; 3D rendering contexts; `text-wrap: pretty`; view transitions (with CP4 and CP14); parallel layout, if profiling asks for it |
 
+**Anchor positioning** (Round 2, [RV2-15](../review/round-2/03-findings.md#rv2-15-style-hooks-from-interop-2026)), staged "Later" above, needs style during layout: each position option is tried by style's nested lifecycle for one element (ST25), within its parent's layout. When a corpus page or a milestone's selection needs it, it is built that way.
+
 **The complete model** (SC9): every script and writing mode goes through text's interface and LY14's logical coordinates; a new formatting context is another algorithm under LY6's contract; a new paint effect is an effect node or a primitive; a new scrolling feature is data on the scroll node; parallel layout stays possible behind LY30.
 
 ## 9. Alternatives considered

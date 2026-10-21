@@ -174,7 +174,7 @@ Every finding: **Accepted** as proposed, 2026-10-21 (§5.5, item 1). Where a cou
 | RV2-12 | Low | M3 | CP4: the storage design's open question 2 answered; SW3's 5 MiB; SG10; PF24's quota per site over its keys; ADRs 0004, 0019. **Also fixed:** the storage design's §6 still sent locks to the network process, which CP2 moved, and its §7 said the browser holds no web storage, now with the copies it keeps |
 | RV2-13 | Medium | M1 (M2) | CP2: IR5; [IP16](../architecture/ipc.md); PF21; SG11; MA7's containment test; the roadmap's M2; ADRs 0004, 0005, 0019, 0021 |
 | RV2-14 | Low | M1 | CP2: IP7, IP13, §4.12, §8's question 3; IR6; ADRs 0004, 0005. Question 4 is closed with RV2-05 (CP3). **Also fixed:** a blank line Round 1's CP1 left inside the process model's change record, which split the table so that its Round 1 rows didn't render as one |
-| RV2-15 | Low | M4 | CP6 |
+| RV2-15 | Low | M4 | CP6: [style](../architecture/style.md)'s complete model (§8) names the four hooks; ST4 (effective zoom), ST12 (the position fallback origin), ST19 (`attr()`'s dependencies), ST25 (anchor positioning's fallbacks as a nested lifecycle under IV1); `zoom` and `attr()` staged at M4; layout §8; three CSS drafts cited; ADR-0016 |
 
 ### 5.7 Round 2's checkpoints
 
@@ -185,7 +185,7 @@ Every finding: **Accepted** as proposed, 2026-10-21 (§5.5, item 1). Where a cou
 | CP3 | "GPU process memory accounting and tile reuse protocols" | RV2-05 | Done, `docs(review-r2-cp3)` |
 | CP4 | "Storage key ancestor bit, File API design, and storage quotas" | RV2-10, RV2-11, RV2-12 | Done, `docs(review-r2-cp4)` |
 | CP5 | "Accessibility geometry, tiered VoiceOver enablement, and test harnesses" | RV2-06–RV2-09 | Done, `docs(review-r2-cp5)` |
-| CP6 | "Style & layout hooks for CSS Interop 2026" | RV2-15 | Pending |
+| CP6 | "Style & layout hooks for CSS Interop 2026" | RV2-15 | Done, `docs(review-r2-cp6)` |
 
 ## 6. The stopping rule
 

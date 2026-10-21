@@ -265,7 +265,7 @@ The overview §4 traces seven scenarios end to end through the rules: opening a 
   - Axiom's own CSS parser, generic over the strings' code units, with one property table generating parsers, computed-style groups, impact classes and CSSOM accessors;
   - right-to-left matching with rule buckets, an ancestor Bloom filter and `:has()` invalidation, and **no selector JIT**;
   - Cascade 5 and 6, with immutable computed styles shared through a rule tree, a sharing cache and an evictable cascade cache. A cache-free path is the oracle;
-  - container queries resolved during layout, in nested lifecycles;
+  - container queries resolved during layout, in nested lifecycles, which anchor positioning's fallbacks will reuse; the complete model names its hooks for anchor positioning's cascade origin, `zoom` and `attr()` (Round 2, RV2-15);
   - `:visited` by partitioned history: the browser keeps the history, and each renderer receives only its own partitions;
   - a layout unit of 1/64 CSS pixel in an `i32`, saturating; LayoutNG's contract for every algorithm; **tables marked approximate**;
   - paint in CSS 2.1's order, with display items reused by identity; form controls in Axiom's own theme; hit testing in the renderer.

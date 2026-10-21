@@ -13,6 +13,7 @@
 |---|---|
 | 2026-10-19 | Proposed at Step 5, CP18, with the amendment to ADR-0007 (ST25, ST31) and the `:visited` policy (ST10) for the owner |
 | 2026-10-20 | **Accepted** by the owner at Step 5's Gate C: "ADR-0016 (Style, Layout, and Paint): Accepted as proposed." In the same decisions: "ADR-0007 Amendment (ST25, ST31): Accepted. Nested lifecycle phases for size container queries are adopted." And: ":visited Policy (ST10): Accepted. Partitioned history by top-level site is approved." **S6 reported the same day** ([S6 results](../research/s6-results.md) §6, §8): GPU path filling pays in time and memory, not in quality, so GR5's amendment, which would change LY23, is put to the owner; GR5 and LY23 stand as written meanwhile |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-15: style's complete model names four hooks from Interop 2026: the position fallback origin (ST12), anchor positioning's fallbacks as ST25's nested lifecycle for one element under IV1, effective zoom (ST4) and `attr()`'s dependencies (ST19); `zoom` and `attr()` staged with style's second stage (M4), anchor positioning when needed ([style](../architecture/style.md) §8; [layout and paint](../architecture/layout-and-paint.md) §8) |
 
 ## Question
 
