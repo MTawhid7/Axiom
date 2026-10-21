@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0005's acceptance (2026-10-17, Gate B). Written at Step 4, CP4. Answers OQ-17 |
+| **Status** | **Binding** since ADR-0005's acceptance (2026-10-17, Gate B). Written at Step 4, CP4. Answers OQ-17. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): IP11 for RV1-16 (CP1) |
 | **Question** | How do Axiom's processes and threads exchange messages? Which transport carries them, how are interfaces defined and checked, how do handles and bulk data move, and how are the IPC trust rules IR1–IR10 enforced by construction rather than by care? |
 | **Answers** | Step 4 question Q5 ([tracker](../research/step-4-architecture-proposal.md) §3); OQ-17 |
 | **Feeds** | ADR-0005; CP5 (frame tree and navigation), CP6 (display lists), CP8 (input and accessibility), CP9 (embedder API), CP10 (agents and messaging) |
 | **Builds on** | [Process model](../security/process-model.md) §6 (R1–R6, IR1–IR10); [ADR-0004](../adr/0004-process-model-and-sandbox.md) D3; [S4 results](../research/s4-results.md); [macOS runtime note](../research/macos-runtime-facilities.md); [event loop and threading](event-loop-and-threading.md) (EL4) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered IP1–IP22. Precedent and platform facts are sourced (§2–§3); the design is inference unless marked otherwise.
 
@@ -119,7 +119,7 @@ From source and documentation read on 2026-10-17 (Sources).
 | # | Rule |
 |---|---|
 | IP10 | **Untrusted values can't be used before they are validated.** Every value decoded from a less privileged sender arrives as `Untrusted<T>`. Its only accessor is `validate(validator)`, which returns `T` or a `Violation`, plus one explicitly named escape for values validated elsewhere, which must state where. **Validators compare claims with the receiver's own records** (IR2): the sender's process type, its site lock, its granted capabilities, and the frame, document and resource IDs the browser issued to it. This is WebKit's `IPC::Untrusted<T>`, which Rust can enforce without exceptions: the type has no `Deref` and no public field |
-| IP11 | **Violations are typed.** `Violation::Terminate` means the sender could not have produced the value legitimately: the browser kills it and logs why (IR3). `Violation::Ignore` means an expected race, such as a message about a frame that was destroyed a moment earlier: the message is dropped. Failure to decode, an oversized message, an unknown message ID, a handle of the wrong type, and a message invalid in the receiver's current state are always `Terminate`. **Validation never panics in the browser** (Chromium: "never use `CHECK()`" on message content) |
+| IP11 | **Violations are typed.** `Violation::Terminate` means the sender could not have produced the value legitimately: the browser kills it and logs why (IR3). `Violation::Ignore` means an expected race, such as a message about a frame that was destroyed a moment earlier: the message is dropped. Failure to decode, an oversized message, an unknown message ID, a handle of the wrong type, and a message invalid in the receiver's current state are always `Terminate`. **Validation never panics in the browser** (Chromium: "never use `CHECK()`" on message content). **As amended in Round 1** (RV1-16): validators are panic-free by construction, with Clippy's `indexing_slicing`, `unwrap_used` and `arithmetic_side_effects` denied in them, and use checked arithmetic; every fuzz target reports a panic as a finding (V2). A panic anywhere aborts its process ([ADR-0002](../adr/0002-implementation-language.md)'s failure semantics; IR10) |
 | IP12 | **Every value that decodes means something.** Origins are origins, never strings or URLs; IDs are typed per kind; choices are enums; there are no parallel arrays and no methods that aren't implemented yet (Chromium's guidance [C1]). IDs that the browser issues are scoped to the process it issued them to, so a renderer can name only what it was given |
 
 ### 4.5 Synchronous requests

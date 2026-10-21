@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** as the baseline under review, since [ADR-0020](adr/0020-roadmap-and-security-levels.md) was accepted (2026-10-20, Step 6's Gate C). Written at Step 6, CP8. No milestone starts before the independent architecture review on branch `architecture-review`; a change it brings returns to the owner under MS12 |
+| **Status** | **Binding** as the baseline under review, since [ADR-0020](adr/0020-roadmap-and-security-levels.md) was accepted (2026-10-20, Step 6's Gate C). Written at Step 6, CP8. No milestone starts before the independent architecture review on branch `architecture-review`; a change it brings returns to the owner under MS12. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): §4.1 for RV1-01 and RV1-15 (CP1) |
 | **Question** | Which milestones lead from a static-document engine at L0 to the sensitive-use gate at L3 and the app web? What does each build, at which security level, against which corpus pages? Where does each decision point fall, and how does an implementation milestone run? |
 | **Answers** | Step 6 question Q5 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the tracker's handed-over questions 2 and 25–28 (§2.2); the [corpus](corpus.md)'s open question 3 |
 | **Feeds** | Milestone 1's definition (CP9); requirements traceability (CP10); the [overview](architecture/overview.md) v2's staging (CP10) |
 | **Builds on** | The [overview](architecture/overview.md) §6 (L0–L3); the [threat model](security/threat-model.md) §8 (levels and V1–V9); every design's staging section; the [corpus](corpus.md) (CO1–CO14); the [standards baseline](standards.md) (SB1–SB12); the [testing strategy](testing.md) (TS1–TS18); the [performance budgets](performance.md) (PF1–PF24); the [dependency policy](technology/dependency-policy.md); the [open questions](open-questions.md) |
-| **Last updated** | 2026-10-20 |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Rules are numbered MS1–MS12. **The order is inference** from the accepted designs and the corpus's needs, unless a rule cites a decision. Precedent is sourced (§2). Everything here is **planned**; nothing is implemented.
 
@@ -85,14 +85,14 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 ### 4.1 What each milestone contains
 
 **M1, static documents (L0).** CP9 defines it precisely, in [Milestone 1](milestone-1.md). In outline:
-- **The engine in one process** (MS4), with the AppKit shell (window, address field, back and forward) and the objc2 classes for text input and accessibility validated (EM11); the headless embedder with the test-only WebDriver server (EM9, TS2).
+- **The engine in one process** (MS4), with the AppKit shell (window, address field, back and forward) and the objc2 classes for text input and accessibility validated (EM11); the headless embedder with its script-free reference-test path and its text dumps of the DOM, styles, boxes and fragments, the display list and the network log (EM9, TS2; Round 1's RV1-01 and RV1-15).
 - **HTML and the DOM:** the first document milestone's row ([HTML and the DOM](architecture/html-and-dom.md) §8), without script: the parser with encoding sniffing and fragments; nodes, attributes and the mutation algorithms with their hooks; event dispatch for routed input; ranges and selection; forms submitted as navigations.
 - **Style:** the first document milestone's row ([style](architecture/style.md) §8).
 - **Layout and paint: CSS 2.1's visual formatting model, without paged media.** That is the first document milestone's row ([layout](architecture/layout-and-paint.md) §8), **plus tables** (approximate, LY10), lists and generated content, every CSS 2.1 border style, and outlines. Tables are brought forward from the next stage because both documents lay out tables, such as Wikipedia's infoboxes (inference); the rest completes CSS 2.1, whose reference tests are M1's CSS target ([Milestone 1](milestone-1.md) MA4).
 - **Text:** the first text milestone's row: system fonts through CoreText, HarfRust, ICU4X, the atlas, the encodings ([text](architecture/text-and-fonts.md) §8).
 - **Images:** PNG, JPEG, GIF and WebP ([images](architecture/images-and-media.md) §8). **Graphics:** the first rendering milestone's row ([graphics](architecture/graphics.md) §8).
 - **Networking:** URLs, `file:`, HTTP/1.1 and HTTP/2 over rustls with the system verifying certificates (S7), DNS-SD, an in-memory cache, mixed content, HSTS and Referrer-Policy. No cookies and no disk cache until M2.
-- **Tests without script.** WPT's testharness tests are themselves script, so M1 runs WPT's reference and crash tests only. html5lib's tokenizer tests, and the 1,973 tree-construction tests WPT keeps as `.dat` files beside their script wrappers, run in Axiom's own Rust runners (TS4); Unicode's conformance files run through ICU4X (TS6). The testharness directories become targets from M3.
+- **Tests without script.** WPT's testharness tests are themselves script, so M1 runs WPT's reference and crash tests only, through a script-free executor, one process per test (TS2), run end to end at M1's second checkpoint. Its `css/CSS2` target is interim, over the 5,652 tests in scope that need no script (Round 1, RV1-01). html5lib's tokenizer tests, and the 1,973 tree-construction tests WPT keeps as `.dat` files beside their script wrappers, run in Axiom's own Rust runners (TS4); Unicode's conformance files run through ICU4X (TS6). The testharness directories become targets from M3.
 - **Not in M1:** script (MS3), cookies, storage, web fonts, SVG, flexbox and grid, separate processes.
 
 **M2, the sandboxed engine (L1).** Renderers, one per tab, and the network process become processes under browser-compiled profiles, with S4's, S5's and S7's rules (process model §4.1). Then:
@@ -101,7 +101,8 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 - crashes are contained (overview scenario 5);
 - the spare renderer, B5's limit and discarding under memory pressure;
 - the network's first stage completes: the partitioned disk cache and cookie jar, CORS;
-- **every IPC decoder is fuzzed with coverage,** and V1's escape suite runs in each process type: L1's part of V1 and V2.
+- **every IPC decoder is fuzzed with coverage,** and V1's escape suite runs in each process type: L1's part of V1 and V2;
+- **crash reports:** a crashed helper's report is moved into a local directory the owner controls, with the build identifier (EM9; Round 1, RV1-15).
 
 **M3, script (L1).** The first script milestone's rows of the [JavaScript engine](architecture/javascript-engine.md) §8 and the [bindings](architecture/bindings.md) §8. With them:
 - the event loop's task sources, microtasks and timers;
@@ -109,7 +110,9 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 - `fetch` and `XMLHttpRequest`;
 - `localStorage`, `sessionStorage` and `document.cookie`: the first storage milestone ([storage](architecture/storage-and-workers.md) §8), whose crash tests decide SW2;
 - canvas 2D in the renderer;
-- test262 (TS5). The interpreter's measurements on corpus scripts start the evidence J1 asks for.
+- test262 (TS5). The interpreter's measurements on corpus scripts start the evidence J1 asks for;
+- **the test-only WebDriver server,** which runs WPT's testharness tests and the `css/CSS2` tests with script, for **the full `css/CSS2` target** over all 5,848 tests in scope (TS2; Round 1, RV1-01);
+- **console messages** to the embedder's log and the test runners (JE27; RV1-15).
 
 **M4, the modern document (L1).** The second stage of style, layout and the DOM: flexbox and grid, multi-column, sticky positioning, vertical writing modes, containment, the observers, SVG, clip paths, masks and filters, form controls and scrollbars; Shadow DOM's scoping, `:has()`, container queries, CSS animations and transitions; Shadow DOM and custom elements, the preload scanner, the sanitizer and the XML parser. Then:
 - web fonts through the Rust path (TX7);

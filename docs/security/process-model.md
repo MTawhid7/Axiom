@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0004's acceptance (2026-10-17). The owner accepted SI1–SI7 as staged (SI3 limited to L1 and non-sensitive L2; out-of-process iframes required for L3) and B1–B7 as initial baselines. Spike S4 measurements are folded in ([S4 results](../research/s4-results.md)). **Refined at Step 5's Gate C** (2026-10-20), with the owner's approval: S5's and S7's metadata rules, ImageIO's place, and B1's scope. **The final B1–B7** at Step 6's Gate B (2026-10-20), with [ADR-0019](../adr/0019-performance-methodology-and-budgets.md) (change record below) |
+| **Status** | **Binding** since ADR-0004's acceptance (2026-10-17). The owner accepted SI1–SI7 as staged (SI3 limited to L1 and non-sensitive L2; out-of-process iframes required for L3) and B1–B7 as initial baselines. Spike S4 measurements are folded in ([S4 results](../research/s4-results.md)). **Refined at Step 5's Gate C** (2026-10-20), with the owner's approval: S5's and S7's metadata rules, ImageIO's place, and B1's scope. **The final B1–B7** at Step 6's Gate B (2026-10-20), with [ADR-0019](../adr/0019-performance-methodology-and-budgets.md) (change record below). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): IR10 for RV1-16 (CP1) |
 | **Question** | Into which processes is Axiom split? What may each one do, how are sites assigned to processes, which rules govern IPC, and how much memory may each process use on the 8 GB M1? |
 | **Feeds** | ADR-0004; the architecture proposal (Step 4): event loop, pipeline, embedder API; Step 5 subsystems; Step 6 budgets and roadmap |
 | **Builds on** | [Threat model](threat-model.md); [macOS confinement note](../research/macos-process-confinement.md); [ADR-0001](../adr/0001-scope-and-target.md); [ADR-0002](../adr/0002-implementation-language.md); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [S2 results](../research/s2-results.md) |
-| **Last updated** | 2026-10-20: the final B1–B7 (§7) |
+| **Last updated** | 2026-10-21: Round 1's accepted findings (change record) |
 
 Everything here is **planned**; nothing is implemented. Claims about other browsers are sourced (§11). Budgets are **targets**, to be validated (§7).
 
@@ -23,6 +23,7 @@ The model is binding, so it changes only with the owner's approval. Changes sinc
 | 2026-10-20 | **B1's scope** (§7): ≤ 60 MB now covers the core browser process state, and each visible window's tile surfaces get a budget of their own, by their pixel dimensions, which Step 6 sets. One window's compositor state had left about 4 MB of the old B1 for everything else | [S6 results](../research/s6-results.md) §7 (S6-Q5) | After Step 5's Gate C ([OQ-23](../open-questions.md)): "Approved. In Step 6, budget visible window tile memory separately based on surface pixel dimensions (e.g. 25.2 MB for this Retina window), and maintain a 60 MB budget for the core browser process state." |
 | 2026-10-20 | **The final B1–B7** (§7), set by Step 6 as ADR-0004's D6 required: B1's tiles at ≤ 6.2 bytes per window pixel beside the core's 60 MB; B3's 50 MB median kept, with a ceiling for every corpus page, half of Chrome Canary 158's measured cost capped by tier; B6 bounded for sessions of document and content pages; B2, B4, B5 and B7 unchanged. The initial targets (2026-10-17) were B1 ≤ 60 MB in all, B3 ≤ 50 MB as a median, and B6 ≤ 1 GB for 10 tabs on about 6 sites, with B2, B4, B5 and B7 as now | [Performance budgets](../performance.md) §4 (PF6–PF12); [S6 results](../research/s6-results.md) §7; [S8 results](../research/s8-results.md) | Step 6's Gate B: "ADR-0019 (Performance Methodology and Budgets): Accepted as proposed, including the B1-B7 process model amendment (B1 tile scaling formula and B3 per-page memory ceilings)." |
 
+| 2026-10-21 | **IR10, failure semantics** (§6.2): every executable aborts on a panic, so a helper's panic is a death IR10 handles, and the browser's validators are panic-free | The architecture review's [RV1-16](../review/round-1/02-findings.md#rv1-16-failure-semantics-panics-and-overflow) | Round 1's dispositions (2026-10-21), RV1-16: "Enforce panic = "abort" per binary; enforce checked arithmetic / overflow checks in parsers and IPC validators." |
 ---
 
 ## 1. Summary
@@ -166,7 +167,7 @@ The transport itself (Mach messages, or Unix-domain socket pairs) is chosen in S
 | IR7 | **Shared memory has one writer.** The reader copies what it interprets before validating it, so it never reads the same bytes twice. Shared memory holds bounds-checked offsets, never pointers |
 | IR8 | **One build only.** The handshake carries a build identifier, and a mismatch refuses the connection. There is no compatibility logic between versions |
 | IR9 | **Only the browser launches processes,** and only its own bundle's helper executables |
-| IR10 | **When a child dies,** the browser discards everything that child reported and recovers from its own state: a crash page in the tab, and a reload on request |
+| IR10 | **When a child dies,** the browser discards everything that child reported and recovers from its own state: a crash page in the tab, and a reload on request. **As amended in Round 1** (RV1-16): every executable aborts on a panic (ADR-0002's failure semantics), so a helper's panic is a death handled here, and a panic on one agent's thread ends the whole renderer, never one agent alone. The browser's validators can't panic (IP11); a panic elsewhere in the browser ends it. In single-process test mode, a panic on any thread ends the process: no recovery hides a defect |
 
 **Unsafe boundary.** Receiving a Mach message or a socket message with attached handles needs FFI, which lives in `platform`. The platform layer hands the safe decoder plain bytes and a typed list of handles, so no IPC decoding code needs `unsafe` (inference).
 

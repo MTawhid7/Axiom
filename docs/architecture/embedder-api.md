@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0009's acceptance (2026-10-17, Gate B). Written at Step 4, CP9. Answers OQ-11, subject to the shell milestone's validation (EM11) |
+| **Status** | **Binding** since ADR-0009's acceptance (2026-10-17, Gate B). Written at Step 4, CP9. Answers OQ-11, subject to the shell milestone's validation (EM11). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): EM9's diagnostics and reference-test path, for RV1-01 and RV1-15 (CP1) |
 | **Question** | Where is the boundary between the engine and the browser's shell? What does the API offer in each direction? How does a headless embedder use it for tests and WPT? Is the shell pure Rust, or a thin Swift layer (OQ-11)? |
 | **Answers** | Step 4 question Q14 ([tracker](../research/step-4-architecture-proposal.md) §3): F4; OQ-11 |
 | **Feeds** | ADR-0009; CP11 (overview and crate structure); Step 5 (the shell's subsystems: menus, the accessibility bridge); Step 6 (the testing strategy and WPT) |
 | **Builds on** | [Event loop and threading](event-loop-and-threading.md) (EL6, EL24); [IPC](ipc.md) (IP2, IP7); [frame tree](frame-tree-and-navigation.md); [input and accessibility](input-and-accessibility.md); [S2 results](../research/s2-results.md) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered EM1–EM12. Precedent is sourced (§2); the design is inference unless marked otherwise.
 
@@ -118,7 +118,7 @@ From documentation read on 2026-10-17 (Sources).
 
 | # | Rule |
 |---|---|
-| EM9 | **A headless embedder implements the same API without AppKit.** It provides offscreen presentation (the compositor renders into an offscreen texture, read back for reference tests and screenshots), synthetic input injected at the compositor's sink, virtual time through the deterministic scheduler (EL24), and logged answers to decision requests. It runs WPT, reference tests, crash tests and fuzzing harnesses (Step 6), on this Mac, without a window. `content_shell` plays this role for Chromium [C1] |
+| EM9 | **A headless embedder implements the same API without AppKit.** It provides offscreen presentation (the compositor renders into an offscreen texture, read back for reference tests and screenshots), synthetic input injected at the compositor's sink, virtual time through the deterministic scheduler (EL24), and logged answers to decision requests. It runs WPT, reference tests, crash tests and fuzzing harnesses (Step 6), on this Mac, without a window. `content_shell` plays this role for Chromium [C1].<br>**As amended in Round 1** (2026-10-21):<br>• **A script-free reference-test path** (RV1-01; [testing](../testing.md) TS2): given a URL, it loads it, waits natively for the load event and for pending images and fonts, writes a PNG of the offscreen texture, and exits, so wptrunner can run reference tests before script exists. WPT's host names resolve through a hosts file that only the test build accepts.<br>• **Diagnostics for one developer** (RV1-15), staged: **from M1,** test-only commands dump, as text in stable formats that tests can compare, the DOM, a node's computed style, the box and fragment trees, the display list and the network log; **from M2,** a crashed helper's report is moved into a local directory the owner controls, with the build identifier (IP18), as S9's script already does for test crashes; **from M3,** console messages reach the embedder's log and the test runners (JE27). A developer-tools protocol stays later (JE27).<br>Every dump and log is test-only or local: none leaves this Mac |
 | EM10 | **Single-process mode uses the same API.** The shell can't tell whether the engine runs one process (L0) or many (L1–L3). That is a property of the engine's process manager |
 
 ### 4.5 The shell's language and packaging
@@ -144,7 +144,7 @@ From documentation read on 2026-10-17 (Sources).
 
 | Level | What changes |
 |---|---|
-| L0 | The shell and engine run in one process. The engine's helpers are threads |
+| L0 | The shell and engine run in one process. The engine's helpers are threads. The headless embedder's script-free test path and dumps exist from M1 (EM9) |
 | L1–L3 | The engine's process manager launches helpers; the embedder API doesn't change (EM10) |
 
 ## 6. Alternatives considered
@@ -171,7 +171,7 @@ From documentation read on 2026-10-17 (Sources).
 |---|---|---|
 | 1 | OQ-11: confirm the pure-Rust shell | **Confirmed at Gate B** (2026-10-17, ADR-0009 accepted); validated at the start of the shell milestone (EM11) |
 | 2 | The full list of settings, and how the sensitive-site list and the JIT switches are presented | Step 5, with the owner |
-| 3 | WPT's harness integration (`testharness.js`, `testdriver`) on the headless embedder | Step 6 (testing) |
+| 3 | WPT's harness integration (`testharness.js`, `testdriver`) on the headless embedder | **Settled** at Step 6 ([testing](../testing.md) TS2), and amended in Round 1 (RV1-01): a script-free executor at M1 and M2, WebDriver from M3 |
 
 ## Sources
 

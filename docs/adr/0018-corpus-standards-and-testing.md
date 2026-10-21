@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-20, Step 6's Gate B): "Accepted as proposed." The automation boundary confirmed; the not-planned list approved; spike S9 authorized (decision history) |
+| **Status** | **Accepted** (2026-10-20, Step 6's Gate B): "Accepted as proposed." The automation boundary confirmed; the not-planned list approved; spike S9 authorized (decision history). **Amended by the architecture review's Round 1** (2026-10-21): TS2, TS3, SB10 and SB11 for RV1-01 |
 | **Date** | 2026-10-20 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [The corpus](../corpus.md) (CO1–CO14); [the standards baseline](../standards.md) (SB1–SB12); [the testing strategy](../testing.md) (TS1–TS18); [S8 results](../research/s8-results.md); decision-map items X1 and X2; [OQ-2](../open-questions.md), [OQ-22](../open-questions.md); the [charter](../charter.md) §8 and principle 5; the [threat model](../security/threat-model.md) §8–§9; [ADR-0009](0009-embedder-api-and-shell.md) (EM9); [ADR-0010](0010-dependency-and-supply-chain-policy.md) |
@@ -16,6 +16,7 @@
 | 2026-10-20 | **The automation boundary** ([corpus](../corpus.md) CO3) confirmed at Gate B: "Automation Boundary: Confirmed. Automating only the 5 permitted pages and reserving the other 8 for manual testing was the correct decision to respect site terms." |
 | 2026-10-20 | **The not-planned list** ([standards](../standards.md) §5.3) approved at Gate B: "Not-Planned List: Approved as written in docs/standards.md §5.3 (DRM, plugins, Web SQL, AppCache, WebXR, Web MIDI, etc.)." |
 | 2026-10-20 | **Spike S9** ([testing](../testing.md) §9) authorized at Gate B: "Spike S9 (Testing and Fuzzing Tooling): Authorized. Proceed with validating cargo-fuzz, AddressSanitizer/ThreadSanitizer, and wptrunner on this Mac." |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1), RV1-01: "Implement a script-free screenshot harness for Milestone 1 (modeled on wptrunner's executorservo.py); move full 97% CSS2 target and WebDriver runner to Milestone 3 when JavaScript lands." TS2 now stages two executors: a script-free, process-per-test reference-test executor at M1 and M2, and the WebDriver server from M3. TS3 sends WPT's test fonts down the Rust path from M1. SB11 allows an interim target over a subset gated by a capability, and checks every tool-computed target by an independent count. **A correction to the owner's quotation:** at WPT `0f26972422`, `executorservo.py` holds Servo's WebDriver executors; the process-per-test executor the finding meant is `ServoLegacyRefTestExecutor` in `executorservolegacy.py` (observed 2026-10-21), and the documents name it. Decision 3 records the amendment |
 | 2026-10-20 | **A correction to the evidence, not the decision** (Step 6, CP9): the [standards baseline](../standards.md) §6's calibration had left reference and crash tests out, because `tools/wpt-pass-rates.py` read only subtest counts, which wpt.fyi leaves at zero for them. Recomputed as SB10 defines the measure, 42 of the 48 rows changed. `css/CSS2/`'s median is 98.1%, not 98.9%. Ladybird meets the median on `html/syntax/parsing/`, not on `css/CSS2/`, where it has 93.8%. SB10 and SB11 are unchanged |
 
 ## Question
@@ -44,7 +45,7 @@ How is Axiom judged? Three parts decided together, because each uses the others:
 - **A. Automate every corpus page that works logged out,** as S8's first design had it. Simple, but eight of the thirteen sites' terms forbid automated access, logged out too ([corpus](../corpus.md) §3).
 - **B. Pin specifications only at reviewed snapshots** (WHATWG Review Drafts, W3C Recommendations). Stable, but up to six months behind the living standards that engines and WPT follow, and many shipped CSS modules have no Recommendation.
 - **C. Fixed pass-rate targets,** such as 90% or 100% of every directory. Simple, but blind to directories whose tests cover one engine's features (`storage/`: Chrome 97.5%, the others 33%).
-- **D. A WPT executor speaking the embedder API directly.** No WebDriver server to write, but no precedent among wptrunner's products, and no reuse of `testdriver.js`'s WebDriver mapping.
+- **D. A WPT executor speaking the embedder API directly.** No WebDriver server to write, but no reuse of `testdriver.js`'s WebDriver mapping. The original assessment also said it had "no precedent among wptrunner's products"; that was wrong, since wptrunner keeps a process-per-test Servo executor ([testing](../testing.md) §2). **As amended in Round 1** (RV1-01), D's process-per-test form is M1's reference-test executor, until WebDriver arrives with script.
 - **E. Rely on hosted services** for fuzzing and continuous integration. Less load on this Mac, but hosted runners can't stand in for macOS 27's sandbox, frameworks or performance.
 
 ## Historical context and modern developments
@@ -92,7 +93,7 @@ Plus S8's census of five pages ([S8 results](../research/s8-results.md)), and wp
    - completed areas targeting the shipping median on their WPT directories, without regressions.
 3. **The testing strategy:**
    - eight layers of tests;
-   - WPT through a test-only WebDriver server in the headless embedder;
+   - WPT through a test-only WebDriver server in the headless embedder. **As amended in Round 1** (RV1-01, 2026-10-21): without script, at M1 and M2, through a script-free, process-per-test reference-test executor, with WebDriver from M3 (TS2); and a milestone may set an interim target over a directory's tests that need no script (SB11);
    - Axiom's own runners for html5lib-tests, test262 and Unicode;
    - test-only differential oracles and self-oracles, under virtual time;
    - every parser and IPC decoder fuzzed, with AddressSanitizer, ThreadSanitizer and Miri;
@@ -137,7 +138,7 @@ Spike S9 ([testing](../testing.md) §9) was authorized at Gate B. The hosted run
 ## Consequences
 
 - **Milestone 1's conformance criteria** (CP9) use SB9–SB11. Its plan pins the snapshots and WPT's revision.
-- **The headless embedder needs its WebDriver server** at the first milestone that runs WPT. wptrunner and WPT's Python tools are test dependencies that need the owner's authorization at that milestone.
+- **The headless embedder needs its WebDriver server** at the first milestone that runs WPT with script, M3; M1 needs only its script-free executor (RV1-01). wptrunner and WPT's Python tools are test dependencies that need the owner's authorization at that milestone.
 - **Expectation files live in the repository** beside the code.
 - **Every census reads the corpus's terms again,** and the session by hand needs the owner.
 - **`cargo-deny`, `cargo-vet` and `cargo-fuzz`** become checks once the owner authorizes them (DP22).

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-20), by the owner at Step 6's Gate C, as the proposed baseline: "The nine-milestone progression (M1–M9) and security levels L0–L3 are approved as the baseline under review." The independent architecture review comes before any milestone starts (decision history) |
+| **Status** | **Accepted** (2026-10-20), by the owner at Step 6's Gate C, as the proposed baseline: "The nine-milestone progression (M1–M9) and security levels L0–L3 are approved as the baseline under review." The independent architecture review comes before any milestone starts (decision history). **Amended by the review's Round 1** (2026-10-21): the roadmap's §4.1 (RV1-01, RV1-15) |
 | **Date** | 2026-10-20 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [The roadmap](../roadmap.md) (MS1–MS12); [Milestone 1](../milestone-1.md) and [ADR-0021](0021-milestone-1.md); the [threat model](../security/threat-model.md) §8; the [overview](../architecture/overview.md) §6; [ADR-0001](0001-scope-and-target.md); [ADR-0004](0004-process-model-and-sandbox.md) (J1); [ADR-0018](0018-corpus-standards-and-testing.md); [ADR-0019](0019-performance-methodology-and-budgets.md); [OQ-1](../open-questions.md), [OQ-3](../open-questions.md), [OQ-9](../open-questions.md), [OQ-16](../open-questions.md), [OQ-18](../open-questions.md) |
@@ -13,6 +13,7 @@
 |---|---|
 | 2026-10-20 | Proposed at Step 6, CP10 |
 | 2026-10-20 | **Accepted** at Step 6's Gate C. The owner: "ADR-0020 (The Roadmap and Its Security Levels): Accepted as proposed baseline. The nine-milestone progression (M1–M9) and security levels L0–L3 are approved as the baseline under review." With it: "We are deferring implementation (Milestone 1 kickoff) until the architecture and roadmap undergo independent, multi-round adversarial review." The [roadmap](../roadmap.md) is binding as that baseline; a change the review brings returns to the owner under MS12 |
+| 2026-10-21 | **Amendments accepted** in the owner's dispositions of the review's Round 1 ([the review](../review/README.md) §5.1). For the roadmap's §4.1: RV1-01, "move full 97% CSS2 target and WebDriver runner to Milestone 3 when JavaScript lands"; RV1-15, "Require headless embedder text dumps at M1, crash reporting at M2, and console logging at M3." M1 runs reference tests through a script-free executor with an interim `css/CSS2` target; M2 adds local crash reports; M3 adds the WebDriver server, the full target and the console |
 
 ## Question
 

@@ -4,6 +4,7 @@
     python3 -I tools/wpt-script-deps.py WPT_ROOT MANIFEST.json --dir css/CSS2
                                         [--exclude css/CSS2/tables/ [...]]
                                         [--types reftest [...]] [--list]
+                                        [--list-free FILE]
 
 For the tests of --types (default: reftest) under --dir, minus each --exclude
 prefix, it reads every test file and counts those that contain a <script>
@@ -16,6 +17,10 @@ contains script fails, as wpt.fyi counts a test that doesn't run (SB10).
 Counts are of test files, as the manifest's paths name them; a file with
 variants counts once. The manifest is WPT's MANIFEST.json, as `./wpt manifest`
 writes it (version 8, a trie of path segments).
+
+--list-free writes the tests in scope that contain no script to FILE, one
+`/path` per line, as wpt.fyi's summaries name them; `wpt-pass-rates.py
+--tests FILE` then computes the shipping median over just those tests.
 
 Used for the architecture review's finding RV1-01, on Milestone 1's
 `css/CSS2` target (MA4). WPT's files are untrusted data: run with -I, and keep
@@ -76,6 +81,7 @@ def main():
     parser.add_argument("--exclude", nargs="*", default=[], help="path prefixes to leave out, such as css/CSS2/tables/")
     parser.add_argument("--types", nargs="+", default=["reftest"], help="test types (default: reftest)")
     parser.add_argument("--list", action="store_true", help="also list the tests that contain script")
+    parser.add_argument("--list-free", metavar="FILE", help="write the tests without script to FILE, one /path per line")
     args = parser.parse_args()
 
     root = Path(args.root)
@@ -86,7 +92,7 @@ def main():
 
     totals = collections.Counter()
     by_dir = collections.defaultdict(collections.Counter)
-    scripted = []
+    scripted, free = [], []
     for path in paths:
         file = root / path
         if not file.is_file():
@@ -101,8 +107,7 @@ def main():
             if present:
                 by_dir[sub][fact] += 1
                 totals[fact] += 1
-        if facts["script"]:
-            scripted.append(path)
+        (scripted if facts["script"] else free).append(path)
 
     columns = ("tests", "script", "inline", "reftest-wait", "external only")
     print("| Subdirectory | " + " | ".join(columns) + " |")
@@ -119,6 +124,9 @@ def main():
         print()
         for path in scripted:
             print(path)
+    if args.list_free:
+        Path(args.list_free).write_text("".join(f"/{path}\n" for path in free), encoding="utf-8")
+        print(f"\nWrote the {len(free)} tests without script to {args.list_free}.")
 
 
 if __name__ == "__main__":

@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review |
+| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): RQ45 and RQ46 for RV1-01 (CP1) |
 | **Question** | Does every requirement trace from its source to the milestone that verifies it, and to the check that does? |
 | **Answers** | Part of Step 6 question Q7 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the tracker's handed-over question 30 (§2.2). Planned since Step 1 |
 | **Builds on** | The [charter](charter.md); the accepted ADRs; the [threat model](security/threat-model.md) and [process model](security/process-model.md); the [corpus](corpus.md), [standards](standards.md), [testing](testing.md) and [performance](performance.md) documents; the [roadmap](roadmap.md) and [Milestone 1](milestone-1.md) |
-| **Last updated** | 2026-10-20 |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone that first verifies it, and how. Later milestones keep every check green (MS2, MS7). **A requirement with no milestone is a gap;** §8 lists the gaps, and there is none. The milestones are the [roadmap](roadmap.md)'s M1–M9; "every gate" means every milestone's gate.
 
@@ -78,8 +78,8 @@ Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone th
 |---|---|---|---|---|
 | RQ43 | Specifications and suites pinned at each milestone's start | [ADR-0018](adr/0018-corpus-standards-and-testing.md) SB1, SB2 | Every milestone's plan | MA3 for M1 |
 | RQ44 | A staged API isn't exposed until it works | SB4 | Every gate | Interface exposure reviewed against the support matrix |
-| RQ45 | Completed areas at the shipping median, with no regressions | SB10–SB12 | Every gate | Expectation files (SB8); MA4 for M1 |
-| RQ46 | WPT through a test-only WebDriver server; reference tests through the offscreen texture | TS2, TS3 | M1 | wptrunner's `axiom` product (MA4) |
+| RQ45 | Completed areas at the shipping median, with no regressions; interim targets over subsets gated by a capability, with the whole directory's target at the named milestone | SB10–SB12 | Every gate | Expectation files (SB8); MA4 for M1, whose `css/CSS2` target is interim until M3 (RV1-01) |
+| RQ46 | WPT through wptrunner's `axiom` product: a script-free reference-test executor without script, a test-only WebDriver server with it; reference tests through the offscreen texture | TS2, TS3 | M1 (script-free), M3 (WebDriver) | wptrunner's `axiom` product (MA4), run end to end at M1's second checkpoint (RV1-01) |
 | RQ47 | Axiom's own runners for html5lib-tests, test262 and Unicode | TS4–TS6 | M1 (html5lib, Unicode), M3 (test262) | MA4 |
 | RQ48 | Differential oracles and self-oracles, under virtual time | TS7, TS8 | M1 | MA8; html5ever's differential fuzzing (MA7) |
 | RQ49 | Every parser and IPC decoder fuzzed; sanitizers; Miri | TS9–TS11 | Every milestone, for what it adds | MA7 for M1; S9's results for the tools |

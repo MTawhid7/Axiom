@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0017](../adr/0017-javascript-engine-and-bindings.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP16. No Step 4 interface changes (SC1) |
+| **Status** | **Binding** since [ADR-0017](../adr/0017-javascript-engine-and-bindings.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP16. No Step 4 interface changes (SC1). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): JE27 for RV1-15 (CP1) |
 | **Question** | How is Axiom's own JavaScript engine built: the front end, the bytecode and its interpreter, the value type, objects and strings, execution of functions, generators and modules, the standard library with `RegExp`, `Intl` and dates, errors and interrupts, and room for a JIT? What would a WebAssembly engine need from it? |
 | **Answers** | Step 5 question Q12 ([tracker](../research/step-5-subsystems.md) §3); the handed-over questions 17 (dispatch), 18 (the value type, rooting, the benchmark) and 19 (ropes and slices), and evidence for 21 (OQ-3) (§2.2); [script and heap](script-and-heap.md) open question 2 |
 | **Feeds** | Part 2's ADRs (CP18); CP17 (bindings: the value type, conversions, platform objects); [OQ-3](../open-questions.md), as evidence |
 | **Builds on** | [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md) (Pattern B); [script and heap](script-and-heap.md) (SH1–SH14); [ADR-0004](../adr/0004-process-model-and-sandbox.md) (J1–J7); [S3 results](../research/s3-results.md); the [rendering pipeline](rendering-pipeline.md) (PL11); the [event loop](event-loop-and-threading.md) (EL9, EL14, EL17, EL24); the [frame tree](frame-tree-and-navigation.md) (FT11); [text and fonts](text-and-fonts.md) (TX1, TX2); [HTML and the DOM](html-and-dom.md) (HD18, HD30); [style](style.md) (ST30); the [dependency policy](../technology/dependency-policy.md) (DP1, DP2, DP5) |
-| **Last updated** | 2026-10-20: binding |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered JE1–JE32. Precedent is sourced (§3); the design is inference unless marked otherwise.
 
@@ -137,7 +137,7 @@ No new dependency is proposed: ICU4X is already admitted (TX2), and the differen
 |---|---|
 | JE25 | **Errors and stack traces.** A thrown error records its stack as pairs of function and bytecode offset, and source positions are computed only when `stack` is read, from compact position tables, so throwing stays cheap. **The `stack` format is approximate:** no specification defines it, so it follows the format the engines share (§2). `Error.isError` is standard (§2) |
 | JE26 | **Interrupts and limits.** The interrupt flag (SH5) stops runaway script on back edges, calls and long `RegExp` matches. **Stack limits:** the register file has a bounded size, and native re-entry (builtins calling back into bytecode) is counted, so deep recursion throws a `RangeError` instead of overflowing the thread's stack |
-| JE27 | **Debugging,** later: breakpoints and stepping through a per-function debug copy of the bytecode with breakpoint instructions, checked like the interrupt flag, so code without breakpoints pays nothing. The developer tools protocol and its process boundary are decided at that milestone (staged) |
+| JE27 | **Debugging,** later: breakpoints and stepping through a per-function debug copy of the bytecode with breakpoint instructions, checked like the interrupt flag, so code without breakpoints pays nothing. The developer tools protocol and its process boundary are decided at that milestone (staged). **Console messages come first** (Round 1, RV1-15): from the first script milestone, `console`'s output reaches the embedder's log and the test runners ([embedder API](embedder-api.md) EM9) |
 
 ### 5.7 Memory, threads, a JIT, WebAssembly and tests
 

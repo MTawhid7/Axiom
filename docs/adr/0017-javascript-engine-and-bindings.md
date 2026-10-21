@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-20), by the owner at Step 5's Gate C, as proposed |
+| **Status** | **Accepted** (2026-10-20), by the owner at Step 5's Gate C, as proposed. **Amended by the architecture review's Round 1** (2026-10-21): JE27 (RV1-15) |
 | **Date** | 2026-10-19 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [The JavaScript engine](../architecture/javascript-engine.md) (JE1–JE32); [WebIDL bindings](../architecture/bindings.md) (WB1–WB23); [ADR-0001](0001-scope-and-target.md) (R2); [ADR-0003](0003-gc-handle-and-rooting-pattern.md); [ADR-0004](0004-process-model-and-sandbox.md) (J1–J7); [ADR-0008](0008-script-agents-and-heap.md); [ADR-0011](0011-text-fonts-and-unicode.md) (TX1, TX2); [ADR-0015](0015-html-parsing-and-the-dom.md); [S3 results](../research/s3-results.md); decision-map item P7; [OQ-3](../open-questions.md) |
@@ -13,6 +13,7 @@
 |---|---|
 | 2026-10-19 | Proposed at Step 5, CP18 |
 | 2026-10-20 | **Accepted** by the owner at Step 5's Gate C: "ADR-0017 (JavaScript Engine and Bindings): Accepted as proposed." |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1), RV1-15: "Require headless embedder text dumps at M1, crash reporting at M2, and console logging at M3." JE27 gains console output to the embedder's log and the test runners from the first script milestone (M3) |
 
 ## Question
 

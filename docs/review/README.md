@@ -70,7 +70,7 @@ The owner's decisions, in the owner's words. "Changed" names the checkpoint (§5
 
 | ID | Severity | Blocks | Disposition | The owner's words | Date | Changed |
 |---|---|---|---|---|---|---|
-| RV1-01 | Critical | M1 | **Accepted** | "Adopt an interim CSS2 conformance target over the 5,652 script-free tests (shipping browser median on that subset)." "Implement a script-free screenshot harness for Milestone 1 (modeled on wptrunner's executorservo.py); move full 97% CSS2 target and WebDriver runner to Milestone 3 when JavaScript lands." "Run the test harness end-to-end at M1 Checkpoint 2 rather than Checkpoint 10." | 2026-10-21 | CP1 (pending) |
+| RV1-01 | Critical | M1 | **Accepted** | "Adopt an interim CSS2 conformance target over the 5,652 script-free tests (shipping browser median on that subset)." "Implement a script-free screenshot harness for Milestone 1 (modeled on wptrunner's executorservo.py); move full 97% CSS2 target and WebDriver runner to Milestone 3 when JavaScript lands." "Run the test harness end-to-end at M1 Checkpoint 2 rather than Checkpoint 10." | 2026-10-21 | CP1: [Milestone 1](../milestone-1.md) MA1, MA2, MA4, MA7, MA10, MA11; [testing](../testing.md) TS2, TS3, TS12; [standards](../standards.md) SB10, SB11; [EM9](../architecture/embedder-api.md); the [roadmap](../roadmap.md) §4.1; ADRs 0009, 0018, 0020, 0021; `--list-free` and `--tests` in the WPT tools. The interim target is ≥ 97% of the 5,652 tests, their shipping median (97.8%) rounded down |
 | RV1-02 | Critical | M1 | **Accepted** | "Formally design the sandboxed GPU/compositor process topology now (Renderer → GPU Process → Browser CALayer tree)." "Build the separate GPU/compositor process at Milestone 2; split Budget B1 accordingly." "Ensure Level 3 (L3) security certification at Milestone 6 is performed on the final multi-process topology." | 2026-10-21 | CP2 (pending) |
 | RV1-03 | High | M1 | **Accepted** | "Adopt the single binding rule: cross-site frames are separate agents with independent event loops and heaps behind remote proxies from Milestone 1." "Correct conflicting staging text in overview.md §6, frame-tree-and-navigation.md §5, and roadmap.md M5." | 2026-10-21 | CP3 (pending) |
 | RV1-04 | High | M3 | **Accepted** | "Fix the GC end-state before Milestone 3 via an amendment to ADR-0008: generational nursery, allocation-driven incremental marking, parallel marking in pauses, and non-moving tenured arenas with selective evacuation." "Evaluate pause times on a 1M-object heap in Spike S11." | 2026-10-21 | CP6 (pending) |
@@ -84,8 +84,8 @@ The owner's decisions, in the owner's words. "Changed" names the checkpoint (§5
 | RV1-12 | Medium | M4 | **Accepted** | "RV1-12 to RV1-14 (Corpus Capabilities, WebAssembly/JIT Timing, Site Compatibility): Accepted. Schedule for Milestones 3–5 as outlined in 04-round-2-actions.md." | 2026-10-21 | CP5 (pending) |
 | RV1-13 | Medium | M3 | **Accepted** | As RV1-12 | 2026-10-21 | CP5 (pending) |
 | RV1-14 | Medium | M4 | **Accepted** | As RV1-12 | 2026-10-21 | CP5 (pending) |
-| RV1-15 | Medium | M1 | **Accepted** | "Require headless embedder text dumps at M1, crash reporting at M2, and console logging at M3." | 2026-10-21 | CP1 (pending) |
-| RV1-16 | Medium | M1 | **Accepted** | "Enforce panic = "abort" per binary; enforce checked arithmetic / overflow checks in parsers and IPC validators." | 2026-10-21 | CP1 (pending) |
+| RV1-15 | Medium | M1 | **Accepted** | "Require headless embedder text dumps at M1, crash reporting at M2, and console logging at M3." | 2026-10-21 | CP1: EM9; [JE27](../architecture/javascript-engine.md); MA1, MA11; the roadmap §4.1; ADRs 0009, 0017, 0020, 0021 |
+| RV1-16 | Medium | M1 | **Accepted** | "Enforce panic = "abort" per binary; enforce checked arithmetic / overflow checks in parsers and IPC validators." | 2026-10-21 | CP1: [ADR-0002](../adr/0002-implementation-language.md)'s failure semantics; IR10 ([process model](../security/process-model.md) change record); [IP11](../architecture/ipc.md) and ADR-0005; MA7, MA10, MA11; the [overview](../architecture/overview.md) §2 |
 | RV1-17 | Medium | M1 | **Accepted** | "Validate local self-signed codesigning persistence via Spike S15." | 2026-10-21 | CP5 (pending) |
 | RV1-18 | Medium | M1, M3 | **Accepted** | "Split generated WebIDL crates by interface group; measure compile times in Spike S13." | 2026-10-21 | CP5 (pending) |
 | RV1-19 | Low | M5 | **Accepted** | "RV1-19 to RV1-22 (Timing Side-Channels, Rustls ECH, Passkeys, Product Gaps): Accepted. Correct stale facts and schedule resolutions for Milestones 5–6." | 2026-10-21 | CP5 (pending) |
@@ -94,6 +94,9 @@ The owner's decisions, in the owner's words. "Changed" names the checkpoint (§5
 | RV1-22 | Low | M6 | **Accepted** | As RV1-19 | 2026-10-21 | CP5 (pending) |
 
 **Where the owner's words differ from a counter-proposal, the owner's words govern.** Where a counter-proposal offered a choice the owner's words don't make, the checkpoint records the choice it made and why, for the owner to overrule.
+
+**Corrections found while making the changes:**
+- **RV1-01's precedent** (CP1): the process-per-test executor that the finding, and so the owner's words, call `executorservo.py` is `ServoLegacyRefTestExecutor` in `executorservolegacy.py`; at the pinned revision `executorservo.py` holds Servo's WebDriver executors (observed 2026-10-21). The documents name the right file, and the finding carries a note.
 
 ### 5.2 Spikes
 
@@ -115,7 +118,7 @@ The owner's authorizations (2026-10-21). Each covers only the questions it names
 
 | Checkpoint | The owner's name | Findings | State |
 |---|---|---|---|
-| CP1 | "M1 Conformance & Test Harness" | RV1-01, RV1-15, RV1-16 | Pending |
+| CP1 | "M1 Conformance & Test Harness" | RV1-01, RV1-15, RV1-16 | Done, `docs(review-r1-cp1)` |
 | CP2 | "Multi-Process Topology & GPU Process Design" | RV1-02, RV1-07, RV1-09 | Pending |
 | CP3 | "Frame Tree & Cross-Site Agents" | RV1-03 | Pending |
 | CP4 | "Developer Scope & Dependencies" | RV1-08, with `encoding_rs` graded | Pending |

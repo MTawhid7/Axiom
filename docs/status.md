@@ -65,6 +65,11 @@
 
 **Done:**
 - **The dispositions recorded:** [the review](review/README.md) §5 (findings, spikes, checkpoints), the round's status rows, the [index](README.md) and this status. CP6 is added for RV1-04–RV1-06, which the five named checkpoints leave out.
+- **CP1, Milestone 1's conformance and harness (RV1-01), diagnostics (RV1-15) and failure semantics (RV1-16).**
+  - **The interim `css/CSS2` target** is ≥ 97% of the 5,652 tests in scope that need no script: their shipping median is 97.8% (Chrome 5,550, Firefox 5,527, Safari 5,450 passing), computed with the tools' new `--list-free` and `--tests`, and checked by an independent count (grep found the same 196 tests with script). The full target over all 5,848 is M3's.
+  - **A correction:** the script-free precedent is `ServoLegacyRefTestExecutor` in `executorservolegacy.py`; at the pinned revision `executorservo.py`, the file RV1-01 and the owner's words name, holds Servo's WebDriver executors. Recorded in the review's log, ADR-0018 and ADR-0021.
+  - **A choice the dispositions left open:** WPT's test fonts take the Rust path from M1, as TX21 and TS3 already said (RV1-01's first option).
+  - Amended: Milestone 1, testing, the standards, EM9, JE27, the roadmap §4.1, IR10, IP11, the overview §2, and ADRs 0002, 0005, 0009, 0017, 0018, 0020 and 0021.
 
 ### 2026-10-21 — Session 17 (the review's Round 1)
 

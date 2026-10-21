@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-20), by the owner at Step 6's Gate C, as the specification baseline for M1: "The scope, pinned baselines, and measurable criteria (MA1–MA12) are approved as written." **Starting it (MA10) is on hold** until the independent architecture review is done (decision history) |
+| **Status** | **Accepted** (2026-10-20), by the owner at Step 6's Gate C, as the specification baseline for M1: "The scope, pinned baselines, and measurable criteria (MA1–MA12) are approved as written." **Starting it (MA10) is on hold** until the independent architecture review is done (decision history). **Amended by the architecture review's Round 1** (2026-10-21): MA1, MA2, MA4, MA7, MA10 and MA11 for RV1-01, RV1-15 and RV1-16 |
 | **Date** | 2026-10-20 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Milestone 1](../milestone-1.md) (MA1–MA12); [the roadmap](../roadmap.md) and [ADR-0020](0020-roadmap-and-security-levels.md); [ADR-0018](0018-corpus-standards-and-testing.md); [ADR-0019](0019-performance-methodology-and-budgets.md); [S9 results](../research/s9-results.md); the [charter](../charter.md) §8 |
@@ -13,6 +13,7 @@
 |---|---|
 | 2026-10-20 | Proposed at Step 6, CP10 |
 | 2026-10-20 | **Accepted** at Step 6's Gate C. The owner: "ADR-0021 (Milestone 1, Static Documents): Accepted as the specification baseline for M1. The scope, pinned baselines, and measurable criteria (MA1–MA12) are approved as written." And: "Milestone 1 Implementation (MA10): ON HOLD. Do not create crate skeletons or write production code. The next phase will be conducted on branch architecture-review in a dedicated review cycle." |
+| 2026-10-21 | **Amendments accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1):<br>• **RV1-01:** "Adopt an interim CSS2 conformance target over the 5,652 script-free tests (shipping browser median on that subset)." "Implement a script-free screenshot harness for Milestone 1 (modeled on wptrunner's executorservo.py); move full 97% CSS2 target and WebDriver runner to Milestone 3 when JavaScript lands." "Run the test harness end-to-end at M1 Checkpoint 2 rather than Checkpoint 10." The shipping median on the 5,652 tests is 97.8% (Chrome 98.2%, Firefox 97.8%, Safari 96.4%), so MA4's target is ≥ 97% of them, recomputed with the tools and checked by an independent count. The executor the finding meant is `ServoLegacyRefTestExecutor` in `executorservolegacy.py`; at the pinned revision `executorservo.py` holds Servo's WebDriver executors (observed 2026-10-21).<br>• **RV1-15:** "Require headless embedder text dumps at M1, crash reporting at M2, and console logging at M3."<br>• **RV1-16:** "Enforce panic = "abort" per binary; enforce checked arithmetic / overflow checks in parsers and IPC validators."<br>MA1, MA2, MA4, MA7, MA10 and MA11 are amended in [Milestone 1](../milestone-1.md), and decision 3 records it. **One choice the dispositions left open** is made: RV1-01's counter-proposal offered the test fonts either on the Rust path or on CoreText with reruns after macOS updates; MA4 takes the Rust path, which TX21 and TS3 already require |
 
 ## Question
 
@@ -37,7 +38,7 @@ What exactly is Milestone 1, how is it accepted, and what does starting it requi
 ## Historical context and modern developments
 
 - **WPT keeps html5lib's 1,973 tree-construction tests as `.dat` files** beside the three script wrappers that run them (observed in WPT at `0f26972422`), so a runner without script can read them directly, as parsers' own test harnesses do.
-- **No new engine meets the shipping median on `css/CSS2/`'s reference tests yet:** on the 5,848 in M1's scope, Servo passes 93.7% and Ladybird 91.2%, against a median of 97.8% (measured from wpt.fyi's runs, with the corrected counting of the standards baseline §6).
+- **No new engine meets the shipping median on `css/CSS2/`'s reference tests yet:** on the 5,848 in M1's scope, Servo passes 93.7% and Ladybird 91.2%, against a median of 97.8% (measured from wpt.fyi's runs, with the corrected counting of the standards baseline §6). On the 5,652 that need no script, Servo passes 93.7% and Ladybird 91.4%, against the same median (measured, 2026-10-21, RV1-01).
 
 ## Analysis
 
@@ -56,10 +57,11 @@ What exactly is Milestone 1, how is it accepted, and what does starting it requi
 1. **Scope** (MA1, MA2): the static-document engine at L0, with CSS 2.1's visual formatting model without paged media, in one process with every interface of the later levels; no script, cookies, storage, web fonts, SVG, flexbox, grid or separate processes.
 2. **The baseline** pinned at its start (MA3).
 3. **Acceptance criteria** (MA4–MA8), each a number with its method:
-   - **conformance:** tokenizer tests 100%; tree construction at least 96%; `css/CSS2`'s 5,848 reference tests in scope at least 97%, their shipping median rounded down; Unicode's conformance files 100%; no regressions;
+   - **conformance:** tokenizer tests 100%; tree construction at least 96%; `css/CSS2`'s 5,848 reference tests in scope at least 97%, their shipping median rounded down; Unicode's conformance files 100%; no regressions. **As amended in Round 1** (RV1-01, 2026-10-21): `css/CSS2`'s target at M1 is interim, at least 97% of the 5,652 tests in scope that need no script (their shipping median, 97.8%, rounded down), run through a script-free executor and checked end to end at the second checkpoint; the full target over all 5,848 applies at M3, with WebDriver;
    - **the corpus:** Wikipedia and MDN render readably, links navigate, and 10 loads never crash or hang;
    - **budgets:** 95 MB idle; Wikipedia ≤ 100 MB and MDN ≤ 70 MB above it; S6's frame budgets; no task over 50 ms; no idle wakeups; pauses within 4 ms; T1–T4;
-   - **security and robustness:** no script engine; no credentials by construction; every parser and decoder fuzzed at least an hour with no open finding; `unsafe` only where allowed; every dependency registered and graded;
+   - **security and robustness:** no script engine; no credentials by construction; every parser and decoder fuzzed at least an hour with no open finding; `unsafe` only where allowed; every dependency registered and graded. **As amended in Round 1** (RV1-16): every executable aborts on a panic, and the browser's validators, the parsers and the decoders are panic-free with checked arithmetic;
+   - **diagnostics,** added in Round 1 (RV1-15): the headless embedder's text dumps of the DOM, computed styles, boxes and fragments, the display list and the network log;
    - **determinism:** parsing and painting independent of chunking and repetition.
 4. **The gate** measured under PF1, with every criterion's value beside its target (MA9).
 5. **Starting it** needs the owner's authorization of the list in MA10.
@@ -82,7 +84,7 @@ What exactly is Milestone 1, how is it accepted, and what does starting it requi
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
 | The milestone is large | High | A long milestone | MA11's checkpoints |
-| `css/CSS2`'s median is high, and no new engine meets it yet | High | The conformance gate is missed | An interim target with its reason, for the owner (SB11) |
+| `css/CSS2`'s median is high, and no new engine meets it yet | High | The conformance gate is missed | M1's target is interim, over the tests that need no script (RV1-01); a further interim target needs a reason, for the owner (SB11) |
 | ThreadSanitizer stays broken | Medium | Threads checked by review and Miri | MA7 records it; rechecked with each nightly |
 | Wikipedia's chrome needs flexbox and grid | High | The page's header looks wrong | MA5 judges the article's content |
 
@@ -96,4 +98,4 @@ What exactly is Milestone 1, how is it accepted, and what does starting it requi
 
 - **Phase Zero's last criterion is met** once this ADR is accepted: Milestone 1's measurable acceptance criteria are written.
 - **Starting Milestone 1** needs the owner's authorization of MA10's list: the branch, the skeleton, the dependencies, the data, the tools and the live loads.
-- **`tools/wpt-pass-rates.py`** gains `--manifest` and `--types`, to compute medians over reference tests (MA4).
+- **`tools/wpt-pass-rates.py`** gains `--manifest` and `--types`, to compute medians over reference tests (MA4), and, in Round 1, `--tests`, to compute them over a list such as `tools/wpt-script-deps.py --list-free` writes (RV1-01).

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B |
+| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B. **EM9 amended by the architecture review's Round 1** (2026-10-21): the script-free reference-test path and staged diagnostics (RV1-01, RV1-15) |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Embedder API](../architecture/embedder-api.md) (EM1–EM12); [S2 results](../research/s2-results.md); [event loop and threading](../architecture/event-loop-and-threading.md) (EL6, EL24); [IPC](../architecture/ipc.md); [input and accessibility](../architecture/input-and-accessibility.md); decision-map item F4; OQ-11 |
@@ -13,6 +13,7 @@
 |---|---|
 | 2026-10-17 | Proposed at Step 4, CP12 |
 | 2026-10-17 | **Accepted** by the owner at Gate B: "ADR-0009 (Embedder API & Pure-Rust Shell): Accepted." OQ-11 is resolved, subject to the shell milestone's validation (decision 6) |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1): RV1-15, "Require headless embedder text dumps at M1, crash reporting at M2, and console logging at M3." And RV1-01, "Implement a script-free screenshot harness for Milestone 1". EM9 is amended in the [embedder API](../architecture/embedder-api.md): the headless embedder writes a PNG per test without script, and its diagnostics are staged (dumps at M1, crash reports at M2, the console at M3). Decision 5 records it |
 
 ## Question
 
@@ -58,7 +59,7 @@ See [embedder API](../architecture/embedder-api.md) §4. The language question t
 2. **Commands in; events and requests for decisions out.** The engine applies its policy first, and every request has a default (EM4–EM5).
 3. **Presentation, input, IME and accessibility** cross as shell-hosted objects that the engine keeps current. Profile data lives with the engine (EM6–EM7).
 4. **The browser's own UI is native, never web content** (EM8).
-5. **A headless embedder** with offscreen surfaces, synthetic input and virtual time, for WPT and reference tests. Single-process mode uses the same API (EM9–EM10).
+5. **A headless embedder** with offscreen surfaces, synthetic input and virtual time, for WPT and reference tests. Single-process mode uses the same API (EM9–EM10). **As amended in Round 1** (RV1-01, RV1-15): it writes a reference test's PNG without script, and dumps the DOM, styles, boxes and fragments, the display list and the network log as text from M1, with crash reports at M2 and the console at M3.
 6. **OQ-11: a pure-Rust shell with objc2.** The shell milestone first validates an objc2-defined view class for text input and accessibility, a menu bar and a bundle. A Swift shell can sit behind the same API if that validation fails (EM11).
 7. **One ad-hoc-signed bundle** holding the shell and helper executables, built by a script without Xcode (EM12).
 

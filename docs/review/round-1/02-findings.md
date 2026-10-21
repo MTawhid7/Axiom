@@ -50,6 +50,7 @@ Severities are defined in the [review process](../README.md#3-findings-and-sever
 
   TS2 lists "execute script (including asynchronous)" among the server's commands. Without a script engine, that executor can't run one reference test.
 - **Observed: a script-free precedent sits in the same directory.** `executorservo.py` launches the browser per test and reads the screenshot it writes, so it needs no script in the page.
+  - **Correction (2026-10-21, at CP1):** at `0f26972422`, `executorservo.py` holds Servo's WebDriver executors. The process-per-test executor described here is `ServoLegacyRefTestExecutor`, in `executorservolegacy.py` beside it (observed). The precedent stands; its file name was wrong, and the owner's disposition quotes it. The amended documents name the right file.
 - **Observed: a smaller inconsistency.** MA4 has the headless embedder inject "WPT's test fonts, Ahem among them, as system fonts". TX12 rasterizes system fonts with CoreText. TX21 and TS3 say pixel tests use web fonts, which "take the Rust path and so don't change with macOS".
 - **Observed: MA11 builds the harness at checkpoint 10 of 12,** so the defect would surface late in the longest milestone.
 
