@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are being made in checkpoints (§5.3); spikes S10, S12 and S15 are authorized (§5.2) |
+| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are made in checkpoints (§5.3), and the three spikes authorized before Milestone 1, S10, S12 and S15, are done (§5.2) |
 | **Question** | How is the Phase Zero baseline reviewed before Milestone 1 starts: in what format, with which severities, how do findings become changes, and when does the review end? |
 | **Builds on** | The owner's decision 8 at Step 6's Gate C (2026-10-20): Milestone 1 waits "until the architecture and roadmap undergo independent, multi-round adversarial review"; the recommendation in [status](../status.md) for the review's brief; the findings format the [handover](../handover-phase-0.md) §3 suggests |
 | **Last updated** | 2026-10-21 |
@@ -104,7 +104,7 @@ The owner's authorizations (2026-10-21). Each covers only the questions it names
 
 | Spike | When | The owner's words | State |
 |---|---|---|---|
-| S10 | "Authorized Immediately (Pre-Milestone 1)" | "GPU process IPC hop latency, display list validation, and zero-copy texture sharing." | Authorized |
+| S10 | "Authorized Immediately (Pre-Milestone 1)" | "GPU process IPC hop latency, display list validation, and zero-copy texture sharing." | **Done** (2026-10-21): the commit reaches the browser's layer tree in 48.8 µs at the median, within PF13's 1 ms; zero-copy sampling from memory entries works under RV1-09's renderer profile; validation costs about 9.4 ns an item. The GPU process's rules and a warm-up before its profile await the owner ([results](../research/s10-results.md) §8) |
 | S12 | As S10 | "ThreadSanitizer workaround routes on macOS 27 (-Z external-clangrt)." | **Done** (2026-10-21): both routes work ([results](../research/s12-results.md)) |
 | S15 | As S10 | "Stable self-signed codesigning persistence across rebuilds." | **Done** (2026-10-21): S4's probes and the JIT entitlements behave as ad hoc, and Keychain access survives a rebuild; privacy permissions by hand at M1 ([results](../research/s15-results.md)) |
 | S11 | "Authorized Before Milestone 3" | "Spike S11 (GC pauses & 32-bit slot width)" | Authorized, not started |

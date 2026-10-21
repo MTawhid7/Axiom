@@ -67,3 +67,8 @@ allow spikes/s9/race src/planted/
 # Spike S15 (the review's RV1-17): Security.framework's legacy keychain functions,
 # under invariants K1–K4 (spikes/s15/probe/src/platform/mod.rs).
 allow spikes/s15/probe src/platform/
+
+# Spike S10 (the review's RV1-02, RV1-09): Mach ports, messages and memory entries,
+# IOSurface, Metal and CoreAnimation for the GPU/compositor process, under invariants
+# G1–G9 (spikes/s10/gpu/src/platform/mod.rs).
+allow spikes/s10/gpu src/platform/

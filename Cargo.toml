@@ -10,7 +10,7 @@
 
 [workspace]
 resolver = "3"
-members = ["spikes/s1/*", "spikes/s2/*", "spikes/s3/*", "spikes/s4/*", "spikes/s5/*", "spikes/s6/*", "spikes/s7/*", "spikes/s9/decoder", "spikes/s9/race", "spikes/s15/probe"]
+members = ["spikes/s1/*", "spikes/s2/*", "spikes/s3/*", "spikes/s4/*", "spikes/s5/*", "spikes/s6/*", "spikes/s7/*", "spikes/s9/decoder", "spikes/s9/race", "spikes/s10/gpu", "spikes/s15/probe"]
 # S5's text corpus and font list are data, not a crate; S9's fuzz crate is its own workspace.
 exclude = ["spikes/s5/corpus", "spikes/s9/fuzz"]
 

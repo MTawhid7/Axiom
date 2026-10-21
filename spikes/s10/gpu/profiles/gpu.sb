@@ -1,0 +1,61 @@
+;; Spike S10: the GPU/compositor process's profile (RV1-02), grown by S4's
+;; and S7's method: deny by default; run once under a profile that allows and
+;; reports everything (the reporting runs of tools/s10-measure.sh); allow only
+;; what a failure shows is needed, with its reason; and check each rule by
+;; removing it (the script's removal tests).
+(version 1)
+(deny default)
+
+;; The browser's rendezvous service, as every helper has it (S4).
+(allow mach-lookup (global-name (param "RENDEZVOUS")))
+
+;; No code generation (JIT rule J3).
+(deny dynamic-code-generation)
+
+;; S10 (2026-10-21): IOSurface's connection set-up copies the main bundle's
+;; URL, and without the metadata of the executable's directory
+;; CFBundleGetMainBundle fails and the process crashes in
+;; __CFCheckCFInfoPACSignature, with no denial logged: S5's and S7's silent
+;; failure, the same rule.
+(allow file-read-metadata (literal (param "EXECUTABLE_DIR")))
+
+;; The GPU: its user client, and IOSurface's, for the tiles' surfaces.
+(allow iokit-open-user-client
+  (iokit-user-client-class "AGXDeviceUserClient")
+  (iokit-user-client-class "IOSurfaceRootUserClient"))
+
+;; The GPU's Metal driver bundle, which Metal loads (AGXMetal13_3 on the M1;
+;; the name changes with the GPU's generation).
+(allow file-read* (regex #"^/System/Library/Extensions/AGXMetal[^/]*\.bundle(/|$)"))
+
+;; The shader compiler's identity, which Metal checks against its caches.
+(allow file-read-data
+  (literal "/System/Library/PrivateFrameworks/AGXCompilerCore.framework/agxa_compiler_hash"))
+
+;; S10 (2026-10-21): compiling shaders from source needs Metal's compiler
+;; service. Without it, a cold compile fails with "Unable to reach
+;; MTLCompilerService … Connection init failed at lookup with error 159 -
+;; Sandbox restriction"; a compile that Metal's cache answers doesn't look it
+;; up, which is why the reporting run, on a warm cache, didn't list it.
+(allow mach-lookup (xpc-service-name "com.apple.MTLCompilerService"))
+
+;; Metal's shader caches, under the user's cache directory.
+(allow file-read* file-write* (subpath (param "METAL_CACHE")))
+
+;; S10 (2026-10-21): Metal finds those caches through the user's cache
+;; directory, by its /var/folders/… path, and reads the metadata of /var (a
+;; symbolic link) and of the directory itself. Without either rule it can't use
+;; the caches, and fails nothing: every start compiles the shaders again, with
+;; no error, about 0.45 s to ready instead of about 20 ms. Resolving the
+;; directory itself needs services this profile denies, so the GPU process
+;; resolves it before entering the profile (gpu_process.rs).
+(allow file-read-metadata
+  (literal "/var")
+  (literal (param "USER_CACHE_DIR")))
+
+;; S10 (2026-10-21): the GPU's driver reads the memory size while it creates
+;; the device, and aborts without it (in AGXG13GFamilyDevice's initializer).
+;; Metal also reads kern.bootargs, kern.osproductversion and the performance
+;; levels' CPU counts; denying them changed nothing S10 measured, warm or
+;; cold, so they stay denied.
+(allow sysctl-read (sysctl-name "hw.memsize"))

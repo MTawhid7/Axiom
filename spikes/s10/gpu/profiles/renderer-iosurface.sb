@@ -1,0 +1,15 @@
+;; Spike S10: the old design's renderer, for S10-Q2's comparison only: S4's
+;; renderer profile plus IOSurface's user client, so the renderer can create
+;; IOSurfaces, as the process model allowed "if needed" before RV1-09.
+(version 1)
+(deny default)
+
+(allow mach-lookup (global-name (param "RENDEZVOUS")))
+
+(allow iokit-open (iokit-user-client-class "IOSurfaceRootUserClient"))
+;; IOSurface's connection reads the main bundle's URL; without the metadata of
+;; the executable's directory the bundle is null, and IOSurfaceCreate crashes
+;; in CoreFoundation instead of failing (as gpu.sb found).
+(allow file-read-metadata (literal (param "EXECUTABLE_DIR")))
+
+(deny dynamic-code-generation)

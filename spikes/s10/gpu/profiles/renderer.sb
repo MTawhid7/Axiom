@@ -1,0 +1,16 @@
+;; Spike S10: the renderer's profile, as S4's renderer.sb, with the explicit
+;; IOKit denial the review's RV1-09 asks for: renderers write pixels only into
+;; Mach memory entries, and never open an IOKit user client, IOSurface's
+;; included. (deny default) covers iokit-open already; the explicit rule states
+;; the intent where V1's escape suite looks for it, as J3's rule does for code
+;; generation.
+(version 1)
+(deny default)
+
+(allow mach-lookup (global-name (param "RENDEZVOUS")))
+
+(deny iokit-open)
+
+;; (deny default) does not cover dynamic code generation (S4-Q4), so it is
+;; denied explicitly (JIT rule J3).
+(deny dynamic-code-generation)

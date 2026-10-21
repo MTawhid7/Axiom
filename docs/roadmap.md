@@ -7,7 +7,7 @@
 | **Answers** | Step 6 question Q5 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the tracker's handed-over questions 2 and 25–28 (§2.2); the [corpus](corpus.md)'s open question 3 |
 | **Feeds** | Milestone 1's definition (CP9); requirements traceability (CP10); the [overview](architecture/overview.md) v2's staging (CP10) |
 | **Builds on** | The [overview](architecture/overview.md) §6 (L0–L3); the [threat model](security/threat-model.md) §8 (levels and V1–V9); every design's staging section; the [corpus](corpus.md) (CO1–CO14); the [standards baseline](standards.md) (SB1–SB12); the [testing strategy](testing.md) (TS1–TS18); the [performance budgets](performance.md) (PF1–PF24); the [dependency policy](technology/dependency-policy.md); the [open questions](open-questions.md) |
-| **Last updated** | 2026-10-21: Round 1's accepted findings |
+| **Last updated** | 2026-10-21: Round 1's accepted findings; S10's results in §7 |
 
 Rules are numbered MS1–MS12. **The order is inference** from the accepted designs and the corpus's needs, unless a rule cites a decision. Precedent is sourced (§2). Everything here is **planned**; nothing is implemented.
 
@@ -202,7 +202,7 @@ The secondary accounts the owner used for S8's session by hand may serve, if the
 |---|---|---|---|
 | **WebAssembly** (OQ-3): our own engine or an embedded one | Open; JE31 lists what Axiom's engine must offer | **Its architecture before M3** (Round 1, RV1-13): own or embedded, WasmGC's objects as arena kinds, Wasm frames in the register file, tiering under J6; its implementation for M9 | Spike S14 (authorized before M3): an interpreter against Cranelift here, and WasmGC's support; JE31's interface; the corpus's use (S8: Google Maps and VS Code use it; Figma needs it) |
 | **A JIT** (J1) | Policy accepted (J1–J7); whether to build one is open | Not before L2 (J1); **at M5's gate** (Round 1, RV1-13), the first L2 milestone, before the script-heavy content pages are used signed in | The interpreter on the content pages' scripts, at M3 and M4; S3's dispatch results |
-| **The GPU/compositor process** | **Designed in Round 1** (RV1-02; process model §3, note 1) | Built at M2 | Spike S10: the hop, validation at display rate, zero-copy sampling (authorized 2026-10-21) |
+| **The GPU/compositor process** | **Designed in Round 1** (RV1-02; process model §3, note 1) | Built at M2 | Spike S10, done (2026-10-21): the hop 48.8 µs at the median, validation about 9.4 ns an item, zero-copy sampling from memory entries ([results](research/s10-results.md)) |
 | **Where WebGL and WebGPU run** | Open; recommended: a process of their own, apart from the compositor's (GR10) | M9's plan | The memory cost of a second Metal process; WebGL's and WebGPU's needs |
 | **Passkeys** (OQ-16) | Open | Before M6 starts | Whether a restricted entitlement can be had; roaming security keys over USB HID; **the hybrid transport** (a phone as the authenticator), which needs no restricted entitlement (Round 1, RV1-21), checked for feasibility with CoreBluetooth under the signing identity (RV1-17) |
 | **Xcode** (OQ-7) | Open; no design needs it (GR14) | M1's plan | Whether profiling or Metal debugging needs Instruments |
