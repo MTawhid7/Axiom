@@ -75,6 +75,7 @@
   - **Choices made within the dispositions, for the owner to overrule:** one ordered stream through the GPU process rather than WebKit's two streams (revisited if S10 shows the second hop costs a frame); WebGL and WebGPU placed at M9's plan, with a recommendation that they get their own process, since the compositor's holds every site's pixels; B1 split as B1a (the browser, 60 MB) and B1b (the GPU process, 15 MB as a hypothesis, plus the tiles).
   - **Real processes from M1:** sandboxed renderer and network processes under S4's, S5's and S7's profiles, with S4's probes in each helper; single-process mode only for automated tests, fuzzing and Miri. **Renderers have no IOKit:** pixels in Mach memory entries, an explicit `iokit-open` denial, sampled in place by the compositor (S10 measures it).
   - Amended: the process model, ADR-0004 D1, graphics, the pipeline, input, the event loop, IPC, images, the overview (with its diagram redrawn and aligned), the roadmap, Milestone 1, performance, the threat model, testing, the requirements, the standards, the decision map, and ADRs 0005, 0006, 0007, 0012, 0019, 0020 and 0021.
+- **CP3, cross-site frames as separate agents from M1 (RV1-03):** FT10 states the one rule; the frame tree's §5, the overview's §6 and the roadmap's M5 now say cross-site frames *remain* separate agents, and L2 adds site locks; SH1; WB20 moves into the bindings' first script stage; V9's agent half runs from M3. ADRs 0007, 0008 and 0017 record it.
 
 ### 2026-10-21 — Session 17 (the review's Round 1)
 

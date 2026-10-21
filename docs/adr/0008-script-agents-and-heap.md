@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-18), by the owner at Step 4's Gate C, once the S3 addendum's formal measurements were complete ([S3 results](../research/s3-results.md)). **SH10 amended** at Step 5's Gate C (2026-10-20): compaction skips the DOM's node arena ([HTML and the DOM](../architecture/html-and-dom.md) HD11) |
+| **Status** | **Accepted** (2026-10-18), by the owner at Step 4's Gate C, once the S3 addendum's formal measurements were complete ([S3 results](../research/s3-results.md)). **SH10 amended** at Step 5's Gate C (2026-10-20): compaction skips the DOM's node arena ([HTML and the DOM](../architecture/html-and-dom.md) HD11). **SH1 amended by the architecture review's Round 1** (2026-10-21): documents of different sites are never one agent, from M1 (RV1-03) |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Script and heap](../architecture/script-and-heap.md) (SH1–SH14); [ADR-0003](0003-gc-handle-and-rooting-pattern.md) (C1–C5); [ADR-0004](0004-process-model-and-sandbox.md) (J1–J7); [S1 results](../research/s1-results.md); [S3 results](../research/s3-results.md); [Step 4 tracker](../research/step-4-architecture-proposal.md) §10 (spike S3's design); OQ-5, OQ-13, OQ-14 |
@@ -19,6 +19,7 @@
 | 2026-10-18 | **Accepted,** the owner's condition met: the addendum's formal measurements are complete. Decision 5 names `SliceStack` |
 | 2026-10-19 | **Amendment proposed, for the owner at Step 5's Gate C** ([HTML and the DOM](../architecture/html-and-dom.md) HD11): the mark–compact collector of SH10 compacts every arena except the DOM's node arena, whose slots never move and are reused with a new generation. Reason: PL2 and PL12 make a node's identity (handle and generation) stable for its life, and AX2 sends it to the browser, so a moving node would invalidate identities held outside the heap. Until the owner decides, SH10 stands as written |
 | 2026-10-20 | **Amendment accepted** by the owner at Step 5's Gate C: "ADR-0008 Amendment (HD11): Accepted. Node slots in the arena never move; node identity remains stable." SH10 is amended in [script and heap](../architecture/script-and-heap.md), and decision 8 records it |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1), RV1-03: "Adopt the single binding rule: cross-site frames are separate agents with independent event loops and heaps behind remote proxies from Milestone 1." "Correct conflicting staging text in overview.md §6, frame-tree-and-navigation.md §5, and roadmap.md M5." SH1 is amended in [script and heap](../architecture/script-and-heap.md): a cross-site frame's document always has its own agent, event loop and heap |
 
 ## Question
 

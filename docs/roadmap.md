@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** as the baseline under review, since [ADR-0020](adr/0020-roadmap-and-security-levels.md) was accepted (2026-10-20, Step 6's Gate C). Written at Step 6, CP8. No milestone starts before the independent architecture review on branch `architecture-review`; a change it brings returns to the owner under MS12. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): §4.1 for RV1-01 and RV1-15 (CP1); MS3–MS5, §4.1, §7 and §10 for the GPU/compositor process at M2 and real processes from M1 (RV1-02, RV1-07; CP2) |
+| **Status** | **Binding** as the baseline under review, since [ADR-0020](adr/0020-roadmap-and-security-levels.md) was accepted (2026-10-20, Step 6's Gate C). Written at Step 6, CP8. No milestone starts before the independent architecture review on branch `architecture-review`; a change it brings returns to the owner under MS12. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): §4.1 for RV1-01 and RV1-15 (CP1); MS3–MS5, §4.1, §7 and §10 for the GPU/compositor process at M2 and real processes from M1 (RV1-02, RV1-07; CP2); MS5 and §4.1's M1, M3 and M5 for cross-site agents from M1 (RV1-03; CP3) |
 | **Question** | Which milestones lead from a static-document engine at L0 to the sensitive-use gate at L3 and the app web? What does each build, at which security level, against which corpus pages? Where does each decision point fall, and how does an implementation milestone run? |
 | **Answers** | Step 6 question Q5 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the tracker's handed-over questions 2 and 25–28 (§2.2); the [corpus](corpus.md)'s open question 3 |
 | **Feeds** | Milestone 1's definition (CP9); requirements traceability (CP10); the [overview](architecture/overview.md) v2's staging (CP10) |
@@ -76,7 +76,7 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 | **M2** | **The sandboxed engine** | L1 | **The GPU/compositor process** (RV1-02); audit tokens; V1's and V2's L1 parts; the browser's authority over frames, navigation and history; crashes contained; the disk cache, the cookie jar and CORS | The same pages, sandboxed | QoS overrides (OQ-20) |
 | **M3** | **Script** | L1 | The JavaScript engine and the bindings' first stage; the event loop's tasks, microtasks and timers; script elements and modules; `fetch`; Web Storage and `document.cookie`; canvas 2D | MDN in full: its live examples, in cross-site frames | The storage engine (SW2) |
 | **M4** | **The modern document** | L1 | Flexbox, grid and the rest of layout's second stage; SVG; style's second stage (scoping, `:has()`, container queries, animations); Shadow DOM and custom elements; web fonts; the accessibility tree; HTTP/3 | Wikipedia in full; Google Search, Instagram, Reddit, logged out | GR5's amendment (OQ-24) |
-| **M5** | **Site isolation and logins** | L2 | Site locks in process selection and endpoints; cross-site frames as their own agents (SI3) with remote window proxies; ORB, COEP and CORP; IndexedDB, the Cache API and quotas; the login track's L2 steps; V3 and V4 | Google Search, Instagram, Reddit, signed in with test accounts | DNS over HTTPS; a JIT may be considered from here (J1) |
+| **M5** | **Site isolation and logins** | L2 | Site locks in process selection and endpoints (cross-site frames are their own agents from M1: RV1-03); ORB, COEP and CORP; IndexedDB, the Cache API and quotas; the login track's L2 steps; V3 and V4 | Google Search, Instagram, Reddit, signed in with test accounts | DNS over HTTPS; a JIT may be considered from here (J1) |
 | **M6** | **The sensitive-use gate** | L3 | Out-of-process iframes: every cross-site frame in a renderer locked to its site; V1–V9 complete, with their evidence recorded; the login track's L3 steps | The content sites with the owner's own accounts | Passkeys (OQ-16), before it starts; password saving |
 | **M7** | **Media** | L3 | The media utility process: demuxers, VideoToolbox and AudioToolbox, video layers, audio, Media Source Extensions; AVIF through ImageIO in it (IM3) | YouTube, Twitch | Demuxers; media instances per site |
 | **M8** | **Applications** | L3 | Dedicated, shared and service workers; WebSockets; `SharedArrayBuffer` and `Atomics` with cross-origin isolation; the engine's second stage (Temporal, off-thread compilation); EditContext | VS Code for the Web, Discord, Prism | A JIT (J1), on the applications' measurements; WebAssembly (OQ-3), for M9 |
@@ -86,6 +86,7 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 
 **M1, static documents (L0).** CP9 defines it precisely, in [Milestone 1](milestone-1.md). In outline:
 - **The browser with sandboxed renderer and network processes** (MS4; Round 1, RV1-07), under S4's, S5's and S7's profiles, with the compositor as a browser thread behind its interface; the AppKit shell (window, address field, back and forward) and the objc2 classes for text input and accessibility validated (EM11); the headless embedder with its script-free reference-test path and its text dumps of the DOM, styles, boxes and fragments, the display list and the network log (EM9, TS2; Round 1's RV1-01 and RV1-15).
+- **Cross-site frames are separate agents from M1,** each with its own event loop and heap, behind remote window proxies once script exists (FT10; Round 1, RV1-03).
 - **HTML and the DOM:** the first document milestone's row ([HTML and the DOM](architecture/html-and-dom.md) §8), without script: the parser with encoding sniffing and fragments; nodes, attributes and the mutation algorithms with their hooks; event dispatch for routed input; ranges and selection; forms submitted as navigations.
 - **Style:** the first document milestone's row ([style](architecture/style.md) §8).
 - **Layout and paint: CSS 2.1's visual formatting model, without paged media.** That is the first document milestone's row ([layout](architecture/layout-and-paint.md) §8), **plus tables** (approximate, LY10), lists and generated content, every CSS 2.1 border style, and outlines. Tables are brought forward from the next stage because both documents lay out tables, such as Wikipedia's infoboxes (inference); the rest completes CSS 2.1, whose reference tests are M1's CSS target ([Milestone 1](milestone-1.md) MA4).
@@ -112,6 +113,7 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 - `localStorage`, `sessionStorage` and `document.cookie`: the first storage milestone ([storage](architecture/storage-and-workers.md) §8), whose crash tests decide SW2;
 - canvas 2D in the renderer;
 - test262 (TS5). The interpreter's measurements on corpus scripts start the evidence J1 asks for;
+- **remote window proxies** (WB20) in the bindings' first stage, with a test from M3 on: script in a cross-site frame that reaches for its parent's DOM fails, in every process configuration, V9's check applied from the first script milestone (RV1-03);
 - **the test-only WebDriver server,** which runs WPT's testharness tests and the `css/CSS2` tests with script, for **the full `css/CSS2` target** over all 5,848 tests in scope (TS2; Round 1, RV1-01);
 - **console messages** to the embedder's log and the test runners (JE27; RV1-15).
 
@@ -121,7 +123,7 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 - HTTP/3 over `quinn-proto`;
 - the accessibility tree and cache (AX).
 
-**M5, site isolation and logins (L2).** Site locks join process selection and every endpoint (IP10; [networking](architecture/networking.md) §8's L2 row). Cross-site frames become their own agents and event loops in their embedder's process (SI3, non-sensitive sites only), reached through remote window proxies (WB20). Then:
+**M5, site isolation and logins (L2).** Site locks join process selection and every endpoint (IP10; [networking](architecture/networking.md) §8's L2 row). Cross-site frames remain their own agents and event loops in their embedder's process (SI3, non-sensitive sites only), as they have been since M1, reached through remote window proxies (WB20; Round 1, RV1-03). Then:
 - ORB, Local Network Access, COEP and CORP in full;
 - IndexedDB, the Cache API, quotas and eviction (PF24), behind lock checks;
 - the login track's L2 steps (§6);

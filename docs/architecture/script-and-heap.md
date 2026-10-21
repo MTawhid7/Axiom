@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0008's acceptance (2026-10-18, Gate C). Written at Step 4, CP10; C1 settled by spike S3 and its addendum (CP16), which the owner chose `SliceStack` from ([S3 results](../research/s3-results.md)). SH10 amended at Step 5's Gate C (2026-10-20; [HTML and the DOM](html-and-dom.md) HD11) |
+| **Status** | **Binding** since ADR-0008's acceptance (2026-10-18, Gate C). Written at Step 4, CP10; C1 settled by spike S3 and its addendum (CP16), which the owner chose `SliceStack` from ([S3 results](../research/s3-results.md)). SH10 amended at Step 5's Gate C (2026-10-20; [HTML and the DOM](html-and-dom.md) HD11). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): SH1 for RV1-03 (CP3) |
 | **Question** | How do agents, realms and heaps fit together; how do messages, transfers and `SharedArrayBuffer` cross between agents; how does script integrate with the event loop; and how does the engine meet ADR-0003's obligations C1–C5: cheaper rooting, heap layout, a write-barrier API, a plan for incremental or generational collection, and native interop? What must spike S3 measure? |
 | **Answers** | Step 4 questions Q4 (second half) and Q15 ([tracker](../research/step-4-architecture-proposal.md) §3); OQ-5, OQ-13, OQ-14 |
 | **Feeds** | ADR-0008; spike S3 ([tracker](../research/step-4-architecture-proposal.md) §10); Step 5 (the JavaScript engine and bindings, HTML and DOM) |
 | **Builds on** | [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md) (Pattern B, C1–C5); [ADR-0004](../adr/0004-process-model-and-sandbox.md) (J1–J7); [S1 results](../research/s1-results.md); [event loop and threading](event-loop-and-threading.md) (EL12, EL15–EL17); [IPC](ipc.md); [rendering pipeline](rendering-pipeline.md) (PL2, PL11) |
-| **Last updated** | 2026-10-20: SH10 amended |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered SH1–SH14. Precedent is sourced (§2); the design is inference unless marked otherwise. The JavaScript engine's internals (parser, bytecode set, object shapes, inline caches) belong to Step 5.
 
@@ -57,7 +57,7 @@ From sources read on 2026-10-17 (Sources).
 
 | # | Rule |
 |---|---|
-| SH1 | **One heap per agent, on its event loop's thread** (ADR-0003, EL15). All realms of an agent share its heap: the same-site frames of one browsing context group, or same-origin ones when clusters are origin-keyed, form one agent with several global objects. **DOM objects are JavaScript objects:** a DOM node's script-visible face is the node itself, a platform object in a typed arena, with no wrapper and no reference into another heap (ADR-0001 R2). References between agents exist only as messages |
+| SH1 | **One heap per agent, on its event loop's thread** (ADR-0003, EL15). All realms of an agent share its heap: the same-site frames of one browsing context group, or same-origin ones when clusters are origin-keyed, form one agent with several global objects. **DOM objects are JavaScript objects:** a DOM node's script-visible face is the node itself, a platform object in a typed arena, with no wrapper and no reference into another heap (ADR-0001 R2). References between agents exist only as messages. **As amended in Round 1** (RV1-03): documents of different sites are never one agent, in any process configuration and from M1. A cross-site frame's document always gets an agent, event loop and heap of its own, reached through remote window proxies (WB20) |
 | SH2 | **Copies and transfers between agents.** `postMessage` and `MessagePort` payloads are structured-serialized in the sender's heap and deserialized into the receiver's heap, whether the receiver is in this process or another (IP14). **Transferable objects:** an `ArrayBuffer`'s backing store lives outside the heap (SH11), so transferring it within a process moves ownership without copying. Across processes it is copied, unless it was allocated in shared memory. `MessagePort`s become channels that the browser creates (IP4). Later transferables follow the same rule: their bulk state lives outside the heap |
 | SH3 | **`SharedArrayBuffer`** memory is allocated outside every heap and mapped into the cluster's one process (SI7). Agents on different threads of that cluster share it (EL12). `Atomics` operations are atomic instructions. **`Atomics.wait` and `notify`** use macOS's public wait-on-address primitive, `os_sync_wait_on_address` and `os_sync_wake_by_address_*`. It exists since macOS 14.4, and its process-local mode suits this case (observed, `os/os_sync_wait_on_address.h`). Only dedicated and shared workers may wait (EL, §4.6) |
 

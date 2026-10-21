@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP5 |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP5. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): FT10 and §5, cross-site frames as separate agents from M1 (RV1-03; CP3) |
 | **Question** | What is the browser-owned frame tree? How do renderers represent frames held by other processes? How do cross-frame operations, navigation and resource loading work, with every decision taken from the browser's own records? |
 | **Answers** | Step 4 questions Q6 and Q7 ([tracker](../research/step-4-architecture-proposal.md) §3); the frame-tree part of SI4 |
 | **Feeds** | ADR-0007; CP6 (per-frame display lists), CP7 (frame scheduling), CP8 (input routing and focus), CP9 (embedder API), CP10 (agents and messaging) |
 | **Builds on** | [Process model](../security/process-model.md) §5 (SI1–SI7) and §6 (IR1–IR10); [threat model](../security/threat-model.md) §8 (V9); [event loop and threading](event-loop-and-threading.md); [IPC](ipc.md) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered FT1–FT14. Precedent and specification text are sourced (§2–§3); the design is inference unless marked otherwise.
 
@@ -130,6 +130,7 @@ From source and documentation read on 2026-10-17 (Sources).
   - **Cross-origin isolated groups** get processes of their own (SI7).
   - **Sensitive sites** get a dedicated, no-JIT renderer and are never placed in another site's process (SI5, J4).
   - **Cross-site child frames** stay in their embedder's renderer, in a separate agent and event loop, only at L1 and non-sensitive L2 (SI3). From L3 they always get a renderer locked to their own site.
+  - **As amended in Round 1** (RV1-03; the owner: "Adopt the single binding rule: cross-site frames are separate agents with independent event loops and heaps behind remote proxies from Milestone 1."): **from M1, every cross-site frame is its own agent,** with its own event loop and heap, reached only through remote window proxies (WB20), in whichever process it renders: its embedder's renderer at L0–L2 (at L2 only for sites that aren't sensitive, SI3), a renderer locked to its own site from L3. L2 adds site locks, not agents. Documents of different sites never share an agent, as HTML's agent clusters require.
 - **Special documents** derive their origin and process from the browser's records of the initiator or creator: `about:blank`, `about:srcdoc`, `data:`, `blob:`. Error pages are internal documents, committed in a renderer with an internal lock, never in the failing site's process.
 
 ### 4.5 Loading and storage
@@ -152,9 +153,9 @@ From source and documentation read on 2026-10-17 (Sources).
 
 | Level | What changes in this design |
 |---|---|
-| L0 | One process. The frame tree, replicas, remote window proxies and browser-routed operations all exist. Agents talk through the browser over in-process channels |
-| L1 | Renderers become processes, one per tab. Nothing in the frame tree or its messages changes |
-| L2 | Process selection adds site locks. Cross-site frames move to separate agents and event loops, in their embedder's process (SI3, non-sensitive sites only). The interfaces are unchanged |
+| L0 | Renderers are sandboxed processes from M1 (Round 1, RV1-07). The frame tree, replicas, remote window proxies and browser-routed operations all exist, and **every cross-site frame is a separate agent, with its own event loop and heap, from M1** (Round 1, RV1-03). Agents talk through the browser |
+| L1 | Renderers are hardened (M2), one per tab. Nothing in the frame tree or its messages changes |
+| L2 | Process selection adds site locks. Cross-site frames **remain** separate agents and event loops, in their embedder's process (SI3, non-sensitive sites only), as they have been since M1 (RV1-03). The interfaces are unchanged |
 | L3 | Process selection puts every cross-site frame in a renderer locked to its own site. **Nothing else changes:** the frame was already a separate agent, with its own subscription, display list and browser-routed operations (AC1, SI4). V9's tests pass |
 
 ## 6. Alternatives considered

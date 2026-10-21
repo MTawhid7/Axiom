@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0017](../adr/0017-javascript-engine-and-bindings.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP17. No Step 4 interface changes (SC1) |
+| **Status** | **Binding** since [ADR-0017](../adr/0017-javascript-engine-and-bindings.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP17. No Step 4 interface changes (SC1). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): WB20 and §8, remote window proxies in the first script stage (RV1-03; CP3) |
 | **Question** | How are the WebIDL bindings generated: platform objects in the heap, argument conversion, rooting conventions, prototypes and realms, exceptions, cross-origin objects, and the hot path of event dispatch? |
 | **Answers** | Step 5 question Q13 ([tracker](../research/step-5-subsystems.md) §3); the bindings part of the handed-over question 18 (§2.2); closes [HTML and the DOM](html-and-dom.md)'s JavaScript facet (HD30) |
 | **Feeds** | Part 2's ADRs (CP18); every subsystem that exposes an interface to script |
 | **Builds on** | [Script and heap](script-and-heap.md) (SH1, SH2, SH6, SH7, SH9, SH12); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [ADR-0002](../adr/0002-implementation-language.md) (rule 7); [the JavaScript engine](javascript-engine.md) (JE8–JE11, JE16, JE18, JE32); [HTML and the DOM](html-and-dom.md) (HD10, HD16–HD18, HD25, HD30); the [frame tree](frame-tree-and-navigation.md) (FT3–FT7); the [event loop](event-loop-and-threading.md) (EL14); the [dependency policy](../technology/dependency-policy.md) (DP1, DP2) |
-| **Last updated** | 2026-10-20: binding |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered WB1–WB23. Precedent is sourced (§3); the design is inference unless marked otherwise.
 
@@ -112,7 +112,7 @@ No new dependency is proposed: the IDL is data, and the generator is Axiom's.
 |---|---|
 | WB18 | **Global objects:** `Window`, the worker global scopes (dedicated, shared and service) and worklet globals, each the global of its realm (JE18), with the interfaces its `[Exposed]` set names. **`Window`** has its named properties object, for named access to elements and child frames, and an immutable prototype chain, as `[Global]` requires |
 | WB19 | **`WindowProxy` and `Location` within an agent.** `WindowProxy` is an exotic object in the engine (HTML §7.2.3). Its `[[Window]]` slot changes when its browsing context navigates within the agent. Its internal methods, and `Location`'s, perform HTML's checks (`IsPlatformObjectSameOrigin`), so a cross-origin access sees only `CrossOriginProperties` (§2). This happens inside one agent whenever frames are same-site but cross-origin, since clusters are keyed by site unless they ask for origin keying |
-| WB20 | **Remote window proxies** (FT5, FT6). A frame whose document lives in another agent appears in this heap as a remote `WindowProxy`, a platform object holding the frame's token (FT3). It offers exactly `Window`'s `CrossOriginProperties` and indexed and named child access. FT4's skeleton answers `length`, `frames`, `top`, `parent`, `opener` and `closed` synchronously; `postMessage` (structured-cloned, SH2), a `location` assignment or `replace()` (a navigation request, FT7), `close`, `focus` and `blur` become messages to the browser. **One proxy per browsing context per agent:** each agent maps frame tokens to proxies, so identity holds, and when a frame moves between this agent and another, the same proxy object switches between a local `Window` and a remote reference, keeping its identity as HTML requires across navigations (inference) |
+| WB20 | **Remote window proxies** (FT5, FT6), from the first script milestone (Round 1, RV1-03). A frame whose document lives in another agent appears in this heap as a remote `WindowProxy`, a platform object holding the frame's token (FT3). It offers exactly `Window`'s `CrossOriginProperties` and indexed and named child access. FT4's skeleton answers `length`, `frames`, `top`, `parent`, `opener` and `closed` synchronously; `postMessage` (structured-cloned, SH2), a `location` assignment or `replace()` (a navigation request, FT7), `close`, `focus` and `blur` become messages to the browser. **One proxy per browsing context per agent:** each agent maps frame tokens to proxies, so identity holds, and when a frame moves between this agent and another, the same proxy object switches between a local `Window` and a remote reference, keeping its identity as HTML requires across navigations (inference) |
 | WB21 | **Cross-origin functions** (`postMessage`, `focus`, `blur`, `close`, `replace` and the `location` accessors) are created per realm and kept in `[[CrossOriginPropertyDescriptorMap]]` as HTML specifies, so repeated cross-origin access returns the same function objects within a realm |
 
 ### 5.6 Size and tests
@@ -143,8 +143,8 @@ No new dependency is proposed: the IDL is data, and the generator is Axiom's.
 
 | Stage | What exists |
 |---|---|
-| First script milestone | The generator; platform objects and brand checks; lazy interface objects; conversions, overloads and exceptions; callbacks and event dispatch; `Window` and `WindowProxy` within an agent |
-| Next | Legacy platform objects in full; iterable and maplike declarations; observable arrays; `[CEReactions]`; remote window proxies (with L2's process separation, as FT5 already shapes them); worker and worklet globals |
+| First script milestone | The generator; platform objects and brand checks; lazy interface objects; conversions, overloads and exceptions; callbacks and event dispatch; `Window` and `WindowProxy` within an agent; **remote window proxies** (WB20), moved here in Round 1 (RV1-03), since cross-site frames are separate agents from M1 |
+| Next | Legacy platform objects in full; iterable and maplike declarations; observable arrays; `[CEReactions]`; worker and worklet globals |
 | Later | Interfaces as their subsystems arrive, through their IDL and configuration entries |
 
 **The complete model** (SC9): every interface on the web platform is IDL that the generator reads, a configuration entry, and a Rust implementation; new extended attributes extend the generator, not the engine.
