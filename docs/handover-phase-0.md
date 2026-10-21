@@ -178,6 +178,7 @@ The overview §4 traces seven scenarios end to end through the rules: opening a 
   - **one network process:** outbound network and its own data only;
   - **the GPU/compositor process, from M2** (RV1-02): it validates every renderer's display lists, holds their property trees, rasterizes tiles with Metal into IOSurfaces it owns, and sends the browser layer commits. **S10** measured the commit's hop to the browser at 48.8 µs at the median, against PF13's 1 ms; zero-copy sampling of renderer memory; validation at about 9.4 ns an item. Its profile has ten rules, each checked by removal (S10 §6.1). WebGL and WebGPU never run in the browser, and M9's plan places them;
   - **utility processes** on demand, media first.
+- **Recovery** (IR10, as amended in Round 2, RV2-04): a renderer's death gives its tabs a crash page; the network process is relaunched, renderers get new endpoints, and `sessionStorage` comes back from the browser's copy; the GPU process is relaunched with each window's last layers kept (GR13). PF19's watchdog covers every helper, and the shell hears of each crash or hang.
 - **Confinement** (D2, after S4): each helper is its own executable, **signed by a stable local identity** with an explicit designated requirement, with ad hoc as the fallback (Round 1, RV1-17; S15 found it behaves as ad hoc for S4's probes and keeps Keychain access across rebuilds). **The browser compiles each profile and sends the bytecode;** the helper applies it as its first act: ready in 2.1 ms with a 1.1 MiB footprint. **One exception, approved after S10:** the GPU process resolves its cache directory with `confstr(_CS_DARWIN_USER_CACHE_DIR)` just before applying its profile, so Metal's shader cache works without widening the profile. Profiles are reviewed like `unsafe` code. Option O2 is the fallback if custom profiles stop working.
 - **Launch:** only the browser launches processes, with `posix_spawn` under `POSIX_SPAWN_CLOEXEC_DEFAULT`, a minimal environment, and only the helper's IPC bootstrap handle and a log descriptor (the process model §8).
 - **Site isolation** (SI1–SI7, [process model](security/process-model.md) §5): site locks from L2; process limits never merge sites. **SI3:** at L1 and non-sensitive L2 only, a cross-site iframe may render in its embedder's process, under three compensating rules: partitioned third-party state, ORB, and no sensitive site inside another site's process. **Cross-site frames are always separate agents behind remote proxies, from M1** (Round 1, RV1-03).
@@ -209,8 +210,8 @@ The overview §4 traces seven scenarios end to end through the rules: opening a 
   - endpoints are capabilities only the browser creates, and each child's audit token is pinned at launch and checked on every message;
   - an IDL generates safe-Rust types, canonical encoders, total decoders and a fuzzing entry point per decoder;
   - values from less privileged senders arrive as `Untrusted<T>`, validated against the receiver's records. A violation terminates the sender, or is ignored where a race is expected (IP11). The browser's validators can't panic, by lint (Round 1, RV1-16);
-  - synchronous requests go only toward more privilege, with timeouts;
-  - queues are bounded, and the browser never blocks.
+  - synchronous requests go only toward more privilege, to the network process for every case the platform requires, bounded by PF19's watchdog rather than a timeout of their own; a service worker's answer is the one exception (IP13; Round 2, RV2-14);
+  - queues are bounded; neither the browser nor any process that serves several renderers ever blocks on one, and no thread waits on a send (Round 2, RV2-13).
 - **Threads** ([ADR-0006](adr/0006-event-loop-and-threading.md), [event loop and threading](architecture/event-loop-and-threading.md) EL1–EL24):
   - one wait per thread (kqueue, or run loops for AppKit and the compositor);
   - in the browser, the main thread (AppKit only), a **core** thread (the engine's authority), a compositor thread (the layer tree, scrolling, animation and hit testing) and a worker pool; from M2 the GPU process's own threads validate, rasterize and composite (Round 1, RV1-02);
@@ -218,7 +219,7 @@ The overview §4 traces seven scenarios end to end through the rules: opening a 
   - heaps never cross threads, except a DOM arena lent read-only while the borrow checker freezes the heap (parallel style and layout are built only when profiling justifies them), and the heap lent to parallel marking during a pause (Round 1, RV1-04);
   - the compositor owns a display link per window and never waits for a renderer;
   - QoS follows role and visibility;
-  - the same loops run under a deterministic scheduler with a virtual clock in tests.
+  - the same loops run under a deterministic scheduler with a virtual clock in single-process test mode, for time-dependent tests; conformance runs in real processes on the host clock (Round 2, RV2-03).
 
 ### 4.5 The frame tree, the pipeline and invalidation
 
@@ -304,13 +305,14 @@ The overview §4 traces seven scenarios end to end through the rules: opening a 
 - **Fetch's policy enforced from bound endpoints:** CORS, CORP, COEP, ORB, mixed content, Referrer-Policy, HSTS, Local Network Access.
 - **Web storage lives in the network process,** by storage key, in one engine: `redb` if it passes its audit, otherwise SQLite. `localStorage` is cached in the renderer, and IndexedDB values are never parsed outside it.
 - **Service workers** intercept within Fetch. Shared and service workers run in a renderer locked to their site.
+- **Web Locks are arbitrated in the browser,** as Chromium's are, so a relaunch of the network process can't break mutual exclusion (Round 2, RV2-04, the owner's choice).
 - **Later:** Encrypted Client Hello, planned with DNS over HTTPS at M5's plan: rustls has had experimental client-side ECH since 2024-06 (Round 1, RV1-20).
 
 ### 4.10 The shell, the embedder API and accessibility
 
 - **The embedder** ([ADR-0009](adr/0009-embedder-api-and-shell.md), [embedder API](architecture/embedder-api.md) EM1–EM12):
   - the shell is an embedder on AppKit's main thread, and the engine never depends on it;
-  - commands go in, and events and requests for decisions come out, each request with a default;
+  - commands go in, and events and requests for decisions come out, each request with a default, listed per request (Round 2, RV2-03); a helper's crash or hang is an event (RV2-04);
   - the browser's own interface is native, never web content;
   - a headless embedder, with offscreen surfaces, synthetic input and virtual time, runs WPT and the reference tests: **without script at M1 and M2,** by a path that loads a URL, waits natively and writes a PNG, and **through a test-only WebDriver server from M3** (Round 1, RV1-01). It dumps the DOM, computed styles, the box and fragment trees, the display list and the network log as text from M1; a helper's crash report is kept locally from M2; console messages reach it from M3 (Round 1, RV1-15);
   - **a pure-Rust shell with objc2.** Its milestone first validates objc2-defined classes for text input and accessibility, with a Swift shell behind the same API as the fallback;
@@ -385,6 +387,7 @@ The proposed crates ([overview](architecture/overview.md) §2), each named and s
   - the not-planned list was approved at Gate B: DRM, plugins, AppCache and Web SQL, one-engine device APIs, WebXR, Gamepad, Web MIDI, Web Speech, Push, extensions; Round 1 added in-engine PDF viewing (PDFs open in Preview) and WebRTC (RV1-22).
 - **Testing** ([testing](testing.md), TS1–TS18):
   - eight layers of tests;
+  - **the process configuration** (Round 2, RV2-03, the owner's choice): conformance in real, sandboxed processes on the host clock; time-dependent and scheduler tests in single-process mode on the virtual clock; visual reference tests under both at each milestone's gate;
   - WPT through wptrunner's `axiom` product with two executors: **a script-free reference-test executor at M1 and M2,** and a test-only WebDriver server in the headless embedder **from M3** (Round 1, RV1-01);
   - Axiom's own runners for html5lib-tests, test262 and Unicode's files;
   - test-only differential oracles (html5ever, xml5ever, Taffy, `regress`, `temporal_rs`, `num-bigint`) under virtual time;
@@ -439,7 +442,7 @@ The proposed crates ([overview](architecture/overview.md) §2), each named and s
   - **conformance:** html5lib's tokenizer tests at 100%; the 1,973 tree-construction tests in WPT's `.dat` files at ≥ 96%; **`css/CSS2`'s reference tests at ≥ 97% of the 5,652 that need no script** (196 of the 5,848 in scope contain script), the median of Chrome, Firefox and Safari on those same tests, an interim target, with the full 5,848 at M3 (Round 1, RV1-01); Unicode's line-breaking and bidi files at 100%. M1 runs reference and crash tests through the script-free executor, end to end from its second checkpoint;
   - **the corpus:** Wikipedia and MDN readable, from dated copies and live; links navigate; 10 loads with no crash or hang;
   - **budgets:** the browser idle ≤ 85.4 MB with the compositor's tiles, a renderer ≤ 10 MB, the network process ≤ 25 MB; Wikipedia ≤ 100 MB and MDN ≤ 70 MB above it; S6's frame budgets; no task over 50 ms; no idle wakeups; pauses within 4 ms; T1–T4;
-  - **security:** no script engine linked; no credentials by construction, with password forms refused below L2; the helpers apply their profiles before touching input, and every renderer profile denies `iokit-open`; every executable aborts on a panic; every parser and decoder fuzzed at least an hour, with no open finding; the concurrency checks in TS11's order;
+  - **security:** no script engine linked; no credentials by construction, with password forms refused below L2; the helpers apply their profiles before touching input, and every renderer profile denies `iokit-open`; every executable aborts on a panic; the network process killed and stalled, and a renderer that stops receiving, as tests (Round 2, RV2-04, RV2-13); every parser and decoder fuzzed at least an hour, with no open finding; the concurrency checks in TS11's order;
   - **starting it** needs the owner's authorization of MA10's list: the branch, the skeleton (signed by the stable local identity), the dependencies, the test data, the tools (a nightly whose ThreadSanitizer works, as S12 found), and the live loads. **On hold.**
 
 ## 5. Empirical findings: spikes S1–S10, S12 and S15

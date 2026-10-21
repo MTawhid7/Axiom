@@ -88,23 +88,23 @@ From documentation read on 2026-10-17 (Sources).
 - URL, title and favicon changes;
 - load progress;
 - security state;
-- a renderer crash or hang;
+- a renderer crash or hang; **as amended in Round 2** (RV2-04), a helper's too, the network or the GPU/compositor process's, with what was lost and whether it was relaunched (IR10);
 - audio playing, and fullscreen changes.
 
 | # | Rule |
 |---|---|
-| EM5 | **Requests for decisions** (engine asks, shell answers). The engine asks the shell to decide what only a user interface can, after applying its own policy first. The table below lists them. WKWebView's two delegates are the model [A1, A2]. **Every request has a default, and the engine never waits indefinitely.** A request that is still pending when its tab closes is cancelled |
+| EM5 | **Requests for decisions** (engine asks, shell answers). The engine asks the shell to decide what only a user interface can, after applying its own policy first. The table below lists them. WKWebView's two delegates are the model [A1, A2]. **Every request has a default, and the engine never waits indefinitely.** A request that is still pending when its tab closes is cancelled. **Each request's default is the table's last column** (**as amended in Round 2,** RV2-03): the engine takes it when the shell doesn't answer, and the headless embedder answers with it and logs it (EM9) |
 
-| Request | Engine's part | Shell's part |
-|---|---|---|
-| New window (`window.open`, `target=_blank`) | Popup blocking from its activation records (IN8); the opener relationship | Open a tab or a window, or show that it was blocked |
-| Permission (camera, microphone, location, notifications) | Records and defaults; never granted to a renderer directly | Prompt; the decision is stored in the profile |
-| JavaScript dialog (alert, confirm, prompt) and `beforeunload` | Pauses the event loop (EL17) | A sheet attached to the tab |
-| Download | Classifies the response; writes the file and marks it quarantined | Location and confirmation; the downloads list |
-| File chooser | Gives the renderer read access only to the chosen files, through a capability (IP15) | `NSOpenPanel` |
-| HTTP authentication, certificate errors | Interstitial pages are internal documents (FT10) | Credentials prompt; the security indicator |
-| Context menu | The hit-tested element's data, with URLs checked against its records (IN10) | The menu |
-| External protocols (`mailto:`) | Requires user activation | Confirmation, then `NSWorkspace` |
+| Request | Engine's part | Shell's part | Default, if the shell doesn't answer |
+|---|---|---|---|
+| New window (`window.open`, `target=_blank`) | Popup blocking from its activation records (IN8); the opener relationship | Open a tab or a window, or show that it was blocked | A new tab |
+| Permission (camera, microphone, location, notifications) | Records and defaults; never granted to a renderer directly | Prompt; the decision is stored in the profile | Denied, and not stored |
+| JavaScript dialog (alert, confirm, prompt) and `beforeunload` | Pauses the event loop (EL17) | A sheet attached to the tab | Dismissed: `confirm` answers false, `prompt` null; `beforeunload` lets the navigation proceed |
+| Download | Classifies the response; writes the file and marks it quarantined | Location and confirmation; the downloads list | Cancelled |
+| File chooser | Gives the renderer read access only to the chosen files, through a capability (IP15) | `NSOpenPanel` | Cancelled: no files |
+| HTTP authentication, certificate errors | Interstitial pages are internal documents (FT10) | Credentials prompt; the security indicator | Cancelled: the request fails, and the interstitial stays |
+| Context menu | The hit-tested element's data, with URLs checked against its records (IN10) | The menu | None shown |
+| External protocols (`mailto:`) | Requires user activation | Confirmation, then `NSWorkspace` | Refused |
 
 ### 4.3 What the shell hosts
 
@@ -118,7 +118,7 @@ From documentation read on 2026-10-17 (Sources).
 
 | # | Rule |
 |---|---|
-| EM9 | **A headless embedder implements the same API without AppKit.** It provides offscreen presentation (the compositor renders into an offscreen texture, read back for reference tests and screenshots), synthetic input injected at the compositor's sink, virtual time through the deterministic scheduler (EL24), and logged answers to decision requests. It runs WPT, reference tests, crash tests and fuzzing harnesses (Step 6), on this Mac, without a window. `content_shell` plays this role for Chromium [C1].<br>**As amended in Round 1** (2026-10-21):<br>• **A script-free reference-test path** (RV1-01; [testing](../testing.md) TS2): given a URL, it loads it, waits natively for the load event and for pending images and fonts, writes a PNG of the offscreen texture, and exits, so wptrunner can run reference tests before script exists. WPT's host names resolve through a hosts file that only the test build accepts.<br>• **Diagnostics for one developer** (RV1-15), staged: **from M1,** test-only commands dump, as text in stable formats that tests can compare, the DOM, a node's computed style, the box and fragment trees, the display list and the network log; **from M2,** a crashed helper's report is moved into a local directory the owner controls, with the build identifier (IP18), as S9's script already does for test crashes; **from M3,** console messages reach the embedder's log and the test runners (JE27). A developer-tools protocol stays later (JE27).<br>Every dump and log is test-only or local: none leaves this Mac |
+| EM9 | **A headless embedder implements the same API without AppKit.** It provides offscreen presentation (the compositor renders into an offscreen texture, read back for reference tests and screenshots), synthetic input injected at the compositor's sink, virtual time through the deterministic scheduler (EL24) in single-process mode (**as amended in Round 2,** RV2-03: conformance runs in real processes on the host clock, TS2), and logged answers to decision requests, which take EM5's defaults. It runs WPT, reference tests, crash tests and fuzzing harnesses (Step 6), on this Mac, without a window. `content_shell` plays this role for Chromium [C1].<br>**As amended in Round 1** (2026-10-21):<br>• **A script-free reference-test path** (RV1-01; [testing](../testing.md) TS2): given a URL, it loads it, waits natively for the load event and for pending images and fonts, writes a PNG of the offscreen texture, and exits, so wptrunner can run reference tests before script exists. WPT's host names resolve through a hosts file that only the test build accepts.<br>• **Diagnostics for one developer** (RV1-15), staged: **from M1,** test-only commands dump, as text in stable formats that tests can compare, the DOM, a node's computed style, the box and fragment trees, the display list and the network log; **from M2,** a crashed helper's report is moved into a local directory the owner controls, with the build identifier (IP18), as S9's script already does for test crashes; **from M3,** console messages reach the embedder's log and the test runners (JE27). A developer-tools protocol stays later (JE27).<br>Every dump and log is test-only or local: none leaves this Mac |
 | EM10 | **Single-process mode uses the same API.** The shell can't tell whether the engine runs one process (single-process test mode) or many (every level from M1, as amended in Round 1, RV1-07). That is a property of the engine's process manager |
 
 ### 4.5 The shell's language and packaging

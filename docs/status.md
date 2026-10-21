@@ -64,6 +64,12 @@
   - **The [decision map](decision-map.md):** Round 1's notes on F2, F3, P7 and X1–X4; the Review row "Under way".
   - **The review's process** (§4): the entry documents change with the rules, and the last checkpoint of a round searches for each finding's old wording.
   - **The stale statements** RV2-02 listed, corrected, and two more the sweep found: OQ-20's reason (it predates RV1-07) and script and heap's summary of C4 (it predates RV1-04).
+- **CP2, processes, IPC and test configuration (RV2-03, RV2-04, RV2-13, RV2-14).**
+  - **RV2-03, as the owner chose:** conformance in real, sandboxed processes on the host clock; time-dependent and scheduler tests in single-process mode on EL24's virtual clock; visual reference tests under both at each milestone's gate (TS2, TS8, MA4, MA8, EM9, EL24). EM5's table gains each request's default.
+  - **RV2-04:** IR10 recovers by process type (the network process relaunched with new endpoints; the GPU process as GR13 says); PF19's watchdog covers every helper; EM4 reports helpers' crashes and hangs; **Web Locks are arbitrated in the browser's core,** as the owner chose (SW10); `sessionStorage`'s browser copy is kept current (SW3); SW13 checks the clients' view; MA7 tests the network process killed and stalled; M2 tests the GPU process's.
+  - **RV2-13:** IR5 and IP16 cover every process that serves several peers; a child's sends never block a thread (EL1), with a bounded local backlog drained on Mach's send-possible notification; PF21's bound per peer; SG11's note; a stalled-renderer test at M1 and M2.
+  - **RV2-14:** IP13 takes PF21's rule, with one exception for a service worker's answer; IR6 names the network process; IP7 bars `iosurface` from renderers' interfaces; IPC's families gain network control, locks and video frames; IPC's question 3 answered.
+  - **Also fixed:** a blank line Round 1's CP1 had left inside the process model's change record, which kept its Round 1 rows from rendering as a table.
 
 ### 2026-10-21 — Session 19 (the owner's decisions on Round 1's results; Round 2)
 

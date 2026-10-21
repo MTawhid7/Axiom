@@ -101,7 +101,7 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 - **B1b measured** against its 15 MB, with the display lists' memory per item; scaled per window if complex pages exceed the margin (the owner, 2026-10-21: "Budget B1b (15 MB): Approved. Keep the 15 MB baseline ceiling. Milestone 2 will measure display-list memory density per item and introduce per-window scaling if complex DOM trees exceed the margin.");
 - Mach channels pin audit tokens; IP's validators and violation handling are complete;
 - the browser's frame tree, navigation and session history are the authority (FT);
-- crashes are contained (overview scenario 5);
+- crashes are contained (overview scenario 5); **as amended in Round 2** (RV2-04, RV2-13), the GPU process's death and hang are recovered as IR10 and GR13 say, and a renderer that stops receiving stalls neither the GPU process nor another renderer, each tested;
 - the spare renderer, B5's limit and discarding under memory pressure;
 - the network's first stage completes: the partitioned disk cache and cookie jar, CORS;
 - **every IPC decoder is fuzzed with coverage,** and V1's escape suite runs in each process type: L1's part of V1 and V2;

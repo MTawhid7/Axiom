@@ -225,7 +225,7 @@ Storage runs on its own thread so that a slow network can't delay a synchronous 
 
 | # | Rule |
 |---|---|
-| EL24 | **The thread loop is an interface:** a wait source and a clock. In production it is kqueue or a run loop, with the host clock. In tests, one deterministic scheduler with a **virtual clock** drives every event loop, including those of other "processes", on one thread in a defined order, and can record and replay that order. Single-process mode (a test mode since Round 1, RV1-07) runs the production threads in one process, connected by in-process channels (R6) |
+| EL24 | **The thread loop is an interface:** a wait source and a clock. In production it is kqueue or a run loop, with the host clock. In tests, one deterministic scheduler with a **virtual clock** drives every event loop, including those of other "processes", on one thread in a defined order, and can record and replay that order. Single-process mode (a test mode since Round 1, RV1-07) runs the production threads in one process, connected by in-process channels (R6).<br>**Which tests use it** (**as amended in Round 2,** RV2-03): time-dependent and scheduler tests, in single-process mode; conformance runs in real processes on the host clock, where this scheduler can't reach the helpers (TS2) |
 
 ### 4.10 Memory
 
