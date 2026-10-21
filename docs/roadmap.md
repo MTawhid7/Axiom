@@ -7,7 +7,7 @@
 | **Answers** | Step 6 question Q5 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the tracker's handed-over questions 2 and 25–28 (§2.2); the [corpus](corpus.md)'s open question 3 |
 | **Feeds** | Milestone 1's definition (CP9); requirements traceability (CP10); the [overview](architecture/overview.md) v2's staging (CP10) |
 | **Builds on** | The [overview](architecture/overview.md) §6 (L0–L3); the [threat model](security/threat-model.md) §8 (levels and V1–V9); every design's staging section; the [corpus](corpus.md) (CO1–CO14); the [standards baseline](standards.md) (SB1–SB12); the [testing strategy](testing.md) (TS1–TS18); the [performance budgets](performance.md) (PF1–PF24); the [dependency policy](technology/dependency-policy.md); the [open questions](open-questions.md) |
-| **Last updated** | 2026-10-21: Round 1's accepted findings; S10's results in §7 |
+| **Last updated** | 2026-10-21: Round 1's accepted findings; S10's results in §7, and the owner's decisions on them in M2 (§4.1) |
 
 Rules are numbered MS1–MS12. **The order is inference** from the accepted designs and the corpus's needs, unless a rule cites a decision. Precedent is sourced (§2). Everything here is **planned**; nothing is implemented.
 
@@ -97,7 +97,8 @@ Rules are numbered MS1–MS12. **The order is inference** from the accepted desi
 - **Not in M1:** script (MS3), cookies, storage, web fonts, SVG, flexbox and grid, the GPU/compositor process (M2).
 
 **M2, the sandboxed engine (L1).** **As amended in Round 1:** renderers and the network process are already processes under browser-compiled profiles from M1 (RV1-07). M2 hardens them, and builds the GPU/compositor process (RV1-02; the owner: "Formally design the sandboxed GPU/compositor process topology now (Renderer → GPU Process → Browser CALayer tree)." "Build the separate GPU/compositor process at Milestone 2; split Budget B1 accordingly." "Ensure Level 3 (L3) security certification at Milestone 6 is performed on the final multi-process topology."):
-- **the GPU/compositor process:** validation, property trees and tile rasterization move out of the browser, which keeps the layer tree, scrolling, animation and input (process model §3, note 1), with S10's measurements behind it;
+- **the GPU/compositor process:** validation, property trees and tile rasterization move out of the browser, which keeps the layer tree, scrolling, animation and input (process model §3, note 1), with S10's measurements behind it. Its profile is S10's ten rules, applied after its one call to resolve the cache directory (ADR-0004 D2), and **its removal tests run among M2's checks** (TS14's V1), since five rules fail silently (the owner, 2026-10-21);
+- **B1b measured** against its 15 MB, with the display lists' memory per item; scaled per window if complex pages exceed the margin (the owner, 2026-10-21: "Budget B1b (15 MB): Approved. Keep the 15 MB baseline ceiling. Milestone 2 will measure display-list memory density per item and introduce per-window scaling if complex DOM trees exceed the margin.");
 - Mach channels pin audit tokens; IP's validators and violation handling are complete;
 - the browser's frame tree, navigation and session history are the authority (FT);
 - crashes are contained (overview scenario 5);

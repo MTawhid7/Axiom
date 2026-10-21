@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are made in checkpoints (§5.3), and the three spikes authorized before Milestone 1, S10, S12 and S15, are done (§5.2) |
+| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are made in checkpoints (§5.3), and the three spikes authorized before Milestone 1, S10, S12 and S15, are done (§5.2). **The owner approved the results** and **commissioned Round 2** (2026-10-21, §5.4) |
 | **Question** | How is the Phase Zero baseline reviewed before Milestone 1 starts: in what format, with which severities, how do findings become changes, and when does the review end? |
 | **Builds on** | The owner's decision 8 at Step 6's Gate C (2026-10-20): Milestone 1 waits "until the architecture and roadmap undergo independent, multi-round adversarial review"; the recommendation in [status](../status.md) for the review's brief; the findings format the [handover](../handover-phase-0.md) §3 suggests |
 | **Last updated** | 2026-10-21 |
@@ -21,7 +21,8 @@
 
 | Round | Date | Documents | Findings | State |
 |---|---|---|---|---|
-| 1 | 2026-10-21 | [Risk matrix](round-1/01-risk-matrix.md) · [Findings](round-1/02-findings.md) · [Challenged assumptions](round-1/03-challenged-assumptions.md) · [Actions before Round 2](round-1/04-round-2-actions.md) | 22: 2 Critical, 6 High, 10 Medium, 4 Low | All accepted (2026-10-21); changes in progress (§5.3) |
+| 1 | 2026-10-21 | [Risk matrix](round-1/01-risk-matrix.md) · [Findings](round-1/02-findings.md) · [Challenged assumptions](round-1/03-challenged-assumptions.md) · [Actions before Round 2](round-1/04-round-2-actions.md) | 22: 2 Critical, 6 High, 10 Medium, 4 Low | All accepted (2026-10-21); changes made (§5.3); the spikes' results and the choices approved (§5.4) |
+| 2 | 2026-10-21 | In progress: commissioned by the owner (§5.4, decision 6) | — | — |
 
 ## 3. Findings and severities
 
@@ -104,7 +105,7 @@ The owner's authorizations (2026-10-21). Each covers only the questions it names
 
 | Spike | When | The owner's words | State |
 |---|---|---|---|
-| S10 | "Authorized Immediately (Pre-Milestone 1)" | "GPU process IPC hop latency, display list validation, and zero-copy texture sharing." | **Done** (2026-10-21): the commit reaches the browser's layer tree in 48.8 µs at the median, within PF13's 1 ms; zero-copy sampling from memory entries works under RV1-09's renderer profile; validation costs about 9.4 ns an item. The GPU process's rules and a warm-up before its profile await the owner ([results](../research/s10-results.md) §8) |
+| S10 | "Authorized Immediately (Pre-Milestone 1)" | "GPU process IPC hop latency, display list validation, and zero-copy texture sharing." | **Done** (2026-10-21): the commit reaches the browser's layer tree in 48.8 µs at the median, within PF13's 1 ms; zero-copy sampling from memory entries works under RV1-09's renderer profile; validation costs about 9.4 ns an item ([results](../research/s10-results.md)). The owner approved the GPU process's rules and its call before its profile (§5.4) |
 | S12 | As S10 | "ThreadSanitizer workaround routes on macOS 27 (-Z external-clangrt)." | **Done** (2026-10-21): both routes work ([results](../research/s12-results.md)) |
 | S15 | As S10 | "Stable self-signed codesigning persistence across rebuilds." | **Done** (2026-10-21): S4's probes and the JIT entitlements behave as ad hoc, and Keychain access survives a rebuild; privacy permissions by hand at M1 ([results](../research/s15-results.md)) |
 | S11 | "Authorized Before Milestone 3" | "Spike S11 (GC pauses & 32-bit slot width)" | Authorized, not started |
@@ -126,6 +127,19 @@ The owner's authorizations (2026-10-21). Each covers only the questions it names
 | CP6 | Added: the collector, slot width and the memory gate | RV1-04, RV1-05, RV1-06 | Done, `docs(review-r1-cp6)` |
 
 **CP6 is added** because the five named checkpoints leave out three accepted findings, and their changes are documents too. Their evidence follows from S11 and the census addendum, which are authorized for later; CP6 records the decisions and the questions those spikes answer.
+
+### 5.4 Decisions on Round 1's results
+
+The owner, 2026-10-21: "The Round 1 remediation and spike results (S10, S12, S15) on architecture-review are approved. Here are my decisions on the open questions:"
+
+| # | The owner's heading | The owner's words | Recorded in |
+|---|---|---|---|
+| 1 | GPU Process Cache Warm-Up | "Approved. The GPU process may resolve its cache directory via confstr(_CS_DARWIN_USER_CACHE_DIR) immediately before applying its sandbox profile. This avoids widening the sandbox profile with opendirectoryd/dirhelper and avoids the 450 ms shader recompilation penalty on launch/restart. Update ADR-0004 D2 to document this single exception." | ADR-0004 D2 and its history; the [process model](../security/process-model.md) §10 and change record |
+| 2 | GPU Process Sandbox Rules | "Confirmed. The 10 rules identified in docs/research/s10-results.md §6.1 are adopted into docs/security/process-model.md §4.1. Incorporate the removal tests into Milestone 2's validation suite to catch silent framework failures." | The process model §4.1 and change record; [testing](../testing.md) TS14's V1; the [roadmap](../roadmap.md)'s M2; ADR-0004's history |
+| 3 | Budget B1b (15 MB) | "Approved. Keep the 15 MB baseline ceiling. Milestone 2 will measure display-list memory density per item and introduce per-window scaling if complex DOM trees exceed the margin." | The process model's B1; [performance](../performance.md) PF6; the roadmap's M2; ADR-0019's history |
+| 4 | Strategic Choices (WPT fonts, single ordered stream, browser layer animation, B1 split) | "All approved as implemented." | None needed: the documents already carry them (CP1, CP2) |
+| 5 | Branch Merge | "Wait on merging architecture-review into main until Round 2 is complete, preserving main as the verified baseline." | This log and the status |
+| 6 | Commission Round 2 | "Authorized. Please proceed immediately with executing Round 2 of the architecture review on branch architecture-review": verify "that the CP1–CP6 amendments completely resolve findings RV1-01 through RV1-22 without introducing regressions or contradictions"; "Conduct an in-depth audit of the deferred subsystems: Accessibility (ADR-0014), Storage & Workers (ADR-0013), Style Cascade & Layout Algorithms (LY1–LY32, ST1–ST36), Embedder API (EM1–EM12), and granular IPC protocols (IP13–IP22)"; "Evaluate whether the stopping rule (zero Critical or High findings) is met." | §2; Round 2's documents |
 
 ## 6. The stopping rule
 
