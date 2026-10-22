@@ -13,6 +13,7 @@
 |---|---|
 | 2026-10-18 | Proposed at Step 5, CP9, with the settings list and the reserved key equivalents for the owner |
 | 2026-10-18 | **Accepted** by the owner at Gate B: "ADR-0014 (Accessibility): Accepted as proposed." "Settings List: Approved as written in docs/architecture/accessibility.md §6.1." "Reserved Key Equivalents: Approved as written in docs/architecture/accessibility.md §6.2 (Chromium reserved set, plus ⌘L, ⌘,, and Esc un-overridable even in fullscreen)." The [accessibility design](../architecture/accessibility.md) is binding |
+| 2026-10-21 | **Amendments accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-06: AX2's bounds are in the space of the nearest scroll or animation node the browser holds, with an advance per grapheme cluster in text runs; AX4 answers hit tests from the cache, then refines them asynchronously. RV2-07: AX7's tiers, full while VoiceOver or Switch Control runs (by KVO), basic for any other client, off again after idle; AX12 follows. RV2-08: AX11 says which suite runs where. RV2-09: AX4's eight web notifications and `ariaNotify`; AX10's `inverted-colors`; live regions in full by M7 ([accessibility](../architecture/accessibility.md)) |
 
 ## Question
 

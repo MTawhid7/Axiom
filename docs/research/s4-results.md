@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Complete (2026-10-17) |
+| **Status** | Complete (2026-10-17). **Measured on macOS 26B5112a;** its probes ran again under S15 on 2026-10-21, with the build unrecorded (Round 4, RV4-13) |
 | **Question** | Can Axiom's helpers enter custom deny-by-default Seatbelt profiles on macOS 27.2, signed ad hoc and built with the Command Line Tools (S4-Q1)? Does the profile deny what it should while the helper keeps working (S4-Q2)? What does a sandboxed helper cost, and what does IPC cost (S4-Q3)? Where can a helper generate code (S4-Q4)? Does CoreText work inside a renderer profile (S4-Q5)? |
 | **Feeds** | [ADR-0004](../adr/0004-process-model-and-sandbox.md) (acceptance and refinements); [process model](../security/process-model.md) §7 and §10; OQ-17 (IPC transport); Steps 4 and 5 |
 | **Plan** | [macOS confinement note](macos-process-confinement.md) §7; [Step 3 tracker](step-3-security-and-process-model.md), CP6–CP8 |

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B |
+| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B. **EM9 amended by the architecture review's Round 1** (2026-10-21): the script-free reference-test path and staged diagnostics (RV1-01, RV1-15) |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Embedder API](../architecture/embedder-api.md) (EM1–EM12); [S2 results](../research/s2-results.md); [event loop and threading](../architecture/event-loop-and-threading.md) (EL6, EL24); [IPC](../architecture/ipc.md); [input and accessibility](../architecture/input-and-accessibility.md); decision-map item F4; OQ-11 |
@@ -13,6 +13,11 @@
 |---|---|
 | 2026-10-17 | Proposed at Step 4, CP12 |
 | 2026-10-17 | **Accepted** by the owner at Gate B: "ADR-0009 (Embedder API & Pure-Rust Shell): Accepted." OQ-11 is resolved, subject to the shell milestone's validation (decision 6) |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1): RV1-15, "Require headless embedder text dumps at M1, crash reporting at M2, and console logging at M3." And RV1-01, "Implement a script-free screenshot harness for Milestone 1". EM9 is amended in the [embedder API](../architecture/embedder-api.md): the headless embedder writes a PNG per test without script, and its diagnostics are staged (dumps at M1, crash reports at M2, the console at M3). Decision 5 records it |
+| 2026-10-21 | **Amendment recorded** in Round 2's first checkpoint ([the review](../review/README.md) §5.6, RV2-02; the owner: "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed."): decision 7 and EM12 follow Round 1's RV1-17, "Validate local self-signed codesigning persistence via Spike S15.", and [ADR-0004](0004-process-model-and-sandbox.md) D2's amendment: the bundle is signed by the stable local identity S15 validated, with ad hoc as the fallback (MA10). EM10 now says single-process mode is a test mode (RV1-07) |
+| 2026-10-21 | **Amendments accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-03: EM5 lists each request's default, which the headless embedder answers with; EM9's virtual time is single-process mode's, and conformance runs in real processes (the owner: "Approved as recommended." "Run WPT conformance suites (MA4's gate) in real, sandboxed processes on host time"; "Run time-dependent and scheduler tests in single-process mode on EL24's virtual clock"; "Run visual reference tests under both configurations at milestone review gates."). RV2-04: EM4's events include a helper's crash or hang |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-11: EM5's file chooser follows SG1: the browser reads the chosen files, and the renderer receives their bytes, never a descriptor |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-08: EM9 answers Get Computed Role and Label from M4; the platform-mapping tests run against the shell's build |
 
 ## Question
 
@@ -58,9 +63,9 @@ See [embedder API](../architecture/embedder-api.md) §4. The language question t
 2. **Commands in; events and requests for decisions out.** The engine applies its policy first, and every request has a default (EM4–EM5).
 3. **Presentation, input, IME and accessibility** cross as shell-hosted objects that the engine keeps current. Profile data lives with the engine (EM6–EM7).
 4. **The browser's own UI is native, never web content** (EM8).
-5. **A headless embedder** with offscreen surfaces, synthetic input and virtual time, for WPT and reference tests. Single-process mode uses the same API (EM9–EM10).
+5. **A headless embedder** with offscreen surfaces, synthetic input and virtual time, for WPT and reference tests. Single-process mode uses the same API (EM9–EM10). **As amended in Round 1** (RV1-01, RV1-15): it writes a reference test's PNG without script, and dumps the DOM, styles, boxes and fragments, the display list and the network log as text from M1, with crash reports at M2 and the console at M3. **As amended in Round 2** (RV2-03): virtual time in single-process mode only; conformance runs in real processes on the host clock.
 6. **OQ-11: a pure-Rust shell with objc2.** The shell milestone first validates an objc2-defined view class for text input and accessibility, a menu bar and a bundle. A Swift shell can sit behind the same API if that validation fails (EM11).
-7. **One ad-hoc-signed bundle** holding the shell and helper executables, built by a script without Xcode (EM12).
+7. **One ad-hoc-signed bundle** holding the shell and helper executables, built by a script without Xcode (EM12). **As amended** (Round 1, RV1-17; recorded in Round 2, RV2-02): signed by the stable local identity, with ad hoc as the fallback.
 
 ## Rationale
 

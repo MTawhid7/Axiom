@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0018](adr/0018-corpus-standards-and-testing.md) was accepted (2026-10-20, Step 6's Gate B), with the automation boundary (§3) confirmed by the owner. Written at Step 6, CP2. **Baselines from spike S8** (§5): all thirteen pages in Chrome Canary, the five automated logged out, the eight others signed in by the owner's hand; and the ten pages that work logged out in Safari, by the owner's hand ([S8 results](research/s8-results.md) §7.4, recorded at Step 6's Gate C) |
+| **Status** | **Binding** since [ADR-0018](adr/0018-corpus-standards-and-testing.md) was accepted (2026-10-20, Step 6's Gate B), with the automation boundary (§3) confirmed by the owner. Written at Step 6, CP2. **Baselines from spike S8** (§5): all thirteen pages in Chrome Canary, the five automated logged out, the eight others signed in by the owner's hand; and the ten pages that work logged out in Safari, by the owner's hand ([S8 results](research/s8-results.md) §7.4, recorded at Step 6's Gate C). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): §10's census addendum (RV1-12; CP5) |
 | **Question** | Which pages is Axiom judged against? What does each need, and from which security level can it be used? How is each measured, repeatably and within its site's terms? |
 | **Answers** | Step 6 question Q1 ([tracker](research/step-6-standards-budgets-roadmap.md) §3), with S8; the tracker's handed-over questions 1 and 2 (§2.2) |
 | **Feeds** | Spike S8 (CP3); the standards baseline (CP4); testing (CP5); budgets (CP6); the roadmap's corpus targets and login track (CP8); Milestone 1 (CP9) |
 | **Builds on** | [OQ-2](open-questions.md), resolved by the owner (2026-10-20); the owner's Gate A decisions on S8, accounts and URL parameters (tracker §11); the [threat model](security/threat-model.md) §8; [ADR-0001](adr/0001-scope-and-target.md); the [charter](charter.md) §8 |
-| **Last updated** | 2026-10-20 |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Rules are numbered CO1–CO14. Each site's terms and robots file are quoted and dated (§3). Each site's needs are **inference** from background knowledge until S8 or a session by hand measures them, and are marked as such.
 
@@ -281,7 +281,7 @@ The roadmap (CP8) places each site at the first milestone and level where it can
 
 ## 10. Open questions
 
-1. **Features of the eight pages measured by hand.** S8 can't instrument them. **Optional, by hand:** after each page, the owner saves Chrome's own `chrome://histograms/Blink.UseCounter` page from the census profile. That page counts the features the browser saw used, records the browser's own statistics, and holds no page content. Not saved in the session of 2026-10-20, so these pages' features stay inference.
+1. **Features of the eight pages measured by hand.** S8 can't instrument them. **Optional, by hand:** after each page, the owner saves Chrome's own `chrome://histograms/Blink.UseCounter` page from the census profile. That page counts the features the browser saw used, records the browser's own statistics, and holds no page content. Not saved in the session of 2026-10-20, so these pages' features stay inference. **Authorized as the census addendum** by the owner (2026-10-21, Round 1: "Manual census addendum (Chrome memory-infra traces & UseCounters on normalized feeds)"), before M4: the use counters for the eight pages, and memory-infra traces under RV1-05's normalized workload, by the owner's hand (CO6). M4's targets are then placed again by MS6 ([roadmap](roadmap.md) §5).
 2. **Safari for the five automated pages.** Safari's automation needs its remote automation enabled (Develop → Allow Remote Automation, or `safaridriver --enable` with an administrator's password), a setting only the owner may change. It stayed off, so Safari is measured by hand for every page: the corrected census tool measured the ten pages that work logged out on 2026-10-20 ([S8 results](research/s8-results.md) §7.4).
 3. **Test accounts at L2:** answered at CP8 in the [roadmap](roadmap.md) §6. M5 targets Google Search, Instagram and Reddit, whose terms set no limit on a person's accounts; each test account is made by hand, in the owner's own name, with accurate details, and used only to sign in and read.
 4. **When to read terms again:** before each census and each milestone's corpus checks (CO3). Whether a changed clause should stop a census automatically, as a changed robots file does, is CP5's to decide.

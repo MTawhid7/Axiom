@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (final, 2026-10-17). Provisionally accepted on 2026-10-16; the Step 2b spikes validated it |
+| **Status** | **Accepted** (final, 2026-10-17). Provisionally accepted on 2026-10-16; the Step 2b spikes validated it. **Amended by the architecture review's Round 1** (2026-10-21): failure semantics, panics and overflow (RV1-16) |
 | **Date** | 2026-10-16; accepted as final 2026-10-17 |
 | **Deciders** | Project owner |
 | **Related** | [Language evaluation](../technology/language-evaluation.md) (full analysis and sources), [ADR-0001](0001-scope-and-target.md), [S1 results](../research/s1-results.md), [S2 results](../research/s2-results.md), [ADR-0003](0003-gc-handle-and-rooting-pattern.md) (Accepted) |
@@ -18,6 +18,7 @@
 | 2026-10-17 | **S2 complete.** The objc2 platform stack (AppKit, Metal, CoreText) works without Xcode, with `unsafe` contained. Build thresholds T1–T4 are proposed for revisit condition 3 ([S2 results](../research/s2-results.md)) |
 | 2026-10-17 | **Recommendation: final acceptance.** The GC pattern is proposed separately as [ADR-0003](0003-gc-handle-and-rooting-pattern.md) |
 | 2026-10-17 | **Owner accepts ADR-0002 as final:** "The S1 and S2 evidence conclusively validates the Rust hypothesis." The owner also accepts thresholds T1–T4 as the meaning of revisit condition 3 (OQ-12), and ADR-0003 |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1), RV1-16: "Enforce panic = "abort" per binary; enforce checked arithmetic / overflow checks in parsers and IPC validators." The decision gains its failure semantics, below; the [process model](../security/process-model.md)'s IR10 and the [IPC design](../architecture/ipc.md)'s IP11 apply them |
 
 ## Question
 
@@ -52,6 +53,13 @@ Excluded, with reasons given in the evaluation (§6.5): languages with their own
 - benchmark-justified hot paths.
 
 Parsers, network policy and IPC message decoding contain no `unsafe` at all. The full policy is in the evaluation, §15.3.
+
+**Failure semantics, as amended in Round 1** (RV1-16, 2026-10-21). Rust's defaults unwind on a panic and let integer overflow wrap in release builds; Axiom sets both:
+- **Every executable is built with `panic = "abort"`.** A panic on any thread ends its process, and nothing recovers with `catch_unwind`. A helper's panic is a crash the browser handles (IR10); a panic in the browser ends it, since its state can't be trusted afterwards.
+- **Parsers, decoders and IPC validators use checked arithmetic,** enforced by Clippy's `arithmetic_side_effects` lint, or are built with overflow checks on in release builds (a per-package profile setting), with the cost measured at Milestone 1.
+- **The browser's message handling and validators are panic-free by construction:** Clippy's `indexing_slicing` and `unwrap_used` are denied in them, and every fuzz target reports a panic as a finding (IP11, V2).
+
+The workspace's profiles and lints take these settings at Milestone 1's skeleton ([Milestone 1](../milestone-1.md) MA7, MA11). The spikes keep theirs, so their measurements stay comparable.
 
 ## Rationale (summary — see the evaluation for evidence)
 
@@ -116,6 +124,7 @@ See evaluation §15.6.
 ## Consequences
 
 - Future crates are designed around `#![forbid(unsafe_code)]` with a few audited exceptions.
+- Every executable aborts on a panic, and the code that handles untrusted input uses checked arithmetic (RV1-16).
 - The DOM is modelled with enums, traits and code generated from WebIDL, not class inheritance.
 - The GC handle pattern is its own ADR: [ADR-0003](0003-gc-handle-and-rooting-pattern.md) (Accepted 2026-10-17) adopts Pattern B (Nova style), with obligations C1–C5.
 - macOS integration goes through objc2 and C FFI. A thin Swift shell remains an option for later, not a plan.

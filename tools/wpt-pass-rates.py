@@ -3,6 +3,7 @@
 
     python3 -I tools/wpt-pass-rates.py LABEL=SUMMARY.json.gz [...] --dirs DIR [DIR ...]
                                        [--manifest MANIFEST.json --types reftest [...]]
+                                       [--tests FILE]
 
 Each SUMMARY is a run's `*-summary_v2.json.gz`, as wpt.fyi's runs API lists
 it in `results_url`, downloaded beforehand, gzipped or not. For each
@@ -18,6 +19,11 @@ area's target.
 With --manifest (WPT's MANIFEST.json, as `./wpt manifest` writes it) and
 --types, only tests of those types count: for example `--types reftest`
 for an engine that can't run script yet.
+
+With --tests, only the tests listed in FILE count, one `/path` per line, such
+as `wpt-script-deps.py --list-free` writes: for example a milestone's interim
+target over a directory's tests that need no script (SB11). With both options,
+a test counts only if it passes both filters.
 
 Summaries are untrusted data: run with -I, and keep them in their own
 directory under target/.
@@ -95,8 +101,13 @@ def main():
     parser.add_argument("--manifest", help="WPT's MANIFEST.json, to count only the tests of --types")
     parser.add_argument("--types", nargs="+", default=["reftest"],
                         help="test types counted with --manifest (default: reftest)")
+    parser.add_argument("--tests", metavar="FILE", help="count only the tests listed in FILE, one /path per line")
     args = parser.parse_args()
     only = manifest_tests(args.manifest, args.types) if args.manifest else None
+    if args.tests:
+        with open(args.tests, encoding="utf-8") as f:
+            listed = {line if line.startswith("/") else "/" + line for line in (raw.strip() for raw in f) if line}
+        only = listed if only is None else only & listed
     runs = []
     for spec in args.runs:
         label, _, path = spec.partition("=")

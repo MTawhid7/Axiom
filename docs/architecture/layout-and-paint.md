@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0016](../adr/0016-style-layout-and-paint.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP15. No Step 4 interface changes (SC1): scrollbars, snapping and sticky positioning use PL6's spatial nodes and PL7's items (LY17, LY18). Paths stay images (LY23): the owner deferred GR5's amendment, which S6-Q4 put to them, to the graphics milestone ([S6 results](../research/s6-results.md) §8) |
+| **Status** | **Binding** since [ADR-0016](../adr/0016-style-layout-and-paint.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP15. No Step 4 interface changes (SC1): scrollbars, snapping and sticky positioning use PL6's spatial nodes and PL7's items (LY17, LY18). Paths stay images (LY23): the owner deferred GR5's amendment, which S6-Q4 put to them, to the graphics milestone ([S6 results](../research/s6-results.md) §8). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): §10 for RV4-14 (CP7) |
 | **Question** | How does layout work: the layout unit, box construction, formatting contexts, intrinsic sizing, writing modes, fragmentation, scrolling and overflow, replaced elements and child frames, fragment reuse? How is the fragment tree painted into a display list, hit-tested and queried? |
 | **Answers** | Step 5 question Q11 ([tracker](../research/step-5-subsystems.md) §3); the layout-unit half of the handed-over question 16 (§2.2); the [rendering pipeline](rendering-pipeline.md)'s open question 4 |
 | **Feeds** | Part 2's ADRs (CP18); CP16 and CP17 (geometry, scrolling and observers for script, and their bindings); [graphics](graphics.md) (display items, property trees, path images, scrollbars); [accessibility](accessibility.md) (geometry and text boundaries) |
@@ -175,7 +175,7 @@ No new dependency is proposed.
 
 ## 7. Security
 
-- **Paint emits only PL7's validated primitives,** which the browser validates again before drawing (PL9). Fonts and image bytes never leave the renderer (TX14, IM1).
+- **Paint emits only PL7's validated primitives,** which the compositor validates again before drawing (PL9): from M2 in the GPU/compositor process, at M1 in the browser (as amended in Round 1, RV1-02). Fonts and image bytes never leave the renderer (TX14, IM1).
 - **Untrusted structure, bounded work.** Layout's only parsing is SVG's geometry syntax, such as path data, in safe Rust (rule 5). A hostile document can still be deep or huge: recursion depth is bounded wherever the document controls it, using explicit work stacks past a limit, and every quantity saturates instead of overflowing (LY1). Exhaustion harms only the attacker's tab, but a stack overflow would abort the renderer (inference).
 - **No other frame's content is visible.** The compositor routes input by frame token (IN1), and a renderer hit-tests and measures only its own frames (LY25). A child frame learns only its own visible rectangle from the browser, the information IntersectionObserver exposes (LY28), never its parent's layout.
 - **Form controls and scrollbars need no AppKit in the renderer** (LY24, HD27), as the process model requires.
@@ -187,6 +187,8 @@ No new dependency is proposed.
 | First document milestone | The box tree; block and inline layout, with text in horizontal writing modes and bidi; floats; relative, absolute and fixed positioning; images and child frames; overflow and scroll nodes; backgrounds, solid borders, shadows and text; stacking contexts, display items and their reuse; hit testing and hit-test regions; CSSOM View's basic geometry |
 | Next | Flexbox and grid; tables (approximate); multi-column layout; sticky positioning; vertical writing modes; snapping and anchoring; containment and `content-visibility`; ResizeObserver and IntersectionObserver; SVG; clip paths, masks and filters; form controls and scrollbars |
 | Later | Printing and paged media; anchor positioning; grid lanes and gap decorations; ruby; `shape-outside`; 3D rendering contexts; `text-wrap: pretty`; view transitions (with CP4 and CP14); parallel layout, if profiling asks for it |
+
+**Anchor positioning** (Round 2, [RV2-15](../review/round-2/03-findings.md#rv2-15-style-hooks-from-interop-2026)), staged "Later" above, needs style during layout: each position option is tried by style's nested lifecycle for one element (ST25), within its parent's layout. When a corpus page or a milestone's selection needs it, it is built that way.
 
 **The complete model** (SC9): every script and writing mode goes through text's interface and LY14's logical coordinates; a new formatting context is another algorithm under LY6's contract; a new paint effect is an effect node or a primitive; a new scrolling feature is data on the scroll node; parallel layout stays possible behind LY30.
 
@@ -207,7 +209,7 @@ No new dependency is proposed.
 |---|---|---|
 | 1 | How printed pages reach a PDF without font parsing in the browser: glyph images, or glyph outlines as paths (TX15) | The printing milestone |
 | 2 | Depth sorting and plane splitting for 3D rendering contexts (LY19) | The compositor, at that milestone (GR3) |
-| 3 | Taffy as a test-only differential oracle for flexbox and grid, under DP2's rules for test tooling (LY32) | Step 6 |
+| 3 | Taffy as a test-only differential oracle for flexbox and grid, under DP2's rules for test tooling (LY32) | M4, with flexbox and grid (Round 4, RV4-14) |
 | 4 | Parallel layout (LY30) | Step 6 profiling (PL10) |
 | 5 | Limits for hostile documents: recursion depth, boxes per formatting context, path complexity (§7) | Implementation, with Step 6's fuzzing |
 

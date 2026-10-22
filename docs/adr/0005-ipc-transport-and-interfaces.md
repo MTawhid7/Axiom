@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B |
+| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B. **IP11 amended by the architecture review's Round 1** (2026-10-21): panic-free validators with checked arithmetic (RV1-16); IP2 and the compositing family for real processes from M1 and the GPU/compositor process (RV1-07, RV1-02). **Amended by Round 4** (2026-10-22): IP13's bound (RV4-03); IP2, IP4, IP9, IP11 and IP16 (RV4-05, RV4-11, RV4-12) |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [IPC](../architecture/ipc.md) (the full design, IP1–IP22); [process model](../security/process-model.md) §6 (R1–R6, IR1–IR10); [ADR-0004](0004-process-model-and-sandbox.md) D3; [S4 results](../research/s4-results.md); [macOS runtime note](../research/macos-runtime-facilities.md); [Step 4 tracker](../research/step-4-architecture-proposal.md); OQ-17 |
@@ -13,6 +13,13 @@
 |---|---|
 | 2026-10-17 | Proposed at Step 4, CP12 |
 | 2026-10-17 | **Accepted** by the owner at Gate B: "ADR-0005 (Mach IPC): Accepted." OQ-17 is resolved |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1), RV1-16: "Enforce panic = "abort" per binary; enforce checked arithmetic / overflow checks in parsers and IPC validators." IP11 is amended in the [IPC design](../architecture/ipc.md): validators are panic-free by lint and use checked arithmetic |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1), RV1-07: "Run real, sandboxed renderer and network processes from Milestone 1 using the profiles validated in Spikes S4, S5, and S7." "Retain single-process mode strictly for rapid automated testing, fuzzing, and Miri." And RV1-02: "Formally design the sandboxed GPU/compositor process topology now (Renderer → GPU Process → Browser CALayer tree)." "Build the separate GPU/compositor process at Milestone 2; split Budget B1 accordingly." "Ensure Level 3 (L3) security certification at Milestone 6 is performed on the final multi-process topology." IP2 now confines single-process mode to tests, fuzzing and Miri, so Mach channels and memory entries run from M1; the compositing family gains the GPU process's channels: display lists from renderers, layer commits to the browser |
+| 2026-10-21 | **Amendments accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-13: IP16's never-block rules for every process that serves several peers, and children's sends with a zero timeout and a bounded local backlog, under EL1. RV2-14: IP13's synchronous requests have no timeout of their own (PF21), with one exception for a service worker's answer; IP7 bars `iosurface` from renderers' interfaces; three interface families added; open question 3 answered. In the [IPC design](../architecture/ipc.md) |
+| 2026-10-21 | **Open question 4 answered** with Round 2's RV2-05, accepted in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." S10 found memory charged to the process that allocates it, so the GPU process accounts by page ([IPC](../architecture/ipc.md) §8) |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-11: IP15 states its one exception, the origin private file system's synchronous access handle; the user's files reach renderers only as data ([IPC](../architecture/ipc.md)) |
+| 2026-10-22 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 4 ([the review](../review/README.md) §5.9): "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." RV4-03: IP13's synchronous requests are bounded by PF19's task-age deadline over the answering thread ([IPC](../architecture/ipc.md) IP13) |
+| 2026-10-22 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 4 ([the review](../review/README.md) §5.9): "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." RV4-05: every handle in a received or returned message is owned or destroyed (IP9, IP11, IP16); RV4-11: in-memory channels model Mach's limits and failures (IP2); RV4-12: the rendezvous pins the PID's version (IP4) |
 
 ## Question
 
@@ -78,7 +85,7 @@ All sourced in [IPC](../architecture/ipc.md) §3.
 
 ## Assumptions
 
-- Mach messages keep working for unsandboxed-to-sandboxed processes signed ad hoc (shown by S4).
+- Mach messages keep working for unsandboxed-to-sandboxed processes signed ad hoc (shown by S4), and under the stable local identity Round 1 adopted (S15, RV1-17).
 - A safe-Rust generator can produce decoders fast enough for display-list traffic (to measure when built).
 
 ## Risks and unresolved issues

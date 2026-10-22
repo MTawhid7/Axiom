@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** by the owner (2026-10-17), with one amendment: out-of-process iframes are a prerequisite for L3 (§8, check V9) |
+| **Status** | **Accepted** by the owner (2026-10-17), with one amendment: out-of-process iframes are a prerequisite for L3 (§8, check V9). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): L1 and V1 for the GPU/compositor process and renderers without IOKit (RV1-02, RV1-09; CP2); NG4 and §9 for rendering-timing side channels and passkeys (RV1-19, RV1-21; CP5) |
 | **Question** | What does Axiom protect, from whom, through which entry points, and where does trust change? When may it be used for sensitive logins? |
 | **Feeds** | [Process model](process-model.md), ADR-0004, the security sections of the architecture (Step 4), the testing strategy (Step 6) |
 | **Builds on** | [ADR-0001](../adr/0001-scope-and-target.md) (R3 and the defaults), [ADR-0002](../adr/0002-implementation-language.md) (the `unsafe` policy), [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md) (one heap per agent) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Claims follow the [research conventions](../research/README.md): **sourced facts** cite a numbered source (§11), and **inference**, **hypothesis** and **background** are marked as such. Everything about Axiom itself is **planned**, not implemented.
 
@@ -83,7 +83,8 @@ Each entry point for untrusted input, with the process that must handle it (the 
 | HTTP, TLS, DNS, decompression | Network bytes | Network process | Safe Rust where we write it; a sandbox around the process |
 | IPC endpoints of more privileged processes | **Every** message from a less privileged process | Browser, network and GPU processes | The IPC trust rules IR1–IR10 ([process model](process-model.md) §6) |
 | GPU work from WebGL and WebGPU (later) | Shaders and commands | GPU process | Validation before the Metal compiler; never in the browser process |
-| Display lists, accessibility trees and other renderer output | Renderer-generated data | Browser (later the GPU process) | Safe Rust decoding and validation; renderers never draw outside their area |
+| Display lists, accessibility trees and other renderer output | Renderer-generated data | Display lists: the GPU/compositor process from M2, the browser at M1 only (Round 1, RV1-02). Accessibility trees and other output: the browser | Safe Rust decoding and validation; renderers never draw outside their area |
+| Layer commits from the GPU/compositor process (from M2) | Layer trees, IOSurface ports, scroll and animation nodes, hit-test regions | Browser | Bounded decoding in safe Rust; checks against the browser's own records (IR1, IR2) |
 | Browser interface | Page-controlled titles, URLs, dialogs, fullscreen requests, permission requests, downloads, drag and drop, clipboard writes, external URL schemes | Browser | Spoof-resistant URL display; browser-drawn prompts; the browser's own user-activation tracking; downloads marked as quarantined (background); a prompt before launching another app |
 | Local network and `localhost` | Requests from public sites | Network process | Private Network Access-style checks (Step 5) |
 | Updates and dependencies | Upstream code | Build time | Pinned `Cargo.lock`; advisory monitoring (§9) |
@@ -124,7 +125,7 @@ Each goal names the adversary it addresses and the security level (§8) by which
 
 | ID | Goal | Against | Level |
 |---|---|---|---|
-| SG1 | **No file access from renderers.** A compromised renderer can't read or write any user file, run a program, or persist. Files the user picks for upload are read by the browser and passed as data | AD2 | L1 |
+| SG1 | **No file access from renderers.** A compromised renderer can't read or write any user file, run a program, or persist. Files the user picks for upload are read by the browser and passed as data, or as a read-only memory entry, never as a descriptor (the File API's SW16; Round 2, RV2-11) | AD2 | L1 |
 | SG2 | **Credentials stay with their site.** A renderer obtains only the cookies and storage of the site it is locked to. `HttpOnly` cookies never reach a renderer. No renderer holds the cookie jar | AD2 | L2 |
 | SG3 | **No cross-site data in a renderer** unless the other site opts in (CORS). This defeats both AD2 and Spectre-class reads by AD1, because the data is never in the attacker's address space | AD1, AD2 | L2 |
 | SG4 | **No direct network access from renderers.** Every request goes through the network process, which derives the initiator from the renderer's site lock rather than trusting a claimed origin. It enforces CORS, SameSite, mixed-content rules and response blocking in the style of ORB [7] | AD2 | L1 (lock checks from L2) |
@@ -133,8 +134,8 @@ Each goal names the adversary it addresses and the security level (§8) by which
 | SG7 | **Transport security.** TLS is validated against the system trust store. There is no silent downgrade, HSTS is honoured, and mixed content is blocked | AD3 | L1 |
 | SG8 | **The web's own security model, implemented correctly** and tested with WPT: same-origin policy, CORS, CSP, SameSite (Lax by default), frame-ancestors and X-Frame-Options, COOP and COEP, sandboxed iframes, Referrer-Policy | AD1 | Each feature, when it ships |
 | SG9 | **Renderers can't attack each other.** They can't name, signal or share memory with each other except through channels the browser brokers | AD2 | L1 |
-| SG10 | **Helpers are compartments too.** A compromised network process exposes traffic and cookies, but not user files, the interface, or other secrets. A compromised GPU process exposes rendered pixels, but not cookies or files | AD4 | L2 |
-| SG11 | **Containment.** A crashed, hung or memory-hungry renderer affects only its own tabs. The browser never blocks waiting for a child process | AD1, AD2 | L1 |
+| SG10 | **Helpers are compartments too.** A compromised network process exposes traffic and cookies, and, as Round 2 noted (RV2-12), every site's web storage, databases, caches and shared blobs (SW1, SW14), but not user files, the interface, or other secrets. A compromised GPU process exposes rendered pixels, but not cookies or files | AD4 | L2 |
+| SG11 | **Containment.** A crashed, hung or memory-hungry renderer affects only its own tabs. The browser never blocks waiting for a child process. **As amended in Round 2** (RV2-13): nor does any process that serves several renderers, so one renderer can't stall another's loads or drawing ([process model](process-model.md) IR5; [IPC](../architecture/ipc.md) IP16) | AD1, AD2 | L1 |
 | SG12 | **No executable memory where it isn't needed.** Only the JIT renderer variant can create executable memory, and that is enforced by the kernel through entitlements. Sensitive sites run without a JIT. A global switch turns every JIT off | AD2 | Before any JIT |
 
 **Why SG3 needs process isolation.** Transient-execution attacks such as Spectre let script read data inside its own process without any bug in the browser. Site Isolation therefore keeps cross-site data out of an attacker's process instead of relying on software checks [2][3]. Chrome re-enabled `SharedArrayBuffer` and precise timers only once Site Isolation was on [3].
@@ -150,7 +151,7 @@ The web platform encodes the same rule:
 | NG1 | Protection against malware already running as the user, or against a root or kernel compromise | Such software can read the profile and the screen directly (TA1, TA2) |
 | NG2 | Physical attacks, such as an unlocked or stolen machine | FileVault and the OS cover these |
 | NG3 | Anonymity and strong resistance to fingerprinting | A Tor-class design is a different product. Storage partitioning against cross-site tracking is in scope, as a standards decision |
-| NG4 | Side channels other than cross-site transient execution: power, acoustic, or cross-process microarchitectural attacks | They need OS and hardware mitigations [3] |
+| NG4 | Side channels other than cross-site transient execution: power, acoustic, or cross-process microarchitectural attacks | They need OS and hardware mitigations [3]. **As amended in Round 1** (RV1-19): rendering-timing attacks across frames, such as pixel stealing, are *not* excluded; §9 and the rendering pipeline's PL9 cover them |
 | NG5 | Reputation services such as Safe Browsing | They need a cloud service, which ADR-0001 rules out. Phishing defence rests on a clear interface and on binding credentials to sites |
 | NG6 | Denial-of-service resistance beyond containment | A page can always use CPU in its own process. Axiom contains it (SG11) and throttles background work |
 | NG7 | Extensions, sync and multiple profiles | ADR-0001 |
@@ -163,7 +164,7 @@ ADR-0001 gates sensitive use "until the isolation milestone is verified". The le
 | Level | Name | What must be true | Permitted use |
 |---|---|---|---|
 | **L0** | Prototype | Anything goes, including a single process and no sandbox | Local test pages and public documents. **Never credentials** |
-| **L1** | Sandboxed | Web content is parsed and run only in renderer processes under a deny-by-default sandbox. A separate, sandboxed network process. The browser process parses no web content. IPC follows IR1–IR10. SG1, SG4–SG7, SG9 and SG11 hold | General browsing **without logging in** |
+| **L1** | Sandboxed | Web content is parsed and run only in renderer processes under a deny-by-default sandbox. A separate, sandboxed network process. The browser process parses no web content and, as amended in Round 1 (RV1-02), consumes no renderer display lists: the GPU/compositor process does. IPC follows IR1–IR10. SG1, SG4–SG7, SG9 and SG11 hold | General browsing **without logging in** |
 | **L2** | Site-isolated | Renderers are locked to one site. Credentials and storage are mediated with lock checks. ORB-style response blocking is on. Third-party state is partitioned by top-level site. SG2, SG3 and SG10 hold | Logging in to accounts that are **not** sensitive |
 | **L3** | Sensitive-use gate passed | **Out-of-process iframes:** every cross-site frame renders in a process locked to its own site (the owner's amendment, 2026-10-17). Checks V1–V9 pass, and their evidence is recorded | Email, banking, and accounts with write access |
 
@@ -171,7 +172,7 @@ ADR-0001 gates sensitive use "until the isolation milestone is verified". The le
 
 | # | Check |
 |---|---|
-| V1 | **Sandbox escape tests.** From inside each process type, an automated suite tries the operations that type must not perform: reading user files, opening sockets, spawning programs, and looking up Mach services outside its allowlist. Every attempt is denied |
+| V1 | **Sandbox escape tests.** From inside each process type, the GPU/compositor process included, an automated suite tries the operations that type must not perform: reading user files, opening sockets, spawning programs, looking up Mach services outside its allowlist, and, from a renderer, opening IOKit user clients (Round 1, RV1-09). Every attempt is denied |
 | V2 | **IPC fuzzing.** Every message decoder of every privileged endpoint is fuzzed, with coverage reported, and the campaign ends without open findings |
 | V3 | **Lock enforcement tests.** A test renderer that lies about its origin is caught and terminated, for cookies, storage, navigation commits and requests |
 | V4 | **Cross-site leak tests.** The relevant WPT suites (CORS, COOP and COEP, ORB, cookies) pass. A test confirms that cross-site no-CORS responses carrying HTML, JSON or XML never reach the renderer's memory |
@@ -192,11 +193,12 @@ ADR-0001 gates sensitive use "until the isolation milestone is verified". The le
 | **System parsers inside renderers** | A bug in CoreText or ImageIO compromises a renderer (AD2). A sandbox escape still needs a second bug |
 | **Spectre inside one site's process** | Accepted. Same-site data may share a process |
 | **Cross-site iframes before out-of-process iframes exist** | At L1 and non-sensitive L2 only, a cross-site iframe may share its embedder's process. The [process model](process-model.md) §5 limits the exposure: partitioned third-party state, ORB, and no sensitive site rendered inside another site's process. L3 requires out-of-process iframes |
-| **WebAuthn and passkeys** | **Hypothesis:** the platform authenticator needs an Apple entitlement that ad-hoc signing can't claim. Chrome's main executable carries `com.apple.developer.web-browser.public-key-credential` (observed with `codesign -d` on this machine). New open question OQ-16 |
+| **WebAuthn and passkeys** | **Hypothesis:** the platform authenticator needs an Apple entitlement that ad-hoc signing can't claim. Chrome's main executable carries `com.apple.developer.web-browser.public-key-credential` (observed with `codesign -d` on this machine). New open question OQ-16. **Round 1** (RV1-21): roaming keys over USB HID and the hybrid transport (a phone as the authenticator, as Chromium implements it) need no restricted entitlement, to be checked before M6 |
+| **Rendering-timing side channels across frames** (Round 1, RV1-19) | GPU.zip (IEEE S&P 2024) stole pixels from cross-origin frames through the timing of filters drawn on the GPU; it needed the frame to load with cookies, SVG filters on frames, and GPU rendering. Axiom blocks third-party cookies (NW11), but its compositor applies a parent's effect nodes to child frames (PL6, PL9), and same-site cross-origin frames, or a Storage Access grant, still carry credentials. **Mitigation, from M5:** PL9 doesn't apply effects whose cost depends on pixel values to a cross-origin child frame's output, or applies them only in forms whose cost doesn't; V4 tests it ([RV1-19](../review/round-1/02-findings.md#rv1-19-rendering-timing-side-channels)) |
 
 ## 10. Open questions raised
 
-- **OQ-16.** How can Axiom support WebAuthn and passkeys without a paid developer account? Candidates are roaming security keys over USB HID, or obtaining the entitlement. Needed before L3, because high-value accounts increasingly use passkeys.
+- **OQ-16.** How can Axiom support WebAuthn and passkeys without a paid developer account? Candidates are roaming security keys over USB HID, or obtaining the entitlement; **Round 1** (RV1-21) added the hybrid transport (§9). Needed before L3, because high-value accounts increasingly use passkeys.
 - Inputs to existing questions: OQ-4 (JIT policy), via SG12 and V7; OQ-5 (per-agent heaps), because an agent cluster must live in one process [6].
 
 ## 11. Sources

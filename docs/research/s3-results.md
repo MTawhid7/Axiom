@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Complete** (2026-10-18), with an addendum (CP16) that measured C1's final stack, `SliceStack`, and corrected §3. ADR-0008 accepted at Gate C |
+| **Status** | **Complete** (2026-10-18), with an addendum (CP16) that measured C1's final stack, `SliceStack`, and corrected §3. ADR-0008 accepted at Gate C. **The build** wasn't recorded (macOS 27.2) (Round 4, RV4-13) |
 | **Question** | Spike S3 (Step 4 tracker §10.1). **S3-Q1:** can a root stack without borrow tracking cost at most 1 ns per root and per read (ADR-0003's C1)? **S3-Q2:** how much rooting does an interpreter-shaped workload do, and where? **S3-Q3:** how fast is each bytecode dispatch technique on stable Rust? **S3-Q4:** do layouts without index arithmetic speed up traversal (C2)? **S3-Q5:** what do generated setters and a write barrier cost (C3)? |
 | **Feeds** | [ADR-0008](../adr/0008-script-agents-and-heap.md) (C1, and the dispatch technique as evidence for J1); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md) (C1–C3); OQ-14; Step 5 (the JavaScript engine) |
 | **Plan and raw log** | [Step 4 tracker](step-4-architecture-proposal.md): design §10, per-checkpoint results §11 (CP13–CP16) |

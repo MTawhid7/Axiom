@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | Complete (2026-10-19). S7-Q1, S7-Q3 and S7-Q4 pass; S7-Q2 is reported, and settles NW6 as designed: rustls, verified by Security |
+| **Status** | Complete (2026-10-19). S7-Q1, S7-Q3 and S7-Q4 pass; S7-Q2 is reported, and settles NW6 as designed: rustls, verified by Security. **Re-run on macOS 26B118** (2026-10-22, Round 4's RV4-13; §12): S7-Q1, S7-Q3 and S7-Q4 pass again; S7-Q2's handshakes hold, its per-byte comparison didn't reproduce on a slower network path |
 | **Question** | Under a deny-by-default profile compiled by a broker, does a helper's TLS client verify servers through `SecTrustEvaluateWithError`, and which rules does it need (S7-Q1)? What do rustls with `aws-lc-rs` and Network framework's TLS cost in handshake latency, CPU per megabyte and footprint (S7-Q2)? Do DNS-SD's address and HTTPS-record queries, driven from kqueue, work under the profile (S7-Q3)? Does one I/O thread drive rustls, `quinn-proto`, DNS-SD, a Mach port and timers from a single `kevent64` call, with no wakeups while idle (S7-Q4)? |
 | **Feeds** | [ADR-0013](../adr/0013-networking-storage-and-workers.md) (its acceptance conditions: S7-Q1, S7-Q3 and S7-Q4); [networking](../architecture/networking.md) NW1, NW5, NW6, NW7, NW17 and its open question 1; the [dependency register](../technology/dependency-register.md); a refinement of the [process model](../security/process-model.md) §4.1 for the owner |
 | **Plan** | [Step 5 tracker](step-5-subsystems.md) §10.3, authorized at Gate B (2026-10-18) |
 | **Code** | `spikes/s7/net` (`s7-net`) and `tools/s7-measure.sh`, on branch `step-5`. Formal run at commit `4840d7d` (§2) |
-| **Last updated** | 2026-10-20: the owner's Gate C decisions on §9's items 3 and 5 |
+| **Last updated** | 2026-10-22: the re-run on 26B118 (§12) |
 
 **Evidence labels** follow the [research conventions](README.md):
 - **Measured** facts come from S7's binary and script, in the formal run named in §2 unless stated otherwise.
@@ -332,6 +332,22 @@ tools/s7-measure.sh         # everything; target/s7-results/<timestamp>/; needs 
 | Formal run (commit `4840d7d`, clean tree) | `target/s7-results/20261019-071313/`: `summary.txt`, `environment.txt`, the `q1-` to `q4-` files named above, `q1-removal-*.txt`, `q1-report-*.txt`, `q1-attempted.txt`, `profiles/`, `sandbox-denials.txt`, and an empty `crash-reports/`: no helper crashed |
 | Supplementary `startup` runs (commit `13daa44`) | `target/s7-results/20261019-073956-startup/` |
 | Build cost | `target/measure/20261019-070309/` |
+
+## 12. Re-run on macOS 26B118 (Round 4)
+
+Authorized by the owner for the architecture review's RV4-13 (2026-10-22, [the review](../review/README.md) §5.9): "Re-run S5, S6, and S7 once on the current macOS build (26B118) prior to Checkpoint 7." TS16 runs the checks that depend on the system again after a macOS update, and this spike's formal run was on 26B5112a. **The run:** `tools/s7-measure.sh` with its defaults, 2026-10-22 18:52–19:05, started at a load average of 1.85, three runs after 30 s cool-downs, then the removal tests and the reporting runs; AC power, Low Power Mode off; macOS 27.2 (26B118); with `rustls-webpki` 0.103.16, which Round 4's CP2 put in the lock (`target/s7-results/20261022-185224/`, against `20261019-071313/`). **The network path was slower than on 2026-10-19:** QUIC's round trip measured 55–60 ms against 9–12 ms, and the downloads ran at 7–18 MB/s against 55–67 MB/s (measured). A VPN client, Cloudflare WARP, was running (observed in `top`), the likely cause (inference).
+
+| Check | 26B5112a (2026-10-19) | 26B118 (2026-10-22) |
+|---|---|---|
+| S7-Q1: verification under the profile, 18 hosts, three runs per stack | Each host verified or rejected as expected whenever it connected | **The same:** no host that should be rejected was ever accepted; the unexpected outcomes were connections to badssl.com's hosts that ended early (rustls) and three TLS closes (`-9816`) under Network framework |
+| The probes, and the profile's removal tests | As specified; all 7 removals pass | **Identical;** all 7 pass |
+| S7-Q2: a full handshake to Cloudflare, rustls against Network framework | 2.6 against 8.0 ms of CPU; 3.3 M against 10.9 M instructions | **2.4 against 6.9 ms; 3.3 M against 10.8 M** |
+| S7-Q2: instructions per full handshake, over both hosts | rustls 2.4–3.3× fewer | **2.2–3.3× fewer** |
+| S7-Q2: per byte downloaded | rustls 1.6× fewer instructions per byte | **Not reproduced:** medians of 8.8 against 7.6 instructions per byte on the slower path, with a wide spread for both stacks |
+| S7-Q3: DNS-SD from kqueue | One thread; 0.35–0.43 ms of CPU | **One thread; 0.36–0.57 ms** |
+| S7-Q4: one wait | Everything from one `kevent64` wait; idle for 30 s, woken only by QUIC's idle timeout; idle wakeups 0 | **The same,** the loop turning only for QUIC's timeout and the window's end; the process's idle-wakeup counter read 0, 2 and 0 |
+
+**So S7-Q1, S7-Q3 and S7-Q4 pass again on 26B118,** with NW17's rules confirmed by their removal tests, and **NW6's choice holds on handshakes.** The per-byte comparison didn't reproduce on a path several times slower; it is measured again at Milestone 1's networking checkpoint, on a direct path, before anything relies on it (hypothesis: unchanged there).
 
 ## Sources
 

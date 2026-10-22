@@ -20,7 +20,7 @@ The aim is the smallest well-engineered system that delivers meaningful browser 
 | G1 | Understand and implement the core browser-engine mechanisms ourselves (see the list below) |
 | G2 | Be genuinely useful on a defined and growing set of real websites, with an architecture that can reach the full modern app web (*Accepted*, ADR-0001 R1) |
 | G3 | Reach a security posture adequate for sensitive logins, in verified stages (*Accepted*, ADR-0001 R3) |
-| G4 | **Efficiency is a primary architectural goal, not an afterthought:** low memory use, CPU efficiency and low power consumption, with measurable budgets on the target machine (owner direction, 2026-10-16) |
+| G4 | **Efficiency is a primary architectural goal, not an afterthought:** low memory use, CPU efficiency and low power consumption, with measurable budgets on the target machine (owner direction, 2026-10-16). **Round 4** (the owner, 2026-10-22: "Adopt the 3-tier validation strategy (commit unit tests, checkpoint instruction/memory ratchet, gate wall/energy budgets) and formalize budgets PF25–PF30 in docs/performance.md."): validated at every commit, every checkpoint and every gate, with budgets for start-up, CPU per page load, disk, writes, background activity and memory pressure ([performance](performance.md) PF5, PF25–PF30) |
 | G5 | Make decisions from evidence, record them in ADRs, and keep these docs as the source of truth |
 
 The core mechanisms in G1 are:

@@ -1,0 +1,61 @@
+[package]
+name = "s10-gpu"
+description = "Spike S10: a sandboxed GPU/compositor process between a renderer and the browser. Display-list updates are validated and rasterized there into IOSurfaces that the browser's layer tree shows: the hop's latency and CPU at 60 Hz; renderer pixels sampled from Mach memory entries without copies; validation's cost on page-sized lists. unsafe only in src/platform/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+# Every dependency is already in the workspace's lock (no new crate): S4's
+# library for spawning helpers and entering their profiles, and the objc2
+# framework crates S6 used, with objc2-metal's `block2` feature for buffers
+# made without a copy.
+[dependencies]
+s4-sandbox.workspace = true
+objc2.workspace = true
+objc2-foundation = { workspace = true, features = ["NSError", "NSString"] }
+objc2-metal = { workspace = true, features = [
+    "MTLAllocation",
+    "MTLBlitCommandEncoder",
+    "MTLBuffer",
+    "MTLCommandBuffer",
+    "MTLCommandEncoder",
+    "MTLCommandQueue",
+    "MTLDevice",
+    "MTLLibrary",
+    "MTLPixelFormat",
+    "MTLRenderCommandEncoder",
+    "MTLRenderPass",
+    "MTLRenderPipeline",
+    "MTLResource",
+    "MTLTexture",
+    "MTLTypes",
+    "block2",
+    "objc2-core-foundation",
+    "objc2-io-surface",
+] }
+objc2-io-surface = { workspace = true, features = [
+    "IOSurfaceRef",
+    "IOSurfaceTypes",
+    "objc2",
+    "objc2-core-foundation",
+] }
+objc2-quartz-core = { workspace = true, features = [
+    "CALayer",
+    "CATransaction",
+    "objc2-core-foundation",
+] }
+objc2-core-foundation = { workspace = true, features = [
+    "CFCGTypes",
+    "CFDictionary",
+    "CFNumber",
+    "CFString",
+] }
+
+[[bin]]
+name = "s10"
+path = "src/main.rs"
+
+[lints]
+workspace = true

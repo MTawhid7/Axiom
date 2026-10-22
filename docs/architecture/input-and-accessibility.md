@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP8 |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP8. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): IN1 for the GPU/compositor process (RV1-02; CP2). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): IN7 and §5 for RV4-08 (CP6); §8 for RV4-14 (CP7) |
 | **Question** | How does the browser route pointer, wheel, keyboard, IME and gesture input to frames that may live in different processes? How are focus, scrolling, user activation and accessibility handled, when AppKit asks synchronous questions and the browser may never block on a renderer? |
 | **Answers** | Step 4 question Q13 ([tracker](../research/step-4-architecture-proposal.md) §3); the input-routing part of SI4 |
 | **Feeds** | ADR-0007; CP9 (embedder API: input and accessibility at the shell boundary); Step 5 (the accessibility bridge, I5) |
 | **Builds on** | [macOS runtime note](../research/macos-runtime-facilities.md) §7, §8, §11 items 13–14; [event loop and threading](event-loop-and-threading.md); [IPC](ipc.md); [frame tree](frame-tree-and-navigation.md); [rendering pipeline](rendering-pipeline.md) (PL16); [invalidation](invalidation.md) (IV8, IV9) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-22: Round 4's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered IN1–IN12. Precedent and specification text are sourced (§2); the design is inference unless marked otherwise.
 
@@ -64,7 +64,7 @@ NSEvent (main thread)
 
 | # | Rule |
 |---|---|
-| IN1 | **Input enters at the compositor.** The main thread passes each `NSEvent` to the compositor thread at once, without engine logic (EL6). The compositor hit-tests the latest composited picture of that window. It walks the frames' hit-test regions (PL16), each mapped through its parent's embedding transform and clip, and finds the target frame and the scroll node under the point. **Regions too complex to decide,** such as those under a clip path or an unusual transform, are marked imprecise by their renderer. For those, the compositor asks the candidate frame's renderer and waits at most a deadline, queueing the gesture's later events meanwhile (IR5) |
+| IN1 | **Input enters at the compositor.** The main thread passes each `NSEvent` to the compositor thread at once, without engine logic (EL6). The compositor hit-tests the latest composited picture of that window. **As amended in Round 1** (RV1-02): from M2 this compositor thread stays in the browser, holding the layer tree and the hit-test regions that arrive with the GPU process's layer commits, so input never waits on the GPU process. It walks the frames' hit-test regions (PL16), each mapped through its parent's embedding transform and clip, and finds the target frame and the scroll node under the point. **Regions too complex to decide,** such as those under a clip path or an unusual transform, are marked imprecise by their renderer. For those, the compositor asks the candidate frame's renderer and waits at most a deadline, queueing the gesture's later events meanwhile (IR5) |
 | IN2 | **The renderer finishes the job.** The target frame's event loop receives the event in that frame's coordinates, finds the DOM element, and dispatches. It then acknowledges: handled, or default prevented. The browser measures acknowledgement time for hang detection ([event loop](event-loop-and-threading.md) §4.7) |
 | IN3 | **Gestures are latched.** A gesture is routed to the frame chosen at its start until it ends: a button press through its release, a scroll from its began phase through the end of its momentum, a touch sequence. This uses the phases that `NSEvent` carries (macOS runtime note §7). Scroll gestures also latch to a scroll node |
 
@@ -80,14 +80,14 @@ NSEvent (main thread)
 | # | Rule |
 |---|---|
 | IN6 | **The browser tracks the focused frame** (FT6), as Chromium does [C1]. Keyboard events go to the focused frame's event loop, after the shell has had its key equivalents (menu shortcuts). A click makes the frame under it focused. `focus()` and `blur()` from script are requests the browser validates. **Sequential navigation** (Tab) crosses frames through the browser: a renderer that reaches the end of its sequence asks the browser to continue, and the browser moves focus to the next frame in tree order. The specification treats a container as "a placeholder for its content navigable's active document" [H1] |
-| IN7 | **IME is answered from a mirror on the main thread.** While an editable element has focus, its frame's renderer keeps the browser's copy current: the text around the selection, the selection and composition ranges, and the caret and character rectangles in screen coordinates. `NSTextInputClient`'s synchronous queries read the mirror without waiting (macOS runtime note item 13). Edits from the IME (`insertText`, `setMarkedText`, `unmarkText`) go to the renderer as messages. The renderer applies them and sends the new state. Firefox's `ContentCache` is the precedent [F1]. A query that arrives before the mirror has caught up gets the latest state, as the platform tolerates; it never blocks |
+| IN7 | **IME is answered from a mirror on the main thread.** While an editable element has focus, its frame's renderer keeps the browser's copy current: the text around the selection, the selection and composition ranges, and the caret and character rectangles in screen coordinates. `NSTextInputClient`'s synchronous queries read the mirror without waiting (macOS runtime note item 13). Edits from the IME (`insertText`, `setMarkedText`, `unmarkText`) go to the renderer as messages. The renderer applies them and sends the new state. Firefox's `ContentCache` is the precedent [F1]. A query that arrives before the mirror has caught up gets the latest state, as the platform tolerates; it never blocks. **For pages, from M4** (Round 4, RV4-08) |
 
 ### 4.4 Activation, accessibility and mediation
 
 | # | Rule |
 |---|---|
 | IN8 | **User activation comes from routed input.** When the compositor routes an activation-triggering event [H1] to a frame, the core records activation for that document. It propagates the activation to the windows the specification names (ancestors, and same-origin descendants) and tells their renderers. **Consuming activation** (`window.open`, fullscreen, other gated APIs) is decided by the browser from its records, and clears transient activation for the whole page, as specified. A renderer can't create activation (FT2, FT14) |
-| IN9 | **Accessibility is a cache in the browser.** After the first query from an assistive technology (WebKit also enables its cache only then; macOS runtime note §10), each renderer builds an accessibility tree per document from the DOM and box tree (PL12). It sends incremental updates to the browser's main thread. There the trees are stitched across frames: an `iframe` node refers to its child frame's tree by token, and only to children the browser's frame tree lists. The browser answers `NSAccessibility` queries from the cache, never by asking a renderer (IR5). Actions (press, focus, set value, scroll into view) go to the renderer as messages. Updates are validated like any untrusted input (IP10): tree shape, bounded sizes, references. Firefox reports this design made it up to 20× faster on the worst pages [F2]. Step 5 designs the bridge to `NSAccessibility` (I5) |
+| IN9 | **Accessibility is a cache in the browser.** After the first query from an assistive technology (WebKit also enables its cache only then; macOS runtime note §10; **as amended in Round 2,** RV2-07, enablement has tiers, full for VoiceOver and Switch Control and basic for other clients: [accessibility](accessibility.md) AX7), each renderer builds an accessibility tree per document from the DOM and box tree (PL12). It sends incremental updates to the browser's main thread. There the trees are stitched across frames: an `iframe` node refers to its child frame's tree by token, and only to children the browser's frame tree lists. The browser answers `NSAccessibility` queries from the cache, never by asking a renderer (IR5). Actions (press, focus, set value, scroll into view) go to the renderer as messages. Updates are validated like any untrusted input (IP10): tree shape, bounded sizes, references. Firefox reports this design made it up to 20× faster on the worst pages [F2]. Step 5 designs the bridge to `NSAccessibility` (I5) |
 | IN10 | **The browser mediates the pasteboard, menus and dragging.** Renderers have no pasteboard ([process model](../security/process-model.md) §4.1). Copying sends the selection's data to the browser, which writes the pasteboard. Pasting happens only on a user action: the browser reads the pasteboard and sends the data to the focused frame. A context menu is requested by the renderer, with what it hit-tested. The browser shows the menu, checks any URL in it against its own records before acting on it, and sends the chosen action back. Dragging into and out of frames, later, follows the same pattern |
 
 ### 4.5 Integrity and tests
@@ -101,7 +101,7 @@ NSEvent (main thread)
 
 | Level | What changes |
 |---|---|
-| L0 | All of it, in one process: the compositor routes events to event loops, and the mirrors and caches exist |
+| L0 | All of it: the browser's compositor thread routes events to event loops, which run in renderer processes from M1 (Round 1, RV1-07), and the mirrors and caches exist, **except the IME mirror for pages** (IN7), which arrives with text entry into pages and form controls at M4 (as amended in Round 4, RV4-08; the owner: "Move in-page text editing and IME mirrors to Milestone 4 (form submission and shell validation stay in M1)"); the shell's own text input is validated at M1 (EM11). From M2 the compositor thread keeps routing while the GPU/compositor process rasterizes (RV1-02) |
 | L1–L3 | Nothing in this design. A cross-site frame already received input through the browser at L0, so moving it to another process changes no path (AC1) |
 
 ## 6. Alternatives considered
@@ -124,9 +124,9 @@ NSEvent (main thread)
 
 | # | Question | Where it is settled |
 |---|---|---|
-| 1 | The deadlines for imprecise hit tests and for listeners that may block scrolling | Step 6 |
-| 2 | Which key equivalents a page may override | Step 5 (shell), with the owner |
-| 3 | The mapping from accessibility trees to `NSAccessibility` roles and actions | Step 5 (I5) |
+| 1 | The deadlines for imprecise hit tests and for listeners that may block scrolling | **Answered** at Step 6 by PF20: one frame for an imprecise hit test; 400 ms for a listener (Round 4, RV4-14) |
+| 2 | Which key equivalents a page may override | **Answered** at Step 5's Gate B: the reserved key equivalents, approved as written ([accessibility](accessibility.md) §6.2) (Round 4, RV4-14) |
+| 3 | The mapping from accessibility trees to `NSAccessibility` roles and actions | **Answered** at Step 5 (I5; [ADR-0014](../adr/0014-accessibility.md)) (Round 4, RV4-14) |
 | 4 | Dragging into and out of frames, and between processes | A later milestone |
 
 ## Sources

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-18), by the owner at Step 5's Gate B, including CP3's refinement of DP10 |
+| **Status** | **Accepted** (2026-10-18), by the owner at Step 5's Gate B, including CP3's refinement of DP10. **DP1 (g) and DP2 amended by the architecture review's Round 1** (2026-10-21): Temporal's and BigInt's arithmetic are replaceable details (RV1-08). **Amended by Round 4** (2026-10-22): DP4, DP8, DP9 and DP10 for RV4-02 |
 | **Date** | 2026-10-18 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Dependency policy](../technology/dependency-policy.md) (the full rules, DP1–DP23); [dependency register](../technology/dependency-register.md); [charter](../charter.md) G1 and principle 4; [ADR-0002](0002-implementation-language.md) and the [language evaluation](../technology/language-evaluation.md) §12, §15.3–§15.4; [threat model](../security/threat-model.md) TA4, TA5, §9; [process model](../security/process-model.md) PM2; [Step 5 tracker](../research/step-5-subsystems.md); decision-map item X4 |
@@ -15,6 +15,8 @@
 | 2026-10-18 | The policy written at CP2. DP10 refined at CP3: applying it showed that a tree-wide `ub-risk-1` rule excluded every Rust font stack while admitting C through the exception |
 | 2026-10-18 | Proposed at Step 5, CP9 |
 | 2026-10-18 | **Accepted** by the owner at Gate B: "ADR-0010 (Dependency and Supply-Chain Policy): Accepted as proposed, including the DP10 refinement." The [policy](../technology/dependency-policy.md) is binding. At the same gate the owner chose Axiom's license, "MIT OR Apache-2.0" (OQ-21), which every license on DP17's allow-list is compatible with |
+| 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1), RV1-08: "Reclassify WHATWG text encodings, Temporal calendar arithmetic, and BigInt as replaceable details behind clean interfaces (DP2)." "Audit and grade modern encoding_rs (SIMD off) before Milestone 1, and temporal_rs before Milestone 3." DP1 (g) and DP2 are amended in the [dependency policy](../technology/dependency-policy.md): the arithmetic behind Temporal and BigInt is supporting infrastructure, behind interfaces the engine owns; the Encoding Standard's codecs already were. The [audit of `encoding_rs`](../research/encoding-rs-audit.md) 0.8.42 graded it `ub-risk-3`, which DP8 doesn't admit |
+| 2026-10-22 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 4 ([the review](../review/README.md) §5.9): "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." RV4-02, the owner: "Amend DP8 to admit ub-risk-3 Rust crates in sandboxed helpers under DP10's conditions (Axiom audit of unsafe blocks + libFuzzer target under AddressSanitizer)." "Amend DP4 to prefer mature supporting infrastructure by default, reserving custom implementations for core differentiators." DP4, DP8, DP9 and DP10 are amended ([dependency policy](../technology/dependency-policy.md)), and decisions 1 and 3 below |
 
 ## Question
 
@@ -54,10 +56,10 @@ The [policy](../technology/dependency-policy.md) §2 and its Sources: Chromium's
 ## Decision
 
 **The [dependency policy](../technology/dependency-policy.md) is binding.** In summary:
-1. **The line** (DP1–DP4). Charter G1's mechanisms and the security policies are Axiom's own. The decision map's infrastructure layer, Unicode data, encodings, URL parsing, compression and storage engines may be reused behind interfaces Axiom owns. Axiom never writes its own cryptography. A dependency must save substantial, specialized work.
+1. **The line** (DP1–DP4). Charter G1's mechanisms and the security policies are Axiom's own. The decision map's infrastructure layer, Unicode data, encodings, URL parsing, compression and storage engines may be reused behind interfaces Axiom owns. Axiom never writes its own cryptography. A dependency must save substantial, specialized work. **As amended in Round 4** (RV4-02): for supporting infrastructure, a mature implementation that meets DP8–DP10 is the default, and custom implementations are reserved for the core.
 2. **Classes and records** (DP5–DP7). Every dependency has a class and a register entry covering its whole transitive tree. A foundational dependency needs an ADR.
 3. **Grades and groups** (DP8–DP12).
-   - Google's `ub-risk` scale, with `ub-risk-3` and `ub-risk-4` not admitted.
+   - Google's `ub-risk` scale, with `ub-risk-4` not admitted. **As amended in Round 4** (RV4-02): `ub-risk-3` is admitted only in sandboxed helpers, under DP10's conditions, with Axiom's audit of each `unsafe` block and a libFuzzer target under AddressSanitizer.
    - Chromium-style groups (`trusted`, `sandboxed`, `build`, `test`), inherited transitively.
    - A reused parser of untrusted input must be pure Rust at `ub-risk-2` or better across its tree, and `ub-risk-1` in the browser.
    - C, C++ or assembly parsing untrusted input, Apple's included, is admitted only in a sandboxed helper, with no pure-Rust alternative, and with an ADR.
@@ -87,7 +89,7 @@ The [policy](../technology/dependency-policy.md) §2 and its Sources: Chromium's
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| A crate everyone uses carries a barred grade, as `smallvec` 1.11.0 does (`ub-risk-3`), and blocks good candidates | Medium | Medium | Grade the adopted version afresh; ask upstream; the register records the risk |
+| A crate everyone uses carries a barred grade, as `smallvec` 1.11.0 does (`ub-risk-3`), and blocks good candidates (mitigated in Round 4: `ub-risk-3` is admitted in sandboxed helpers under DP8's conditions) | Medium | Medium | Grade the adopted version afresh; ask upstream; the register records the risk |
 | Auditing costs more time than expected | Medium | Medium | Imported audits; the DP4 bar keeps dependencies few |
 | Grades go stale as crates change | High | Low | Relative audits on every update (DP14, DP15) |
 

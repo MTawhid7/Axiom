@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0009's acceptance (2026-10-17, Gate B). Written at Step 4, CP9. Answers OQ-11, subject to the shell milestone's validation (EM11) |
+| **Status** | **Binding** since ADR-0009's acceptance (2026-10-17, Gate B). Written at Step 4, CP9. Answers OQ-11, subject to the shell milestone's validation (EM11). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): EM9's diagnostics and reference-test path, for RV1-01 and RV1-15 (CP1). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): §8 for RV4-14 (CP7) |
 | **Question** | Where is the boundary between the engine and the browser's shell? What does the API offer in each direction? How does a headless embedder use it for tests and WPT? Is the shell pure Rust, or a thin Swift layer (OQ-11)? |
 | **Answers** | Step 4 question Q14 ([tracker](../research/step-4-architecture-proposal.md) §3): F4; OQ-11 |
 | **Feeds** | ADR-0009; CP11 (overview and crate structure); Step 5 (the shell's subsystems: menus, the accessibility bridge); Step 6 (the testing strategy and WPT) |
 | **Builds on** | [Event loop and threading](event-loop-and-threading.md) (EL6, EL24); [IPC](ipc.md) (IP2, IP7); [frame tree](frame-tree-and-navigation.md); [input and accessibility](input-and-accessibility.md); [S2 results](../research/s2-results.md) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-21: Round 1's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered EM1–EM12. Precedent is sourced (§2); the design is inference unless marked otherwise.
 
@@ -21,7 +21,7 @@ Everything here is **planned**; nothing is implemented. Rules are numbered EM1�
 - **Commands flow in, events and requests for decisions flow out** (EM4, EM5). The shell creates web views, navigates them and forwards input. The engine reports navigation, title, progress and crashes. It asks the shell to decide what only a user interface can: new windows, permissions, dialogs, downloads, file choices, authentication, context menus. WKWebView's navigation and UI delegates are the model.
 - **Presentation, input, IME and accessibility cross the boundary as objects the shell hosts** (EM6). The compositor draws into a layer in the shell's view, and the view's event, text-input and accessibility entry points delegate to the engine's sinks and mirrors.
 - **The browser's own UI is native, never web content** (EM8). No privileged web pages exist that a compromised renderer could aim at.
-- **A headless embedder** (EM9) implements the same API without AppKit: offscreen surfaces, synthetic input and virtual time, for WPT, reference tests and fuzzing.
+- **A headless embedder** (EM9) implements the same API without AppKit: offscreen surfaces, synthetic input and, in single-process mode, virtual time (Round 2, RV2-03), for WPT, reference tests and fuzzing.
 - **OQ-11: pure Rust, with objc2** (EM11). S2 showed AppKit, Metal and CoreText working from Rust. Defining Objective-C classes, which IME and accessibility need, is the first thing the shell milestone validates. A Swift shell could sit behind the same message API if that fails, so the engine's architecture doesn't depend on the answer.
 
 ## 1. Binding inputs
@@ -88,23 +88,23 @@ From documentation read on 2026-10-17 (Sources).
 - URL, title and favicon changes;
 - load progress;
 - security state;
-- a renderer crash or hang;
+- a renderer crash or hang; **as amended in Round 2** (RV2-04), a helper's too, the network or the GPU/compositor process's, with what was lost and whether it was relaunched (IR10);
 - audio playing, and fullscreen changes.
 
 | # | Rule |
 |---|---|
-| EM5 | **Requests for decisions** (engine asks, shell answers). The engine asks the shell to decide what only a user interface can, after applying its own policy first. The table below lists them. WKWebView's two delegates are the model [A1, A2]. **Every request has a default, and the engine never waits indefinitely.** A request that is still pending when its tab closes is cancelled |
+| EM5 | **Requests for decisions** (engine asks, shell answers). The engine asks the shell to decide what only a user interface can, after applying its own policy first. The table below lists them. WKWebView's two delegates are the model [A1, A2]. **Every request has a default, and the engine never waits indefinitely.** A request that is still pending when its tab closes is cancelled. **Each request's default is the table's last column** (**as amended in Round 2,** RV2-03): the engine takes it when the shell doesn't answer, and the headless embedder answers with it and logs it (EM9) |
 
-| Request | Engine's part | Shell's part |
-|---|---|---|
-| New window (`window.open`, `target=_blank`) | Popup blocking from its activation records (IN8); the opener relationship | Open a tab or a window, or show that it was blocked |
-| Permission (camera, microphone, location, notifications) | Records and defaults; never granted to a renderer directly | Prompt; the decision is stored in the profile |
-| JavaScript dialog (alert, confirm, prompt) and `beforeunload` | Pauses the event loop (EL17) | A sheet attached to the tab |
-| Download | Classifies the response; writes the file and marks it quarantined | Location and confirmation; the downloads list |
-| File chooser | Gives the renderer read access only to the chosen files, through a capability (IP15) | `NSOpenPanel` |
-| HTTP authentication, certificate errors | Interstitial pages are internal documents (FT10) | Credentials prompt; the security indicator |
-| Context menu | The hit-tested element's data, with URLs checked against its records (IN10) | The menu |
-| External protocols (`mailto:`) | Requires user activation | Confirmation, then `NSWorkspace` |
+| Request | Engine's part | Shell's part | Default, if the shell doesn't answer |
+|---|---|---|---|
+| New window (`window.open`, `target=_blank`) | Popup blocking from its activation records (IN8); the opener relationship | Open a tab or a window, or show that it was blocked | A new tab |
+| Permission (camera, microphone, location, notifications) | Records and defaults; never granted to a renderer directly | Prompt; the decision is stored in the profile | Denied, and not stored |
+| JavaScript dialog (alert, confirm, prompt) and `beforeunload` | Pauses the event loop (EL17) | A sheet attached to the tab | Dismissed: `confirm` answers false, `prompt` null; `beforeunload` lets the navigation proceed |
+| Download | Classifies the response; writes the file and marks it quarantined | Location and confirmation; the downloads list | Cancelled |
+| File chooser | Reads the chosen files for the renderer, which receives their bytes as data or a read-only memory entry, never a descriptor (SG1; the File API's SW16; **as amended in Round 2,** RV2-11) | `NSOpenPanel` | Cancelled: no files |
+| HTTP authentication, certificate errors | Interstitial pages are internal documents (FT10) | Credentials prompt; the security indicator | Cancelled: the request fails, and the interstitial stays |
+| Context menu | The hit-tested element's data, with URLs checked against its records (IN10) | The menu | None shown |
+| External protocols (`mailto:`) | Requires user activation | Confirmation, then `NSWorkspace` | Refused |
 
 ### 4.3 What the shell hosts
 
@@ -118,8 +118,8 @@ From documentation read on 2026-10-17 (Sources).
 
 | # | Rule |
 |---|---|
-| EM9 | **A headless embedder implements the same API without AppKit.** It provides offscreen presentation (the compositor renders into an offscreen texture, read back for reference tests and screenshots), synthetic input injected at the compositor's sink, virtual time through the deterministic scheduler (EL24), and logged answers to decision requests. It runs WPT, reference tests, crash tests and fuzzing harnesses (Step 6), on this Mac, without a window. `content_shell` plays this role for Chromium [C1] |
-| EM10 | **Single-process mode uses the same API.** The shell can't tell whether the engine runs one process (L0) or many (L1–L3). That is a property of the engine's process manager |
+| EM9 | **A headless embedder implements the same API without AppKit.** It provides offscreen presentation (the compositor renders into an offscreen texture, read back for reference tests and screenshots), synthetic input injected at the compositor's sink, virtual time through the deterministic scheduler (EL24) in single-process mode (**as amended in Round 2,** RV2-03: conformance runs in real processes on the host clock, TS2), and logged answers to decision requests, which take EM5's defaults. It runs WPT, reference tests, crash tests and fuzzing harnesses (Step 6), on this Mac, without a window. `content_shell` plays this role for Chromium [C1].<br>**As amended in Round 1** (2026-10-21):<br>• **A script-free reference-test path** (RV1-01; [testing](../testing.md) TS2): given a URL, it loads it, waits natively for the load event and for pending images and fonts, writes a PNG of the offscreen texture, and exits, so wptrunner can run reference tests before script exists. WPT's host names resolve through a hosts file that only the test build accepts.<br>• **Diagnostics for one developer** (RV1-15), staged: **from M1,** test-only commands dump, as text in stable formats that tests can compare, the DOM, a node's computed style, the box and fragment trees, the display list and the network log; **from M2,** a crashed helper's report is moved into a local directory the owner controls, with the build identifier (IP18), as S9's script already does for test crashes; **from M3,** console messages reach the embedder's log and the test runners (JE27). A developer-tools protocol stays later (JE27).<br>Every dump and log is test-only or local: none leaves this Mac.<br>**Round 2** (RV2-08): the headless embedder answers WebDriver's Get Computed Role and Label from M4; tests of the platform mapping need AppKit, so they run against the shell's build (AX11) |
+| EM10 | **Single-process mode uses the same API.** The shell can't tell whether the engine runs one process (single-process test mode) or many (every level from M1, as amended in Round 1, RV1-07). That is a property of the engine's process manager |
 
 ### 4.5 The shell's language and packaging
 
@@ -138,13 +138,13 @@ From documentation read on 2026-10-17 (Sources).
 
 | # | Rule |
 |---|---|
-| EM12 | **One application bundle** contains the shell and the helper executables (`renderer`, `renderer-jit` later, `network`, and `gpu` and `utility` later). They are signed ad hoc with the hardened runtime, each with its own entitlements ([process model](../security/process-model.md) §10; `tools/s4-sign.sh`). A script builds the bundle, without Xcode |
+| EM12 | **One application bundle** contains the shell and the helper executables (`renderer`, `renderer-jit` later, `network`, and `gpu` and `utility` later). They are signed with the hardened runtime, each with its own entitlements, by the stable local identity, with ad hoc as the fallback (**as amended in Round 1**, RV1-17; [S15 results](../research/s15-results.md)) ([process model](../security/process-model.md) §10; `tools/s4-sign.sh`). A script builds the bundle, without Xcode |
 
 ## 5. Staging
 
 | Level | What changes |
 |---|---|
-| L0 | The shell and engine run in one process. The engine's helpers are threads |
+| L0 | The shell and the engine's browser side run in one process; **as amended in Round 1** (RV1-07), renderers and the network process are sandboxed helpers from M1, and single-process mode is kept strictly for automated tests, fuzzing and Miri. The headless embedder's script-free test path and dumps exist from M1 (EM9) |
 | L1–L3 | The engine's process manager launches helpers; the embedder API doesn't change (EM10) |
 
 ## 6. Alternatives considered
@@ -170,8 +170,8 @@ From documentation read on 2026-10-17 (Sources).
 | # | Question | Where it is settled |
 |---|---|---|
 | 1 | OQ-11: confirm the pure-Rust shell | **Confirmed at Gate B** (2026-10-17, ADR-0009 accepted); validated at the start of the shell milestone (EM11) |
-| 2 | The full list of settings, and how the sensitive-site list and the JIT switches are presented | Step 5, with the owner |
-| 3 | WPT's harness integration (`testharness.js`, `testdriver`) on the headless embedder | Step 6 (testing) |
+| 2 | The full list of settings, and how the sensitive-site list and the JIT switches are presented | The settings list approved at Gate B (accessibility §6.1); the sensitive-site list and the JIT switches at M5's plan (Round 4, RV4-14) |
+| 3 | WPT's harness integration (`testharness.js`, `testdriver`) on the headless embedder | **Settled** at Step 6 ([testing](../testing.md) TS2), and amended in Round 1 (RV1-01): a script-free executor at M1 and M2, WebDriver from M3 |
 
 ## Sources
 

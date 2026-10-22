@@ -1,0 +1,60 @@
+[package]
+name = "s16-lifetime"
+description = "Spike S16: what happens to shared memory and IOSurfaces when the process that shared them dies (S16-Q1); port rights in dropped messages, failed sends and handles of the wrong type (S16-Q2); and whether rusage's per-process counters can serve as low-noise efficiency metrics (S16-Q3). unsafe only in src/platform/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+# Every dependency is already in the workspace's lock (no new crate): S4's
+# library for spawning helpers and entering their profiles, and the objc2
+# framework crates S10 used.
+[dependencies]
+s4-sandbox.workspace = true
+objc2.workspace = true
+objc2-foundation = { workspace = true, features = ["NSError", "NSString"] }
+objc2-metal = { workspace = true, features = [
+    "MTLAllocation",
+    "MTLBuffer",
+    "MTLCommandBuffer",
+    "MTLCommandEncoder",
+    "MTLCommandQueue",
+    "MTLDevice",
+    "MTLLibrary",
+    "MTLPixelFormat",
+    "MTLRenderCommandEncoder",
+    "MTLRenderPass",
+    "MTLRenderPipeline",
+    "MTLResource",
+    "MTLTexture",
+    "MTLTypes",
+    "block2",
+    "objc2-core-foundation",
+    "objc2-io-surface",
+] }
+objc2-io-surface = { workspace = true, features = [
+    "IOSurfaceRef",
+    "IOSurfaceTypes",
+    "objc2",
+    "objc2-core-foundation",
+] }
+objc2-quartz-core = { workspace = true, features = [
+    "CALayer",
+    "CATransaction",
+    "objc2-core-foundation",
+] }
+objc2-core-foundation = { workspace = true, features = [
+    "CFCGTypes",
+    "CFData",
+    "CFDictionary",
+    "CFNumber",
+    "CFString",
+] }
+
+[[bin]]
+name = "s16"
+path = "src/main.rs"
+
+[lints]
+workspace = true

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Reviewed** by the owner (2026-10-17). The smoke test and the owner's visual check are satisfactory; thresholds T1–T4 (§6) are accepted into [ADR-0002](../adr/0002-implementation-language.md) |
+| **Status** | **Reviewed** by the owner (2026-10-17). The smoke test and the owner's visual check are satisfactory; thresholds T1–T4 (§6) are accepted into [ADR-0002](../adr/0002-implementation-language.md). **The build** wasn't recorded (macOS 27.2) (Round 4, RV4-13) |
 | **Question** | Can AppKit, a `CAMetalLayer` and CoreText draw text through objc2 with the Command Line Tools alone, with `unsafe` confined to platform modules (S2-Q5)? What do the bindings cost to build, and the app to run (S2-Q6)? |
 | **Feeds** | [ADR-0002](../adr/0002-implementation-language.md): final acceptance, and the thresholds for revisit condition 3 (OQ-12). Also OQ-11 (pure Rust shell or a Swift layer), OQ-7 (when to install Xcode), and the platform layer of the architecture |
 | **Plan and raw log** | [Step 2b tracker](step-2b-validation-spikes.md): questions §3, CP8 in §6, results in §8 |
