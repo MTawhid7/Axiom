@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 4, delivered** (2026-10-22), for the owner's dispositions. This page summarizes; the [findings](06-findings.md) carry the evidence |
+| **Status** | **Round 4, disposed** (2026-10-22): the owner accepted all seventeen findings as proposed, with the choices the [disposition log](../README.md#59-round-4s-dispositions) records. It stays as written, as the round's record; where the owner's words differ, they govern. This page summarizes; the [findings](06-findings.md) carry the evidence |
 | **Question** | Do Round 3's claims hold when tested? Does the baseline build what serves few uses, write what mature software already does, and validate efficiency as a first-class requirement? What is wrong in the areas no round reviewed? Is the stopping rule met? |
 | **See also** | [Verification of Round 3](02-verification.md) · [Reuse and scope](03-reuse-and-scope.md) · [Efficiency](04-efficiency.md) · [Unreviewed areas](05-unreviewed-areas.md) · [Findings](06-findings.md) · [Actions](07-actions.md) · [The review process](../README.md) |
 | **Last updated** | 2026-10-22 |

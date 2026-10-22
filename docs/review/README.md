@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are made in checkpoints (§5.3), and the three spikes authorized before Milestone 1, S10, S12 and S15, are done (§5.2). **The owner approved the results** and **commissioned Round 2** (2026-10-21, §5.4). **Round 2 delivered** (2026-10-21): Round 1's changes verified; 15 findings, no Critical or High, so **the stopping rule is met** for the scope commissioned (§6, §8). **Disposed by the owner the same day: all 15 accepted** (§5.5–§5.7), the changes made and verified in checkpoints CP1–CP6, and `architecture-review` pushed; **an independent external review follows,** which the owner commissions before the merge into `main`. **Round 3,** that external review, by Gemini, delivered on 2026-10-21 ([its record](round-3/01-gemini-review.md)): "Blocked by Findings". **The owner commissioned Round 4** (2026-10-22, §5.8): Round 3's claims tested rather than taken, the owner's themes of scope by value, reuse and efficiency, and every area no round had reviewed, with spike S16. **Round 4 delivered** (2026-10-22): 17 findings, 1 Critical and 1 High, so **the stopping rule isn't met** (§6, §10); **awaiting the owner's dispositions** |
+| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are made in checkpoints (§5.3), and the three spikes authorized before Milestone 1, S10, S12 and S15, are done (§5.2). **The owner approved the results** and **commissioned Round 2** (2026-10-21, §5.4). **Round 2 delivered** (2026-10-21): Round 1's changes verified; 15 findings, no Critical or High, so **the stopping rule is met** for the scope commissioned (§6, §8). **Disposed by the owner the same day: all 15 accepted** (§5.5–§5.7), the changes made and verified in checkpoints CP1–CP6, and `architecture-review` pushed; **an independent external review follows,** which the owner commissions before the merge into `main`. **Round 3,** that external review, by Gemini, delivered on 2026-10-21 ([its record](round-3/01-gemini-review.md)): "Blocked by Findings". **The owner commissioned Round 4** (2026-10-22, §5.8): Round 3's claims tested rather than taken, the owner's themes of scope by value, reuse and efficiency, and every area no round had reviewed, with spike S16. **Round 4 delivered** (2026-10-22): 17 findings, 1 Critical and 1 High, so the stopping rule isn't met (§6, §10). **Disposed by the owner the same day: all 17 accepted** (§5.9–§5.11); the changes are made in checkpoints CP1–CP7, after which the owner ends the cycle (§5.9, item 11) |
 | **Question** | How is the Phase Zero baseline reviewed before Milestone 1 starts: in what format, with which severities, how do findings become changes, and when does the review end? |
 | **Builds on** | The owner's decision 8 at Step 6's Gate C (2026-10-20): Milestone 1 waits "until the architecture and roadmap undergo independent, multi-round adversarial review"; the recommendation in [status](../status.md) for the review's brief; the findings format the [handover](../handover-phase-0.md) §3 suggests |
 | **Last updated** | 2026-10-22 |
@@ -24,7 +24,7 @@
 | 1 | 2026-10-21 | [Risk matrix](round-1/01-risk-matrix.md) · [Findings](round-1/02-findings.md) · [Challenged assumptions](round-1/03-challenged-assumptions.md) · [Actions before Round 2](round-1/04-round-2-actions.md) | 22: 2 Critical, 6 High, 10 Medium, 4 Low | All accepted (2026-10-21); changes made (§5.3); the spikes' results and the choices approved (§5.4) |
 | 2 | 2026-10-21 | [Risk matrix](round-2/01-risk-matrix.md) · [Verification of Round 1](round-2/02-verification.md) · [Findings](round-2/03-findings.md) · [Actions](round-2/04-actions.md) | 15: 0 Critical, 0 High, 10 Medium, 5 Low | All accepted (2026-10-21, §5.5); changes made and verified (§5.7). The stopping rule is met for the scope commissioned |
 | 3 | 2026-10-21 | [Gemini's review](round-3/01-gemini-review.md), kept verbatim | External, not in §3's format: six headline findings and five recommendations; Round 4 numbered its 18 claims RV3-01 to RV3-18 | Tested by Round 4 ([verification](round-4/02-verification.md)): 4 confirmed, 7 partly confirmed, 5 refuted, 1 already covered; its verdict, that the merge should wait, agreed with for other reasons |
-| 4 | 2026-10-22 | [Risk matrix](round-4/01-risk-matrix.md) · [Verification of Round 3](round-4/02-verification.md) · [Reuse and scope](round-4/03-reuse-and-scope.md) · [Efficiency](round-4/04-efficiency.md) · [Unreviewed areas](round-4/05-unreviewed-areas.md) · [Findings](round-4/06-findings.md) · [Actions](round-4/07-actions.md) | 17: 1 Critical, 1 High, 7 Medium, 8 Low | Delivered; awaiting the owner's dispositions. The stopping rule isn't met (§10) |
+| 4 | 2026-10-22 | [Risk matrix](round-4/01-risk-matrix.md) · [Verification of Round 3](round-4/02-verification.md) · [Reuse and scope](round-4/03-reuse-and-scope.md) · [Efficiency](round-4/04-efficiency.md) · [Unreviewed areas](round-4/05-unreviewed-areas.md) · [Findings](round-4/06-findings.md) · [Actions](round-4/07-actions.md) | 17: 1 Critical, 1 High, 7 Medium, 8 Low | All accepted (2026-10-22, §5.9); changes in checkpoints CP1–CP7 (§5.11); the cycle ends after CP7 |
 
 ## 3. Findings and severities
 
@@ -211,6 +211,61 @@ The owner, 2026-10-22, after Round 3: "We've completed three rounds of review". 
 - **The scope:** "Everything unreviewed": besides Round 3's claims and the three themes, every area Round 2 listed as not reviewed (§8) ([unreviewed areas](round-4/05-unreviewed-areas.md)).
 
 The plan, approved by the owner, took two defaults without asking: G1's core list and ADR-0001 R2 stand, so reuse inside them is flagged as an amendment; and S1–S4 aren't re-run.
+
+### 5.9 Round 4's dispositions
+
+The owner, 2026-10-22: "I have reviewed the Round 4 findings, the claim-by-claim verification of Round 3, Spike S16's results, and the proposed actions in docs/review/round-4/." "Here are my formal dispositions and decisions:"
+
+| # | The owner's heading | The owner's words | Recorded in |
+|---|---|---|---|
+| 1 | Dispose Findings | "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." | §5.10 |
+| 2 | XML Parser at M1 (RV4-01) | "Approved. Implement Axiom's own non-validating XML 1.0 document parser in Milestone 1. External XML crates are rejected due to recent DoS advisories and dormant maintenance." | CP1 (§5.11) |
+| 3 | Dependency Policy (RV4-02) | "Approved. Amend DP8 to admit ub-risk-3 Rust crates in sandboxed helpers under DP10's conditions (Axiom audit of unsafe blocks + libFuzzer target under AddressSanitizer). Amend DP4 to prefer mature supporting infrastructure by default, reserving custom implementations for core differentiators." | CP2 |
+| 4 | Scope Pruning (RV4-08) | "Approved." "Move HTTP/2 to Milestone 2"; "Move in-page text editing and IME mirrors to Milestone 4 (form submission and shell validation stay in M1)"; "Move the preload scanner to Milestone 3"; "Adopt encoding_rs at Milestone 1 under the amended DP8." | CP2 (`encoding_rs`), CP6 (the rest) |
+| 5 | Milestone 1 CSS Target (RV4-09) | "Approved. Adopt ≥ 90.0% pass rate over the 5,652 static tests, with per-directory floors (no chapter of 100+ tests falling more than 10 points below the median). The full shipping median (≥ 97.8%) moves to Milestone 3 when script and WebDriver land." | CP1 |
+| 6 | Efficiency Strategy (RV4-06) | "Approved. Adopt the 3-tier validation strategy (commit unit tests, checkpoint instruction/memory ratchet, gate wall/energy budgets) and formalize budgets PF25–PF30 in docs/performance.md." | CP5 |
+| 7 | Spike Re-runs (RV4-13) | "Authorized. Re-run S5, S6, and S7 once on the current macOS build (26B118) prior to Checkpoint 7." | CP7 |
+| 8 | Dependency Advisory (RV4-15) | "Approved. Update rustls-webpki in the spikes lock file in Checkpoint 2." | CP2 |
+| 9 | Gemini Claim Verdicts | "Approved as documented in docs/review/round-4/02-verification.md." | Round 4's [verification](round-4/02-verification.md) |
+| 10 | Checkpoints Execution | "Approved. Please proceed with executing Checkpoints CP1 through CP7 as detailed in docs/review/round-4/07-actions.md §2", with the names §5.11 quotes | §5.11 |
+| 11 | Review Phase Conclusion | "After CP7 verifies all changes, the review cycle is officially complete (no Round 5)." | §6, once CP7 is done |
+| 12 | Transition to Implementation | "Merge architecture-review into main with --no-ff and push main to origin"; "Produce the implementation plan (docs/milestone-1-plan.md)" | The [status](../status.md), after CP7 |
+
+### 5.10 Round 4's findings
+
+Every finding: **Accepted** as proposed, 2026-10-22 (§5.9, item 1). Where a counter-proposal offered a choice, items 2–8 make it.
+
+| ID | Severity | Blocks | Changed |
+|---|---|---|---|
+| RV4-01 | Critical | M1 | CP1 |
+| RV4-02 | High | M1 | CP2 |
+| RV4-03 | Medium | M1 | CP3 |
+| RV4-04 | Medium | M1 | CP4 |
+| RV4-05 | Medium | M1 | CP4 |
+| RV4-06 | Medium | M1 | CP5 |
+| RV4-07 | Medium | M2 | CP4 |
+| RV4-08 | Medium | M1 | CP2 (`encoding_rs`), CP6 |
+| RV4-09 | Medium | M1 | CP1 |
+| RV4-10 | Low | M2 | CP4 |
+| RV4-11 | Low | M1 | CP4 |
+| RV4-12 | Low | M2 | CP4 |
+| RV4-13 | Low | M1 | CP7 |
+| RV4-14 | Low | M1 | CP7 |
+| RV4-15 | Low | — | CP2 |
+| RV4-16 | Low | M2 | CP6 |
+| RV4-17 | Low | M2 | CP6 |
+
+### 5.11 Round 4's checkpoints
+
+| Checkpoint | The owner's name | Findings | State |
+|---|---|---|---|
+| CP1 | "M1 Conformance & Scope (XML parser, CSS 90% gate, MA4 recount)" | RV4-01, RV4-09 | To do |
+| CP2 | "Dependency Policy & Crate Audits (DP8/DP4 amendment, encoding_rs, rustls-webpki bump)" | RV4-02, RV4-08 (`encoding_rs`), RV4-15 | To do |
+| CP3 | "Event Loop Progress & Watchdogs (task age monitoring, storage thread pings)" | RV4-03 | To do |
+| CP4 | "Process Robustness & IPC (memory unmapping at death, mach_msg_destroy on drop, surface validation)" | RV4-04, RV4-05, RV4-07, RV4-10, RV4-11, RV4-12 | To do |
+| CP5 | "Efficiency Strategy & Ratchet (3 tiers, PF25–PF30, instruction counter baselines)" | RV4-06 | To do |
+| CP6 | "Staging & Scope Realignment (HTTP/2 to M2, text entry to M4, preload scanner to M3)" | RV4-08, RV4-16, RV4-17 | To do |
+| CP7 | "S5–S7 re-run results, stale statement sweep, final verification pass, and independent MA4 recount." | RV4-13, RV4-14, and the verification | To do |
 
 ## 6. The stopping rule
 

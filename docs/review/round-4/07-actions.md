@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 4, delivered** (2026-10-22), for the owner's dispositions. Nothing here is done until the owner decides (§6) |
+| **Status** | **Round 4, disposed** (2026-10-22): the owner accepted all seventeen findings as proposed, with the choices the [disposition log](../README.md#59-round-4s-dispositions) records. It stays as written, as the round's record; where the owner's words differ, they govern. The changes are made in the checkpoints of §2 ([the log](../README.md#511-round-4s-checkpoints) §5.11) |
 | **Question** | Which changes does each finding need, and before which milestone; how are they made; which questions remain open, and when is each settled; what does Milestone 1's implementation plan look like; and what is the path to the merge? |
 | **See also** | [Risk matrix](01-risk-matrix.md) · [Verification of Round 3](02-verification.md) · [Findings](06-findings.md) · [The review process](../README.md) |
 | **Last updated** | 2026-10-22 |

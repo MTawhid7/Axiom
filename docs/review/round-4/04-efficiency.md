@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 4, delivered** (2026-10-22), for the owner's dispositions. The strategy in §4 and §5 is a proposal: nothing binds until the owner accepts [RV4-06](06-findings.md#rv4-06-efficiency-is-checked-only-at-gates) |
+| **Status** | **Round 4, disposed** (2026-10-22): the owner accepted all seventeen findings as proposed, with the choices the [disposition log](../README.md#59-round-4s-dispositions) records. It stays as written, as the round's record; where the owner's words differ, they govern |
 | **Question** | The owner's third theme: should efficiency be a first-class architectural requirement from the first phase, and what would an efficiency-first strategy need, across battery, CPU, memory, disk and background activity, without giving up quality? |
 | **Covers** | Charter G4; [ADR-0019](../../adr/0019-performance-methodology-and-budgets.md) and the [performance budgets](../../performance.md) (PF1–PF24, B1–B7, T1–T4); [testing](../../testing.md) TS1 and TS13; [Milestone 1](../../milestone-1.md)'s MA6 and MA9; the designs' efficiency rules; spike S16-Q3 ([results](../../research/s16-results.md#5-s16-q3-counters) §5) |
 | **Summary** | [Findings](06-findings.md): RV4-06, with RV4-04 · [Actions](07-actions.md) |

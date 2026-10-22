@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 4, delivered** (2026-10-22), for the owner's dispositions |
+| **Status** | **Round 4, disposed** (2026-10-22): the owner accepted all seventeen findings as proposed, with the choices the [disposition log](../README.md#59-round-4s-dispositions) records. It stays as written, as the round's record; where the owner's words differ, they govern |
 | **Question** | Which of Round 3's claims hold when tested, against the repository, primary sources and measurements on this Mac, and which don't? |
 | **Covers** | Round 3, Gemini's external review ([`01-gemini-review.md`](../round-3/01-gemini-review.md), dated 2026-10-21), every claim in it, at the baseline on `architecture-review` at `e71803b` |
 | **Summary** | [Risk matrix](01-risk-matrix.md) · [Findings](06-findings.md) · [Actions](07-actions.md) |

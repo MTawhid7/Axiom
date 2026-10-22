@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 4, delivered** (2026-10-22), for the owner's dispositions. Nothing here changes the baseline until the owner decides each finding (the review's [§4](../README.md#4-how-a-round-runs)) |
+| **Status** | **Round 4, disposed** (2026-10-22): the owner accepted all seventeen findings as proposed, with the choices the [disposition log](../README.md#59-round-4s-dispositions) records. It stays as written, as the round's record; where the owner's words differ, they govern |
 | **Question** | Which of Round 3's claims hold when tested; where does the baseline build what serves few uses, or write what mature software already does; is efficiency first-class in its validation as well as its goals; and what is wrong in the areas no round has reviewed? |
 | **Covers** | The baseline on `architecture-review` at `e71803b` (2026-10-21), Round 3 ([verification](02-verification.md)), the owner's three themes ([reuse and scope](03-reuse-and-scope.md), [efficiency](04-efficiency.md)) and the areas no round reviewed ([unreviewed areas](05-unreviewed-areas.md)), with spike S16 ([results](../../research/s16-results.md)) |
 | **Summary** | [Risk matrix](01-risk-matrix.md) · [Verification of Round 3](02-verification.md) · [Actions](07-actions.md) |

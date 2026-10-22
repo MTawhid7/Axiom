@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 4, delivered** (2026-10-22), for the owner's dispositions |
+| **Status** | **Round 4, disposed** (2026-10-22): the owner accepted all seventeen findings as proposed, with the choices the [disposition log](../README.md#59-round-4s-dispositions) records. It stays as written, as the round's record; where the owner's words differ, they govern |
 | **Question** | The owner's first two themes: does the baseline rebuild components that serve few uses, and does it reuse mature software wherever that meets Axiom's security, compatibility and architectural requirements? |
 | **Covers** | Every component of Milestone 1 ([MA1](../../milestone-1.md)) and, more briefly, of M2–M9 ([roadmap](../../roadmap.md)); the [dependency policy](../../technology/dependency-policy.md) and [register](../../technology/dependency-register.md); the build-or-reuse sections of the designs |
 | **Summary** | [Findings](06-findings.md): RV4-01, RV4-02, RV4-08, RV4-09, RV4-15 · [Actions](07-actions.md) |

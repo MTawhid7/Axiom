@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Round 4, delivered** (2026-10-22), for the owner's dispositions |
+| **Status** | **Round 4, disposed** (2026-10-22): the owner accepted all seventeen findings as proposed, with the choices the [disposition log](../README.md#59-round-4s-dispositions) records. It stays as written, as the round's record; where the owner's words differ, they govern |
 | **Question** | What holds, and what is wrong, in the areas Rounds 1 and 2 left out ([Round 2's limits](../README.md#8-round-2s-coverage-and-limits)), which the owner put in scope: "Everything unreviewed" (2026-10-22)? |
 | **Covers** | The [requirements](../../requirements.md)' trace (RQ1–RQ66); the methods of spikes S1–S4; the [decision map](../../decision-map.md)'s couplings; [invalidation](../../architecture/invalidation.md) (IV1–IV14); [HTML and the DOM](../../architecture/html-and-dom.md) (HD1–HD33); the [JavaScript engine](../../architecture/javascript-engine.md)'s details, with its [bindings](../../architecture/bindings.md) and [script and heap](../../architecture/script-and-heap.md); [networking](../../architecture/networking.md) beyond its keys (NW1–NW18); dated facts older than six months |
 | **Summary** | [Findings](06-findings.md): RV4-01, RV4-03, RV4-08, RV4-13, RV4-14, RV4-16, RV4-17 · [Actions](07-actions.md) |
