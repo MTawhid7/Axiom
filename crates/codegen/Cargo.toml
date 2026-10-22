@@ -1,0 +1,11 @@
+[package]
+name = "codegen"
+description = "Axiom's code generators, run as `cargo run -p codegen`, with their output committed and checked fresh by `--check` on every commit (ES19). Build group; never linked into a shipping crate."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
