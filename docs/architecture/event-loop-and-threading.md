@@ -7,7 +7,7 @@
 | **Answers** | Step 4 questions Q1–Q3 and the first half of Q4 ([tracker](../research/step-4-architecture-proposal.md) §3); OQ-5 in part |
 | **Feeds** | ADR-0006; CP4 (IPC), CP5 (frame tree), CP6 (pipeline), CP7 (invalidation), CP8 (input), CP9 (embedder API), CP10 (script and heap) |
 | **Builds on** | [Process model](../security/process-model.md); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [ADR-0004](../adr/0004-process-model-and-sandbox.md); [macOS runtime note](../research/macos-runtime-facilities.md); [S2 results](../research/s2-results.md); [S4 results](../research/s4-results.md) |
-| **Last updated** | 2026-10-22: Round 4's accepted findings |
+| **Last updated** | 2026-10-23: crate names after ADR-0022's acceptance. Earlier: 2026-10-22: Round 4's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered EL1–EL24. Precedent is sourced (§3, Sources); the design is inference unless marked otherwise.
 
@@ -266,7 +266,7 @@ Storage runs on its own thread so that a slow network can't delay a synchronous 
 | AC5 | EL10–EL12, EL15 |
 | AC6 | EL24 |
 | AC7 | §4.10 |
-| AC9 | Thread loops need FFI (kqueue, run loops, Mach) only in `platform` |
+| AC9 | Thread loops need FFI (kqueue, run loops, Mach) only in the platform layer: `platform-event` and `platform-mach` (the crate architecture's CR6, ADR-0022) |
 
 ## 7. Open questions
 

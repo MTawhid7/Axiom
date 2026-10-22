@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0010](../adr/0010-dependency-and-supply-chain-policy.md)'s acceptance (2026-10-18, Step 5's Gate B). Written at Step 5, CP2; DP10 refined at CP3 (§6). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): DP1 (g) and DP2 for RV1-08 (CP4). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): DP4, DP8, DP9 and DP10 for RV4-02 (CP2) |
+| **Status** | **Binding** since [ADR-0010](../adr/0010-dependency-and-supply-chain-policy.md)'s acceptance (2026-10-18, Step 5's Gate B). Written at Step 5, CP2; DP10 refined at CP3 (§6). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): DP1 (g) and DP2 for RV1-08 (CP4). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): DP4, DP8, DP9 and DP10 for RV4-02 (CP2) **Amended by ADR-0022's acceptance** (2026-10-23): DP22's checks; open questions 2 and 3 settled |
 | **Question** | Which code does Axiom write itself, and which may it reuse? How is each dependency justified, classed, audited and placed, and how do the `unsafe` and C code inside dependencies count against ADR-0002's rules and the Rule of 2? |
 | **Answers** | Step 5 question Q1 ([tracker](../research/step-5-subsystems.md) §3); decision-map item X4, added by the owner at Step 5's Gate A (2026-10-18) |
 | **Feeds** | ADR-0010 (CP9); the build-or-reuse decisions of every Step 5 subsystem checkpoint; the [dependency register](dependency-register.md) |
 | **Builds on** | [Charter](../charter.md) G1 and principle 4; [ADR-0002](../adr/0002-implementation-language.md) and the [language evaluation](language-evaluation.md) §12, §15.3–§15.4; the [threat model](../security/threat-model.md) TA4, TA5 and §9; the [process model](../security/process-model.md) PM2 and §4; the [decision map](../decision-map.md)'s layers |
-| **Last updated** | 2026-10-22: Round 4's accepted findings |
+| **Last updated** | 2026-10-23: DP22 and the open questions, at Milestone 1's start. Earlier: 2026-10-22, Round 4's accepted findings |
 
 This document sets rules; it adds no dependency. Rules are numbered DP1–DP23. Precedent is sourced (§2); the rules are inference from the binding inputs and the precedent, unless marked otherwise.
 
@@ -27,7 +27,7 @@ This document sets rules; it adds no dependency. Rules are numbered DP1–DP23. 
   - audits recorded with `cargo-vet`, importing the organizations whose audits Firefox imports;
   - `cargo-deny` for advisories, licenses, duplicate crates and sources;
   - minimal features, and costs measured against T1–T4.
-- **Apple's frameworks are required platform facilities,** reached only through `platform` modules and only from the processes that the process model and DP21 allow.
+- **Apple's frameworks are required platform facilities,** reached only through the platform layer's crates (`platform` modules before ADR-0022; CR6) and only from the processes that the process model and DP21 allow.
 - **Enforcement** (DP22): `cargo-deny` and `cargo-vet` become pre-commit checks once the owner authorizes installing them. A repository tool, designed here, checks that every crate in the lock has a register entry, and that no browser-process crate depends on a `sandboxed` one.
 
 ## 1. Binding inputs
@@ -74,7 +74,7 @@ Read on 2026-10-18. The dates are the last commits to each file, from GitHub's A
 
 | # | Rule |
 |---|---|
-| DP5 | **Every dependency has one class, which sets how it is approved and how it is left:**<br>• **Required platform facility:** a macOS framework, library or service that Axiom can't do without, or must use for platform behaviour. Examples: AppKit, Metal, the sandbox, certificate trust evaluation, libSystem. Reached only through `platform` modules (ADR-0002), and only from the processes DP21 allows. Approved by the ADR that needs it.<br>• **Replaceable implementation detail:** a crate behind an Axiom-owned interface (DP2), replaceable within one crate. Approved with its subsystem's design document and ADR.<br>• **Foundational dependency:** a crate whose types or build role spread across many crates, such as objc2 across `platform` and the shell, or whose replacement would be a project in itself. Approved by an ADR of its own, or a named decision in one, with a written revisit condition |
+| DP5 | **Every dependency has one class, which sets how it is approved and how it is left:**<br>• **Required platform facility:** a macOS framework, library or service that Axiom can't do without, or must use for platform behaviour. Examples: AppKit, Metal, the sandbox, certificate trust evaluation, libSystem. Reached only through the platform layer's crates (ADR-0002; CR6 since ADR-0022), and only from the processes DP21 allows. Approved by the ADR that needs it.<br>• **Replaceable implementation detail:** a crate behind an Axiom-owned interface (DP2), replaceable within one crate. Approved with its subsystem's design document and ADR.<br>• **Foundational dependency:** a crate whose types or build role spread across many crates, such as objc2 across `platform` and the shell, or whose replacement would be a project in itself. Approved by an ADR of its own, or a named decision in one, with a written revisit condition |
 
 ## 5. Records
 
@@ -110,7 +110,7 @@ Read on 2026-10-18. The dates are the last commits to each file, from GitHub's A
 
 | # | Rule |
 |---|---|
-| DP21 | **Platform facilities run only where this table allows,** and only through `platform` modules (ADR-0002). Apple's parsers of untrusted bytes run only in sandboxed helpers (TA5, SC2). Private interfaces need an ADR with a recorded fallback, as ADR-0004 records for libsandbox. Deprecated interfaces are avoided, as `CVDisplayLink` was ([macOS runtime note](../research/macos-runtime-facilities.md)). The minimum OS is the current macOS (ADR-0001) |
+| DP21 | **Platform facilities run only where this table allows,** and only through the platform layer's crates (ADR-0002; CR6 since ADR-0022, one crate per facility). Apple's parsers of untrusted bytes run only in sandboxed helpers (TA5, SC2). Private interfaces need an ADR with a recorded fallback, as ADR-0004 records for libsandbox. Deprecated interfaces are avoided, as `CVDisplayLink` was ([macOS runtime note](../research/macos-runtime-facilities.md)). The minimum OS is the current macOS (ADR-0001) |
 
 | Facility | Processes | Purpose | Decided by |
 |---|---|---|---|
@@ -129,7 +129,7 @@ Read on 2026-10-18. The dates are the last commits to each file, from GitHub's A
 
 | # | Rule |
 |---|---|
-| DP22 | **Checks.** `cargo deny check` and `cargo vet` join the pre-commit checks once the owner authorizes installing them, proposed with the first engine crate. A repository tool, `tools/check-dependencies.py`, is designed here and built when authorized. It will check:<br>• that every third-party crate in `Cargo.lock` has a register entry;<br>• from a file mapping each workspace crate to its processes and each dependency to its group, that no crate in the browser process reaches a `sandboxed` dependency (DP9);<br>• that every crate with a build script or procedural macro is flagged for DP12.<br>Until then, the register and the manifests' justifications are checked by review at each gate |
+| DP22 | **Checks.** `cargo deny check` and `cargo vet` join the pre-commit checks once the owner authorizes installing them, proposed with the first engine crate. **As amended by [ADR-0022](../adr/0022-code-architecture-and-engineering-standards.md)'s acceptance** (2026-10-23; the owner: "The 7-layer architecture, facility-split platform layer, separate spikes workspace, and check-dependencies script are approved."): both run in the checkpoint tier of `tools/check.sh` (ES25), installed with MA10's authorization at M1-CP2, and the tool below also checks the crate map: layers, allowlists, cycles, placement per executable, test code out of shipping closures, names, the `unsafe` allowlist and panic classes (the crate architecture's CR16). A repository tool, `tools/check-dependencies.py`, is designed here and built when authorized. It will check:<br>• that every third-party crate in `Cargo.lock` has a register entry;<br>• from a file mapping each workspace crate to its processes and each dependency to its group, that no crate in the browser process reaches a `sandboxed` dependency (DP9);<br>• that every crate with a build script or procedural macro is flagged for DP12.<br>Until then, the register and the manifests' justifications are checked by review at each gate |
 | DP23 | **The spikes are exempt from the register.** They are throwaway code ([spikes README](../../spikes/README.md)), and each spike's manifest justifies its dependencies, as S1–S4 did. Their crates are listed in the register's last section, so that the lock is fully accounted for. A crate proposed for the engine because a spike used it still needs a full entry |
 
 ## 10. Adding a dependency
@@ -165,15 +165,15 @@ Read on 2026-10-18. The dates are the last commits to each file, from GitHub's A
 | B | **Reuse judged case by case, with no rules** | It invites the sprawl the evaluation warns of (§12), and would leave rule 5 empty for code Axiom doesn't write. Rejected |
 | C | **No `unsafe` in any dependency** | The standard library, SIMD primitives and every Objective-C binding contain `unsafe`, so this would rule out objc2, which ADR-0009 requires. Grading and placement (DP8–DP10) target the risk instead. Rejected |
 | D | **Counting `unsafe` (cargo-geiger) as the criterion** | A count isn't a soundness judgement; cargo-geiger itself "is not meant to advise directly whether the code ultimately is truly insecure or not" [T1]. Kept as a screening tool for audits. Rejected as the criterion |
-| E | **Vendoring every crate into the repository,** as Chromium does | It makes builds reproducible offline, but bloats a public repository, and `Cargo.lock`'s checksums already pin each crate's contents. Deferred: revisited at the first engine milestone |
+| E | **Vendoring every crate into the repository,** as Chromium does | It makes builds reproducible offline, but bloats a public repository, and `Cargo.lock`'s checksums already pin each crate's contents. Deferred: revisited at the first engine milestone. **Settled at Milestone 1's start** (2026-10-23): not vendored (the plan's §2, item 9) |
 
 ## 13. Open questions
 
 | # | Question | Where it is settled |
 |---|---|---|
 | 1 | **Axiom's own license.** The repository was public with no license file (observed 2026-10-18), so by default no one else could reuse it | **Resolved at Gate B** (2026-10-18): "MIT OR Apache-2.0" (OQ-21; DP17) |
-| 2 | When `cargo-deny` and `cargo-vet` are installed, and `tools/check-dependencies.py` built | Proposed with the first engine crate; the owner authorizes |
-| 3 | Vendoring (alternative E) | The first engine milestone |
+| 2 | When `cargo-deny` and `cargo-vet` are installed, and `tools/check-dependencies.py` built | **Settled:** at M1-CP2, under MA10's authorization (the owner, 2026-10-23) |
+| 3 | Vendoring (alternative E) | **Settled:** not vendored, Milestone 1's plan §2, item 9, approved by the owner on 2026-10-23 ("Approved as written"); revisited if builds must work offline |
 
 ## Sources
 

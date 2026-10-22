@@ -7,7 +7,7 @@
 | **Answers** | Step 5 question Q13 ([tracker](../research/step-5-subsystems.md) §3); the bindings part of the handed-over question 18 (§2.2); closes [HTML and the DOM](html-and-dom.md)'s JavaScript facet (HD30) |
 | **Feeds** | Part 2's ADRs (CP18); every subsystem that exposes an interface to script |
 | **Builds on** | [Script and heap](script-and-heap.md) (SH1, SH2, SH6, SH7, SH9, SH12); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [ADR-0002](../adr/0002-implementation-language.md) (rule 7); [the JavaScript engine](javascript-engine.md) (JE8–JE11, JE16, JE18, JE32); [HTML and the DOM](html-and-dom.md) (HD10, HD16–HD18, HD25, HD30); the [frame tree](frame-tree-and-navigation.md) (FT3–FT7); the [event loop](event-loop-and-threading.md) (EL14); the [dependency policy](../technology/dependency-policy.md) (DP1, DP2) |
-| **Last updated** | 2026-10-21: Round 1's accepted findings |
+| **Last updated** | 2026-10-23: crate names after ADR-0022's acceptance. Earlier: 2026-10-21: Round 1's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered WB1–WB23. Precedent is sourced (§3); the design is inference unless marked otherwise.
 
@@ -73,7 +73,7 @@ No new dependency is proposed: the IDL is data, and the generator is Axiom's.
 
 | Rule | Decision |
 |---|---|
-| WB1 | **A WebIDL compiler of Axiom's own** (DP1 (h)), run at build time. It parses Web IDL's grammar; merges partial interfaces, mixins and `includes`; resolves typedefs, dictionaries, enums, callbacks and namespaces; validates the result; and generates Rust. **Its input** is the specifications' IDL as webref's curated extracts provide it, pinned in the repository (§4), plus **a configuration** saying which Rust type implements each interface and which members are implemented, as Gecko's configuration file and Servo's `Bindings.conf` do (§3) |
+| WB1 | **A WebIDL compiler of Axiom's own** (DP1 (h)), run at build time. (Since [ADR-0022](../adr/0022-code-architecture-and-engineering-standards.md) D5, 2026-10-23, Axiom's generated code is committed and checked fresh by default; whether the bindings follow, given their size, is decided with spike S13 before M3.) It parses Web IDL's grammar; merges partial interfaces, mixins and `includes`; resolves typedefs, dictionaries, enums, callbacks and namespaces; validates the result; and generates Rust. **Its input** is the specifications' IDL as webref's curated extracts provide it, pinned in the repository (§4), plus **a configuration** saying which Rust type implements each interface and which members are implemented, as Gecko's configuration file and Servo's `Bindings.conf` do (§3) |
 | WB2 | **Generated code is safe, readable Rust** (ADR-0002 rule 7, SH12): no `unsafe`, and no macros that expand to it. It passes the workspace's lints like hand-written code, and the same input always generates the same bytes, so builds stay reproducible. The generator is a build tool and never ships |
 | WB3 | **Only implemented members are exposed.** A member the configuration doesn't mark as implemented is absent, not a stub that throws, so feature detection (`'x' in object`) tells the truth. `[Exposed]`, `[SecureContext]` and `[CrossOriginIsolated]` decide, per global, which interfaces and members a realm sees |
 

@@ -7,7 +7,7 @@
 | **Answers** | Step 5 question Q8 ([tracker](../research/step-5-subsystems.md) §3); decision-map item I5; the tracker's handed-over questions 12–14 (§2.2); [input and accessibility](input-and-accessibility.md) open questions 2 and 3; [embedder API](embedder-api.md) open question 2 |
 | **Feeds** | ADR-0014 (CP9); CP13 (the DOM's accessibility hooks); CP14 (media features from system settings); CP15 (geometry and text runs); the shell milestone (EM11) |
 | **Builds on** | [Input and accessibility](input-and-accessibility.md) IN6–IN9; [rendering pipeline](rendering-pipeline.md) PL12; [embedder API](embedder-api.md) EM5, EM6, EM8, EM11; [IPC](ipc.md) IP7–IP11; [frame tree](frame-tree-and-navigation.md) FT1, FT3; [text and fonts](text-and-fonts.md) TX16; the [macOS runtime note](../research/macos-runtime-facilities.md) §10; the [dependency policy](../technology/dependency-policy.md) DP9 |
-| **Last updated** | 2026-10-18 |
+| **Last updated** | 2026-10-23: crate names after ADR-0022's acceptance. Earlier: 2026-10-18 |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered AX1–AX12. Precedent is sourced (§3); the design is inference unless marked otherwise.
 
@@ -15,7 +15,7 @@ Everything here is **planned**; nothing is implemented. Rules are numbered AX1�
 
 - **The renderer builds the tree; the browser answers the questions.** The renderer turns each document's DOM and boxes into an accessibility tree once an assistive technology first asks, as WebKit enables its cache. It follows HTML-AAM, Core-AAM, the accessible-name computation and WAI-ARIA (AX1). It pushes a complete tree, then incremental updates (AX3), the model Chromium uses and AccessKit borrows. The browser validates the updates, stitches frames together, and answers every `NSAccessibility` query from its cache, never by waiting on a renderer (IN9).
 - **Text navigation uses macOS's text-marker API,** which the SDK 27 headers document for "custom web browser engines" (AX5). Chromium, WebKit and Firefox all implement text markers. The renderer precomputes word, sentence and line boundaries, so the browser never runs Unicode segmentation on a renderer's text.
-- **The bridge is Axiom's own,** implemented in the shell's `platform` module (AX8). AccessKit's macOS adapter doesn't yet support "rich text or hypertext", which web content needs.
+- **The bridge is Axiom's own,** implemented in `platform-appkit`, which only `shell` uses (AX8; (the crate architecture's CR6, ADR-0022)). AccessKit's macOS adapter doesn't yet support "rich text or hypertext", which web content needs.
 - **System settings reach pages as media features** (AX10): reduced motion, increased contrast, reduced transparency, and appearance.
 - **Two questions for the owner** (§6): the settings list, with how the sensitive-site list and the JIT switches appear; and which key equivalents a page may never override. The recommendation follows Chromium's reserved commands: tab, window and quit commands, and the address bar, are never delivered to pages. **The owner approved both as written at Gate B** (2026-10-18).
 
@@ -65,7 +65,7 @@ Read on 2026-10-18; dates in brackets are the last commits to each file, from Gi
 |---|---|---|
 | **Building the tree** | **Our own:** it is the DOM's and layout's own data, under HTML-AAM's rules | **Our own** (AX1) |
 | **The tree's format across IPC** | **Our own,** in the IDL, modeled on Chromium's abstraction, as AccessKit's schema is; **AccessKit's schema crate** | **Our own, in the IDL** (AX2): its decoders must be generated and validated (IP8, IP10) |
-| **The `NSAccessibility` bridge** | **AccessKit's macOS adapter** 0.27.1: no rich text or hypertext yet [K1]. **Our own,** in the shell's `platform` module | **Our own** (AX8). AccessKit is reconsidered if its adapter gains hypertext |
+| **The `NSAccessibility` bridge** | **AccessKit's macOS adapter** 0.27.1: no rich text or hypertext yet [K1]. **Our own,** in `platform-appkit`, used only by `shell` (the crate architecture's CR6, ADR-0022) | **Our own** (AX8). AccessKit is reconsidered if its adapter gains hypertext |
 
 ## 5. Design
 
@@ -85,7 +85,7 @@ Read on 2026-10-18; dates in brackets are the last commits to each file, from Gi
 | AX5 | **Text navigation uses the text-marker API** that SDK 27 documents for web engines (§3). A marker's payload is opaque to assistive technologies, and encodes a frame token, a node ID, a text offset and an affinity. **Boundaries come from the renderer:** each text run carries its word, sentence and line boundaries, computed with ICU4X (TX16) and layout. The browser only indexes them. So ICU4X never runs in the browser on renderer-supplied text (DP9) |
 | AX6 | **Frames are stitched by token.** An `iframe` node refers to its child frame's tree by frame token, and only to a child that the browser's frame tree lists for that frame (FT1). A child frame in another process is another renderer's tree in the same cache. A renderer's claim about a frame that isn't its child is dropped, and is a violation (IN9, IP11) |
 | AX7 | **Enabled on first use,** as WebKit enables its cache only after an assistive technology's first query ([macOS runtime note](../research/macos-runtime-facilities.md) §10). The first query tells every renderer with a visible document to build its tree. Documents that load later build theirs at load. The cost is paid only by users of assistive technologies. The cache's and the trees' memory is measured at the shell milestone.<br>**As amended in Round 2** ([RV2-07](../review/round-2/03-findings.md#rv2-07-accessibility-enabled-by-any-client)): many clients of the accessibility API aren't assistive technologies (password managers, window managers, antivirus tools), so **enablement has tiers:**<br>• **Full,** while VoiceOver or Switch Control runs, which the browser observes through `NSWorkspace`'s `voiceOverEnabled` and `switchControlEnabled` by KVO: every visible document's tree, with text markers, advances and notifications, as above.<br>• **Basic,** for any other client's query: the tree of the document queried, built on demand, with roles, names, states and bounds, as Chromium turns on only a basic mode for such clients since 2024.<br>• **Off again** after a period with no queries (a hypothesis, 60 s, tuned at the shell milestone): the trees are discarded and the renderers stop sending updates.<br>Each tier's memory is measured at the shell milestone |
-| AX8 | **The bridge is Axiom's own,** in the shell's `platform` module, through objc2-defined classes that implement `NSAccessibility`. Those are the classes whose validation opens the shell milestone (EM11). The browser's own interface is native AppKit, accessible by AppKit itself (EM8), so it needs no bridge |
+| AX8 | **The bridge is Axiom's own,** in `platform-appkit`, which only `shell` uses (the crate architecture's CR6, ADR-0022), through objc2-defined classes that implement `NSAccessibility`. Those are the classes whose validation opens the shell milestone (EM11). The browser's own interface is native AppKit, accessible by AppKit itself (EM8), so it needs no bridge |
 
 ### 5.3 System settings, tests and memory
 

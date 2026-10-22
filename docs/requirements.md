@@ -2,13 +2,13 @@
 
 | | |
 |---|---|
-| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): RQ45 and RQ46 for RV1-01 (CP1); RQ12, RQ35 and RQ53 for RV1-02, RV1-07 and RV1-09 (CP2); §8's open items and RQ18 for RV1-11 and RV1-13 (CP5). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](review/README.md) §5.9): RQ40 for RV4-01 (CP1); RQ5 for RV4-06 (CP5); RQ30, RQ54, RQ56 and RQ61 for RV4-14 (CP7) |
+| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): RQ45 and RQ46 for RV1-01 (CP1); RQ12, RQ35 and RQ53 for RV1-02, RV1-07 and RV1-09 (CP2); §8's open items and RQ18 for RV1-11 and RV1-13 (CP5). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](review/README.md) §5.9): RQ40 for RV4-01 (CP1); RQ5 for RV4-06 (CP5); RQ30, RQ54, RQ56 and RQ61 for RV4-14 (CP7) **Amended at Milestone 1's first checkpoint** (2026-10-23): RQ67–RQ70 from ADR-0022's acceptance, RQ71–RQ73 from ADR-0023's |
 | **Question** | Does every requirement trace from its source to the milestone that verifies it, and to the check that does? |
 | **Answers** | Part of Step 6 question Q7 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the tracker's handed-over question 30 (§2.2). Planned since Step 1 |
 | **Builds on** | The [charter](charter.md); the accepted ADRs; the [threat model](security/threat-model.md) and [process model](security/process-model.md); the [corpus](corpus.md), [standards](standards.md), [testing](testing.md) and [performance](performance.md) documents; the [roadmap](roadmap.md) and [Milestone 1](milestone-1.md) |
-| **Last updated** | 2026-10-22: Round 4's accepted findings |
+| **Last updated** | 2026-10-23: RQ67–RQ73, from ADRs 0022 and 0023. Earlier: 2026-10-22, Round 4's accepted findings |
 
-Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone that first verifies it, and how. Later milestones keep every check green (MS2, MS7). **A requirement with no milestone is a gap;** §8 lists the gaps, and there is none. The milestones are the [roadmap](roadmap.md)'s M1–M9; "every gate" means every milestone's gate.
+Each entry RQ1–RQ73 names a requirement, where it comes from, the milestone that first verifies it, and how. Later milestones keep every check green (MS2, MS7). **A requirement with no milestone is a gap;** §8 lists the gaps, and there is none. The milestones are the [roadmap](roadmap.md)'s M1–M9; "every gate" means every milestone's gate.
 
 ## 1. Goals and scope
 
@@ -57,6 +57,12 @@ Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone th
 | RQ31 | Five owned stages; a compiler-checked lifecycle; reuse at each stage | ADR-0007 | M1 | IV14's self-oracle (MA8) |
 | RQ32 | Pattern B's heap with `SliceStack`; the node arena never compacted | ADR-0003; ADR-0008 (with SH10's amendment) | M1 (the node arena), M3 (the JavaScript heap) | The collector's pause budget (PF15); stable identities (HD33) |
 | RQ33 | The shell as an embedder over a message API; a headless embedder; a pure-Rust shell | [ADR-0009](adr/0009-embedder-api-and-shell.md) | M1 | The objc2 classes validated (EM11); the headless embedder runs WPT (TS2) |
+| RQ67 | The crate graph is layered, and each executable's closure links only what its process may (added at ADR-0022's acceptance, 2026-10-23) | [ADR-0022](adr/0022-code-architecture-and-engineering-standards.md); the [crate architecture](architecture/crates.md) CR1–CR4; AC4; RV1-09; DP9; DP21; MA7 | Every commit, from M1-CP2 | `tools/check-dependencies.py` over `tools/crate-map.toml` (CR16), in the commit tier |
+| RQ68 | Files, functions and crates stay within their size limits (ADR-0022) | The [engineering standards](technology/engineering-standards.md) ES1–ES3; the owner: "Enforce 600-line warning / 1,000-line failure for files, and 100-line failure for functions." | Every commit, from M1-CP2; the distribution reviewed at M1-CP15 | `tools/check-file-size.py`; Clippy's `too_many_lines` |
+| RQ69 | Every executable aborts on a panic, and RV1-16's panic classes hold by lint (ADR-0022) | ES9, ES10; RV1-16 ([Milestone 1](milestone-1.md) MA7) | Every commit, from M1-CP2 | Each crate root's lints, checked by `tools/check-dependencies.py`; release profiles with `panic = "abort"`; fuzz targets report panics (TS9) |
+| RQ71 | Every crash, hang, IPC violation and budget breach leaves a local report with the flight recorder's last seconds (added at ADR-0023's acceptance, 2026-10-23) | [ADR-0023](adr/0023-observability-and-diagnostics.md); [observability](architecture/observability.md) OB17; IR3; PF19; RV1-15 | M1 (crashes, hangs and violations at M1-CP3; budget breaches at M1-CP12); M2 (the system's crash reports and the diagnostics window) | OB27's crash, hang and violation tests |
+| RQ72 | Observability costs the least that meets its goals, and nothing while idle: no wakeups, no writes, retention within PF27 (ADR-0023; the owner: "minimal performance overhead") | OB18, OB20, OB25; PF16, PF27, PF28 | Every commit (recording's tier-1 tests, from M1-CP2); M1-CP12 (retention); M1-CP14 (OB25 under PF1) | First-tier tests (OB27); PF16's and PF28's checks with observability on |
+| RQ73 | No record holds page content, form values, cookies or credentials, and nothing leaves the Mac (ADR-0023) | OB22, OB23; PF29 | Every gate, from M1 | The record format has no field for them (OB22); PF29's check; review at each gate |
 
 ## 4. Subsystems
 
@@ -110,6 +116,7 @@ Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone th
 | RQ64 | Every commit passes the five checks | CLAUDE.md | Every commit | The checks |
 | RQ65 | Status recorded every substantial session; trackers per step and milestone | Charter §10 | Every session | `status.md`; the trackers |
 | RQ66 | The corpus changes only with the owner | CO1; OQ-2 | Every gate | The corpus's record of changes |
+| RQ70 | Checks run in two tiers from one entry point, and the commit tier's time is budgeted, never met by skipping a check (added at ADR-0022's acceptance, 2026-10-23) | ES25; [ADR-0022](adr/0022-code-architecture-and-engineering-standards.md) D11 | Every commit and checkpoint, from M1-CP2 | `tools/check.sh` (commit tier) and `tools/check.sh --checkpoint` |
 
 ## 8. Gaps
 

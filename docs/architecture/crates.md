@@ -2,13 +2,13 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-22), with [ADR-0022](../adr/0022-code-architecture-and-engineering-standards.md), for the owner. Written at Milestone 1's first checkpoint, at the owner's request: "we should enforce clear separation of concerns, well-defined module boundaries, high cohesion, low coupling, and explicit interfaces between components." It refines the [overview](overview.md)'s §2, which calls its crate table "a proposal for the implementation milestones; final names and splits are set when code is authorized". The overview stays as written until the owner accepts ADR-0022. **Nothing here is implemented** |
+| **Status** | **Accepted** (2026-10-23), with [ADR-0022](../adr/0022-code-architecture-and-engineering-standards.md): "The 7-layer architecture, facility-split platform layer, separate spikes workspace, and check-dependencies script are approved." Written at Milestone 1's first checkpoint, at the owner's request: "we should enforce clear separation of concerns, well-defined module boundaries, high cohesion, low coupling, and explicit interfaces between components." It supersedes the [overview](overview.md)'s crate table, which called itself "a proposal for the implementation milestones; final names and splits are set when code is authorized", and which now points here. Implementation begins at M1-CP2 |
 | **Question** | How is Axiom's code divided into crates? Which crate may depend on which, which processes may link each one, and how are those rules checked, so that a change stays inside the crates it concerns? |
 | **Builds on** | The [overview](overview.md) §2; the [process model](../security/process-model.md) §3–§4 and IR1–IR10; the [dependency policy](../technology/dependency-policy.md) (DP2, DP9, DP21, DP22); [ADR-0002](../adr/0002-implementation-language.md)'s rules 5 and 7, and the [language evaluation](../technology/language-evaluation.md) §15.3; EM3; NW2; TX3; PL1 and PL11; IV1 and IV2; IP2, IP8 and IP18; EL24; MS4; [Milestone 1](../milestone-1.md)'s MA1 and MA7; the [engineering standards](../technology/engineering-standards.md); [observability](observability.md) |
 | **Feeds** | ADR-0022; [Milestone 1's plan](../milestone-1-plan.md), whose second checkpoint builds the crate map and its checker; every crate's charter (ES15) |
-| **Last updated** | 2026-10-22 |
+| **Last updated** | 2026-10-23: accepted; the owner's conditional approval on open question 1 |
 
-Rules are numbered CR1–CR16. Everything here is **planned**. The rules are inference from the binding documents and the precedent in §2, unless marked otherwise. Facts observed on this Mac name their command.
+Rules are numbered CR1–CR16. Everything here is **planned** until the checkpoint that builds it. The rules are inference from the binding documents and the precedent in §2, unless marked otherwise. Facts observed on this Mac name their command.
 
 ## Summary
 
@@ -277,7 +277,7 @@ How common changes travel through the graph (inference, checked by hand against 
 
 ## 13. Open questions
 
-1. **`smallvec`'s grade and IDNA in the browser.** NW2 has the browser's address bar use full IDNA through ICU4X, and ICU4X's normalizer depends on `smallvec` (§2). If Axiom's audit at M1-CP2 grades `smallvec` `ub-risk-2` or better, `url` links the normalizer everywhere. If it grades it `ub-risk-3`, DP8 bars it from the browser. Full IDNA then moves into a `url-idna` crate in the `sandboxed` group, linked only by helpers, and the address bar asks the network process for the ASCII form of a typed host. That is an amendment to NW2, for the owner, decided with the grade.
+1. **`smallvec`'s grade and IDNA in the browser.** NW2 has the browser's address bar use full IDNA through ICU4X, and ICU4X's normalizer depends on `smallvec` (§2). If Axiom's audit at M1-CP2 grades `smallvec` `ub-risk-2` or better, `url` links the normalizer everywhere. If it grades it `ub-risk-3`, DP8 bars it from the browser. Full IDNA then moves into a `url-idna` crate in the `sandboxed` group, linked only by helpers, and the address bar asks the network process for the ASCII form of a typed host. That is an amendment to NW2, for the owner, decided with the grade. **The owner's conditional approval** (2026-10-23): "If smallvec is graded ub-risk-3 during CP2, approve moving the IDNA domain lookup into the network process as an amendment to NW2." So M1-CP2's grade settles it, and NW2 is amended then if the grade is `ub-risk-3`.
 2. **One `protocol` crate or several:** split by interface family if its rebuild costs too much against T1, measured at M1-CP4.
 3. **One sink for both parsers or two:** settled by M1-CP5's interface note on the HTML tree sink.
 4. **`embedder-api` generated from the IDL or written by hand:** settled by M1-CP3's interface note on the IDL.

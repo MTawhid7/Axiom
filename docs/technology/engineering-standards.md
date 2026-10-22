@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-22), with [ADR-0022](../adr/0022-code-architecture-and-engineering-standards.md), for the owner. Written at Milestone 1's first checkpoint, at the owner's request (2026-10-22): "I want us to establish the architectural principles, project structure, coding standards, testing strategy, dependency management approach, and key technical decisions before implementation begins." **They apply to engine code once ADR-0022 is accepted,** and are carried into CLAUDE.md's code rules at M1-CP2. Nothing here is implemented |
+| **Status** | **Accepted** (2026-10-23), with [ADR-0022](../adr/0022-code-architecture-and-engineering-standards.md), and **binding on engine code.** Written at Milestone 1's first checkpoint, at the owner's request (2026-10-22): "I want us to establish the architectural principles, project structure, coding standards, testing strategy, dependency management approach, and key technical decisions before implementation begins." On ES1, the owner: "Approved. Enforce 600-line warning / 1,000-line failure for files, and 100-line failure for functions. We will review empirical distribution at M1-CP15." They are carried into CLAUDE.md's code rules at M1-CP2, which builds their tools |
 | **Question** | How is Axiom's code written, documented, tested in place, reviewed and checked, so that it stays modular and readable as it grows to hundreds of thousands of lines? |
 | **Builds on** | [ADR-0002](../adr/0002-implementation-language.md) and the [language evaluation](language-evaluation.md) §15.3 (`unsafe`); the [dependency policy](dependency-policy.md); the [testing strategy](../testing.md) (TS1, TS7–TS11); the [performance budgets](../performance.md) (PF5's tiers); RV1-16's failure semantics ([Milestone 1](../milestone-1.md) MA7); the [crate architecture](../architecture/crates.md); [observability](../architecture/observability.md); the [charter](../charter.md)'s principles 5–7; CLAUDE.md's code rules |
 | **Feeds** | ADR-0022; CLAUDE.md's code rules, at M1-CP2; every crate's charter; the review of every commit and checkpoint |
-| **Last updated** | 2026-10-22 |
+| **Last updated** | 2026-10-23: accepted |
 
 Rules are numbered ES1–ES29. A rule enforced by a tool names it; the others are checked in review (ES28). The rules are inference from the binding documents and the sources in §2, unless marked otherwise.
 
@@ -61,7 +61,7 @@ Rules are numbered ES1–ES29. A rule enforced by a tool names it; the others ar
 
 | # | Rule |
 |---|---|
-| ES1 | **Files: 600 lines warn, 1,000 lines fail,** counting every line of a `.rs` file. `tools/check-file-size.py` (planned, M1-CP2) enforces it. Exempt are files under a crate's `src/generated/` (ES19) and those listed in `tools/file-size-allowlist.txt`, one per line with its justification, as `tools/unsafe-policy.txt` is written. Typical exemptions: a specification's data table, or a decoder that the specification's structure makes one unit. **Unit tests count,** so a file that nears 600 lines moves its tests into `<module>/tests.rs` before anything else. The limits are hypotheses, revisited at Milestone 1's gate with the files nearest them |
+| ES1 | **Files: 600 lines warn, 1,000 lines fail,** counting every line of a `.rs` file. `tools/check-file-size.py` (planned, M1-CP2) enforces it. Exempt are files under a crate's `src/generated/` (ES19) and those listed in `tools/file-size-allowlist.txt`, one per line with its justification, as `tools/unsafe-policy.txt` is written. Typical exemptions: a specification's data table, or a decoder that the specification's structure makes one unit. **Unit tests count,** so a file that nears 600 lines moves its tests into `<module>/tests.rs` before anything else. The limits are hypotheses: the owner reviews their distribution at M1-CP15, Milestone 1's gate ("We will review empirical distribution at M1-CP15") |
 | ES2 | **Functions: at most 100 lines,** Clippy's `too_many_lines` at its default, already in force through `pedantic` and `-D warnings`. An exception takes `#[expect(clippy::too_many_lines, reason = "…")]` (ES18). The expected ones are a dispatch loop that must be one function to be fast (JE6's `match` loop) and an assembly listing in a test. **Within the limit, a function does one thing:** a state machine gets a function per state, not one `match` over every state's body |
 | ES3 | **Crates: one concern and one dependency set each.** A crate splits when its own incremental rebuild passes T1's 5 s, or when it holds two concerns whose dependencies differ. **`lib.rs` is a table of contents:** the crate's charter (ES15), module declarations and re-exports, with no logic |
 | ES4 | **Modules: one concept each, named for it.** A module with submodules is a directory with a `mod.rs`, as the spikes write them, enforced by `clippy::self_named_module_files`. Modules nest no deeper than their concepts do |
@@ -174,7 +174,7 @@ For M1-CP2, which writes it (inference). The workspace's current lints stay. Add
 
 1. **The commit tier's time budget:** about 3 minutes for an incremental change, a hypothesis measured at M1-CP2 (ES25).
 2. **A pre-commit hook:** the owner's choice at M1-CP2 (§16, G).
-3. **The limits of ES1:** revisited at Milestone 1's gate, with the files nearest them.
+3. **The limits of ES1:** approved by the owner (2026-10-23), and their distribution reviewed at M1-CP15, Milestone 1's gate.
 
 ## Sources
 

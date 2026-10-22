@@ -7,7 +7,7 @@
 | **Answers** | Step 4 question Q14 ([tracker](../research/step-4-architecture-proposal.md) §3): F4; OQ-11 |
 | **Feeds** | ADR-0009; CP11 (overview and crate structure); Step 5 (the shell's subsystems: menus, the accessibility bridge); Step 6 (the testing strategy and WPT) |
 | **Builds on** | [Event loop and threading](event-loop-and-threading.md) (EL6, EL24); [IPC](ipc.md) (IP2, IP7); [frame tree](frame-tree-and-navigation.md); [input and accessibility](input-and-accessibility.md); [S2 results](../research/s2-results.md) |
-| **Last updated** | 2026-10-21: Round 1's accepted findings |
+| **Last updated** | 2026-10-23: crate names after ADR-0022's acceptance. Earlier: 2026-10-21: Round 1's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered EM1–EM12. Precedent is sourced (§2); the design is inference unless marked otherwise.
 
@@ -163,7 +163,7 @@ From documentation read on 2026-10-17 (Sources).
 | AC1 | The embedder API is the same from L0 to L3 (EM10) |
 | AC2 | The engine applies policy before asking the shell; the shell decides only what needs a person (EM5) |
 | AC6 | The headless embedder (EM9) |
-| AC9 | objc2 FFI stays in the shell's `platform` modules, under the `unsafe` policy |
+| AC9 | objc2 FFI stays in `platform-appkit` and the other platform crates (the crate architecture's CR6, ADR-0022), under the `unsafe` policy |
 
 ## 8. Open questions
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-22), for the owner at Milestone 1's first checkpoint. Until it is accepted, the [overview](../architecture/overview.md) §2, [Milestone 1](../milestone-1.md)'s MA1 and MA10, IP8, PL11 and the [language evaluation](../technology/language-evaluation.md) §15.3 stand as written |
+| **Status** | **Accepted** (2026-10-23), by the owner at Milestone 1's first checkpoint: "Accepted as proposed (Decisions D1 through D15)." The acceptance sweep is made (Consequences): the [overview](../architecture/overview.md) §2, [Milestone 1](../milestone-1.md)'s MA1 and MA10, IP8, PL11 and the [language evaluation](../technology/language-evaluation.md) §15.3 now follow this ADR. CLAUDE.md follows at M1-CP2, when the tools exist |
 | **Date** | 2026-10-22 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | The [crate architecture](../architecture/crates.md) (CR1–CR16) and the [engineering standards](../technology/engineering-standards.md) (ES1–ES29), which this ADR proposes; [ADR-0023](0023-observability-and-diagnostics.md), observability; [ADR-0002](0002-implementation-language.md); [ADR-0004](0004-process-model-and-sandbox.md); [ADR-0005](0005-ipc-transport-and-interfaces.md); [ADR-0010](0010-dependency-and-supply-chain-policy.md); [ADR-0021](0021-milestone-1.md); [Milestone 1's plan](../milestone-1-plan.md); the [charter](../charter.md)'s principles |
@@ -14,6 +14,8 @@
 | 2026-10-22 | **Commissioned** by the owner, at Milestone 1's first checkpoint: "Given the scale and potential long-term evolution of this project, which could grow to hundreds of thousands of lines of code, we need to approach it with the discipline and rigor of a mature software engineering organization." "Our primary goal should be to build a codebase that is **modular, maintainable, and extensible**." "We must also avoid common architectural pitfalls, particularly monolithic files that accumulate thousands of lines of code". "I want us to establish the architectural principles, project structure, coding standards, testing strategy, dependency management approach, and key technical decisions before implementation begins. We should document the rationale behind significant decisions so that future contributors can understand not just *what* we built, but *why* we built it that way." And on the plan: "Feel free to refine or rewrite it as needed. Once the plan is finalized, we can proceed with implementation in stages." |
 | 2026-10-22 | **The owner's choices in plan mode,** before drafting, each from options put with a recommendation:<br>• on Milestone 1's order: "Walking skeleton first (Recommended)", recorded in [ADR-0021](0021-milestone-1.md)'s history and the plan;<br>• on design reviews: "Interfaces only (Recommended)": notes for cross-crate interfaces wait for the owner's approval before code, and notes on internals are reviewed asynchronously (D14);<br>• on observability, after the first draft: "I think we should implement a robust observability mechanism that will help us monitor the system effectively in the long run" ([ADR-0023](0023-observability-and-diagnostics.md); D8) |
 | 2026-10-22 | **Proposed** at M1-CP1, with the crate architecture and the engineering standards |
+| 2026-10-23 | **Accepted** by the owner: "ADR-0022 (Code Architecture and Engineering Standards): Accepted as proposed (Decisions D1 through D15). The 7-layer architecture, facility-split platform layer, separate spikes workspace, and check-dependencies script are approved." On D9's limits: "File & Function Size Limits (ES1): Approved. Enforce 600-line warning / 1,000-line failure for files, and 100-line failure for functions. We will review empirical distribution at M1-CP15." |
+| 2026-10-23 | **The owner's conditional approval** on the crate architecture's open question 1: "smallvec & IDNA: If smallvec is graded ub-risk-3 during CP2, approve moving the IDNA domain lookup into the network process as an amendment to NW2." It takes effect only if M1-CP2's grade is `ub-risk-3` (CLAUDE.md: a conditional approval counts once its condition is met), and the evidence is recorded with it |
 
 ## Question
 
@@ -67,7 +69,7 @@ The [crate architecture](../architecture/crates.md)'s and the [engineering stand
 
 ## Decision
 
-**Proposed:** adopt the [crate architecture](../architecture/crates.md) (CR1–CR16) and the [engineering standards](../technology/engineering-standards.md) (ES1–ES29), with these decisions:
+**Accepted** (2026-10-23): adopt the [crate architecture](../architecture/crates.md) (CR1–CR16) and the [engineering standards](../technology/engineering-standards.md) (ES1–ES29), with these decisions:
 
 - **D1. A layered crate graph, checked mechanically** (CR1–CR3, CR16). Seven layers; an explicit allowlist of internal dependencies for every crate in `tools/crate-map.toml`; no cycles; `tools/check-dependencies.py` in the commit checks, extending DP22's planned tool.
 - **D2. The platform layer split by facility and placed by process** (CR6): `platform-mach`, `-event`, `-process`, `-metal`, `-layers`, `-text`, `-net` and `-appkit`, with `unsafe` only in each one's `src/sys/`. AC9's "the shell's `platform` module" becomes `platform-appkit`.
@@ -77,7 +79,7 @@ The [crate architecture](../architecture/crates.md)'s and the [engineering stand
 - **D6. Test-only capabilities as crates or executables, never features** (CR12), with **the build's flavor in IP18's identifier** (CR13).
 - **D7. Errors and panics** (ES8–ES10): typed errors written by hand; panics only for broken invariants; `unwrap` denied outside tests; RV1-16's panic classes recorded in the crate map and checked.
 - **D8. Observability as a subsystem of its own,** decided by [ADR-0023](0023-observability-and-diagnostics.md): `trace` at the foundation, `diagnostics` in the browser (ES14).
-- **D9. Size limits enforced by tools** (ES1–ES3): files warn at 600 lines and fail at 1,000; functions at 100; crates by T1 and by concern.
+- **D9. Size limits enforced by tools** (ES1–ES3): files warn at 600 lines and fail at 1,000; functions at 100; crates by T1 and by concern. The owner reviews their distribution at M1-CP15, Milestone 1's gate.
 - **D10. Architecture rules as lints** (ES4, ES6, ES13, ES14, ES17, ES18): disallowed methods and types for the clock, environment, files, processes, threads, sockets, locks and randomly seeded hash maps; exhaustive matching; `#[expect]` with reasons.
 - **D11. Checks in two tiers with one entry point** (ES25): `tools/check.sh` for every commit, `--checkpoint` for every checkpoint, with the commit tier's time budgeted.
 - **D12. Separate workspaces for the engine, the spikes and fuzzing** (CR15). The spikes stay in `spikes/`, as MA10 says, with the current lock moved there; the engine's lock holds only the engine's dependencies; the register covers all three locks.
@@ -119,7 +121,7 @@ The [crate architecture](../architecture/crates.md)'s and the [engineering stand
 
 ## Consequences
 
-**On acceptance, these documents are amended** (the sweep), each with the owner's words:
+**On acceptance, these documents are amended** (the sweep), each with the owner's words. **Done on 2026-10-23,** at M1-CP1's close, except CLAUDE.md, which M1-CP2 updates with the tools:
 - **the overview §2:** its crate table points to the crate architecture, with the renamed and split crates;
 - **Milestone 1:** MA1's crate names; MA10's list gains the repository tools, the workspace split and `codegen`;
 - **[IPC](../architecture/ipc.md) IP8 and the [pipeline](../architecture/rendering-pipeline.md)'s PL11:** the wording of D5;
@@ -128,6 +130,8 @@ The [crate architecture](../architecture/crates.md)'s and the [engineering stand
 - **the [requirements](../requirements.md):** rows for the layering and placement checks, the size limits, the panic classes and the commit tier;
 - **the [handover](../handover-phase-0.md):** §4.12 notes the refined crates;
 - **CLAUDE.md**, at M1-CP2, when the tools exist: the code rules, the repository's layout and the checks.
+
+**A reading rule for the earlier records.** ADRs 0002–0021 and the Phase Zero records (the steps' trackers, the review's rounds, the handover's lists, the spikes' results) stay as written, as decision records do. In them, `platform` reads as the platform layer (CR6), "the shell's `platform` module" as `platform-appkit`, `core` as `browser`, and `idl` as `protocol` with `codegen`. The binding designs that an implementer reads were updated in the sweep: the overview §2, MA1, MA7 and MA10, IP8, PL11, TS11, DP5, DP21 and DP22, GR1, AX8, the register's objc2 entry, the process model's unsafe boundary, the threat model's AD2 and V5, and the event loop's, embedder API's and text design's checks of AC9.
 
 **Milestone 1's plan** adds an engineering-foundation checkpoint (M1-CP2) that builds the crate map, the checkers, the configuration and the first crates, before any engine code.
 

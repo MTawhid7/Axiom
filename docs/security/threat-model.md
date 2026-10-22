@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** by the owner (2026-10-17), with one amendment: out-of-process iframes are a prerequisite for L3 (§8, check V9). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): L1 and V1 for the GPU/compositor process and renderers without IOKit (RV1-02, RV1-09; CP2); NG4 and §9 for rendering-timing side channels and passkeys (RV1-19, RV1-21; CP5) |
+| **Status** | **Accepted** by the owner (2026-10-17), with one amendment: out-of-process iframes are a prerequisite for L3 (§8, check V9). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): L1 and V1 for the GPU/compositor process and renderers without IOKit (RV1-02, RV1-09; CP2); NG4 and §9 for rendering-timing side channels and passkeys (RV1-19, RV1-21; CP5) **Amended at ADR-0023's acceptance** (2026-10-23): §5 gains the diagnostics regions, a new input from helpers into the browser |
 | **Question** | What does Axiom protect, from whom, through which entry points, and where does trust change? When may it be used for sensitive logins? |
 | **Feeds** | [Process model](process-model.md), ADR-0004, the security sections of the architecture (Step 4), the testing strategy (Step 6) |
 | **Builds on** | [ADR-0001](../adr/0001-scope-and-target.md) (R3 and the defaults), [ADR-0002](../adr/0002-implementation-language.md) (the `unsafe` policy), [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md) (one heap per agent) |
-| **Last updated** | 2026-10-21: Round 1's accepted findings |
+| **Last updated** | 2026-10-23: §5's diagnostics regions (ADR-0023). Earlier: 2026-10-21, Round 1's accepted findings |
 
 Claims follow the [research conventions](../research/README.md): **sourced facts** cite a numbered source (§11), and **inference**, **hypothesis** and **background** are marked as such. Everything about Axiom itself is **planned**, not implemented.
 
@@ -54,7 +54,7 @@ Claims follow the [research conventions](../research/README.md): **sourced facts
 | ID | Adversary | Capabilities | Goals |
 |---|---|---|---|
 | AD1 | **Web attacker** (malicious content) | Controls the content of one or more sites, including ads, iframes and compromised third-party scripts. Serves arbitrary HTML, CSS, script, fonts, images and media. Once Axiom runs JavaScript, it runs code **with timers**. Makes the browser send requests with the user's ambient credentials, within SameSite and CORS rules. Opens popups, navigates, frames other sites, starts downloads | Read another site's data (AS2, AS3); act as the user on another site; compromise the renderer (becoming AD2); phish the user (AS5) |
-| AD2 | **Compromised renderer** | AD1 after exploiting a bug in renderer code. Candidates: `unsafe` Rust in the `gc`, `jit` or `platform` crates; a JIT logic bug; a system library (TA5). Runs arbitrary native code in that process, reads all of its memory, sends **any** IPC message in **any** order, and tries every system call, Mach service and IOKit class that the sandbox allows | Escape to the browser's privileges or to the OS (AS4); obtain other sites' credentials or data (AS1–AS3); spoof the interface (AS5) |
+| AD2 | **Compromised renderer** | AD1 after exploiting a bug in renderer code. Candidates: `unsafe` Rust in the platform layer's crates or `jit` (`gc` has none since ADR-0008, SH7; the single `platform` crate became a layer at ADR-0022); a JIT logic bug; a system library (TA5). Runs arbitrary native code in that process, reads all of its memory, sends **any** IPC message in **any** order, and tries every system call, Mach service and IOKit class that the sandbox allows | Escape to the browser's privileges or to the OS (AS4); obtain other sites' credentials or data (AS1–AS3); spoof the interface (AS5) |
 | AD3 | **Network attacker** | On the path: public Wi-Fi, a malicious router or ISP. Reads and modifies unencrypted traffic, spoofs DNS, attempts TLS interception and downgrade. Injecting into an `http:` page makes it AD1 for that origin. Off the path, DNS rebinding against local services | Read or alter traffic (AS7); steal session cookies (AS1); reach the local network (AS6) |
 | AD4 | **A compromised helper other than a renderer** | AD2's capabilities inside the network, GPU or a utility process | Each process exposes only what it holds (SG10): traffic and cookies in the network process; rendered pixels in the GPU process |
 
@@ -85,6 +85,7 @@ Each entry point for untrusted input, with the process that must handle it (the 
 | GPU work from WebGL and WebGPU (later) | Shaders and commands | GPU process | Validation before the Metal compiler; never in the browser process |
 | Display lists, accessibility trees and other renderer output | Renderer-generated data | Display lists: the GPU/compositor process from M2, the browser at M1 only (Round 1, RV1-02). Accessibility trees and other output: the browser | Safe Rust decoding and validation; renderers never draw outside their area |
 | Layer commits from the GPU/compositor process (from M2) | Layer trees, IOSurface ports, scroll and animation nodes, hit-test regions | Browser | Bounded decoding in safe Rust; checks against the browser's own records (IR1, IR2) |
+| Diagnostics regions (from M1; added at [ADR-0023](../adr/0023-observability-and-diagnostics.md)'s acceptance, 2026-10-23) | Trace records that helpers write into the shared region the browser created for each ([observability](../architecture/observability.md) OB10) | Browser (the `diagnostics` collector) | Each record copied out before it is read, every index, length, ID and field checked, and the producer's identity stamped by the reader (IR1, IR7; OB11); a record no correct writer could produce terminates the helper (IR3); a full ring drops and counts; the decoder `panic-free`, fuzzed and tested with a lying producer (OB24); no diagnostic value used for a security or recovery decision (IR2) |
 | Browser interface | Page-controlled titles, URLs, dialogs, fullscreen requests, permission requests, downloads, drag and drop, clipboard writes, external URL schemes | Browser | Spoof-resistant URL display; browser-drawn prompts; the browser's own user-activation tracking; downloads marked as quarantined (background); a prompt before launching another app |
 | Local network and `localhost` | Requests from public sites | Network process | Private Network Access-style checks (Step 5) |
 | Updates and dependencies | Upstream code | Build time | Pinned `Cargo.lock`; advisory monitoring (§9) |
@@ -176,7 +177,7 @@ ADR-0001 gates sensitive use "until the isolation milestone is verified". The le
 | V2 | **IPC fuzzing.** Every message decoder of every privileged endpoint is fuzzed, with coverage reported, and the campaign ends without open findings |
 | V3 | **Lock enforcement tests.** A test renderer that lies about its origin is caught and terminated, for cookies, storage, navigation commits and requests |
 | V4 | **Cross-site leak tests.** The relevant WPT suites (CORS, COOP and COEP, ORB, cookies) pass. A test confirms that cross-site no-CORS responses carrying HTML, JSON or XML never reach the renderer's memory |
-| V5 | **An audit of the `unsafe` code** in `gc`, `jit` and `platform`, done after the last change to it |
+| V5 | **An audit of the `unsafe` code** in the platform layer's crates and `jit` (`gc` has none, SH7; the crate names since ADR-0022), done after the last change to it |
 | V6 | **A dependency audit:** no open advisories |
 | V7 | **The JIT policy holds:** sensitive sites run without a JIT, and the global switch works |
 | V8 | **A written threat-model review.** This document is re-read against the code as built, and every deviation is recorded |

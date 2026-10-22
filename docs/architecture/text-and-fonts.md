@@ -7,7 +7,7 @@
 | **Answers** | Step 5 questions Q2 and Q3 ([tracker](../research/step-5-subsystems.md) §3); decision-map item I1, and the text part of P4; the tracker's handed-over questions 2 and 3 (§2.2) |
 | **Feeds** | ADR-0011 (CP9); spike S5 (tracker §10); CP4 (the glyph atlas); CP6 (IDNA); CP13 (decoders, sniffing); CP14 (font properties, `@font-face`); CP15 (inline layout); CP16 (`Intl`, `RegExp`, identifiers) |
 | **Builds on** | [Rendering pipeline](rendering-pipeline.md) PL7, PL8, PL10, PL11; [invalidation](invalidation.md) IV10; the [process model](../security/process-model.md) §3–§4; [S4 results](../research/s4-results.md) (CoreText in a sandbox); the [dependency policy](../technology/dependency-policy.md) |
-| **Last updated** | 2026-10-22: Round 4's accepted findings |
+| **Last updated** | 2026-10-23: crate names after ADR-0022's acceptance. Earlier: 2026-10-22: Round 4's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered TX1–TX24. Precedent is sourced (§3); the design is inference unless marked otherwise.
 
@@ -182,7 +182,7 @@ Added by the owner's disposition of RV1-10 (2026-10-21): "Establish explicit rul
 ## 7. Security
 
 - **Rule of 2.** Untrusted text and web fonts are processed only in the renderer, a sandboxed process, and only by safe Rust (TX7–TX9). CoreText, which is C, sees Apple's own system fonts only (TX6, TX12). The browser never parses a font (AC4, TX14–TX15).
-- **`unsafe`.** Axiom's own text code has none: encodings, WOFF containers and validation are parsers under rule 5. CoreText's calls live in the renderer's `platform` module (DP21). The reused crates are graded under DP8–DP10. Every tree named here is `ub-risk-2` or better, except `smallvec`'s grade (§4) and `encoding_rs`, which is `ub-risk-3` and admitted in the sandboxed helpers under DP8's conditions (Round 4, RV4-02).
+- **`unsafe`.** Axiom's own text code has none: encodings, WOFF containers and validation are parsers under rule 5. CoreText's calls live in `platform-text`, linked only by renderers (DP21; (the crate architecture's CR6, ADR-0022)). The reused crates are graded under DP8–DP10. Every tree named here is `ub-risk-2` or better, except `smallvec`'s grade (§4) and `encoding_rs`, which is `ub-risk-3` and admitted in the sandboxed helpers under DP8's conditions (Round 4, RV4-02).
 - **Resource exhaustion.** Web fonts are bounded in size, glyph count and table sizes (TX7). Shaping and rasterization time count against the renderer's hang deadlines (EL §4.7).
 
 ## 8. Staging and the complete model

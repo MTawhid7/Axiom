@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (2026-10-22), for the owner at Milestone 1's first checkpoint |
+| **Status** | **Accepted** (2026-10-23), by the owner at Milestone 1's first checkpoint: "Accepted as proposed (Decisions D1 through D10)", with a direction on overhead that OB25 now carries, and PF19 amended for the watchdog's idle wakeups (decision history) |
 | **Date** | 2026-10-22 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Observability and diagnostics](../architecture/observability.md) (OB1–OB27), which this ADR proposes; [ADR-0022](0022-code-architecture-and-engineering-standards.md) (its D8; the `trace` and `diagnostics` crates); [ADR-0004](0004-process-model-and-sandbox.md) and the [process model](../security/process-model.md)'s IR rules; [ADR-0005](0005-ipc-transport-and-interfaces.md); [ADR-0006](0006-event-loop-and-threading.md); [ADR-0019](0019-performance-methodology-and-budgets.md) (PF2, PF5, PF13, PF14, PF16, PF19, PF27–PF30); [ADR-0020](0020-roadmap-and-security-levels.md) (M2's crash reports, RV1-15); [ADR-0021](0021-milestone-1.md) (MA1, MA6) |
@@ -14,6 +14,9 @@
 | 2026-10-22 | **The owner's direction,** on the first draft of the plan for Milestone 1's engineering foundation: "I think we should implement a robust observability mechanism that will help us monitor the system effectively in the long run." |
 | 2026-10-22 | **The owner's choice in plan mode,** from options put with a recommendation: the native diagnostics window at **"M2, with crash reports (Recommended)"**, with the whole mechanism built at M1: recording in every process, collection in the browser, reports, a bounded daily health log and exports |
 | 2026-10-22 | **Proposed** at M1-CP1 |
+| 2026-10-23 | **Accepted** by the owner: "ADR-0023 (Observability and Diagnostics): Accepted as proposed (Decisions D1 through D10). The trace crate, untrusted shared-memory ring buffers, flight recorder, and local health logs are approved." |
+| 2026-10-23 | **The owner's direction on overhead,** with the acceptance: "Also, we should ensure that the observability architecture introduces minimal performance overhead and consumes as little CPU and memory as possible." [OB25](../architecture/observability.md#10-budgets-determinism-and-tests) now carries it: D9's values are ceilings, not targets; the always-on tier holds only records that a named consumer needs; regions and flight recorders are sized from measurement to the smallest that holds one drain interval; and every cost is measured on every commit from M1-CP2 (tier 1), and reported at each checkpoint that changes it |
+| 2026-10-23 | **The owner's direction on the watchdog,** settling the design's open question 5 and the plan's §2 item 19: "Watchdog vs Idle: Confirm that watchdog pings run only during active window sessions to guarantee zero idle wakeups under PF16." **[PF19](../performance.md) is amended** with these words: the pings run only during an active session, and stop when every watched thread is idle, so that OB13's drains and OB19's samples, which ride the same cycle, stop with them. M1-CP3's interface note on task ages designs the mechanism, and PF16's measurement at M1-CP3 checks it |
 
 ## Question
 
@@ -78,7 +81,7 @@ The design's §2 and Sources, read on 2026-10-22: Perfetto's security-model, buf
 
 ## Decision
 
-**Proposed:** adopt [observability and diagnostics](../architecture/observability.md) (OB1–OB27):
+**Accepted** (2026-10-23): adopt [observability and diagnostics](../architecture/observability.md) (OB1–OB27):
 
 - **D1. Four signals in one record model** (OB1–OB4): spans and events, metrics, logs and reports. Records are small, typed and named by IDs compiled into the build, on one system-wide clock, with flows that follow IPC messages across processes.
 - **D2. Axiom's own recorder, `trace`** (OB5–OB9): per-thread single-writer buffers; no lock, allocation or system call on the recording path; static categories, levels and metrics. An always-on tier shares PF19's task-age store, and a detailed tier is switched on per category. Recording never changes behaviour, and the panic hook writes a bounded record before the process aborts. `tracing` is the revisit option behind `trace`'s interface.
@@ -94,6 +97,8 @@ The design's §2 and Sources, read on 2026-10-22: Perfetto's security-model, buf
   - regions ≤ 256 KiB per helper;
   - the collector and the browser's recorder ≤ 4 MiB;
   - no idle wakeups or writes.
+
+  **As directed by the owner at acceptance** (2026-10-23), these are ceilings, and the aim is the least overhead that still meets the goals (OB25).
 - **D10. Staging** (design §11): M1 builds the mechanism across its checkpoints CP2, CP3, CP4, CP9, CP11, CP12 and CP14; M2 the window and the system's crash reports; M3 the console and pages' User Timing marks.
 
 ## Rationale
@@ -120,7 +125,7 @@ The design's §2 and Sources, read on 2026-10-22: Perfetto's security-model, buf
 | The always-on tier costs more than 1% | Low | Budget pressure | Measured at M1-CP14; categories move to the detailed tier |
 | Region memory charged unexpectedly (S16) | Medium | B2 or B4 pressure | Measured at M1-CP3 with S16's method; sizes set from it |
 | A bug in Axiom's own writer looks like a violation and ends helpers (OB11) | Low | Crashes in development | The writer's tests and the decoder's fuzz target; a violation's report names the record |
-| PF19's pings while idle conflict with PF16 | Medium | Idle wakeups | The design's open question 5, at M1-CP3 |
+| PF19's pings while idle conflict with PF16 | Medium | Idle wakeups | **Settled by the owner** (2026-10-23): PF19 amended so the pings run only during an active session; PF16 measured at M1-CP3 |
 | A trace opened in a web viewer leaves the Mac | Low | Privacy | No content in records (OB22); the owner chooses the viewer; a local summary tool (OB23) |
 
 ## Conditions for revisiting
@@ -133,9 +138,9 @@ The design's §2 and Sources, read on 2026-10-22: Perfetto's security-model, buf
 ## Consequences
 
 - **Milestone 1's plan** builds observability across its checkpoints (design §11) and reports its budgets at the gate.
-- **On acceptance, these documents gain entries,** each with the owner's words:
+- **On acceptance, these documents gain entries,** each with the owner's words (**done on 2026-10-23**):
   - the [threat model](../security/threat-model.md)'s §5, a row for the diagnostics regions;
   - the [roadmap](../roadmap.md)'s M2, the diagnostics window;
-  - the [requirements](../requirements.md), rows for reports, retention and the privacy rules.
-- **No accepted rule changes.** The design uses IP14's shared memory, IP20's messages without importance and EL23's background QoS on the browser's existing worker pool. It needs no new thread role and no profile rule, and it stays within PF27's disk budget.
+  - the [requirements](../requirements.md), rows for reports, retention and the privacy rules (RQ71–RQ73).
+- **No accepted rule changes for the design itself.** It uses IP14's shared memory, IP20's messages without importance and EL23's background QoS on the browser's existing worker pool. It needs no new thread role and no profile rule, and it stays within PF27's disk budget. **One rule changes by the owner's direction at acceptance:** PF19, whose pings now run only during an active session (decision history).
 - **ADR-0022's D8** places the crates: `trace` at the foundation, `diagnostics` in the browser.

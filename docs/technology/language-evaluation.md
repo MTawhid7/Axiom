@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | Reviewed by the owner (2026-10-16); §15.3 amended with rule 7; Step 2b evidence added (2026-10-17) |
+| **Status** | Reviewed by the owner (2026-10-16); §15.3 amended with rule 7; Step 2b evidence added (2026-10-17). §15.3 finalized by the engineering standards' ES11, and §15.4's pinning corrected, at ADR-0022's acceptance (2026-10-23) |
 | **Decision record** | [ADR-0002](../adr/0002-implementation-language.md), **Accepted** (final, 2026-10-17) |
 | **Phase** | Phase Zero, Step 2a |
 | **Inputs** | [ADR-0001](../adr/0001-scope-and-target.md) (scope and target), [decision map](../decision-map.md) |
-| **Last updated** | 2026-10-17 |
+| **Last updated** | 2026-10-23: §15.3 and §15.4 notes (ADR-0022). Earlier: 2026-10-17 |
 
 **How to read the evidence.**
 - A statement with a link is a **sourced fact**. Bracketed numbers such as [3] point to §17.
@@ -551,6 +551,8 @@ The nightly toolchain is allowed only for development tools (fuzzing, Miri, sani
 
 ### 15.3 Unsafe-code policy (draft; finalized with the architecture)
 
+> **Finalized** by the [engineering standards](engineering-standards.md)' ES11, accepted with [ADR-0022](../adr/0022-code-architecture-and-engineering-standards.md) on 2026-10-23 (the owner: "Accepted as proposed (Decisions D1 through D15)"). Where this draft and ES11 differ, ES11 governs: `unsafe` lives only in the platform layer's crates, in each one's `src/sys/` (the crate architecture's CR6, which replaces the single `platform` crate below), in a later `jit` under J1–J7, and in `test-support`'s counting allocator, which never ships. **`gc` has none,** as ADR-0008 decided (SH7). Rules 3–7 below stand, with Clippy's `multiple_unsafe_ops_per_block` and `missing_safety_doc` added to rule 3. The draft is kept as written for its history.
+
 1. Every crate starts with `#![forbid(unsafe_code)]`.
 2. `unsafe` is allowed only in designated crates:
    - `gc`: heap, collector, handles, and the `SharedArrayBuffer` backing store;
@@ -572,7 +574,7 @@ The nightly toolchain is allowed only for development tools (fuzzing, Miri, sani
 
 ### 15.4 Toolchain and dependencies (draft)
 
-- Stable Rust, pinned in `rust-toolchain.toml` when implementation begins. It is not pinned now, because no code exists yet.
+- Stable Rust, pinned in `rust-toolchain.toml` when implementation begins. It is not pinned now, because no code exists yet. **Corrected at ADR-0022's acceptance** (2026-10-23): the toolchain has been pinned since 2026-10-17, at Rust 1.94.1 with the 2024 edition (`rust-toolchain.toml`), for the spikes, and the engine inherits the pin.
 - Each dependency needs a written justification and must state whether it is a required platform facility, a replaceable implementation detail, or a foundational dependency (charter).
 - Dependencies are audited with `cargo-deny` and `cargo-vet` against a license allow-list.
 - Performance claims are measured on the target M1.

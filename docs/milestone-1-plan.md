@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | **Draft, revised for the owner** (2026-10-22).<br>• **First drafted** after the review cycle ended, as the owner directed: "Produce the implementation plan (docs/milestone-1-plan.md)" ([the review](review/README.md) §5.9, item 12). It was merged into `milestone-1` as "adopt Milestone 1 implementation plan".<br>• **Then the owner asked** for the discipline of "a mature software engineering organization": "Feel free to refine or rewrite it as needed. Once the plan is finalized, we can proceed with implementation in stages."<br>• **This revision adds** an engineering foundation ([ADR-0022](adr/0022-code-architecture-and-engineering-standards.md)), observability ([ADR-0023](adr/0023-observability-and-diagnostics.md)) and the order the owner chose: "Walking skeleton first (Recommended)".<br>It becomes binding when the owner adopts it as Milestone 1's first checkpoint, M1-CP1 (MS10), with ADRs 0022 and 0023 and the authorization §1 lists. **No engine code exists** until then |
+| **Status** | **Adopted** (2026-10-23) as Milestone 1's first checkpoint, M1-CP1. The owner: "Milestone 1 Plan: Formally adopted as Milestone 1 Checkpoint 1 (M1-CP1). The 15-checkpoint sequence prioritizing the Walking Skeleton at M1-CP4 is approved. Interface notes will be submitted for approval at CP3, CP4, CP5, and CP11 prior to code implementation." With it, ADRs [0022](adr/0022-code-architecture-and-engineering-standards.md) and [0023](adr/0023-observability-and-diagnostics.md) were accepted, MA10 authorized ("Formally authorized. Proceed with establishing the crate skeleton, workspace configurations, pinned test fixtures, and tooling.") and §2's decisions approved ("Approved as written"). Then: "Please proceed immediately with Checkpoint M1-CP2".<br>• **First drafted** after the review cycle ended, as the owner directed: "Produce the implementation plan (docs/milestone-1-plan.md)" ([the review](review/README.md) §5.9, item 12). It was merged into `milestone-1` as "adopt Milestone 1 implementation plan".<br>• **Then revised** at the owner's request for the discipline of "a mature software engineering organization": "Feel free to refine or rewrite it as needed. Once the plan is finalized, we can proceed with implementation in stages." The revision added an engineering foundation (ADR-0022), observability (ADR-0023) and the order the owner chose: "Walking skeleton first (Recommended)" |
 | **Question** | How is Milestone 1 built? On what engineering foundation, and in which checkpoints, each with what scope, tests, efficiency checks, observability, gates and exit criterion? Which decisions does its start need, and where do the owner's gates fall? |
 | **Builds on** | [Milestone 1](milestone-1.md) (MA1–MA12), which this plan refines and doesn't change; the [roadmap](roadmap.md)'s MS7 and MS10; the [crate architecture](architecture/crates.md) (CR1–CR16); the [engineering standards](technology/engineering-standards.md) (ES1–ES29); [observability](architecture/observability.md) (OB1–OB27); the [performance budgets](performance.md) (PF1–PF30, PF5's three tiers); the [testing strategy](testing.md); the [dependency policy](technology/dependency-policy.md) and [register](technology/dependency-register.md); the architecture review's [Round 4 actions](review/round-4/07-actions.md) §4 |
-| **Last updated** | 2026-10-22: revised at the owner's request: the engineering foundation, the walking skeleton, observability |
+| **Last updated** | 2026-10-23: adopted as M1-CP1, with §2's decisions approved and two settled by the owner's directions (items 12 and 19). Earlier: 2026-10-22, revised at the owner's request |
 
 **How to read it.**
 - §1 says what the owner authorizes to start, and §2 settles the decisions MA12 and the new documents leave to the plan, each with a recommendation.
@@ -20,7 +20,7 @@ Rule IDs are their documents'. Where this plan says more than they do, it is **i
 
 ## 1. What starting Milestone 1 authorizes (MA10, with this plan's additions)
 
-The owner's authorization of MA10's six items, as amended through Round 4. **This revision adds** the items marked, which follow from ADR-0022 and ADR-0023:
+The owner's authorization of MA10's six items, as amended through Round 4. **This revision adds** the items marked, which follow from ADR-0022 and ADR-0023. **Authorized by the owner** (2026-10-23), as put with these additions: "MA10 Authorization: Formally authorized. Proceed with establishing the crate skeleton, workspace configurations, pinned test fixtures, and tooling."
 
 | Item | What it covers |
 |---|---|
@@ -34,7 +34,7 @@ The owner's authorization of MA10's six items, as amended through Round 4. **Thi
 
 ## 2. The decisions this plan settles
 
-Each with a recommendation, for the owner to confirm at M1-CP1. "Moved" marks a decision this revision settles earlier than the draft did.
+Each with a recommendation, for the owner to confirm at M1-CP1. "Moved" marks a decision this revision settles earlier than the draft did. **Approved as written by the owner** (2026-10-23): "Plan Startup Decisions (§2): Approved as written", naming no Xcode for M1, WPT at `0f26972422`, Unicode 17.0 through ICU4X 2.3, `nightly-2026-10-21`, tests on this Mac only, and the three audits at M1-CP2. Items 12 and 19 carry the owner's further directions, quoted in them.
 
 | # | Decision | Recommendation | Settled at |
 |---|---|---|---|
@@ -49,14 +49,14 @@ Each with a recommendation, for the owner to confirm at M1-CP1. "Moved" marks a 
 | 9 | **Vendoring** (the dependency policy's alternative E and open question 3, "the first engine milestone") | **Not vendored.** `Cargo.lock`'s checksums already pin each crate's contents, and vendoring would bloat a public repository. Revisit if builds must work offline | M1-CP2 |
 | 10 | **The commit tier's time budget** (ES25) | **About 3 minutes for an incremental change,** a hypothesis measured on the new workspace; past it, suites move to the checkpoint tier | M1-CP2 |
 | 11 | **A pre-commit hook** (the standards' §16, G) | **Offered, the owner's choice:** it sets `core.hooksPath` in this clone only | M1-CP2 |
-| 12 | **`smallvec`'s grade** (moved from M1-CP5) | **Graded** at the version HarfRust, ICU4X and `vello_cpu` lock (1.16.3 compiles 43 `unsafe` blocks, 11 commented). At `ub-risk-3` it is admitted in renderers under DP8's conditions: Axiom's audit names each block's invariant, and a fuzz target reaches them. **The grade also decides IDNA in the browser** (the crate architecture's open question 1): at `ub-risk-3`, NW2's address bar asks the network process for a typed host's ASCII form, an amendment for the owner | M1-CP2 |
+| 12 | **`smallvec`'s grade** (moved from M1-CP5) | **Graded** at the version HarfRust, ICU4X and `vello_cpu` lock (1.16.3 compiles 43 `unsafe` blocks, 11 commented). At `ub-risk-3` it is admitted in renderers under DP8's conditions: Axiom's audit names each block's invariant, and a fuzz target reaches them. **The grade also decides IDNA in the browser** (the crate architecture's open question 1): at `ub-risk-3`, NW2's address bar asks the network process for a typed host's ASCII form, an amendment for the owner. **The owner's conditional approval** (2026-10-23): "If smallvec is graded ub-risk-3 during CP2, approve moving the IDNA domain lookup into the network process as an amendment to NW2." | M1-CP2 |
 | 13 | **`vello_cpu`'s grade** (moved from M1-CP5) | **Graded:** its root forbids `unsafe`, so the grade rests on its dependencies, `smallvec` among them | M1-CP2 |
 | 14 | **`encoding_rs`'s DP8 conditions** | **The audit at M1-CP2:** each `unsafe` block across its tree, `simdutf8` included (143 compiled blocks in 2026-10-21's census). **The fuzz target at M1-CP5,** through TX3's interface under AddressSanitizer, before any legacy encoding is decoded. The skeleton decodes UTF-8 through the same interface with the standard library | M1-CP2, M1-CP5 |
 | 15 | **QoS overrides on one-way messages** (OQ-20) | **Measured** with the first Mach channels: a one-way message with an override, to a thread waiting in `kevent64` | M1-CP3 |
 | 16 | **The objc2 classes** (EM11; OQ-11; moved from the shell's checkpoint) | **Validated with the first window,** before anything depends on the shell, risk first: `NSTextInputClient` and `NSAccessibility` defined through objc2. The Swift fallback stays behind the same API | M1-CP3 |
 | 17 | **The IDL's syntax** (IP7: "its syntax is chosen at implementation") | **In its interface note,** for the owner | M1-CP3 |
 | 18 | **The diagnostics region's format** (OB10) and **the browser's recorder** (OB16) | **In their interface note,** for the owner | M1-CP3 |
-| 19 | **PF19's pings while idle** (observability's open question 5) | **Measured against PF16:** pause the pings when no helper has work, if the measurement shows idle wakeups | M1-CP3 |
+| 19 | **PF19's pings while idle** (observability's open question 5) | **Settled by the owner** (2026-10-23): "Confirm that watchdog pings run only during active window sessions to guarantee zero idle wakeups under PF16." PF19 is amended: the pings run only during an active session, and stop when every watched thread is idle. M1-CP3's note on task ages designs the restart, and PF16 is measured there | M1-CP1; checked at M1-CP3 |
 | 20 | **The skeleton's starter set** | **A list of `css/CSS2` reference tests** the thin slice can pass, with its expected pass count, fixed in M1-CP4's interface notes | M1-CP4 |
 | 21 | **Surfaces allocated ahead** (GR12) | **A pool sized from S6's slowest frames,** a hypothesis measured at the paint checkpoint | M1-CP9 |
 | 22 | **JPEG's decoder** (IM2) | **`zune-jpeg` without its `x86` and `neon` features,** where its root forbids `unsafe`, if it matches `jpeg-decoder`'s pixels and isn't slower on the corpus's images; `jpeg-decoder` with `platform_independent` otherwise. Neither has `unsafe` in that configuration; `zune-jpeg` is maintained, `jpeg-decoder` dormant since 2025-06-21 | M1-CP10 |
@@ -303,9 +303,9 @@ Each leaves the workspace clean and working (MS10). **Gate** lists what the owne
 
 ## 7. The owner's gates
 
-1. **M1-CP1:** ADRs 0022 and 0023; this plan, with §2's decisions; MA10's authorization with §1's additions.
+1. **M1-CP1:** ADRs 0022 and 0023; this plan, with §2's decisions; MA10's authorization with §1's additions. **Passed** (2026-10-23).
 2. **The interface notes** at M1-CP3, M1-CP4, M1-CP5 and M1-CP11, and any change to an approved note (CR8).
-3. **Each dependency's adoption,** with its register entry, as the checkpoints reach it, unless the owner approves them all at M1-CP1.
+3. **Each dependency's adoption,** with its register entry, as the checkpoints reach it. MA10's authorization lists them; their adoptions weren't approved together at M1-CP1, so each comes to the owner with the checkpoint that first uses it.
 4. **Any amendment** to an ADR or a binding rule that M1 finds necessary (MS12). That includes the one `smallvec`'s grade may raise for NW2 (§2, item 12).
 5. **The gate:** MA9's report at M1-CP15; then the merge of `milestone-1` into `main`, `--no-ff`, when the owner says so.
 
@@ -332,5 +332,6 @@ The owner's choice of a walking skeleton refines MA11's order. Its twelve items 
 
 | Checkpoint | State | Record |
 |---|---|---|
-| M1-CP1 | **In progress:** this revision, with ADRs 0022 and 0023 proposed, for the owner (2026-10-22) | `docs(m1-cp1)` commits |
-| M1-CP2 to M1-CP15 | Not started | — |
+| M1-CP1 | **Done** (2026-10-23): the plan adopted, ADRs 0022 and 0023 accepted, MA10 authorized, §2 approved; the acceptance sweep made | `docs(m1-cp1)` commits |
+| M1-CP2 | **In progress** (2026-10-23) | `(m1-cp2)` commits |
+| M1-CP3 to M1-CP15 | Not started | — |
