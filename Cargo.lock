@@ -1117,6 +1117,19 @@ name = "s15-probe"
 version = "0.0.0"
 
 [[package]]
+name = "s16-lifetime"
+version = "0.0.0"
+dependencies = [
+ "objc2",
+ "objc2-core-foundation",
+ "objc2-foundation",
+ "objc2-io-surface",
+ "objc2-metal",
+ "objc2-quartz-core",
+ "s4-sandbox",
+]
+
+[[package]]
 name = "s2-window"
 version = "0.0.0"
 dependencies = [

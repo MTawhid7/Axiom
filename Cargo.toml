@@ -2,7 +2,7 @@
 #
 # Phase Zero: only validation spikes live here (spikes/, throwaway): S1 and S2
 # from Step 2b, S4 from Step 3, S3 from Step 4, S5 to S7 from Step 5, S9 from
-# Step 6, and S10 and S15 from the architecture review's Round 1. S8, Step 6's
+# Step 6, S10 and S15 from the architecture review's Round 1, and S16 from its Round 4. S8, Step 6's
 # corpus census, is Python and outside the workspace, as is
 # S9's fuzz crate, which only cargo-fuzz builds. Engine crates will live
 # under crates/ once the architecture is approved; the lints, profiles and toolchain pin
@@ -10,7 +10,7 @@
 
 [workspace]
 resolver = "3"
-members = ["spikes/s1/*", "spikes/s2/*", "spikes/s3/*", "spikes/s4/*", "spikes/s5/*", "spikes/s6/*", "spikes/s7/*", "spikes/s9/decoder", "spikes/s9/race", "spikes/s10/gpu", "spikes/s15/probe"]
+members = ["spikes/s1/*", "spikes/s2/*", "spikes/s3/*", "spikes/s4/*", "spikes/s5/*", "spikes/s6/*", "spikes/s7/*", "spikes/s9/decoder", "spikes/s9/race", "spikes/s10/gpu", "spikes/s15/probe", "spikes/s16/lifetime"]
 # S5's text corpus and font list are data, not a crate; S9's fuzz crate is its own workspace.
 exclude = ["spikes/s5/corpus", "spikes/s9/fuzz"]
 
