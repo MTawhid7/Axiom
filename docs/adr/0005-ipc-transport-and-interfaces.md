@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B. **IP11 amended by the architecture review's Round 1** (2026-10-21): panic-free validators with checked arithmetic (RV1-16); IP2 and the compositing family for real processes from M1 and the GPU/compositor process (RV1-07, RV1-02) |
+| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B. **IP11 amended by the architecture review's Round 1** (2026-10-21): panic-free validators with checked arithmetic (RV1-16); IP2 and the compositing family for real processes from M1 and the GPU/compositor process (RV1-07, RV1-02). **Amended by Round 4** (2026-10-22): IP13's bound (RV4-03) |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [IPC](../architecture/ipc.md) (the full design, IP1–IP22); [process model](../security/process-model.md) §6 (R1–R6, IR1–IR10); [ADR-0004](0004-process-model-and-sandbox.md) D3; [S4 results](../research/s4-results.md); [macOS runtime note](../research/macos-runtime-facilities.md); [Step 4 tracker](../research/step-4-architecture-proposal.md); OQ-17 |
@@ -18,6 +18,7 @@
 | 2026-10-21 | **Amendments accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-13: IP16's never-block rules for every process that serves several peers, and children's sends with a zero timeout and a bounded local backlog, under EL1. RV2-14: IP13's synchronous requests have no timeout of their own (PF21), with one exception for a service worker's answer; IP7 bars `iosurface` from renderers' interfaces; three interface families added; open question 3 answered. In the [IPC design](../architecture/ipc.md) |
 | 2026-10-21 | **Open question 4 answered** with Round 2's RV2-05, accepted in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." S10 found memory charged to the process that allocates it, so the GPU process accounts by page ([IPC](../architecture/ipc.md) §8) |
 | 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-11: IP15 states its one exception, the origin private file system's synchronous access handle; the user's files reach renderers only as data ([IPC](../architecture/ipc.md)) |
+| 2026-10-22 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 4 ([the review](../review/README.md) §5.9): "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." RV4-03: IP13's synchronous requests are bounded by PF19's task-age deadline over the answering thread ([IPC](../architecture/ipc.md) IP13) |
 
 ## Question
 

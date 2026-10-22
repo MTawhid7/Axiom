@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0006's acceptance (2026-10-17, Gate B). Written at Step 4, CP3. EL11 amended at Gate B (OQ-19). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): the browser's compositor thread and the GPU/compositor process's threads, §4.2 (RV1-02; CP2); EL11's second exception, parallel marking in pauses (RV1-04; CP6) |
+| **Status** | **Binding** since ADR-0006's acceptance (2026-10-17, Gate B). Written at Step 4, CP3. EL11 amended at Gate B (OQ-19). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): the browser's compositor thread and the GPU/compositor process's threads, §4.2 (RV1-02; CP2); EL11's second exception, parallel marking in pauses (RV1-04; CP6). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): §4.7 and EL17 for RV4-03 (CP3) |
 | **Question** | How does each Axiom process run its work? Which threads exist, how does each one wait, how is the HTML event loop implemented and scheduled, what drives frame production, and how do agents and workers map onto threads and heaps? |
 | **Answers** | Step 4 questions Q1–Q3 and the first half of Q4 ([tracker](../research/step-4-architecture-proposal.md) §3); OQ-5 in part |
 | **Feeds** | ADR-0006; CP4 (IPC), CP5 (frame tree), CP6 (pipeline), CP7 (invalidation), CP8 (input), CP9 (embedder API), CP10 (script and heap) |
 | **Builds on** | [Process model](../security/process-model.md); [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); [ADR-0004](../adr/0004-process-model-and-sandbox.md); [macOS runtime note](../research/macos-runtime-facilities.md); [S2 results](../research/s2-results.md); [S4 results](../research/s4-results.md) |
-| **Last updated** | 2026-10-21: Round 1's accepted findings |
+| **Last updated** | 2026-10-22: Round 4's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered EL1–EL24. Precedent is sourced (§3, Sources); the design is inference unless marked otherwise.
 
@@ -158,7 +158,7 @@ Storage runs on its own thread so that a slow network can't delay a synchronous 
 | EL14 | **The HTML event loop is a scheduler owned by one thread loop.** It holds the agent's task queues, microtask queue, timer heap and rendering state. The thread loop wakes it with messages and deadlines |
 | EL15 | **One event loop per agent, and one thread per event loop.** Each similar-origin window agent and each worker agent has its own event loop, on its own thread, with its own heap. No two window or worker agents share a thread. Worklet agents run on threads their host chooses (§4.6), which ECMAScript allows because worklets can't block [E1, H2] |
 | EL16 | **Task selection** (the specification leaves it to the implementation [H1]): (1) discrete input from the user-interaction task source; (2) the rendering update, when a frame has been offered and the previous one acknowledged (§4.5); (3) all other tasks, oldest first across task sources; (4) idle tasks, such as `requestIdleCallback` and incremental collection work (CP10), only during idle periods. Each class has a starvation bound, so continuous input can't starve rendering and rendering can't starve ordinary tasks. Step 6 sets the bounds |
-| EL17 | **No nested event loops.** "Pausing", as in `alert()`, blocks only that event loop's thread while the browser shows a dialog for that tab. Algorithms that "spin the event loop" are written as resumable states, not as loops re-entered from inside a task. **Interrupts:** a running script can be stopped through an atomic flag that the control thread sets at the browser's request, and that the interpreter checks at safe points (CP10) |
+| EL17 | **No nested event loops.** "Pausing", as in `alert()`, blocks only that event loop's thread while the browser shows a dialog for that tab. Algorithms that "spin the event loop" are written as resumable states, not as loops re-entered from inside a task. **Interrupts:** a running script can be stopped through an atomic flag that the control thread sets at the browser's request, and that the interpreter checks at safe points (CP10). The same control thread reports its event loop's task age with each ping (§4.7; Round 4, RV4-03) |
 | EL18 | **Timers** live in each event loop's timer heap. The thread loop arms only the earliest deadline among its event loops, with leeway (macOS note item 9). Visible documents get small leeway; hidden documents are aligned to coarse boundaries. The initial levels follow Chrome's tested scheme (§3): about once a second when hidden, and once a minute after five minutes hidden for chained timers in silent pages without WebRTC. Pages playing audio are exempt. Step 6 sets the final values |
 
 **Continuous input.** Pointer moves, wheel and touch moves are coalesced and dispatched at the start of the next rendering update. Discrete input (keys, clicks, pointer down and up) is dispatched at once, together with any pending continuous events, so the relative order is kept. Chrome has done this since 2017 [C5], and Ladybird drains input inside its rendering update [L1]. The coalesced events stay available through `getCoalescedEvents()`.
@@ -200,9 +200,10 @@ Storage runs on its own thread so that a slow network can't delay a synchronous 
 ### 4.7 Hangs
 
 - The browser measures how long each renderer takes to acknowledge input. It never waits (IR5); it only notices.
+- **It also learns how long each watched thread's current task has run** (as amended in Round 4, RV4-03): each event loop, and a helper's I/O and storage threads, record when their current task began, and the control thread reports the oldest age with each ping ([performance](../performance.md) PF19). A task that never yields is noticed with no input pending.
 - Past a first deadline, it offers to stop the page. Stopping sets the interrupt flag through the renderer's control thread (EL17).
 - Past a second deadline, it ends the process, and the tab shows the hang page ([process model](../security/process-model.md) §8).
-- Step 6 sets the deadlines.
+- Step 6 set the deadlines (PF19): for a renderer, 5 s and 30 s, of unacknowledged input or of task age; for a helper's thread, 5 s.
 
 ### 4.8 Quality of service and priority
 

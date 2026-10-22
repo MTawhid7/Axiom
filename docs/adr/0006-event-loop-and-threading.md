@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B. **§4.2's threads amended by the architecture review's Round 1** (2026-10-21): the browser's compositor thread and the GPU/compositor process (RV1-02); EL11's second exception, parallel marking in pauses (RV1-04) |
+| **Status** | **Accepted** (2026-10-17), by the owner at Step 4's Gate B. **§4.2's threads amended by the architecture review's Round 1** (2026-10-21): the browser's compositor thread and the GPU/compositor process (RV1-02); EL11's second exception, parallel marking in pauses (RV1-04). **Amended by Round 4** (2026-10-22): hang detection by task age (RV4-03) |
 | **Date** | 2026-10-17 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Event loop and threading](../architecture/event-loop-and-threading.md) (the full design, EL1–EL24); [macOS runtime note](../research/macos-runtime-facilities.md); [process model](../security/process-model.md) (PM6, PM8, SI7, IR5, IR6); [ADR-0003](0003-gc-handle-and-rooting-pattern.md); [Step 4 tracker](../research/step-4-architecture-proposal.md); decision-map item P1 |
@@ -17,6 +17,7 @@
 | 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1), RV1-04: "Fix the GC end-state before Milestone 3 via an amendment to ADR-0008: generational nursery, allocation-driven incremental marking, parallel marking in pauses, and non-moving tenured arenas with selective evacuation." "Evaluate pause times on a 1M-object heap in Spike S11." EL11 gains a second read-only exception: during a collection pause, helper threads may mark arenas lent to them, with mark state in atomic bitmaps outside the arenas |
 | 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-03, with the owner's configuration: "Approved as recommended." "Run WPT conformance suites (MA4's gate) in real, sandboxed processes on host time"; "Run time-dependent and scheduler tests in single-process mode on EL24's virtual clock"; "Run visual reference tests under both configurations at milestone review gates." EL24's virtual clock serves time-dependent and scheduler tests in single-process mode; conformance runs in real processes on the host clock ([testing](../testing.md) TS2) |
 | 2026-10-21 | **Noted** with Round 2's RV2-04 and RV2-11: the browser's core thread also arbitrates Web Locks and keeps the `blob:` URL store ([event loop](../architecture/event-loop-and-threading.md)) |
+| 2026-10-22 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 4 ([the review](../review/README.md) §5.9): "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." RV4-03: hangs are detected by task age as well as by unacknowledged input: each watched thread records when its current task began, and the control thread reports the oldest age with each ping ([event loop](../architecture/event-loop-and-threading.md) §4.7; [performance](../performance.md) PF19) |
 
 ## Question
 
