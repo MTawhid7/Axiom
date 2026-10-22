@@ -240,15 +240,15 @@ Every finding: **Accepted** as proposed, 2026-10-22 (§5.9, item 1). Where a cou
 | RV4-01 | Critical | M1 | CP1: [Milestone 1](../milestone-1.md) MA1, MA2, MA4's method and recount (33 tests still need what M1 lacks), MA7's XML fuzz target, MA11's second checkpoint; [HD9](../architecture/html-and-dom.md) and §8; the [roadmap](../roadmap.md)'s M1 and M4; SB11's count over every missing capability; RQ40; ADRs 0015, 0018, 0021; the handover and the decision map |
 | RV4-02 | High | M1 | CP2: the [dependency policy](../technology/dependency-policy.md)'s DP4 (mature supporting infrastructure by default), DP8 (`ub-risk-3` in sandboxed helpers, with Axiom's audit of each block and a libFuzzer target under AddressSanitizer), DP9, DP10's note; the [register](../technology/dependency-register.md) (`encoding_rs` admitted, `smallvec`'s path, `zune-jpeg` a candidate); TX3, text §4, §6, §8–§10; IM2 and images §10; MA7, MA12; ADRs 0010–0012; the overview; the handover and the decision map |
 | RV4-03 | Medium | M1 | CP3: [PF19](../performance.md)'s deadlines by task age as well as input, for renderers and every helper's watched threads; PF21's and [IP13](../architecture/ipc.md)'s bound corrected to the answering thread; [EL §4.7](../architecture/event-loop-and-threading.md) and EL17; SW10's note (no lock revocation); MA5, MA7's stalled storage thread; ADRs 0005, 0006, 0013, 0019 |
-| RV4-04 | Medium | M1 | CP4 |
-| RV4-05 | Medium | M1 | CP4 |
+| RV4-04 | Medium | M1 | CP4: [PL8](../architecture/rendering-pipeline.md) and [IR10](../security/process-model.md) release a dead renderer's resources at once, and the compositor never reads renderer memory with its CPU; [PF4](../performance.md) counts mapped pages; GR13's note; MA7's test; the process model's change record; ADRs 0004, 0007 |
+| RV4-05 | Medium | M1 | CP4: [IP9](../architecture/ipc.md) and IP11 own or destroy every handle in a received message; IP16 keeps a returned message whole or destroys it; TS14's V2 and MA7 test a lying peer; ADR-0005 |
 | RV4-06 | Medium | M1 | CP5 |
-| RV4-07 | Medium | M2 | CP4 |
+| RV4-07 | Medium | M2 | CP4: [GR14](../architecture/graphics.md): one right per surface lifetime, each new surface validated, values stripped and the colour set from the commit; graphics §9's alternative H, CoreAnimation contexts hosted by ID; ADR-0012 |
 | RV4-08 | Medium | M1 | CP2: `encoding_rs` at M1 behind TX3's interface, in the sandboxed helpers (TX3, MA1, MA7, the register, ADR-0011); CP6: the rest |
 | RV4-09 | Medium | M1 | CP1: MA4's ≥ 90.0% with floors for the 16 directories of 100 tests or more, and the full median (≥ 97.8%) at M3; the summary; the roadmap's M1 and M3; ADR-0021; the handover |
-| RV4-10 | Low | M2 | CP4 |
-| RV4-11 | Low | M1 | CP4 |
-| RV4-12 | Low | M2 | CP4 |
+| RV4-10 | Low | M2 | CP4: GR12's writer's rule, a tile committed once its commands are scheduled; video frames pooled by their own release (IM11); ADR-0012 |
+| RV4-11 | Low | M1 | CP4: IP2's in-memory channels model Mach's limits and failures; TS8's and MA8's stress configuration in real processes; ADR-0005 |
+| RV4-12 | Low | M2 | CP4: IP4 pins the PID's version and accepts one hello per child, with the code requirement considered at M2; ADR-0004's D3; ADR-0005 |
 | RV4-13 | Low | M1 | CP7 |
 | RV4-14 | Low | M1 | CP7 |
 | RV4-15 | Low | — | CP2: `rustls-webpki` 0.103.16 in the spikes' lock, and the register's rustls row |
@@ -262,7 +262,7 @@ Every finding: **Accepted** as proposed, 2026-10-22 (§5.9, item 1). Where a cou
 | CP1 | "M1 Conformance & Scope (XML parser, CSS 90% gate, MA4 recount)" | RV4-01, RV4-09 | Done, `docs(review-r4-cp1)` |
 | CP2 | "Dependency Policy & Crate Audits (DP8/DP4 amendment, encoding_rs, rustls-webpki bump)" | RV4-02, RV4-08 (`encoding_rs`), RV4-15 | Done, `docs(review-r4-cp2)` |
 | CP3 | "Event Loop Progress & Watchdogs (task age monitoring, storage thread pings)" | RV4-03 | Done, `docs(review-r4-cp3)` |
-| CP4 | "Process Robustness & IPC (memory unmapping at death, mach_msg_destroy on drop, surface validation)" | RV4-04, RV4-05, RV4-07, RV4-10, RV4-11, RV4-12 | To do |
+| CP4 | "Process Robustness & IPC (memory unmapping at death, mach_msg_destroy on drop, surface validation)" | RV4-04, RV4-05, RV4-07, RV4-10, RV4-11, RV4-12 | Done, `docs(review-r4-cp4)` |
 | CP5 | "Efficiency Strategy & Ratchet (3 tiers, PF25–PF30, instruction counter baselines)" | RV4-06 | To do |
 | CP6 | "Staging & Scope Realignment (HTTP/2 to M2, text entry to M4, preload scanner to M3)" | RV4-08, RV4-16, RV4-17 | To do |
 | CP7 | "S5–S7 re-run results, stale statement sweep, final verification pass, and independent MA4 recount." | RV4-13, RV4-14, and the verification | To do |
