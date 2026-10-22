@@ -244,7 +244,7 @@ Every finding: **Accepted** as proposed, 2026-10-22 (§5.9, item 1). Where a cou
 | RV4-05 | Medium | M1 | CP4: [IP9](../architecture/ipc.md) and IP11 own or destroy every handle in a received message; IP16 keeps a returned message whole or destroys it; TS14's V2 and MA7 test a lying peer; ADR-0005 |
 | RV4-06 | Medium | M1 | CP5: [PF5](../performance.md)'s three tiers (commit unit tests, the checkpoint ratchet, gate measurements); PF2's `rusage_info_v6` counters; **PF25–PF30** in the new §9 (start-up, CPU per page load, disk, writes, background activity, memory pressure); TS1 and TS13 with the planned `perf/baseline.toml`; RQ5; MA6's rows and MA11's harness; MS7 and MS10's efficiency section; the charter's G4 note; ADRs 0018–0021; the handover and the decision map |
 | RV4-07 | Medium | M2 | CP4: [GR14](../architecture/graphics.md): one right per surface lifetime, each new surface validated, values stripped and the colour set from the commit; graphics §9's alternative H, CoreAnimation contexts hosted by ID; ADR-0012 |
-| RV4-08 | Medium | M1 | CP2: `encoding_rs` at M1 behind TX3's interface, in the sandboxed helpers (TX3, MA1, MA7, the register, ADR-0011); CP6: the rest |
+| RV4-08 | Medium | M1 | CP2: `encoding_rs` at M1 behind TX3's interface, in the sandboxed helpers (TX3, MA1, MA7, the register, ADR-0011). CP6: **HTTP/2 with HPACK at M2** (MA1, MA2, MA7, MA11; NW4 and networking §8; the roadmap's M1 and M2); **text entry into pages and IN7's IME mirror for them at M4,** form submission and the shell's validation staying at M1 (MA1; HD28 and §8; input §5 and IN7; the roadmap's M4); **the preload scanner at M3** (HD6 and §8; the roadmap's M3); ADRs 0007, 0013, 0015, 0020, 0021; the handover and the decision map |
 | RV4-09 | Medium | M1 | CP1: MA4's ≥ 90.0% with floors for the 16 directories of 100 tests or more, and the full median (≥ 97.8%) at M3; the summary; the roadmap's M1 and M3; ADR-0021; the handover |
 | RV4-10 | Low | M2 | CP4: GR12's writer's rule, a tile committed once its commands are scheduled; video frames pooled by their own release (IM11); ADR-0012 |
 | RV4-11 | Low | M1 | CP4: IP2's in-memory channels model Mach's limits and failures; TS8's and MA8's stress configuration in real processes; ADR-0005 |
@@ -252,8 +252,8 @@ Every finding: **Accepted** as proposed, 2026-10-22 (§5.9, item 1). Where a cou
 | RV4-13 | Low | M1 | CP7 |
 | RV4-14 | Low | M1 | CP7 |
 | RV4-15 | Low | — | CP2: `rustls-webpki` 0.103.16 in the spikes' lock, and the register's rustls row |
-| RV4-16 | Low | M2 | CP6 |
-| RV4-17 | Low | M2 | CP6 |
+| RV4-16 | Low | M2 | CP6: [IV13](../architecture/invalidation.md): from M2 the GPU process forwards child frames' rectangles with the layer commit, checked by the browser; FT12's note; ADR-0007 |
+| RV4-17 | Low | M2 | CP6: SW2's engine chosen at M2's plan by SW13's crash tests over the cache and the cookie jar (the roadmap's M2, M3 and decisions; storage §8, SW13, §10; NW10; the register); ADRs 0013, 0020. **Also fixed:** networking §8's L1 row, stale since RV1-07 (part of RV4-14) |
 
 ### 5.11 Round 4's checkpoints
 
@@ -264,7 +264,7 @@ Every finding: **Accepted** as proposed, 2026-10-22 (§5.9, item 1). Where a cou
 | CP3 | "Event Loop Progress & Watchdogs (task age monitoring, storage thread pings)" | RV4-03 | Done, `docs(review-r4-cp3)` |
 | CP4 | "Process Robustness & IPC (memory unmapping at death, mach_msg_destroy on drop, surface validation)" | RV4-04, RV4-05, RV4-07, RV4-10, RV4-11, RV4-12 | Done, `docs(review-r4-cp4)` |
 | CP5 | "Efficiency Strategy & Ratchet (3 tiers, PF25–PF30, instruction counter baselines)" | RV4-06 | Done, `docs(review-r4-cp5)` |
-| CP6 | "Staging & Scope Realignment (HTTP/2 to M2, text entry to M4, preload scanner to M3)" | RV4-08, RV4-16, RV4-17 | To do |
+| CP6 | "Staging & Scope Realignment (HTTP/2 to M2, text entry to M4, preload scanner to M3)" | RV4-08, RV4-16, RV4-17 | Done, `docs(review-r4-cp6)` |
 | CP7 | "S5–S7 re-run results, stale statement sweep, final verification pass, and independent MA4 recount." | RV4-13, RV4-14, and the verification | To do |
 
 ## 6. The stopping rule

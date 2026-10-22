@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP5. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): FT10 and §5, cross-site frames as separate agents from M1 (RV1-03; CP3) |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP5. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): FT10 and §5, cross-site frames as separate agents from M1 (RV1-03; CP3). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): FT12's note for RV4-16 (CP6) |
 | **Question** | What is the browser-owned frame tree? How do renderers represent frames held by other processes? How do cross-frame operations, navigation and resource loading work, with every decision taken from the browser's own records? |
 | **Answers** | Step 4 questions Q6 and Q7 ([tracker](../research/step-4-architecture-proposal.md) §3); the frame-tree part of SI4 |
 | **Feeds** | ADR-0007; CP6 (per-frame display lists), CP7 (frame scheduling), CP8 (input routing and focus), CP9 (embedder API), CP10 (agents and messaging) |
@@ -143,7 +143,7 @@ From source and documentation read on 2026-10-17 (Sources).
 
 | # | Rule |
 |---|---|
-| FT12 | **Each frame is a unit of rendering.** Each frame has its own document ID, subscribes for frames separately (EL20), and produces its own display list, which its parent's display list references (CP6). So frames are composited, hit-tested (CP8) and moved between processes individually |
+| FT12 | **Each frame is a unit of rendering.** Each frame has its own document ID, subscribes for frames separately (EL20), and produces its own display list, which its parent's display list references (CP6). So frames are composited, hit-tested (CP8) and moved between processes individually. **Round 4** (RV4-16): from M2 a child frame's rectangle reaches the browser with the GPU process's layer commit (IV13) |
 | FT13 | **When a renderer dies,** the browser marks its documents gone and puts placeholders in their frames: a crash page in a tab, a placeholder in a subframe. It updates every replica in the affected groups, and keeps nothing that renderer reported (IR10) |
 | FT14 | **Out-of-process iframes are tested** (check V9). "Lying renderer" tests check that a renderer is terminated when it: names a frame token it wasn't given; tries to commit, request or read another site's document; claims another origin in a loader request or storage call; or forges user activation |
 

@@ -123,7 +123,7 @@ CP3–CP8 add entries here as their documents propose dependencies, and CP9's AD
 
 ### From CP7: storage
 
-**Decided** by ADR-0013's acceptance (2026-10-19), on SW2's terms: `redb` if its audit and SW13's crash tests pass at the storage milestone, otherwise SQLite.
+**Decided** by ADR-0013's acceptance (2026-10-19), on SW2's terms: `redb` if its audit and SW13's crash tests pass at the storage milestone (M2's plan, since Round 4, RV4-17), otherwise SQLite.
 
 | Dependency | Class | Group | Published grade | Processes | Purpose, and the interface in front of it | Proposed by |
 |---|---|---|---|---|---|---|

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-20), by the owner at Step 5's Gate C, as proposed, with the amendment to [ADR-0008](0008-script-agents-and-heap.md) that HD11 needs, and XSLT deferred ([OQ-22](../open-questions.md)). **Amended by the architecture review's Round 4** (2026-10-22): decision 2, the XML parser for documents at M1 (RV4-01) |
+| **Status** | **Accepted** (2026-10-20), by the owner at Step 5's Gate C, as proposed, with the amendment to [ADR-0008](0008-script-agents-and-heap.md) that HD11 needs, and XSLT deferred ([OQ-22](../open-questions.md)). **Amended by the architecture review's Round 4** (2026-10-22): decision 2, the XML parser for documents at M1 (RV4-01); HD6, HD28 and §8 (RV4-08) |
 | **Date** | 2026-10-19 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [HTML and the DOM](../architecture/html-and-dom.md) (HD1–HD33); [ADR-0003](0003-gc-handle-and-rooting-pattern.md); [ADR-0007](0007-frame-tree-pipeline-and-input.md); [ADR-0008](0008-script-agents-and-heap.md) (the HD11 amendment); [ADR-0010](0010-dependency-and-supply-chain-policy.md); [ADR-0011](0011-text-fonts-and-unicode.md) (TX3); [ADR-0013](0013-networking-storage-and-workers.md) (NW12, NW14); decision-map item P5; [OQ-22](../open-questions.md) |
@@ -14,6 +14,7 @@
 | 2026-10-19 | Proposed at Step 5, CP18, with the amendment to ADR-0008 (HD11) and XSLT ([OQ-22](../open-questions.md)) for the owner |
 | 2026-10-20 | **Accepted** by the owner at Step 5's Gate C: "ADR-0015 (HTML Parsing and the DOM): Accepted as proposed." In the same decisions: "ADR-0008 Amendment (HD11): Accepted. Node slots in the arena never move; node identity remains stable." And: "XSLT (OQ-22): Confirmed. Defer planning XSLT until a concrete use case arises." |
 | 2026-10-22 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 4 ([the review](../review/README.md) §5.9): "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." RV4-01, the owner: "Implement Axiom's own non-validating XML 1.0 document parser in Milestone 1. External XML crates are rejected due to recent DoS advisories and dormant maintenance." Decision 2 is amended below: HD9's parser for documents is built at M1, with `DOMParser` and `XMLHttpRequest` at M3 and SVG documents at M4 ([HTML and the DOM](../architecture/html-and-dom.md) HD9, §8) |
+| 2026-10-22 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 4 ([the review](../review/README.md) §5.9): "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." RV4-08, the owner: "Move HTTP/2 to Milestone 2"; "Move in-page text editing and IME mirrors to Milestone 4 (form submission and shell validation stay in M1)"; "Move the preload scanner to Milestone 3". The preload scanner (HD6) is built at M3, and text entry into pages (HD26, HD28) at M4 ([HTML and the DOM](../architecture/html-and-dom.md) §8) |
 
 ## Question
 

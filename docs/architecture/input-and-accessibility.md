@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP8. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): IN1 for the GPU/compositor process (RV1-02; CP2) |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP8. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): IN1 for the GPU/compositor process (RV1-02; CP2). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): IN7 and §5 for RV4-08 (CP6) |
 | **Question** | How does the browser route pointer, wheel, keyboard, IME and gesture input to frames that may live in different processes? How are focus, scrolling, user activation and accessibility handled, when AppKit asks synchronous questions and the browser may never block on a renderer? |
 | **Answers** | Step 4 question Q13 ([tracker](../research/step-4-architecture-proposal.md) §3); the input-routing part of SI4 |
 | **Feeds** | ADR-0007; CP9 (embedder API: input and accessibility at the shell boundary); Step 5 (the accessibility bridge, I5) |
 | **Builds on** | [macOS runtime note](../research/macos-runtime-facilities.md) §7, §8, §11 items 13–14; [event loop and threading](event-loop-and-threading.md); [IPC](ipc.md); [frame tree](frame-tree-and-navigation.md); [rendering pipeline](rendering-pipeline.md) (PL16); [invalidation](invalidation.md) (IV8, IV9) |
-| **Last updated** | 2026-10-21: Round 1's accepted findings |
+| **Last updated** | 2026-10-22: Round 4's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered IN1–IN12. Precedent and specification text are sourced (§2); the design is inference unless marked otherwise.
 
@@ -80,7 +80,7 @@ NSEvent (main thread)
 | # | Rule |
 |---|---|
 | IN6 | **The browser tracks the focused frame** (FT6), as Chromium does [C1]. Keyboard events go to the focused frame's event loop, after the shell has had its key equivalents (menu shortcuts). A click makes the frame under it focused. `focus()` and `blur()` from script are requests the browser validates. **Sequential navigation** (Tab) crosses frames through the browser: a renderer that reaches the end of its sequence asks the browser to continue, and the browser moves focus to the next frame in tree order. The specification treats a container as "a placeholder for its content navigable's active document" [H1] |
-| IN7 | **IME is answered from a mirror on the main thread.** While an editable element has focus, its frame's renderer keeps the browser's copy current: the text around the selection, the selection and composition ranges, and the caret and character rectangles in screen coordinates. `NSTextInputClient`'s synchronous queries read the mirror without waiting (macOS runtime note item 13). Edits from the IME (`insertText`, `setMarkedText`, `unmarkText`) go to the renderer as messages. The renderer applies them and sends the new state. Firefox's `ContentCache` is the precedent [F1]. A query that arrives before the mirror has caught up gets the latest state, as the platform tolerates; it never blocks |
+| IN7 | **IME is answered from a mirror on the main thread.** While an editable element has focus, its frame's renderer keeps the browser's copy current: the text around the selection, the selection and composition ranges, and the caret and character rectangles in screen coordinates. `NSTextInputClient`'s synchronous queries read the mirror without waiting (macOS runtime note item 13). Edits from the IME (`insertText`, `setMarkedText`, `unmarkText`) go to the renderer as messages. The renderer applies them and sends the new state. Firefox's `ContentCache` is the precedent [F1]. A query that arrives before the mirror has caught up gets the latest state, as the platform tolerates; it never blocks. **For pages, from M4** (Round 4, RV4-08) |
 
 ### 4.4 Activation, accessibility and mediation
 
@@ -101,7 +101,7 @@ NSEvent (main thread)
 
 | Level | What changes |
 |---|---|
-| L0 | All of it: the browser's compositor thread routes events to event loops, which run in renderer processes from M1 (Round 1, RV1-07), and the mirrors and caches exist. From M2 the compositor thread keeps routing while the GPU/compositor process rasterizes (RV1-02) |
+| L0 | All of it: the browser's compositor thread routes events to event loops, which run in renderer processes from M1 (Round 1, RV1-07), and the mirrors and caches exist, **except the IME mirror for pages** (IN7), which arrives with text entry into pages and form controls at M4 (as amended in Round 4, RV4-08; the owner: "Move in-page text editing and IME mirrors to Milestone 4 (form submission and shell validation stay in M1)"); the shell's own text input is validated at M1 (EM11). From M2 the compositor thread keeps routing while the GPU/compositor process rasterizes (RV1-02) |
 | L1–L3 | Nothing in this design. A cross-site frame already received input through the browser at L0, so moving it to another process changes no path (AC1) |
 
 ## 6. Alternatives considered

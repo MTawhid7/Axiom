@@ -430,7 +430,7 @@ The proposed crates ([overview](architecture/overview.md) §2), each named and s
 
   | # | Milestone | Level | Corpus targets |
   |---|---|---|---|
-  | M1 | Static documents: **the browser with sandboxed renderer and network processes** (RV1-07), the shell and the headless embedder; HTML and the DOM without script; CSS 2.1's visual model with tables; system fonts; images; paint and the compositor (a browser thread); HTTP/1.1 and HTTP/2 over rustls | L0 | Wikipedia and MDN, readable |
+  | M1 | Static documents: **the browser with sandboxed renderer and network processes** (RV1-07), the shell and the headless embedder; HTML and the DOM without script; CSS 2.1's visual model with tables; system fonts; images; paint and the compositor (a browser thread); HTTP/1.1 over rustls, HTTP/2 at M2 (Round 4) | L0 | Wikipedia and MDN, readable |
   | M2 | The sandboxed engine: **the GPU/compositor process** (RV1-02); audit tokens; V1's and V2's L1 parts; crashes contained; the disk cache, the cookie jar and CORS | L1 | The same pages, sandboxed |
   | M3 | Script: the engine, bindings, the event loop, `fetch`, Web Storage, canvas 2D; WebAssembly's architecture decided (RV1-13) | L1 | MDN in full, its live examples in cross-site frames |
   | M4 | The modern document: flexbox, grid, SVG, style's second stage, Shadow DOM, web fonts, the accessibility tree, HTTP/3, **WebSockets** (RV1-12) | L1 | Wikipedia in full; Google Search, Instagram (without video), Reddit (without its interactive posts in frames), logged out |
@@ -531,7 +531,7 @@ Each is taken by the owner at its milestone, on its evidence ([roadmap](roadmap.
 | JPEG's decoder: Axiom's own, or a graded alternative (RV1-22) | Open | M1's plan |
 | `temporal_rs`'s grade; BigInt's candidate (RV1-08) | Replaceable details, to be graded | Before M3; before M4 |
 | The generated bindings' build cost (RV1-18) | Spike S13 authorized | Before M3 |
-| The storage engine (SW2) | Open | M3 |
+| The storage engine (SW2) | Open | M2's plan (Round 4, RV4-17) |
 | AWS-LC's jitter entropy source (S7) | Open | M1, when TLS arrives |
 | objc2's text-input and accessibility classes (EM11) | To validate first | M1 |
 | Hosted runners (TS17); the nightly to pin | The owner's choice; S12 found a working nightly | M1's start |
@@ -634,7 +634,7 @@ Each item is an **assessment**: a claim or decision this handover thinks most de
 
 5. **The sandbox rests on undocumented libsandbox functions** (ADR-0004 D2; threat model §9). Chromium, Firefox and WebKit use the same route, and SDK 27 already kills processes that use named profiles (S4). The fallback, O2, is App Sandbox entitlements on each helper, whose base profile reaches 170 Mach services. What would L1–L3 mean under O2?
 6. **The browser process is unsandboxed** (D1). **Round 1** (RV1-02) moved validation, rasterization and compositing into a sandboxed GPU/compositor process from M2, so L3 is certified on that topology; the browser still decodes IPC from every process and holds the layer tree.
-7. **M1 loads live pages at L0** (MA5): networking (rustls, HTTP/2), safe-Rust parsers, and CoreText on system fonts. The threat model permits public documents at L0, and MS3 forbids script. **Round 1** (RV1-07): M1's renderer and network process are sandboxed, under S4's, S5's and S7's profiles.
+7. **M1 loads live pages at L0** (MA5): networking (rustls, HTTP/1.1; HTTP/2 at M2 since Round 4), safe-Rust parsers, and CoreText on system fonts. The threat model permits public documents at L0, and MS3 forbids script. **Round 1** (RV1-07): M1's renderer and network process are sandboxed, under S4's, S5's and S7's profiles.
 8. **SI3 until M6:** cross-site iframes share their embedder's process at L1 and L2, including M5's logins with test accounts. Are SI3's three compensating rules enough against Spectre-class reads at L2? (Round 1 made them separate agents from M1, RV1-03, which doesn't change their process.)
 9. **The JIT policy's endgame** (J1–J7): whether the app-web corpus can be served acceptably with no JIT at all, and whether J7's containment design is credible. **Round 1** (RV1-13) moved the decision to M5's gate.
 10. **Passkeys** (OQ-16): if the platform authenticator needs a restricted entitlement, L3 may not cover passkey-only accounts. **Round 1** (RV1-21) added the hybrid transport.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0013](../adr/0013-networking-storage-and-workers.md)'s acceptance (2026-10-19), which the owner pre-approved at Gate B (2026-10-18), effective once S7-Q1, S7-Q3 and S7-Q4 passed ([S7 results](../research/s7-results.md)). Written at Step 5, CP7. The storage engine is still settled at its milestone, by SW2's conditions. **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): SW10's note for RV4-03 (CP3) |
+| **Status** | **Binding** since [ADR-0013](../adr/0013-networking-storage-and-workers.md)'s acceptance (2026-10-19), which the owner pre-approved at Gate B (2026-10-18), effective once S7-Q1, S7-Q3 and S7-Q4 passed ([S7 results](../research/s7-results.md)). Written at Step 5, CP7. The storage engine is still settled at its milestone, by SW2's conditions. **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): SW10's note for RV4-03 (CP3); §8, SW13 and §10 for RV4-17 (CP6) |
 | **Question** | Where and how are web storage, IndexedDB, the Cache API and quotas stored? How do service workers intercept fetches, and where do shared and service workers run when no same-site renderer exists? |
 | **Answers** | Step 5 question Q7 ([tracker](../research/step-5-subsystems.md) §3); the tracker's handed-over question 11 (§2.2); [networking](networking.md) open question 2 (the storage format of the cache and the cookie jar) |
 | **Feeds** | ADR-0013 (CP9); CP16 (the storage and worker APIs in JavaScript); CP17 (bindings) |
@@ -116,7 +116,7 @@ Observed in its source: no required dependencies, and 54 mentions of `unsafe`, m
 |---|---|
 | SW11 | **The origin private file system** comes later: files per storage key, the whole key (SW1), in the network process's data directory. A synchronous access handle in a worker receives a descriptor for one file, where its interface allows a descriptor: IP15 states that one exception (Round 2, RV2-11). That file is web storage, not a user file (SG1). **Push messaging and background sync** need a push service and periodic wakeups, and are not designed here |
 | SW12 | **Memory and idle.** Databases are opened on demand and closed after an idle period. The storage thread waits with nothing to do when no requests arrive. Within the network process's budget (B4), its caches are bounded |
-| SW13 | **Tests:**<br>• WPT's `IndexedDB`, `webstorage`, `service-workers`, `storage` and `fs` directories; **as amended in Round 2,** each key's isolation tested with an A→B→A frame (RV2-10), and the `FileAPI` directory (SW17);<br>• for the engine: crash tests that kill the network process during writes, then check every store's consistency and each key's isolation. **As amended in Round 2** (RV2-04): the same tests check what the clients see: open tabs' loads fail as network errors and succeed after a reload, `sessionStorage` comes back from the browser's copy, and Web Locks stay held. These tests, run at the first storage milestone, decide `redb` against SQLite (SW2) |
+| SW13 | **Tests:**<br>• WPT's `IndexedDB`, `webstorage`, `service-workers`, `storage` and `fs` directories; **as amended in Round 2,** each key's isolation tested with an A→B→A frame (RV2-10), and the `FileAPI` directory (SW17);<br>• for the engine: crash tests that kill the network process during writes, then check every store's consistency and each key's isolation. **As amended in Round 2** (RV2-04): the same tests check what the clients see: open tabs' loads fail as network errors and succeed after a reload, `sessionStorage` comes back from the browser's copy, and Web Locks stay held. These tests, run at the first storage milestone, decide `redb` against SQLite (SW2); **since Round 4** (RV4-17), at M2's plan, over the cache and the cookie jar, which arrive at M2 |
 
 ### 5.5 Blobs, files and `blob:` URLs
 
@@ -148,7 +148,7 @@ Added in Round 2 ([RV2-11](../review/round-2/03-findings.md#rv2-11-the-file-api-
 
 | Stage | What exists |
 |---|---|
-| First storage milestone | `localStorage`, `sessionStorage`, the cookie jar and the cache on the engine; the crash tests that decide it; with script at M3, blobs, `blob:` URLs, `FileReader` and the user's files (SW14–SW17; Round 2, RV2-11) |
+| First storage milestone | **M2, as amended in Round 4** (RV4-17): the cookie jar and the HTTP cache on the engine that SW13's crash tests choose at M2's plan. **With script at M3:** `localStorage` and `sessionStorage` on the same engine, blobs, `blob:` URLs, `FileReader` and the user's files (SW14–SW17; Round 2, RV2-11) |
 | Later | IndexedDB; the Cache API and service workers; shared workers; quotas and persistence; Web Locks; the origin private file system |
 | L0–L3 | No interface changes: storage stays behind endpoints at every level, and from L2 the endpoints carry site locks |
 
@@ -167,7 +167,7 @@ Added in Round 2 ([RV2-11](../review/round-2/03-findings.md#rv2-11-the-file-api-
 
 | # | Question | Where it is settled |
 |---|---|---|
-| 1 | `redb`'s audit grade, and its durability under SW13's crash tests, against SQLite | The first storage milestone |
+| 1 | `redb`'s audit grade, and its durability under SW13's crash tests, against SQLite | The first storage milestone: M2's plan (Round 4, RV4-17) |
 | 2 | Quotas, area limits and the eviction policy's thresholds | **Answered** at Step 6 by [PF24](../performance.md): 5 MiB per area, quotas per site, eviction least recently used by site; per storage key within its site's total since Round 2 (RV2-12) |
 | 3 | Push messaging and background sync | A later decision, with the owner |
 

@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP7. IV1 and IV2 amended at Step 5's Gate C (2026-10-20; [style](style.md) ST25, ST31) |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP7. IV1 and IV2 amended at Step 5's Gate C (2026-10-20; [style](style.md) ST25, ST31). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): IV13 for RV4-16 (CP6) |
 | **Question** | What is the rendering lifecycle? How does a change propagate from a DOM mutation through style, layout, paint and compositing, reusing work at each stage? How are synchronous queries such as `offsetWidth` bounded? Which updates bypass the renderer's main thread, and how does that work across processes? |
 | **Answers** | Step 4 questions Q3, Q11 and Q12 ([tracker](../research/step-4-architecture-proposal.md) §3): P3 |
 | **Feeds** | ADR-0007; CP8 (input routing for scrolling); Step 5 (style, layout and graphics algorithms); Step 6 (budgets) |
 | **Builds on** | [Event loop and threading](event-loop-and-threading.md) (EL16, EL19–EL22); [frame tree](frame-tree-and-navigation.md) (FT12); [rendering pipeline](rendering-pipeline.md) (PL1–PL16) |
-| **Last updated** | 2026-10-20: IV1 and IV2 amended |
+| **Last updated** | 2026-10-22: Round 4's accepted findings |
 
 Everything here is **planned**; nothing is implemented. Rules are numbered IV1–IV14. Precedent is sourced (§2); the design is inference unless marked otherwise.
 
@@ -112,7 +112,7 @@ mutations ─▶ StyleDirty ─style─▶ StyleClean ─boxes─▶ BoxTreeClea
 | IV10 | **Late content invalidates only what it affects.** The HTML parser yields between chunks, so rendering opportunities fall between them, and render-blocking stylesheets and fonts follow the specifications. **An image that arrives** repaints only, if its size was known from attributes or an aspect ratio, and relayouts otherwise. **A font that arrives** re-shapes only the text that uses it, under its `font-display` periods. **A viewport resize** re-evaluates media and container queries, invalidates only the rules that depend on them, and then lays out from the root |
 | IV11 | **Hidden and offscreen content does no rendering work.** Hidden and occluded frames are offered no frames (EL20). An `iframe` scrolled out of view, as the parent's layout reports to the browser, stops being offered frames until it returns. Its document still runs tasks. `content-visibility: auto` skips style, layout and paint for content that is offscreen [W1], and every phase supports skipping a subtree |
 | IV12 | **Frames are produced only when offered and needed.** An event loop answers an offer with an update only if something changed or animation-frame callbacks are due. Otherwise it says "no change", and the compositor keeps its last list. A rendering update that takes longer than a frame holds the next offer, since one is outstanding (EL21). Meanwhile the compositor keeps scrolling and animating, so the frame rate falls gracefully. Idle documents unsubscribe (AC3) |
-| IV13 | **Dependencies between frames travel through the browser.** A parent's layout decides its child frame's size and position. The new rectangle goes to the browser in the parent's display-list update (PL7). The browser sends the child its new viewport, and the child invalidates as for any resize (IV10). Nothing waits synchronously across agents (IV2) |
+| IV13 | **Dependencies between frames travel through the browser.** A parent's layout decides its child frame's size and position. The new rectangle goes to the browser in the parent's display-list update (PL7). The browser sends the child its new viewport, and the child invalidates as for any resize (IV10). Nothing waits synchronously across agents (IV2).<br>**As amended in Round 4** (RV4-16): **from M2 display lists go to the GPU process,** which forwards each child frame's token and rectangle with the layer commit, as PL16 forwards hit-test regions; the browser checks the rectangle against the parent frame's bounds before sending the child its viewport. At M1 the browser's compositor thread does the same |
 
 ### 4.5 Testing
 
