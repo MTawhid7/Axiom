@@ -26,9 +26,8 @@ license = "MIT OR Apache-2.0"
 # `workspace = true` (ES24). Axiom's own crates are listed by path; adding an
 # edge between them also edits the crate map (CR2). A third-party crate needs
 # its register entry and grade first (DP6, DP8), and its justification beside
-# it. There is none yet.
+# it. There is none yet; Axiom's crates join as the first edge to each lands.
 [workspace.dependencies]
-trace = { path = "crates/trace" }
 
 [workspace.lints.rust]
 # `unsafe_code` is set per crate root, with #![forbid] by default and #![deny] for

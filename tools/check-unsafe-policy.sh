@@ -6,8 +6,9 @@
 #   R1  Every target root declares #![forbid(unsafe_code)]. The exception is the
 #       library/binary root of a crate allowlisted in tools/unsafe-policy.txt,
 #       which declares #![deny(unsafe_code)] instead.
-#   R2  `allow(unsafe_code)` appears only in allowlisted crates, and only in files
-#       under that crate's allowed path prefixes.
+#   R2  `allow(unsafe_code)`, or `expect(unsafe_code)`, appears only in
+#       allowlisted crates, and only in files under that crate's allowed path
+#       prefixes. Attributes are read across lines, as rustfmt may write them.
 #   R3  Macro crates that emit `unsafe` must be registered as `emits-unsafe`. This
 #       is reported in the inventory; auditing them is a review obligation (§15.3
 #       rule 7).
@@ -20,9 +21,21 @@ set -uo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 QUIET=no
 
-# Does $1 contain an inner attribute #![<level>(... unsafe_code ...)]?
+# Does $1 contain an inner attribute #![<level>(... unsafe_code ...)], on one
+# line or across several, as rustfmt writes a long one?
 has_inner_lint() { # file level
-  grep -E "^[[:space:]]*#!\[$2\(" "$1" 2>/dev/null | grep -q 'unsafe_code'
+  LEVEL=$2 perl -0777 -ne 'exit(/#!\[\s*\Q$ENV{LEVEL}\E\s*\(([^)]*)\)/ && $1 =~ /\bunsafe_code\b/ ? 0 : 1)' "$1" 2>/dev/null
+}
+
+# Prints "<file>:<line>:" for every allow(...) or expect(...) attribute, on one
+# line or several, that names unsafe_code, in the crate's Rust files. `expect`
+# lifts a lint as `allow` does, so both are permission sites.
+unsafe_permissions() { # crate-dir
+  find "$1" -name '*.rs' -not -path '*/target/*' -print0 2>/dev/null |
+    xargs -0 perl -0777 -ne 'while (/\b(?:allow|expect)\s*\(([^)]*)\)/g) {
+      my ($args, $at) = ($1, $-[0]);
+      print "$ARGV:", 1 + (substr($_, 0, $at) =~ tr/\n//), ":\n" if $args =~ /\bunsafe_code\b/;
+    }' 2>/dev/null
 }
 
 # Prints "<allowed-prefixes>" if the crate is allowlisted, otherwise nothing.
@@ -90,7 +103,7 @@ check_tree() {
       fi
     done
 
-    # R2: allow(unsafe_code) only inside allowlisted prefixes.
+    # R2: allow(unsafe_code) or expect(unsafe_code) only inside allowlisted prefixes.
     while IFS= read -r hit; do
       [ -n "$hit" ] || continue
       file=${hit%%:*}
@@ -103,7 +116,7 @@ check_tree() {
         violations=$((violations + 1))
       fi
     done <<EOF
-$(grep -rnE --include='*.rs' 'allow\([^)]*unsafe_code' "$crate_dir" 2>/dev/null | grep -v '/target/' || true)
+$(unsafe_permissions "$crate_dir" || true)
 EOF
 
     # Inventory (informational).
@@ -151,10 +164,13 @@ self_test_in() { # empty-scratch-dir
   mk spikes/good tests/it.rs '#![forbid(unsafe_code)]'
   mk spikes/allowed src/lib.rs '#![deny(unsafe_code)]'
   mk spikes/allowed src/raw/mod.rs '#![allow(unsafe_code)]'
+  mk spikes/wrapped src/lib.rs "$(printf '#![deny(\n    unsafe_code\n)]')"
+  mk spikes/wrapped src/sys/mod.rs "$(printf '#![allow(\n    unsafe_code,\n    reason = "y"\n)]')"
   # A workspace manifest above the crates is not a crate (M1-CP2's split).
   printf '[workspace]\nmembers = ["good", "allowed"]\n' >"$tmp/spikes/Cargo.toml"
   cat >"$tmp/policy.txt" <<'EOF'
 allow spikes/allowed src/raw/
+allow spikes/wrapped src/sys/
 allow spikes/nodeny src/raw/
 emits-unsafe spikes/good
 EOF
@@ -174,6 +190,10 @@ EOF
   mk spikes/sneaky src/x.rs '#[allow(clippy::all, unsafe_code)] fn g() {}'
   mk spikes/nodeny src/lib.rs '#![forbid(unsafe_code)]'
   mk spikes/good benches/b.rs '// bench root without forbid'
+  # Written across lines, as rustfmt writes a long attribute.
+  mk spikes/allowed src/multi.rs "$(printf '#![allow(\n    unsafe_code,\n    reason = "x"\n)]')"
+  # `expect` lifts the lint as `allow` does.
+  mk spikes/allowed src/exp.rs '#![expect(unsafe_code, reason = "x")]'
   if out=$(check_tree "$tmp" "$tmp/policy.txt"); then
     echo "self-test FAILED: seeded violations were not detected:"
     echo "$out"
@@ -185,7 +205,9 @@ EOF
     'R2: spikes/allowed/src/other.rs' \
     'R2: spikes/sneaky/src/x.rs' \
     'R1: spikes/nodeny/src/lib.rs' \
-    'R1: spikes/good/benches/b.rs'; do
+    'R1: spikes/good/benches/b.rs' \
+    'R2: spikes/allowed/src/multi.rs' \
+    'R2: spikes/allowed/src/exp.rs'; do
     if ! printf '%s\n' "$out" | grep -q "$expect"; then
       echo "self-test FAILED: expected violation not reported: $expect"
       missing_hits=$((missing_hits + 1))
@@ -199,7 +221,7 @@ EOF
     echo "$out"
     return 1
   fi
-  echo "check-unsafe-policy self-test: OK (compliant tree accepted; 5/5 seeded violations reported)"
+  echo "check-unsafe-policy self-test: OK (compliant tree accepted; 7/7 seeded violations reported)"
 }
 
 main() {

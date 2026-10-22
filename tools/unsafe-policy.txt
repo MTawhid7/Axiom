@@ -77,3 +77,8 @@ allow spikes/s10/gpu src/platform/
 # space and host statistics, libproc's rusage, IOSurface, Metal and CoreAnimation,
 # under invariants L1–L10 (spikes/s16/lifetime/src/platform/mod.rs).
 allow spikes/s16/lifetime src/platform/
+
+# The engine's test support (M1-CP2): the counting allocator and proc_pid_rusage
+# for PF5's first tier, under invariants I1-I2 (crates/test-support/src/sys/mod.rs).
+# A test crate: it never ships (CR12; ES11).
+allow crates/test-support src/sys/

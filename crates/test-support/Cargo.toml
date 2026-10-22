@@ -1,0 +1,11 @@
+[package]
+name = "test-support"
+description = "Axiom's test-only support: golden files (ES21), and the allocation and instruction counts of PF5's first tier (ES23). A leaf crate in the test group; unsafe only in src/sys/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
