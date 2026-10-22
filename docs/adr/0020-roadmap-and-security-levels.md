@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-20), by the owner at Step 6's Gate C, as the proposed baseline: "The nine-milestone progression (M1–M9) and security levels L0–L3 are approved as the baseline under review." The independent architecture review comes before any milestone starts (decision history). **Amended by the review's Round 1** (2026-10-21): the roadmap's §4.1 (RV1-01, RV1-15); MS3–MS5, §4.1, §7 and §10 (RV1-02, RV1-07); MS5, §4.1, §5 and §7 (RV1-12–RV1-14, RV1-19–RV1-22) |
+| **Status** | **Accepted** (2026-10-20), by the owner at Step 6's Gate C, as the proposed baseline: "The nine-milestone progression (M1–M9) and security levels L0–L3 are approved as the baseline under review." The independent architecture review comes before any milestone starts (decision history). **Amended by the review's Round 1** (2026-10-21): the roadmap's §4.1 (RV1-01, RV1-15); MS3–MS5, §4.1, §7 and §10 (RV1-02, RV1-07); MS5, §4.1, §5 and §7 (RV1-12–RV1-14, RV1-19–RV1-22). MS7 and MS10 (RV4-06) |
 | **Date** | 2026-10-20 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [The roadmap](../roadmap.md) (MS1–MS12); [Milestone 1](../milestone-1.md) and [ADR-0021](0021-milestone-1.md); the [threat model](../security/threat-model.md) §8; the [overview](../architecture/overview.md) §6; [ADR-0001](0001-scope-and-target.md); [ADR-0004](0004-process-model-and-sandbox.md) (J1); [ADR-0018](0018-corpus-standards-and-testing.md); [ADR-0019](0019-performance-methodology-and-budgets.md); [OQ-1](../open-questions.md), [OQ-3](../open-questions.md), [OQ-9](../open-questions.md), [OQ-16](../open-questions.md), [OQ-18](../open-questions.md) |
@@ -19,6 +19,7 @@
 | 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-04 and RV2-13: M2 tests the GPU process's death and hang, and a stalled renderer ([roadmap](../roadmap.md) §4.1) |
 | 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-05: M2 builds the GPU process's accounting by page and tests tile reuse across processes with a window attached ([roadmap](../roadmap.md) §4.1) |
 | 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-09: M7 brings live regions in full and `ariaNotify`, for Twitch's chat ([roadmap](../roadmap.md) §4.1) |
+| 2026-10-22 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 4 ([the review](../review/README.md) §5.9): "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." RV4-06, the owner: "Adopt the 3-tier validation strategy (commit unit tests, checkpoint instruction/memory ratchet, gate wall/energy budgets) and formalize budgets PF25–PF30 in docs/performance.md." MS7's budgets include PF25–PF30 and PF5's tiers, and MS10's plans carry an efficiency section ([roadmap](../roadmap.md)) |
 
 ## Question
 

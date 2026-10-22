@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-20, Step 6's Gate B), with the amendment to the process model's budgets B1–B7: "Accepted as proposed, including the B1-B7 process model amendment". **Amended by the architecture review's Round 1** (2026-10-21): B1 split into B1a and B1b; PF4, PF6, PF13 (RV1-02, RV1-09); PF18 (RV1-18); the content tier's gate, PF11 and PF15 (RV1-04–RV1-06). **Amended by Round 4** (2026-10-22): PF19 and PF21 (RV4-03) |
+| **Status** | **Accepted** (2026-10-20, Step 6's Gate B), with the amendment to the process model's budgets B1–B7: "Accepted as proposed, including the B1-B7 process model amendment". **Amended by the architecture review's Round 1** (2026-10-21): B1 split into B1a and B1b; PF4, PF6, PF13 (RV1-02, RV1-09); PF18 (RV1-18); the content tier's gate, PF11 and PF15 (RV1-04–RV1-06). **Amended by Round 4** (2026-10-22): PF19 and PF21 (RV4-03); PF2, PF5 and PF25–PF30 (RV4-06) |
 | **Date** | 2026-10-20 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Performance budgets](../performance.md) (PF1–PF24); [the process model](../security/process-model.md) §7 and its change record; [ADR-0004](0004-process-model-and-sandbox.md) (D6); [ADR-0002](0002-implementation-language.md) (T1–T4); [S6 results](../research/s6-results.md); [S8 results](../research/s8-results.md); [the corpus](../corpus.md); [ADR-0018](0018-corpus-standards-and-testing.md); decision-map item X3; [OQ-13](../open-questions.md), [OQ-23](../open-questions.md) |
@@ -24,6 +24,7 @@
 | 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-05: PF4's GPU-side memory is accounted by page in the GPU process, since S10 found macOS charges tiles to the process that allocates them; `IOSurfaceSetOwnershipIdentity` tested at M2 as the alternative ([performance](../performance.md)) |
 | 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-12: PF24's quota per site covers all of a site's storage keys ([performance](../performance.md)) |
 | 2026-10-22 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 4 ([the review](../review/README.md) §5.9): "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." RV4-03: PF19's deadlines apply to task age, for renderers and for every helper's watched threads; PF21's bound on synchronous requests is the answering thread's deadline ([performance](../performance.md)) |
+| 2026-10-22 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 4 ([the review](../review/README.md) §5.9): "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." RV4-06, the owner: "Adopt the 3-tier validation strategy (commit unit tests, checkpoint instruction/memory ratchet, gate wall/energy budgets) and formalize budgets PF25–PF30 in docs/performance.md." PF2's counters, PF5's three tiers and PF25–PF30 are added ([performance](../performance.md)), and the decision below |
 
 ## Question
 
@@ -73,7 +74,7 @@ How is performance measured on this Mac, and what must Axiom meet: the final mem
 
 ## Decision
 
-**Accepted:** adopt [the performance budgets](../performance.md) (PF1–PF24) as binding, and **amend the process model's §7** with the final B1–B7:
+**Accepted:** adopt [the performance budgets](../performance.md) (PF1–PF24) as binding (**as amended in Round 4,** RV4-06: with PF25–PF30, and PF5's validation in three tiers), and **amend the process model's §7** with the final B1–B7:
 
 | # | Budget | Final value | Initial value (2026-10-17) |
 |---|---|---|---|

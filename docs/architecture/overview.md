@@ -190,7 +190,7 @@ From the [Step 6 tracker](../research/step-6-standards-budgets-roadmap.md) §5, 
 
 | # | Criterion | Evidence | Verdict |
 |---|---|---|---|
-| RC1 | Measurable | Every budget is a number with its tool, conditions and statistic ([performance](../performance.md) PF1–PF24); every Milestone 1 criterion likewise ([Milestone 1](../milestone-1.md) MA4–MA9) | **Met** |
+| RC1 | Measurable | Every budget is a number with its tool, conditions and statistic ([performance](../performance.md) PF1–PF30); every Milestone 1 criterion likewise ([Milestone 1](../milestone-1.md) MA4–MA9) | **Met** |
 | RC2 | Traceable | Each budget and target is labelled measured, sourced or hypothesis, the hypotheses with their milestones; the ceilings rest on S8's census; [requirements](../requirements.md) traces each requirement to its milestone and check | **Met** |
 | RC3 | Grounded in the corpus | Every site has its tier, needs, logins and level ([corpus](../corpus.md) §2) and its milestone ([roadmap](../roadmap.md) §5); priorities cite the corpus (SB6); every page has a memory ceiling | **Met** |
 | RC4 | Standards first | Each area has a dated specification, a support class and its suites ([standards](../standards.md) §3–§5); targets from the shipping median (SB11), calibrated with the corrected counting (§6) | **Met** |

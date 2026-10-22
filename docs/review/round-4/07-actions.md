@@ -107,7 +107,7 @@ The owner's dispositions of this round (§6): the XML parser (RV4-01), the depen
 | **Taffy as a test oracle** (layout §10, question 3); **hyphenation** (text §10, question 4); **statistical encoding detection** (HTML §10, question 4); **3D depth sorting** (layout §10, question 2) | M4, or the milestone with each feature | — |
 | **The sensitive-site list and the JIT switches' presentation** (embedder §8, question 2); **DNS over HTTPS with ECH** (networking §10, questions 3 and 4) | M5's plan | — |
 | **WebAuthn and passkeys** (OQ-16) | Before M6 | The hybrid transport's feasibility check under the signing identity |
-| **Demuxers and codecs; one media process per site or shared** (images §10, questions 3 and 5); **Safari's energy figures** (performance §9, question 2) | M7 | Decided by maintenance (`mp4parse` is dormant) and the threat model |
+| **Demuxers and codecs; one media process per site or shared** (images §10, questions 3 and 5); **Safari's energy figures** (performance §10, question 2, renumbered in CP5) | M7 | Decided by maintenance (`mp4parse` is dormant) and the threat model |
 | **The bytecode cache** (JE §10, question 4); **push messaging and background sync** (storage §10, question 3); **VS Code and WebAssembly** (roadmap §11, question 2) | M8's plan | — |
 | **WebGPU's implementation and process** (graphics §10, question 5); **Maps without WebAssembly** (roadmap §11, question 3) | M9's plan | Reuse `wgpu` first, in its own process (GR10) |
 | **Printing to PDF** (layout §10, question 1); **dragging across frames** (input §8, question 4) | The milestone that needs each | — |

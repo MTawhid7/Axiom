@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-20, Step 6's Gate B): "Accepted as proposed." The automation boundary confirmed; the not-planned list approved; spike S9 authorized (decision history). **Amended by the architecture review's Round 1** (2026-10-21): TS2, TS3, SB10 and SB11 for RV1-01; TS11, TS14, TS16, SB5, SB13, SB14 and §5.3 for RV1-10, RV1-11, RV1-14, RV1-19 and RV1-22. **Amended by Round 4** (2026-10-22): SB11's independent count covers every missing capability (RV4-01) |
+| **Status** | **Accepted** (2026-10-20, Step 6's Gate B): "Accepted as proposed." The automation boundary confirmed; the not-planned list approved; spike S9 authorized (decision history). **Amended by the architecture review's Round 1** (2026-10-21): TS2, TS3, SB10 and SB11 for RV1-01; TS11, TS14, TS16, SB5, SB13, SB14 and §5.3 for RV1-10, RV1-11, RV1-14, RV1-19 and RV1-22. **Amended by Round 4** (2026-10-22): SB11's independent count covers every missing capability (RV4-01); TS1 and TS13 (RV4-06) |
 | **Date** | 2026-10-20 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [The corpus](../corpus.md) (CO1–CO14); [the standards baseline](../standards.md) (SB1–SB12); [the testing strategy](../testing.md) (TS1–TS18); [S8 results](../research/s8-results.md); decision-map items X1 and X2; [OQ-2](../open-questions.md), [OQ-22](../open-questions.md); the [charter](../charter.md) §8 and principle 5; the [threat model](../security/threat-model.md) §8–§9; [ADR-0009](0009-embedder-api-and-shell.md) (EM9); [ADR-0010](0010-dependency-and-supply-chain-policy.md) |
@@ -24,6 +24,7 @@
 | 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-11: the [standards](../standards.md)' §5.2 gains a row for the File API, staged with script, tested by WPT's `FileAPI/` |
 | 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 2 ([the review](../review/README.md) §5.5): "All 15 findings (RV2-01 through RV2-15) are Accepted as proposed." RV2-08: TS2's WebDriver subset gains Get Computed Role and Get Computed Label at M4 ([testing](../testing.md)) |
 | 2026-10-22 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 4 ([the review](../review/README.md) §5.9): "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." RV4-01: SB11's independent count checks a computed subset against every capability the milestone lacks, not script alone ([standards](../standards.md) SB11) |
+| 2026-10-22 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 4 ([the review](../review/README.md) §5.9): "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." RV4-06, the owner: "Adopt the 3-tier validation strategy (commit unit tests, checkpoint instruction/memory ratchet, gate wall/energy budgets) and formalize budgets PF25–PF30 in docs/performance.md." TS1's sixth layer and TS13 run in PF5's three tiers, with a committed baseline at every checkpoint ([testing](../testing.md)) |
 
 ## Question
 

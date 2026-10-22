@@ -151,7 +151,7 @@ The overview §4 traces seven scenarios end to end through the rules: opening a 
 | [0016](adr/0016-style-layout-and-paint.md) | Our own CSS engine; container queries in nested lifecycles; `:visited` by partitioned history; a 1/64-pixel unit; tables approximate | 2026-10-20 | — |
 | [0017](adr/0017-javascript-engine-and-bindings.md) | The engine entirely our own; heap-free compiled scripts; a register machine; our own WebIDL compiler | 2026-10-20 | Round 1: separate agents from M1 (RV1-03); the slot width open until S11 (RV1-06); Temporal and BigInt as replaceable details (RV1-08); WebAssembly's architecture before M3 and the JIT at M5's gate (RV1-13); the console at M3 (RV1-15); bindings split by interface group (RV1-18) |
 | [0018](adr/0018-corpus-standards-and-testing.md) | The corpus (CO1–CO14), the standards baseline (SB1–SB12) and the testing strategy (TS1–TS18) | 2026-10-20 | The calibration corrected (§5, S9). Round 1: the interim CSS target and two executors (RV1-01); TS11's ordered concurrency checks (RV1-11, S12); text's calibration after macOS updates (RV1-10); SB13's user agent and SB14's interventions (RV1-14) |
-| [0019](adr/0019-performance-methodology-and-budgets.md) | Performance methodology (PF1–PF24) and the final B1–B7, with a ceiling for every corpus page | 2026-10-20 | The content cap kept as a hypothesis for review (Gate C). Round 1: B1 split (RV1-02); the content tier's slope and plateau (RV1-05); PF18 and the build's measurement (RV1-18); S10's results, and B1b kept at 15 MB |
+| [0019](adr/0019-performance-methodology-and-budgets.md) | Performance methodology (PF1–PF30, PF25–PF30 since Round 4) and the final B1–B7, with a ceiling for every corpus page | 2026-10-20 | The content cap kept as a hypothesis for review (Gate C). Round 1: B1 split (RV1-02); the content tier's slope and plateau (RV1-05); PF18 and the build's measurement (RV1-18); S10's results, and B1b kept at 15 MB |
 | [0020](adr/0020-roadmap-and-security-levels.md) | The roadmap: nine milestones, ordered and gated, never dated (MS1–MS12) | 2026-10-20, as the baseline under review | Round 1: real processes at M1 and the GPU process at M2 (RV1-07, RV1-02); WebSockets at M4 (RV1-12); WebAssembly's architecture before M3, the JIT at M5's gate (RV1-13); daily features scheduled (RV1-22); and the rest of the round's placements |
 | [0021](adr/0021-milestone-1.md) | Milestone 1: static documents at L0, with measurable criteria (MA1–MA12) | 2026-10-20, as M1's specification; starting it on hold | Round 1: real, sandboxed processes (RV1-07); the interim CSS target and the harness at the second checkpoint (RV1-01); the dumps (RV1-15); failure semantics (RV1-16); ordered concurrency checks (RV1-11, S12); the stable signing identity (RV1-17, S15) |
 
@@ -397,7 +397,9 @@ The proposed crates ([overview](architecture/overview.md) §2), each named and s
   - V1–V9 built as tests;
   - weekly advisory checks, and the OS-dependent checks after every macOS update;
   - this Mac is authoritative.
-- **Performance** ([performance](performance.md), PF1–PF24):
+- **Performance** ([performance](performance.md), PF1–PF30):
+  - **validation in three tiers** (PF5, Round 4's RV4-06): deterministic counts on every commit, a ratchet of instructions, peak footprints and bytes written at every checkpoint, the formal measurements at every gate;
+  - **start-up, CPU per page load, disk, writes, background activity and memory pressure** (PF25–PF30, hypotheses first measured at M1);
   - **the conditions** (PF1): a release build, AC power with Low Power Mode off, a load average below 3.0, cool-downs, three runs, the median with its range;
   - **a page's cost** includes the GPU and compositor memory allocated on its behalf (PF4), which the GPU process accounts by page from M2, since macOS charges tiles to it (Round 2, RV2-05; S10);
   - frames from S6's budgets, and the GPU process's hop to the browser within 1 ms (PF13; S10 measured 48.8 µs); no task over 50 ms; pauses as in §4.6;
@@ -614,7 +616,7 @@ The first five are the ones the owner named at Gate C; Round 1 answered each (th
 - **Milestone 1** ([Milestone 1](milestone-1.md) §8): the `css/CSS2` tests in scope; the local copies' date; hosted runners.
 - **The standards baseline** ([standards](standards.md) §8): pinning only revisions wpt.fyi aligns; Unicode 17 in ICU4X while 18 is out; the not-planned list, which the owner may move.
 - **The testing strategy** ([testing](testing.md) §10): where fuzzing's seed corpora live.
-- **The performance budgets** ([performance](performance.md) §9): Safari's figures; the hypotheses, measured at their milestones.
+- **The performance budgets** ([performance](performance.md) §10): Safari's figures; the hypotheses, measured at their milestones.
 - **The census** ([S8 results](research/s8-results.md) §7.5): Chrome logged out by hand, and Safari signed in, not yet measured.
 - **The designs:** each document under `architecture/` ends with its own open questions, placed by the roadmap where they bind a milestone.
 
