@@ -31,7 +31,12 @@ and checks:
         with its group, is named in docs/technology/dependency-register.md,
         and has its build script or procedural macro acknowledged (DP12);
   CR15  every third-party crate that the spikes' workspace (and fuzz/'s, once
-        it exists) builds is named in the register (DP23).
+        it exists) builds is named in the register (DP23);
+  DP15  each member's policy in supply-chain/config.toml matches its group and
+        panic class: safe-to-run for build and test code; for shipped code,
+        safe-to-deploy and crypto-safe, with ub-risk-1 for a panic-free crate
+        (it handles less trusted data in the browser, DP9, DP10), ub-risk-2
+        for another trusted crate, ub-risk-3 for a sandboxed one (DP8).
 
 The resolved graph unifies features across the workspace's members, so the
 placement checks over-approximate one executable's build and err toward
@@ -123,8 +128,9 @@ def named_in(text, crate):
 class Checker:
     """Every check over one workspace's graph, the crate map and the policy files."""
 
-    def __init__(self, metadata, cmap, policy_text, register_text, root):
+    def __init__(self, metadata, cmap, policy_text, register_text, root, vet=None):
         self.graph = Graph(metadata)
+        self.vet_policies = (vet or {}).get("policy", {})
         self.crates = cmap.get("crate", {})
         self.third = cmap.get("third-party", {})
         self.shipping = cmap.get("shipping", {})
@@ -200,6 +206,7 @@ class Checker:
         self.check_manifest(name, Path(package["manifest_path"]))
         self.check_unsafe(name, entry, Path(package["manifest_path"]).parent)
         self.check_panic_class(name, entry, package)
+        self.check_vet_policy(name, entry)
         for dep_id, kinds in self.graph.edges.get(package["id"], []):
             self.check_edge(name, entry, dep_id, kinds)
 
@@ -265,6 +272,19 @@ class Checker:
             if required - declared:
                 self.add("ES10", f"{name}: {path.name} doesn't deny {', '.join(sorted(required - declared))}")
 
+    def check_vet_policy(self, name, entry):
+        group, panic = entry.get("group"), entry.get("panic")
+        if group in OUT_OF_LAYER:
+            expected = {"safe-to-run"}
+        else:
+            grade = "ub-risk-1" if panic == "panic-free" else "ub-risk-2" if group == "trusted" else "ub-risk-3"
+            expected = {"safe-to-deploy", grade, "crypto-safe"}
+        criteria = self.vet_policies.get(name, {}).get("criteria")
+        found = {criteria} if isinstance(criteria, str) else set(criteria or [])
+        if found != expected:
+            self.add("DP15", f"{name}: supply-chain/config.toml's policy is {sorted(found) or 'missing'}, "
+                             f"its group and panic class need {sorted(expected)}")
+
     def check_cycles(self):
         state, path = {}, []
 
@@ -326,7 +346,7 @@ class Checker:
 # The self-test: a synthetic workspace written to a temporary directory.
 
 def fixture():
-    """A compliant workspace: (crates, third-party packages, crate map, policy, register)."""
+    """A compliant workspace: (crates, third-party packages, crate map, policy, register, vet)."""
     crates = {
         # name: (kinds, root text, manifest dependencies, edges as (dependency, kinds))
         "base": (["lib"], "", {"tp-trusted"}, [("tp-trusted", {"normal"}), ("support", {"dev"})]),
@@ -353,7 +373,15 @@ def fixture():
         "third-party": {"tp-trusted": {"group": "trusted"}, "tp-sandboxed": {"group": "sandboxed"}},
         "shipping": {"forbid-groups": ["build", "test"], "forbid": ["bindings-*"]},
     }
-    return crates, third, cmap, "", "Register: `tp-trusted` and `tp-sandboxed`; spikes: `tp-spike`."
+    shipped = ["safe-to-deploy", "crypto-safe"]
+    vet = {"policy": {
+        "base": {"criteria": [*shipped, "ub-risk-2"]},
+        "helper": {"criteria": [*shipped, "ub-risk-3"]},
+        "app": {"criteria": [*shipped, "ub-risk-3"]},
+        "brow": {"criteria": [*shipped, "ub-risk-2"]},
+        "support": {"criteria": "safe-to-run"},
+    }}
+    return crates, third, cmap, "", "Register: `tp-trusted` and `tp-sandboxed`; spikes: `tp-spike`.", vet
 
 
 def materialize(tmp, crates, third):
@@ -456,15 +484,24 @@ def seeded_cases():
          "DP22  third-party tp-new 1.0.0: no `third-party` entry"),
         ("an unacknowledged build script", third_party("tp-cc", kinds=("lib", "custom-build"), group="build"), "DP12  third-party tp-cc"),
         ("an unregistered crate in the spikes' lock", state("spike-crate", "tp-unnamed"), "CR15  spikes: third-party tp-unnamed"),
+        ("a vet policy too weak for its crate", state("vet", {"helper": {"criteria": ["safe-to-deploy", "crypto-safe", "ub-risk-4"]}}),
+         "DP15  helper: supply-chain/config.toml's policy"),
+        ("a panic-free crate without ub-risk-1", entry("base", panic="panic-free"),
+         "DP15  base: supply-chain/config.toml's policy"),
     ]
 
 
 def run_case(module_check, mutate=None):
-    crates, third, cmap, policy, register = fixture()
-    crates, third, cmap = copy.deepcopy(crates), copy.deepcopy(third), copy.deepcopy(cmap)
+    crates, third, cmap, policy, register, vet = fixture()
+    crates, third, cmap, vet = copy.deepcopy(crates), copy.deepcopy(third), copy.deepcopy(cmap), copy.deepcopy(vet)
     state = {}
     if mutate:
         mutate(crates, third, cmap, state)
+    for name in [n for n in crates if n not in vet["policy"] and n in cmap["crate"]]:
+        entry = cmap["crate"][name]
+        grade = "ub-risk-2" if entry.get("group") == "trusted" else "ub-risk-3"
+        vet["policy"][name] = {"criteria": ["safe-to-deploy", "crypto-safe", grade]}
+    vet["policy"].update(state.get("vet", {}))
     with tempfile.TemporaryDirectory(prefix="check-dependencies-") as tmp:
         tmp = str(Path(tmp).resolve())
         metadata = materialize(tmp, crates, third)
@@ -475,12 +512,12 @@ def run_case(module_check, mutate=None):
         others = []
         if "spike-crate" in state:
             others.append(("spikes", materialize(tmp + "/spikes", {}, {state["spike-crate"]: ["lib"], "tp-spike": ["lib"]})))
-        return module_check(metadata, cmap, state.get("policy", policy), register, tmp, others)
+        return module_check(metadata, cmap, state.get("policy", policy), register, tmp, others, vet)
 
 
 def self_test():
-    def check(metadata, cmap, policy, register, root, others):
-        return Checker(metadata, cmap, policy, register, root).run(others)
+    def check(metadata, cmap, policy, register, root, others, vet):
+        return Checker(metadata, cmap, policy, register, root, vet).run(others)
 
     failures = 0
     compliant = run_case(check)
@@ -514,12 +551,13 @@ def main():
         cmap = tomllib.loads((root / "tools/crate-map.toml").read_text(encoding="utf-8"))
         policy = (root / "tools/unsafe-policy.txt").read_text(encoding="utf-8")
         register = (root / "docs/technology/dependency-register.md").read_text(encoding="utf-8")
+        vet = tomllib.loads((root / "supply-chain/config.toml").read_text(encoding="utf-8"))
     except (OSError, tomllib.TOMLDecodeError) as error:
         print(f"check-dependencies: {error}", file=sys.stderr)
         return 2
     others = [(label, run_metadata(manifest)) for label, manifest in
               (("spikes", root / "spikes/Cargo.toml"), ("fuzz", root / "fuzz/Cargo.toml")) if manifest.exists()]
-    lines = Checker(run_metadata(root / "Cargo.toml"), cmap, policy, register, root).run(others)
+    lines = Checker(run_metadata(root / "Cargo.toml"), cmap, policy, register, root, vet).run(others)
     for line in lines:
         print(line)
     print(f"check-dependencies: {len(lines)} violation(s)" if lines else "check-dependencies: OK")

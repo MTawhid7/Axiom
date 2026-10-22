@@ -143,7 +143,7 @@ tool_version() { # tool, version
 }
 
 deny() { tool_version cargo-deny "$DENY_VERSION" && cargo deny --locked check; }
-vet() { tool_version cargo-vet "$VET_VERSION" && cargo vet --locked; }
+vet() { tool_version cargo-vet "$VET_VERSION" && cargo vet --locked --cache-dir "$ROOT/target/cargo-vet-cache"; }
 
 echo "tools/check.sh: the $tier tier; logs in target/check/$(basename "$LOGS")/"
 

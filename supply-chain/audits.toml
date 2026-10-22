@@ -1,0 +1,30 @@
+
+# cargo-vet audits file
+
+[criteria.crypto-safe]
+description-url = "https://github.com/google/rust-crate-audits/blob/main/auditing_standards.md#crypto-safe"
+
+[criteria.does-not-implement-crypto]
+description-url = "https://github.com/google/rust-crate-audits/blob/main/auditing_standards.md#does-not-implement-crypto"
+implies = "crypto-safe"
+
+[criteria.ub-risk-0]
+description-url = "https://github.com/google/rust-crate-audits/blob/main/auditing_standards.md#ub-risk-0"
+implies = "ub-risk-1"
+
+[criteria.ub-risk-1]
+description-url = "https://github.com/google/rust-crate-audits/blob/main/auditing_standards.md#ub-risk-1"
+implies = "ub-risk-2"
+
+[criteria.ub-risk-2]
+description-url = "https://github.com/google/rust-crate-audits/blob/main/auditing_standards.md#ub-risk-2"
+implies = "ub-risk-3"
+
+[criteria.ub-risk-3]
+description-url = "https://github.com/google/rust-crate-audits/blob/main/auditing_standards.md#ub-risk-3"
+implies = "ub-risk-4"
+
+[criteria.ub-risk-4]
+description-url = "https://github.com/google/rust-crate-audits/blob/main/auditing_standards.md#ub-risk-4"
+
+[audits]
