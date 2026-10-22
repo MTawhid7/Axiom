@@ -237,7 +237,7 @@ Every finding: **Accepted** as proposed, 2026-10-22 (§5.9, item 1). Where a cou
 
 | ID | Severity | Blocks | Changed |
 |---|---|---|---|
-| RV4-01 | Critical | M1 | CP1 |
+| RV4-01 | Critical | M1 | CP1: [Milestone 1](../milestone-1.md) MA1, MA2, MA4's method and recount (33 tests still need what M1 lacks), MA7's XML fuzz target, MA11's second checkpoint; [HD9](../architecture/html-and-dom.md) and §8; the [roadmap](../roadmap.md)'s M1 and M4; SB11's count over every missing capability; RQ40; ADRs 0015, 0018, 0021; the handover and the decision map |
 | RV4-02 | High | M1 | CP2 |
 | RV4-03 | Medium | M1 | CP3 |
 | RV4-04 | Medium | M1 | CP4 |
@@ -245,7 +245,7 @@ Every finding: **Accepted** as proposed, 2026-10-22 (§5.9, item 1). Where a cou
 | RV4-06 | Medium | M1 | CP5 |
 | RV4-07 | Medium | M2 | CP4 |
 | RV4-08 | Medium | M1 | CP2 (`encoding_rs`), CP6 |
-| RV4-09 | Medium | M1 | CP1 |
+| RV4-09 | Medium | M1 | CP1: MA4's ≥ 90.0% with floors for the 16 directories of 100 tests or more, and the full median (≥ 97.8%) at M3; the summary; the roadmap's M1 and M3; ADR-0021; the handover |
 | RV4-10 | Low | M2 | CP4 |
 | RV4-11 | Low | M1 | CP4 |
 | RV4-12 | Low | M2 | CP4 |
@@ -259,7 +259,7 @@ Every finding: **Accepted** as proposed, 2026-10-22 (§5.9, item 1). Where a cou
 
 | Checkpoint | The owner's name | Findings | State |
 |---|---|---|---|
-| CP1 | "M1 Conformance & Scope (XML parser, CSS 90% gate, MA4 recount)" | RV4-01, RV4-09 | To do |
+| CP1 | "M1 Conformance & Scope (XML parser, CSS 90% gate, MA4 recount)" | RV4-01, RV4-09 | Done, `docs(review-r4-cp1)` |
 | CP2 | "Dependency Policy & Crate Audits (DP8/DP4 amendment, encoding_rs, rustls-webpki bump)" | RV4-02, RV4-08 (`encoding_rs`), RV4-15 | To do |
 | CP3 | "Event Loop Progress & Watchdogs (task age monitoring, storage thread pings)" | RV4-03 | To do |
 | CP4 | "Process Robustness & IPC (memory unmapping at death, mach_msg_destroy on drop, surface validation)" | RV4-04, RV4-05, RV4-07, RV4-10, RV4-11, RV4-12 | To do |

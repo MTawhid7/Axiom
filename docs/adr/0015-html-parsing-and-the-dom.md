@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-20), by the owner at Step 5's Gate C, as proposed, with the amendment to [ADR-0008](0008-script-agents-and-heap.md) that HD11 needs, and XSLT deferred ([OQ-22](../open-questions.md)) |
+| **Status** | **Accepted** (2026-10-20), by the owner at Step 5's Gate C, as proposed, with the amendment to [ADR-0008](0008-script-agents-and-heap.md) that HD11 needs, and XSLT deferred ([OQ-22](../open-questions.md)). **Amended by the architecture review's Round 4** (2026-10-22): decision 2, the XML parser for documents at M1 (RV4-01) |
 | **Date** | 2026-10-19 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [HTML and the DOM](../architecture/html-and-dom.md) (HD1–HD33); [ADR-0003](0003-gc-handle-and-rooting-pattern.md); [ADR-0007](0007-frame-tree-pipeline-and-input.md); [ADR-0008](0008-script-agents-and-heap.md) (the HD11 amendment); [ADR-0010](0010-dependency-and-supply-chain-policy.md); [ADR-0011](0011-text-fonts-and-unicode.md) (TX3); [ADR-0013](0013-networking-storage-and-workers.md) (NW12, NW14); decision-map item P5; [OQ-22](../open-questions.md) |
@@ -13,6 +13,7 @@
 |---|---|
 | 2026-10-19 | Proposed at Step 5, CP18, with the amendment to ADR-0008 (HD11) and XSLT ([OQ-22](../open-questions.md)) for the owner |
 | 2026-10-20 | **Accepted** by the owner at Step 5's Gate C: "ADR-0015 (HTML Parsing and the DOM): Accepted as proposed." In the same decisions: "ADR-0008 Amendment (HD11): Accepted. Node slots in the arena never move; node identity remains stable." And: "XSLT (OQ-22): Confirmed. Defer planning XSLT until a concrete use case arises." |
+| 2026-10-22 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 4 ([the review](../review/README.md) §5.9): "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." RV4-01, the owner: "Implement Axiom's own non-validating XML 1.0 document parser in Milestone 1. External XML crates are rejected due to recent DoS advisories and dormant maintenance." Decision 2 is amended below: HD9's parser for documents is built at M1, with `DOMParser` and `XMLHttpRequest` at M3 and SVG documents at M4 ([HTML and the DOM](../architecture/html-and-dom.md) HD9, §8) |
 
 ## Question
 
@@ -61,7 +62,7 @@ Sourced in [HTML and the DOM](../architecture/html-and-dom.md) §3.
 
 **Accepted: HD1–HD33** (2026-10-20), with the amendment to ADR-0008. In summary:
 1. **Axiom's own HTML parser** (HD1–HD8): the standard's tokenizer and tree builder; sniffing as HTML §13.2.3 specifies, decoding straight into PL11's strings; budgeted tasks on the event loop's thread, with a preload scanner on the helper pool; fragments and the `setHTML` family through one tree builder that sanitizes while parsing.
-2. **Axiom's own XML parser** (HD9), non-validating, fetching no external entity. XPath staged. **XSLT deferred** until a concrete use case arises, as the owner decided ([OQ-22](../open-questions.md)).
+2. **Axiom's own XML parser** (HD9), non-validating, fetching no external entity. XPath staged. **XSLT deferred** until a concrete use case arises, as the owner decided ([OQ-22](../open-questions.md)). **As amended in Round 4** (RV4-01, 2026-10-22): built for documents at M1, since most of M1's CSS tests are XHTML; external XML crates rejected.
 3. **One node arena of `u32` columns, 36 bytes a node,** with per-kind arenas and rare data (HD10, HD12, HD13). **Node slots never move** (HD11), under **the amendment to ADR-0008** the owner accepted: SH10's compaction skips the node arena.
 4. **One mutation path** with a fixed, ordered list of hooks (HD15); live collections cached against a tree version (HD16).
 5. **Events** (HD17–HD21): listeners in a side table; the event path and each listener snapshot rooted as one heap array; trust and activation only from the browser.

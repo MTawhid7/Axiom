@@ -63,6 +63,7 @@
 
 **Done:**
 - **The dispositions recorded:** [the review](review/README.md) §5.9 (the owner's words), §5.10 (the findings), §5.11 (the checkpoints, with the owner's names); the round's status rows; the [index](README.md); this status.
+- **CP1, M1's conformance and scope (RV4-01, RV4-09).** The XML parser for documents moves to M1 (MA1, MA2, MA7's fuzz target, MA11's second checkpoint; HD9 and §8; the roadmap's M1 and M4; RQ40), as Axiom's own. MA4's `css/CSS2` target is ≥ 90.0% of the 5,652, at least 5,087 tests, with floors for the 16 directories of 100 tests or more, from 78.3% (`floats`) to 90.0%; the full median (≥ 97.8%) at M3. **The recount** with `--needs`: 5,423 of the 5,652 need XML; 33 still need what M1 lacks (web fonts 9, SVG 19, form controls 3, print 2, overlapping) and count as failures. SB11's independent count now covers every missing capability. ADRs 0015, 0018 and 0021; the handover and the decision map.
 
 ### 2026-10-22 — Session 21 (Round 4: Round 3 tested, the owner's themes, everything unreviewed; spike S16)
 

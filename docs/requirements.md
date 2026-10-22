@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): RQ45 and RQ46 for RV1-01 (CP1); RQ12, RQ35 and RQ53 for RV1-02, RV1-07 and RV1-09 (CP2); §8's open items and RQ18 for RV1-11 and RV1-13 (CP5) |
+| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): RQ45 and RQ46 for RV1-01 (CP1); RQ12, RQ35 and RQ53 for RV1-02, RV1-07 and RV1-09 (CP2); §8's open items and RQ18 for RV1-11 and RV1-13 (CP5). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](review/README.md) §5.9): RQ40 for RV4-01 (CP1) |
 | **Question** | Does every requirement trace from its source to the milestone that verifies it, and to the check that does? |
 | **Answers** | Part of Step 6 question Q7 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the tracker's handed-over question 30 (§2.2). Planned since Step 1 |
 | **Builds on** | The [charter](charter.md); the accepted ADRs; the [threat model](security/threat-model.md) and [process model](security/process-model.md); the [corpus](corpus.md), [standards](standards.md), [testing](testing.md) and [performance](performance.md) documents; the [roadmap](roadmap.md) and [Milestone 1](milestone-1.md) |
-| **Last updated** | 2026-10-21: Round 1's accepted findings |
+| **Last updated** | 2026-10-22: Round 4's accepted findings |
 
 Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone that first verifies it, and how. Later milestones keep every check green (MS2, MS7). **A requirement with no milestone is a gap;** §8 lists the gaps, and there is none. The milestones are the [roadmap](roadmap.md)'s M1–M9; "every gate" means every milestone's gate.
 
@@ -68,7 +68,7 @@ Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone th
 | RQ37 | Networking: own URL parser and framing, rustls with the system verifying, partitioned caches and cookies | [ADR-0013](adr/0013-networking-storage-and-workers.md) NW | M1 (HTTP/1.1, HTTP/2, TLS), M2 (cache, cookies, CORS), M4 (HTTP/3), M5 (ORB) | WPT's `fetch/`, `cookies/`, `cors/` at their milestones |
 | RQ38 | Storage and workers behind endpoints | ADR-0013 SW | M3 (Web Storage), M5 (IndexedDB, Cache API), M8 (workers) | WPT's `webstorage/`, `IndexedDB/`, `workers/`, `service-workers/` |
 | RQ39 | Accessibility: trees pushed by renderers, the browser's cache, text markers | [ADR-0014](adr/0014-accessibility.md) | M1 (the objc2 classes), M4 (the tree and cache) | The shell's accessibility tests |
-| RQ40 | HTML and the DOM: our own parsers, one mutation path, the rest of the DOM to the specifications | [ADR-0015](adr/0015-html-parsing-and-the-dom.md) | M1 (parser, DOM), M4 (Shadow DOM, custom elements, XML) | Tokenizer and tree-construction tests (MA4); WPT `dom/` from M3 |
+| RQ40 | HTML and the DOM: our own parsers, one mutation path, the rest of the DOM to the specifications | [ADR-0015](adr/0015-html-parsing-and-the-dom.md) | M1 (the HTML parser, the XML parser for documents (Round 4, RV4-01), the DOM), M3 (XML through `DOMParser` and `XMLHttpRequest`), M4 (Shadow DOM, custom elements, SVG documents) | Tokenizer and tree-construction tests, and `css/CSS2`'s XHTML tests (MA4); WPT `dom/` from M3 |
 | RQ41 | Style, layout and paint: our own CSS engine and layout, with `:visited` by partitioned history | [ADR-0016](adr/0016-style-layout-and-paint.md) | M1 (CSS 2.1's model), M4 (flexbox, grid, the rest) | `css/CSS2`'s reference tests (MA4); the CSS directories at M4 |
 | RQ42 | The JavaScript engine and bindings, our own | [ADR-0017](adr/0017-javascript-engine-and-bindings.md) | M3; M4 (`Intl`, BigInt); M8 (Temporal) | test262 (TS5) |
 
