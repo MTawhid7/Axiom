@@ -6,9 +6,9 @@
 
 | Item | State |
 |---|---|
-| Phase | **Phase Zero's baseline is complete:** Step 6's **Gate C passed** (2026-10-20), the final design review. ADRs 0020 and 0021 are accepted, and the architecture proposal (the overview v2, with the requirements) is approved as the Phase Zero baseline. **The independent, multi-round adversarial review is under way,** on branch `architecture-review`: **Round 1 is written and disposed** (2026-10-21): the owner accepted all 22 findings; the accepted changes are made, and the three spikes authorized before Milestone 1 are done ([the review](review/README.md) §5). **The owner approved the results and commissioned Round 2** (2026-10-21). **Round 2 is delivered and disposed** (2026-10-21): Round 1's changes verified; 15 findings, none Critical or High, so the stopping rule is met for the scope commissioned; **the owner accepted all 15,** and their changes are made and verified in checkpoints CP1–CP6, with `architecture-review` pushed. **Round 3, the independent external review** by Gemini, was delivered on 2026-10-21 ([its record](review/round-3/01-gemini-review.md)): "Blocked by Findings". **The owner commissioned Round 4** (2026-10-22; [the review](review/README.md) §5.8): test Round 3's verdict rather than take it, apply three themes (scope by value, reuse of mature software, efficiency first), and review everything no round had, with spike S16. **Round 4 is delivered** (2026-10-22): 17 findings, 1 Critical, 1 High, 7 Medium and 8 Low, so the stopping rule isn't met. **The owner accepted all 17 the same day** ([the review](review/README.md) §5.9), with checkpoints CP1–CP7, the re-runs of S5–S7, the end of the review after CP7, the merge into `main` and Milestone 1's plan. **CP1–CP7 are done and verified, and the review cycle is complete** (the review's §6). **Milestone 1 is on hold:** no crate skeleton and no production code (the owner's decision 8) |
-| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes the architecture review,** merged from `architecture-review` with `--no-ff` on 2026-10-22 (`bca6b8b`) and pushed, as the owner directed; before it, Step 6 (`4fb9ca6`). **`milestone-1-plan`** holds Milestone 1's implementation plan, branched from `main`, not pushed. The branches `architecture-review` and `step-2b` to `step-6` are kept |
-| Current checkpoint | **Step 6 is done:** CP1–CP11 ✅, Gates A–C passed ([tracker](research/step-6-standards-budgets-roadmap.md)). **Review Round 1 is delivered and disposed** (2026-10-21): 22 findings, all accepted. **Its changes are done,** on `architecture-review` and pushed: checkpoints CP1–CP6, a sweep for stale statements, and spikes S10, S12 and S15 ([the review](review/README.md) §5.2, §5.3). **The owner approved them** (2026-10-21, [the review](review/README.md) §5.4). **Review Round 2 is delivered and disposed** (2026-10-21; [the review](review/README.md) §2, §5.5–§5.7, §8): 15 findings, 10 Medium and 5 Low, all accepted; the stopping rule met for the scope commissioned. **Round 2's checkpoints CP1–CP6 are done and verified,** and `architecture-review` is pushed. **Round 3** (Gemini, 2026-10-21) and **Round 4** (2026-10-22; [the review](review/README.md) §2, §5.8, §9, §10) are delivered, Round 4 with spike S16. **Round 4 disposed** (2026-10-22, §5.9–§5.11), its checkpoints CP1–CP7 done and verified; **the review cycle is complete.** **Merged into `main`** (2026-10-22, `bca6b8b`, pushed). **[Milestone 1's implementation plan](milestone-1-plan.md) drafted** for the owner. **Now: the owner's gate, MA10** ("Next steps") |
+| Phase | **Phase Zero's baseline is complete:** Step 6's **Gate C passed** (2026-10-20), the final design review. ADRs 0020 and 0021 are accepted, and the architecture proposal (the overview v2, with the requirements) is approved as the Phase Zero baseline. **The independent, multi-round adversarial review is under way,** on branch `architecture-review`: **Round 1 is written and disposed** (2026-10-21): the owner accepted all 22 findings; the accepted changes are made, and the three spikes authorized before Milestone 1 are done ([the review](review/README.md) §5). **The owner approved the results and commissioned Round 2** (2026-10-21). **Round 2 is delivered and disposed** (2026-10-21): Round 1's changes verified; 15 findings, none Critical or High, so the stopping rule is met for the scope commissioned; **the owner accepted all 15,** and their changes are made and verified in checkpoints CP1–CP6, with `architecture-review` pushed. **Round 3, the independent external review** by Gemini, was delivered on 2026-10-21 ([its record](review/round-3/01-gemini-review.md)): "Blocked by Findings". **The owner commissioned Round 4** (2026-10-22; [the review](review/README.md) §5.8): test Round 3's verdict rather than take it, apply three themes (scope by value, reuse of mature software, efficiency first), and review everything no round had, with spike S16. **Round 4 is delivered** (2026-10-22): 17 findings, 1 Critical, 1 High, 7 Medium and 8 Low, so the stopping rule isn't met. **The owner accepted all 17 the same day** ([the review](review/README.md) §5.9), with checkpoints CP1–CP7, the re-runs of S5–S7, the end of the review after CP7, the merge into `main` and Milestone 1's plan. **CP1–CP7 are done and verified, and the review cycle is complete** (the review's §6). **Now: Milestone 1's first checkpoint** (2026-10-22), on branch `milestone-1`. The owner asked for its plan to be reviewed with "the discipline and rigor of a mature software engineering organization". The plan is revised, and ADRs 0022 (code architecture and engineering standards) and 0023 (observability) are proposed. **No engine code** until the owner adopts the plan and authorizes MA10 |
+| Repository | git, hosted at [github.com/MTawhid7/Axiom](https://github.com/MTawhid7/Axiom) (public; remote `origin`). Local folder: `~/Documents/Axiom`. **`main` includes the architecture review,** merged from `architecture-review` with `--no-ff` on 2026-10-22 (`bca6b8b`) and pushed, as the owner directed; before it, Step 6 (`4fb9ca6`). **`milestone-1`**, from `main` and pushed, holds Milestone 1's plan: merged from `milestone-1-plan` as "adopt Milestone 1 implementation plan" (`9887179`), then revised at M1-CP1. The branches `milestone-1-plan`, `architecture-review` and `step-2b` to `step-6` are kept |
+| Current checkpoint | **Step 6 is done:** CP1–CP11 ✅, Gates A–C passed ([tracker](research/step-6-standards-budgets-roadmap.md)). **Review Round 1 is delivered and disposed** (2026-10-21): 22 findings, all accepted. **Its changes are done,** on `architecture-review` and pushed: checkpoints CP1–CP6, a sweep for stale statements, and spikes S10, S12 and S15 ([the review](review/README.md) §5.2, §5.3). **The owner approved them** (2026-10-21, [the review](review/README.md) §5.4). **Review Round 2 is delivered and disposed** (2026-10-21; [the review](review/README.md) §2, §5.5–§5.7, §8): 15 findings, 10 Medium and 5 Low, all accepted; the stopping rule met for the scope commissioned. **Round 2's checkpoints CP1–CP6 are done and verified,** and `architecture-review` is pushed. **Round 3** (Gemini, 2026-10-21) and **Round 4** (2026-10-22; [the review](review/README.md) §2, §5.8, §9, §10) are delivered, Round 4 with spike S16. **Round 4 disposed** (2026-10-22, §5.9–§5.11), its checkpoints CP1–CP7 done and verified; **the review cycle is complete.** **Merged into `main`** (2026-10-22, `bca6b8b`, pushed). **[Milestone 1's implementation plan](milestone-1-plan.md) drafted,** then **revised at M1-CP1** (2026-10-22): the [crate architecture](architecture/crates.md), the [engineering standards](technology/engineering-standards.md) and [observability](architecture/observability.md) proposed with ADRs 0022 and 0023; the plan rewritten around an engineering foundation and a walking skeleton. **Now: the owner's gate** ("Next steps") |
 | Code | Spike code only, under `spikes/`: S1–S7, all complete. **S8, the corpus census** (`spikes/s8/`, Python), is complete: in Chrome, automated and by the owner's hand; in Safari, by the owner's hand, logged out, with the corrected tool ([results](research/s8-results.md)). **S9, the test tools** (`spikes/s9/`), is complete ([results](research/s9-results.md)): fuzzing and wptrunner work here; the installed nightly's ThreadSanitizer doesn't. **The review's spikes,** authorized by the owner on 2026-10-21 ([the review](review/README.md) §5.2): **S10, the GPU/compositor process** (`spikes/s10/gpu`), **S12, ThreadSanitizer's routes** (S9's `race` crate) and **S15, a stable signing identity** (`spikes/s15/probe`) are complete; S11, S13 and S14 are authorized before Milestone 3. **S16, lifetimes of shared memory and port rights, and efficiency counters** (`spikes/s16/lifetime`), authorized for Round 4 on 2026-10-22 ([the review](review/README.md) §5.8), is complete ([results](research/s16-results.md)). Tooling under `tools/`, now with `s6-tails.py`, `png-region-stats.py` and, from the review's Round 1, `wpt-script-deps.py`, `unsafe-census.py` and the scripts of S10, S12 and S15; from Round 4, `s16-measure.sh`, `crate-facts.py` and `wpt-file-facts.py`, with `wpt-script-deps.py` following references; working files in `scratch/`, which git ignores. The repository is licensed "MIT OR Apache-2.0" (`LICENSE-MIT`, `LICENSE-APACHE`) |
 | Verified capabilities | None at engine level. Spike results: [S1](research/s1-results.md), [S2](research/s2-results.md), [S3](research/s3-results.md), [S4](research/s4-results.md), [S5](research/s5-results.md), [S6](research/s6-results.md), [S7](research/s7-results.md), [S8](research/s8-results.md), [S9](research/s9-results.md), and for the review [S10](research/s10-results.md), [S12](research/s12-results.md), [S15](research/s15-results.md) and [S16](research/s16-results.md). The [handover](handover-phase-0.md) summarizes them all. Observations of this Mac: [macOS note](research/macos-process-confinement.md) §9 |
 | Accepted decisions | [ADR-0001](adr/0001-scope-and-target.md): scope, target, JavaScript strategy, security posture |
@@ -39,14 +39,123 @@
 
 ## Next steps: the owner's gate for Milestone 1
 
-**Done** (2026-10-22), as the owner directed ([the review](review/README.md) §5.9): Round 4's checkpoints CP1–CP7, verified; S5–S7 re-run; the review cycle ended; `architecture-review` merged into `main` with `--no-ff` (`bca6b8b`) and `main` pushed; **[Milestone 1's implementation plan](milestone-1-plan.md) drafted,** on branch `milestone-1-plan`, not pushed.
+**Done** (2026-10-22): Milestone 1's first checkpoint, at the owner's request: the plan reviewed and rewritten, and the documents it needs proposed (Session 23 below).
 
 Decisions only the owner can make, each with a recommendation:
-1. **The plan.** *Recommended:* review [the plan](milestone-1-plan.md), then adopt it as Milestone 1's CP1 with MA10's authorization; until then it is a draft. Its branch can be pushed, merged into `main`, or carried into `milestone-1` as CP1.
-2. **MA10's authorization:** the branch `milestone-1`, the skeleton, the dependencies, the test data, the tools and live loads, as [the plan](milestone-1-plan.md) §1 lists them. *Recommended:* authorize, with the plan's §2 decisions.
-3. **The plan's §2 decisions,** fifteen in all. *Recommended:* as the plan recommends, notably no Xcode for M1, WPT at `0f26972422`, this Mac as the only runner, and `zune-jpeg` without SIMD as JPEG's decoder if it matches `jpeg-decoder` on the corpus's images.
+1. **[ADR-0022](adr/0022-code-architecture-and-engineering-standards.md), code architecture and engineering standards.** *Recommended:* accept, decision by decision. The ones with most consequence:
+   - D2: the platform layer split by facility, so the crate graph proves where Apple's frameworks run;
+   - D3: foundation crates for strings, geometry, URLs, encodings and tracing, fixing placements in the overview's proposal that would have linked the TLS stack into renderers;
+   - D5: generated code committed and checked fresh, which amends IP8's and PL11's wording;
+   - D12: the spikes in their own workspace and lock;
+   - D13: `core` renamed `browser`.
+2. **[ADR-0023](adr/0023-observability-and-diagnostics.md), observability and diagnostics.** *Recommended:* accept. Axiom's own recorder, helpers' regions read as untrusted input, a flight recorder, reports, a daily health log, no content recorded; the window at M2, as you chose.
+3. **[The revised plan](milestone-1-plan.md).** *Recommended:* adopt it as M1-CP1. Its order is the walking skeleton you chose, and it gates the interface notes at M1-CP3, CP4, CP5 and CP11.
+4. **MA10's authorization,** with the plan's §1 additions: the repository's tools, the spikes' workspace, `codegen` and the test crates; no new third-party dependency. *Recommended:* authorize.
+5. **The plan's §2 decisions,** 24 in all. *Recommended:* as the plan recommends. Notably:
+   - no Xcode; WPT at `0f26972422`; no vendoring;
+   - the audits of `smallvec`, `vello_cpu` and `encoding_rs` moved to M1-CP2, before anything depends on them;
+   - EM11's objc2 classes checked with the first window at M1-CP3.
+6. **The size limits** (ES1: 600 lines warn, 1,000 fail; functions 100). *Recommended:* keep them, and revisit at M1's gate with the files nearest them. Tighter limits would split cohesive code.
 
 ## Session log
+
+### 2026-10-22 — Session 23 (Milestone 1's first checkpoint: code architecture, engineering standards, observability; the plan revised)
+
+**The owner's request** (2026-10-22), on branch `milestone-1` after merging the plan's draft into it: "we need to approach it with the discipline and rigor of a mature software engineering organization." Their aims:
+- "modular, maintainable, and extensible";
+- no "monolithic files that accumulate thousands of lines of code";
+- "establish the architectural principles, project structure, coding standards, testing strategy, dependency management approach, and key technical decisions before implementation begins";
+- on the plan: "Feel free to refine or rewrite it as needed. Once the plan is finalized, we can proceed with implementation in stages."
+
+**In plan mode** the owner chose:
+- "Walking skeleton first (Recommended)";
+- "Interfaces only (Recommended)", for design notes that gate code;
+- on the first draft: "I think we should implement a robust observability mechanism that will help us monitor the system effectively in the long run";
+- the diagnostics window at "M2, with crash reports (Recommended)".
+
+Then the owner approved the plan.
+
+**Done:**
+- **[The crate architecture](architecture/crates.md)** (CR1–CR16, proposed):
+  - seven layers, with an allowlist of internal dependencies per crate in a planned `tools/crate-map.toml`;
+  - placement checked per executable;
+  - the platform layer split by facility;
+  - process assemblies as libraries;
+  - test-only code never as Cargo features;
+  - change scenarios.
+
+  **It corrects the overview's proposal,** which calls itself provisional:
+  - URLs sat in `net` and encodings in `text`, which would have linked rustls and `aws-lc-rs` into renderers and the browser, and CoreText into the HTML parser and the network process;
+  - strings, atoms and the lifecycle's tokens had no crate;
+  - one `platform` crate made DP21's placement uncheckable;
+  - a crate named `core` hides Rust's `core` from its dependents.
+- **[The engineering standards](technology/engineering-standards.md)** (ES1–ES29, proposed):
+  - size limits; typed interfaces with exhaustive matching;
+  - hand-written errors; RV1-16's panic classes, checked;
+  - the `unsafe` policy finalized;
+  - determinism and placement by Clippy's disallowed methods and types;
+  - each crate's documentation as its charter;
+  - committed generated code;
+  - tests beside the code;
+  - two tiers of checks behind `tools/check.sh`;
+  - design notes, the review checklist and the definition of done.
+- **[Observability and diagnostics](architecture/observability.md)** (OB1–OB27, proposed):
+  - four signals in one record model, and Axiom's own recorder in every process;
+  - a region per helper, read by the browser as untrusted input, on Perfetto's model;
+  - a flight recorder, with reports on crashes, hangs, violations and budget breaches;
+  - retention within PF27, with no idle writes, and a daily health log for 90 days;
+  - exports, privacy rules, budgets and staging.
+- **[ADR-0022](adr/0022-code-architecture-and-engineering-standards.md)** (D1–D15) **and [ADR-0023](adr/0023-observability-and-diagnostics.md)** (D1–D10), proposed, each with its decision history in the owner's words.
+- **[The plan](milestone-1-plan.md) rewritten:**
+  - §1 MA10 with the tools, the workspace split and `codegen`;
+  - §2 with 24 decisions;
+  - §3 how every checkpoint is built;
+  - M1-CP2, the engineering foundation; M1-CP3, the platform, processes and IPC; M1-CP4, the walking skeleton with the harnesses; M1-CP5–CP12, each stage widened; M1-CP13–CP15, conformance at scale, fuzzing and budgets, the gate;
+  - observability in CP2, CP3, CP4, CP9, CP11, CP12 and CP14;
+  - the risks and the gates;
+  - a map to MA11 and a tracker.
+- **Records:**
+  - ADR-0021's decision history and a note on MA11: the walking skeleton, a refinement that leaves the items and criteria unchanged;
+  - the decision map: X5 and X6; its Review row, stale since 2026-10-22, now "Done"; a Milestone 1 row;
+  - the index's rows and header.
+
+**Evidence:**
+- **Observed on this Mac:**
+  - Clippy's lints and settings, with `cargo clippy --explain` (clippy 0.1.94);
+  - in a scratch workspace in the session's scratchpad, with cargo and rustc 1.94.1: `cargo new core` only warns, but in a dependent crate, `core::mem` and a foreign macro expanding to `::core::mem` fail with E0433;
+  - `cargo tree -i smallvec`: HarfRust, `icu_segmenter` and `vello_cpu`'s tree;
+  - the spikes' sizes (`wc -l`: 219 files, 16 over 600 lines, 2 over 1,000) and their suppressions (86 `#[expect(` against 11 outer `#[allow(`).
+- **Read on 2026-10-22:**
+  - the Cargo Book's resolver chapter (features unify across the packages of one build) and its workspaces chapter;
+  - Chromium's `checkdeps` README;
+  - Miri's README;
+  - crates.io's API (`icu_normalizer` 2.3.0 depends on `smallvec`);
+  - the Rust 1.81 announcement;
+  - rust-analyzer's architecture document;
+  - "Design Docs at Google" (secondary);
+  - Perfetto's security-model, buffers, formats and UI pages;
+  - Chromium's `persistent_histogram_allocator.h`;
+  - the Servo Book's profiling chapter.
+- **Not confirmed, so not claimed:**
+  - that the Firefox Profiler opens Chrome's trace format; the design names Perfetto's UI only;
+  - that Perfetto's web UI keeps an opened file on the machine; OB23 leaves the viewer to the owner.
+
+**For the owner's attention:**
+- **`smallvec` and the browser's IDNA.** ICU4X's normalizer, which NW2's address bar uses for full IDNA, depends on `smallvec`. A `ub-risk-3` grade at M1-CP2 would bar it from the browser and move that lookup to the network process, an amendment to NW2 (the crate architecture's open question 1).
+- **PF19 against PF16.** PF19 pings each helper once a second, and PF16 allows no idle wakeups. Observability relies on the cycle only while a window is active, and M1-CP3 measures it (observability's open question 5).
+
+**Changed from the approved plan:**
+- **Two commits instead of five:** the documents link to one another, and every commit must pass the link checker;
+- **the URL parser completed at M1-CP11,** with WPT's URL test data in a Rust runner;
+- **vendoring settled at M1-CP2,** since the dependency policy left it to "the first engine milestone".
+
+**Not changed, until the owner accepts the ADRs:** the overview §2, MA1 and MA10, IP8, PL11, the language evaluation's §15.3 and §15.4, DP22, the requirements, the threat model, the roadmap, the handover and CLAUDE.md. ADR-0022's and ADR-0023's consequences list them.
+
+**Side effects:**
+- the scratch workspace in the session's scratchpad (`corename/`, with its build);
+- `cargo info` refreshed the local crates.io index cache;
+- read-only requests to crates.io and the documentation sites above;
+- no crash reports.
 
 ### 2026-10-22 — Session 22 (Round 4's dispositions; its checkpoints; the merge; Milestone 1's plan)
 
