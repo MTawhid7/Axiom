@@ -9,3 +9,13 @@
 //! recorder in process, and expands this charter with it, before its code.
 
 #![forbid(unsafe_code)]
+// Panic-free (ES10; the crate map): its decoder reads records from less
+// trusted processes inside the browser (OB24), and every process records
+// through it, so a panic here would abort any of them.
+#![deny(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::arithmetic_side_effects,
+    clippy::panic
+)]

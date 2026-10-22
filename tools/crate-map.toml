@@ -1,0 +1,555 @@
+# The crate map (the crate architecture's CR2), checked on every commit by
+# tools/check-dependencies.py (CR16). Source: docs/architecture/crates.md §4,
+# accepted with ADR-0022 on 2026-10-23.
+#
+# Every package of the engine's workspace has an entry here, and so does every
+# crate Milestone 1 plans, before it exists: a crate is created when a
+# checkpoint first needs it (the plan's §1), and its entry is already its
+# contract. Later milestones' crates join with their milestone's plan.
+#
+# An entry's keys:
+#   layer      0 foundation, 1 platform, 2 runtime, 3 subsystems, 4 process
+#              assemblies, 5 embedders, 6 executables (CR1); or "build" and
+#              "test" for the crates outside the layers, which no shipping
+#              crate may depend on (CR12).
+#   processes  the processes that may link it: browser, renderer, network,
+#              gpu (from M2), utility (from M7). Empty for build and test code.
+#   group      trusted, sandboxed, build or test (DP9). A crate that depends on
+#              a sandboxed crate is sandboxed itself (DP8: "which its
+#              dependents inherit"), and the checker refuses one that isn't.
+#   deps       the Axiom crates it may depend on (CR1, CR2). A new edge is an
+#              edit here, reviewed with the change that needs it; one that
+#              crosses an architectural interface goes to the owner (CR8).
+#   dev-deps   the Axiom crates its tests may also depend on.
+#   unsafe     whether it may hold `unsafe` (CR6, ES11), which must match
+#              tools/unsafe-policy.txt: only the platform layer's src/sys/,
+#              a later jit, and test-support's src/sys/.
+#   panic      panic-free, checked-arithmetic or ordinary (ES10); the crate's
+#              root declares the class's deny lints.
+#   milestone  the milestone it arrives in.
+#   ships-as   for a shipping executable, the process it is; the checker then
+#              walks its closure of normal dependencies (CR4).
+#   forbid     for a shipping executable, the crates its closure must never
+#              hold: CR4's exclusions that carry security rules, checked
+#              besides `processes`, so that one mistaken edit can't admit them.
+#
+# Panic classes beyond ES10's list of "today" (inference, recorded at M1-CP2):
+# `trace`, `url`, `ipc` and `protocol` are panic-free, because each validates
+# data from less trusted processes inside the browser: helpers' records
+# (OB24), URLs from other processes (NW2), and IPC messages (IP8, IR1). A
+# panic there would abort the browser on a helper's input.
+
+# The shipping executables' common rules (CR4, CR12; MA7).
+[shipping]
+# No build or test code, from Axiom or third parties, in a shipping executable.
+forbid-groups = ["build", "test"]
+# Test-only crates, and Milestone 1's rule that no executable links script.
+forbid = ["headless", "js", "bindings-*"]
+
+# ---------------------------------------------------------------------------
+# Layer 0: the foundation (crates.md §4.1). Shared vocabulary, pure Rust.
+
+[crate.trace]
+layer = 0
+processes = ["browser", "renderer", "network", "gpu", "utility"]
+group = "trusted"
+deps = []
+dev-deps = ["test-support"]
+unsafe = false
+panic = "panic-free"
+milestone = "M1"
+
+[crate.strings]
+layer = 0
+processes = ["browser", "renderer", "network", "gpu", "utility"]
+group = "trusted"
+deps = ["trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+[crate.geometry]
+layer = 0
+processes = ["browser", "renderer", "network", "gpu", "utility"]
+group = "trusted"
+deps = []
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+[crate.url]
+layer = 0
+processes = ["browser", "renderer", "network", "gpu", "utility"]
+group = "trusted"
+deps = ["trace"]
+unsafe = false
+panic = "panic-free"
+milestone = "M1"
+
+# TX3: encoding_rs is `ub-risk-3`, so this crate, and everything that depends
+# on it, runs only in sandboxed helpers (DP8).
+[crate.encoding]
+layer = 0
+processes = ["renderer", "network"]
+group = "sandboxed"
+deps = ["strings", "trace"]
+unsafe = false
+panic = "checked-arithmetic"
+milestone = "M1"
+
+# ---------------------------------------------------------------------------
+# Layer 1: the platform (crates.md §4.2). `unsafe` only in each src/sys/.
+# Apple's parsers of untrusted bytes run only in sandboxed helpers (DP10,
+# TA5), so platform-text (CoreText) and platform-net (Security's trust
+# evaluation of servers' certificates) are sandboxed.
+
+[crate.platform-mach]
+layer = 1
+processes = ["browser", "renderer", "network", "gpu", "utility"]
+group = "trusted"
+deps = ["trace"]
+unsafe = true
+panic = "ordinary"
+milestone = "M1"
+
+[crate.platform-event]
+layer = 1
+processes = ["browser", "renderer", "network", "gpu", "utility"]
+group = "trusted"
+deps = ["platform-mach", "trace"]
+unsafe = true
+panic = "ordinary"
+milestone = "M1"
+
+[crate.platform-process]
+layer = 1
+processes = ["browser", "renderer", "network", "gpu", "utility"]
+group = "trusted"
+deps = ["platform-mach", "trace"]
+unsafe = true
+panic = "ordinary"
+milestone = "M1"
+
+[crate.platform-metal]
+layer = 1
+processes = ["browser", "gpu"]
+group = "trusted"
+deps = ["platform-mach", "geometry", "trace"]
+unsafe = true
+panic = "ordinary"
+milestone = "M1"
+
+[crate.platform-layers]
+layer = 1
+processes = ["browser"]
+group = "trusted"
+deps = ["platform-mach", "geometry", "trace"]
+unsafe = true
+panic = "ordinary"
+milestone = "M1"
+
+[crate.platform-text]
+layer = 1
+processes = ["renderer"]
+group = "sandboxed"
+deps = ["geometry", "trace"]
+unsafe = true
+panic = "ordinary"
+milestone = "M1"
+
+[crate.platform-net]
+layer = 1
+processes = ["network"]
+group = "sandboxed"
+deps = ["trace"]
+unsafe = true
+panic = "ordinary"
+milestone = "M1"
+
+[crate.platform-appkit]
+layer = 1
+processes = ["browser"]
+group = "trusted"
+deps = ["platform-layers", "geometry", "trace"]
+unsafe = true
+panic = "ordinary"
+milestone = "M1"
+
+# ---------------------------------------------------------------------------
+# Layer 2: the runtime (crates.md §4.3).
+
+[crate.ipc]
+layer = 2
+processes = ["browser", "renderer", "network", "gpu", "utility"]
+group = "trusted"
+deps = ["platform-mach", "trace"]
+unsafe = false
+panic = "panic-free"
+milestone = "M1"
+
+[crate.protocol]
+layer = 2
+processes = ["browser", "renderer", "network", "gpu", "utility"]
+group = "trusted"
+deps = ["ipc", "url", "geometry", "trace"]
+unsafe = false
+panic = "panic-free"
+milestone = "M1"
+
+[crate.event-loop]
+layer = 2
+processes = ["browser", "renderer", "network", "gpu", "utility"]
+group = "trusted"
+deps = ["platform-event", "platform-mach", "ipc", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+[crate.gc]
+layer = 2
+processes = ["renderer"]
+group = "trusted"
+deps = ["trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+# ---------------------------------------------------------------------------
+# Layer 3: the subsystems (crates.md §4.4). Documents, in renderers; the
+# parsers inherit `sandboxed` from `encoding`, and their dependents from them.
+
+[crate.html]
+layer = 3
+processes = ["renderer"]
+group = "sandboxed"
+deps = ["strings", "encoding", "trace"]
+unsafe = false
+panic = "checked-arithmetic"
+milestone = "M1"
+
+[crate.xml]
+layer = 3
+processes = ["renderer"]
+group = "sandboxed"
+deps = ["strings", "encoding", "trace"]
+unsafe = false
+panic = "checked-arithmetic"
+milestone = "M1"
+
+[crate.dom]
+layer = 3
+processes = ["renderer"]
+group = "sandboxed"
+deps = ["gc", "strings", "url", "html", "xml", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+[crate.css]
+layer = 3
+processes = ["renderer"]
+group = "trusted"
+deps = ["strings", "url", "geometry", "trace"]
+unsafe = false
+panic = "checked-arithmetic"
+milestone = "M1"
+
+[crate.style]
+layer = 3
+processes = ["renderer"]
+group = "sandboxed"
+deps = ["css", "dom", "strings", "geometry", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+[crate.text]
+layer = 3
+processes = ["renderer"]
+group = "sandboxed"
+deps = ["strings", "geometry", "platform-text", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+[crate.image]
+layer = 3
+processes = ["renderer"]
+group = "trusted"
+deps = ["geometry", "trace"]
+unsafe = false
+panic = "checked-arithmetic"
+milestone = "M1"
+
+[crate.layout]
+layer = 3
+processes = ["renderer"]
+group = "sandboxed"
+deps = ["style", "dom", "css", "text", "strings", "geometry", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+# Validated in the browser at M1, where the compositor is a thread (PL9).
+[crate.display-list]
+layer = 3
+processes = ["renderer", "browser", "gpu"]
+group = "trusted"
+deps = ["geometry", "ipc", "trace"]
+unsafe = false
+panic = "panic-free"
+milestone = "M1"
+
+[crate.paint]
+layer = 3
+processes = ["renderer"]
+group = "sandboxed"
+deps = ["layout", "style", "display-list", "text", "geometry", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+[crate.document]
+layer = 3
+processes = ["renderer"]
+group = "sandboxed"
+deps = ["dom", "html", "xml", "css", "style", "text", "image", "layout", "paint", "display-list", "gc", "url",
+        "strings", "event-loop", "protocol", "geometry", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+# Networking, in the network process.
+
+[crate.http]
+layer = 3
+processes = ["network"]
+group = "trusted"
+deps = ["url", "trace"]
+unsafe = false
+panic = "checked-arithmetic"
+milestone = "M1"
+
+[crate.net]
+layer = 3
+processes = ["network"]
+group = "sandboxed"
+deps = ["http", "url", "platform-net", "event-loop", "ipc", "protocol", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+# Compositing.
+
+[crate.compositor]
+layer = 3
+processes = ["browser", "gpu"]
+group = "trusted"
+deps = ["display-list", "platform-metal", "protocol", "ipc", "event-loop", "geometry", "trace"]
+unsafe = false
+panic = "panic-free"
+milestone = "M1"
+
+[crate.presenter]
+layer = 3
+processes = ["browser"]
+group = "trusted"
+deps = ["platform-layers", "protocol", "ipc", "event-loop", "geometry", "trace"]
+unsafe = false
+panic = "panic-free"
+milestone = "M1"
+
+# The browser's records.
+
+[crate.frame-tree]
+layer = 3
+processes = ["browser"]
+group = "trusted"
+deps = ["url", "protocol", "trace"]
+unsafe = false
+panic = "panic-free"
+milestone = "M1"
+
+[crate.embedder-api]
+layer = 3
+processes = ["browser"]
+group = "trusted"
+deps = ["protocol", "url", "geometry", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+[crate.diagnostics]
+layer = 3
+processes = ["browser"]
+group = "trusted"
+deps = ["trace", "ipc", "protocol", "platform-process", "event-loop", "url"]
+unsafe = false
+panic = "panic-free"
+milestone = "M1"
+
+# ---------------------------------------------------------------------------
+# Layer 4: the process assemblies (crates.md §4.5).
+
+[crate.browser]
+layer = 4
+processes = ["browser"]
+group = "trusted"
+deps = ["frame-tree", "embedder-api", "diagnostics", "compositor", "presenter", "protocol", "ipc", "event-loop",
+        "platform-process", "platform-mach", "url", "geometry", "trace"]
+unsafe = false
+panic = "panic-free"
+milestone = "M1"
+
+[crate.renderer]
+layer = 4
+processes = ["renderer"]
+group = "sandboxed"
+deps = ["document", "event-loop", "ipc", "protocol", "gc", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+[crate.network]
+layer = 4
+processes = ["network"]
+group = "sandboxed"
+deps = ["net", "event-loop", "ipc", "protocol", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+# ---------------------------------------------------------------------------
+# Layer 5: the embedders.
+
+[crate.shell]
+layer = 5
+processes = ["browser"]
+group = "trusted"
+deps = ["browser", "embedder-api", "platform-appkit", "platform-layers", "geometry", "url", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+# EM9's embedder for tests: single-process mode composes every assembly here
+# (CR7), never in a shipping executable.
+[crate.headless]
+layer = 5
+processes = []
+group = "test"
+deps = ["browser", "embedder-api", "diagnostics", "compositor", "renderer", "network", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+# ---------------------------------------------------------------------------
+# Layer 6: the executables, each a few lines of main (CR7).
+
+[crate.axiom]
+layer = 6
+processes = ["browser"]
+ships-as = "browser"
+group = "trusted"
+deps = ["shell", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+# AC4, SC2: no parser or decoder of web content; TX3: UTF-8 only, no encodings;
+# DP10: no TLS stack; and no renderer or network assembly.
+forbid = ["html", "xml", "css", "style", "text", "image", "layout", "paint", "document", "gc", "encoding", "http",
+          "net", "platform-text", "platform-net", "renderer", "network"]
+
+[crate.axiom-renderer]
+layer = 6
+processes = ["renderer"]
+ships-as = "renderer"
+group = "sandboxed"
+deps = ["renderer", "platform-process", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+# RV1-09, DP21: no Metal, CoreAnimation, network service or TLS stack; EM3, IR4:
+# nothing of the browser's.
+forbid = ["platform-metal", "platform-layers", "platform-net", "platform-appkit", "http", "net", "compositor",
+          "presenter", "frame-tree", "embedder-api", "diagnostics", "browser", "shell"]
+
+[crate.axiom-network]
+layer = 6
+processes = ["network"]
+ships-as = "network"
+group = "sandboxed"
+deps = ["network", "platform-process", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+# The overview §2's rule and DP21: nothing of the renderer's, no graphics, no
+# browser.
+forbid = ["html", "xml", "dom", "css", "style", "text", "image", "layout", "paint", "document", "gc", "platform-metal",
+          "platform-layers", "platform-text", "platform-appkit", "compositor", "presenter", "browser", "shell"]
+
+[crate.axiom-headless]
+layer = 6
+processes = []
+group = "test"
+deps = ["headless", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+# ---------------------------------------------------------------------------
+# Build and test crates (crates.md §4.6), outside the layers.
+
+[crate.codegen]
+layer = "build"
+processes = []
+group = "build"
+deps = []
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+# A leaf by design (CR3): every crate's tests may depend on it, so it depends on
+# no Axiom crate. Its src/sys/ holds the counting allocator and the counter of
+# instructions retired that PF5's first tier needs.
+[crate.test-support]
+layer = "test"
+processes = []
+group = "test"
+deps = []
+unsafe = true
+panic = "ordinary"
+milestone = "M1"
+
+[crate.test-scheduler]
+layer = "test"
+processes = []
+group = "test"
+deps = ["event-loop", "platform-event", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+[crate.fault-injection]
+layer = "test"
+processes = []
+group = "test"
+deps = ["ipc", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+[crate.perf-harness]
+layer = "test"
+processes = []
+group = "test"
+deps = ["test-support", "trace"]
+unsafe = false
+panic = "ordinary"
+milestone = "M1"
+
+# ---------------------------------------------------------------------------
+# Third-party crates in the engine's lock (DP22): each with its group (DP9),
+# named in docs/technology/dependency-register.md, and with `build-script` or
+# `proc-macro` set to true where it has one (DP12). None yet: M1-CP2 adds no
+# third-party dependency.
+[third-party]
