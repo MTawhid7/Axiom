@@ -10,7 +10,7 @@
 
 ## Summary
 
-- **Grade: `ub-risk-3`** for `encoding_rs` 0.8.42 as it builds on this Mac (aarch64 with NEON, default feature `alloc`, `simd-accel` off). **DP8 doesn't admit it**, so TX3 stands: the encodings are Axiom's own, in safe Rust, behind Axiom's interface, with `encoding_rs` as the differential reference and fuzzing oracle.
+- **Grade: `ub-risk-3`** for `encoding_rs` 0.8.42 as it builds on this Mac (aarch64 with NEON, default feature `alloc`, `simd-accel` off). **DP8 doesn't admit it** (until Round 4 amended DP8, RV4-02, after which `encoding_rs` is adopted at M1), so TX3 stands: the encodings are Axiom's own, in safe Rust, behind Axiom's interface, with `encoding_rs` as the differential reference and fuzzing oracle.
 - **Three reasons,** each enough on its own under Google's criteria [G2]:
   1. **Safety documentation covers 22 of the 143 `unsafe` blocks that compile** (15%). Google graded 0.8.33 `ub-risk-3` because it "Needs extensive safety comments" [G1]; that reason still holds.
   2. **A new pattern rests on an under-specified question of Rust's semantics:** an empty `asm!` block is used so that freshly written pages can be treated as an initialized `&mut [u8]` without zeroing them (`lib.rs`, around line 5180), where zeroing is a stable alternative.

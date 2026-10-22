@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0016](../adr/0016-style-layout-and-paint.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP15. No Step 4 interface changes (SC1): scrollbars, snapping and sticky positioning use PL6's spatial nodes and PL7's items (LY17, LY18). Paths stay images (LY23): the owner deferred GR5's amendment, which S6-Q4 put to them, to the graphics milestone ([S6 results](../research/s6-results.md) §8) |
+| **Status** | **Binding** since [ADR-0016](../adr/0016-style-layout-and-paint.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP15. No Step 4 interface changes (SC1): scrollbars, snapping and sticky positioning use PL6's spatial nodes and PL7's items (LY17, LY18). Paths stay images (LY23): the owner deferred GR5's amendment, which S6-Q4 put to them, to the graphics milestone ([S6 results](../research/s6-results.md) §8). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): §10 for RV4-14 (CP7) |
 | **Question** | How does layout work: the layout unit, box construction, formatting contexts, intrinsic sizing, writing modes, fragmentation, scrolling and overflow, replaced elements and child frames, fragment reuse? How is the fragment tree painted into a display list, hit-tested and queried? |
 | **Answers** | Step 5 question Q11 ([tracker](../research/step-5-subsystems.md) §3); the layout-unit half of the handed-over question 16 (§2.2); the [rendering pipeline](rendering-pipeline.md)'s open question 4 |
 | **Feeds** | Part 2's ADRs (CP18); CP16 and CP17 (geometry, scrolling and observers for script, and their bindings); [graphics](graphics.md) (display items, property trees, path images, scrollbars); [accessibility](accessibility.md) (geometry and text boundaries) |
@@ -209,7 +209,7 @@ No new dependency is proposed.
 |---|---|---|
 | 1 | How printed pages reach a PDF without font parsing in the browser: glyph images, or glyph outlines as paths (TX15) | The printing milestone |
 | 2 | Depth sorting and plane splitting for 3D rendering contexts (LY19) | The compositor, at that milestone (GR3) |
-| 3 | Taffy as a test-only differential oracle for flexbox and grid, under DP2's rules for test tooling (LY32) | Step 6 |
+| 3 | Taffy as a test-only differential oracle for flexbox and grid, under DP2's rules for test tooling (LY32) | M4, with flexbox and grid (Round 4, RV4-14) |
 | 4 | Parallel layout (LY30) | Step 6 profiling (PL10) |
 | 5 | Limits for hostile documents: recursion depth, boxes per formatting context, path complexity (§7) | Implementation, with Step 6's fuzzing |
 

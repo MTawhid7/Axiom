@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Reviewed** by the owner (2026-10-17). The recommendation was accepted as [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); the owner judged Pattern B's ceremony acceptable (S1-Q2) |
+| **Status** | **Reviewed** by the owner (2026-10-17). The recommendation was accepted as [ADR-0003](../adr/0003-gc-handle-and-rooting-pattern.md); the owner judged Pattern B's ceremony acceptable (S1-Q2). **The build** wasn't recorded, as for S2, S3, S8, S9 and S15 (macOS 27.2); S1's decisions rest on effects the build doesn't change (Round 4's [unreviewed areas](../review/round-4/05-unreviewed-areas.md#2-the-methods-of-s1s4-and-the-spikes-builds) §2) |
 | **Question** | Can a garbage-collected heap shared by JS objects and DOM nodes be written in Rust with `unsafe` confined to the GC, at acceptable ergonomic and runtime cost on the target machine? Which of the two candidate patterns should the engine use? |
 | **Feeds** | [ADR-0002](../adr/0002-implementation-language.md) (final acceptance); ADR-0003, the GC handle and rooting pattern (to be proposed at CP9) |
 | **Plan and raw log** | [Step 2b tracker](step-2b-validation-spikes.md): questions §3, design §4, methods §7, per-checkpoint results §8 |

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0016](../adr/0016-style-layout-and-paint.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP14. The owner accepted the amendment to [ADR-0007](../adr/0007-frame-tree-pipeline-and-input.md) that ST25 and ST31 need, and approved ST10's `:visited` policy |
+| **Status** | **Binding** since [ADR-0016](../adr/0016-style-layout-and-paint.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP14. The owner accepted the amendment to [ADR-0007](../adr/0007-frame-tree-pipeline-and-input.md) that ST25 and ST31 need, and approved ST10's `:visited` policy. **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): §10 for RV4-14 (CP7) |
 | **Question** | How is CSS parsed and the cascade computed: selector matching, the cascade and its caches, invalidation, computed values, custom properties, media and container queries, animations and transitions, and the CSSOM? |
 | **Answers** | Step 5 question Q10 ([tracker](../research/step-5-subsystems.md) §3); the handed-over questions 15 (style invalidation's details) and 16 (the cascade and its caches; the layout unit stays with CP15), and 6 with [graphics](graphics.md) GR9 (§2.2) |
 | **Feeds** | Part 2's ADRs (CP18); CP15 (computed styles for boxes, container queries during layout, used values, pseudo-elements, the flat tree); CP16 (the CSSOM's objects in the heap); CP17 (the CSSOM's bindings, generated from the property table); [text and fonts](text-and-fonts.md) (font descriptors, `@font-face`); [graphics](graphics.md) (compositor animations) |
@@ -223,8 +223,8 @@ No new dependency is proposed.
 |---|---|---|
 | 1 | The amendment to ADR-0007: IV1's lifecycle gains nested lifecycles for size-container subtrees (ST25), and IV2's examples gain the reads that need layout (ST31) | **Decided** at Gate C (2026-10-20): accepted |
 | 2 | `:visited`: partitioned history (Selectors 4, Appendix C) once the browser's history service exists, and never matching until then (ST10) | **Decided** at Gate C (2026-10-20): approved |
-| 3 | Cache sizes and budgets: the sharing cache, the cascade cache, the Bloom filter (ST16, ST17) | Step 6, on the corpus |
-| 4 | Whether the user-agent stylesheet is parsed at process launch or at build time (ST12) | Step 6, by measuring the parse against renderer launch |
+| 3 | Cache sizes and budgets: the sharing cache, the cascade cache, the Bloom filter (ST16, ST17) | M1, within B3, by PF23's rule (Round 4, RV4-14) |
+| 4 | Whether the user-agent stylesheet is parsed at process launch or at build time (ST12) | **Answered** at Step 6 by PF23: at build time if parsing it at launch takes more than 1 ms (Round 4, RV4-14) |
 | 5 | The `var()` expansion limit (ST13) | Implementation, with WPT's tests |
 | 6 | Parallel style (ST33) | Step 6 profiling (PL10) |
 

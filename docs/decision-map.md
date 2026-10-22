@@ -66,7 +66,7 @@ X  Cross-cutting    standards baseline · conformance testing · fuzzing · perf
    - Firefox's Electrolysis began around 2009 and reached all users around 2016–17 [S3].
    - Firefox's site isolation (Fission) arrived in late 2021 [S4].
 
-   The plan: define message-passing boundaries with serializable data now (content ⇄ browser, ⇄ network, ⇄ compositor), and split processes later.
+   The plan: define message-passing boundaries with serializable data now (content ⇄ browser, ⇄ network, ⇄ compositor), and split processes later. **Superseded in Round 1** (RV1-07, RV1-02): real, sandboxed renderer and network processes from M1, and the GPU/compositor process from M2.
 4. **The pipeline data model caps incremental work and parallelism.**
    - Immutable layout output (LayoutNG's fragment tree) enables reuse and possibly parallel layout [S5].
    - A parallel cascade (Stylo) depends on the language's concurrency guarantees [S6].
@@ -83,6 +83,11 @@ X  Cross-cutting    standards baseline · conformance testing · fuzzing · perf
    - Performance versus efficiency cores make thread quality-of-service matter.
    - Instruments requires Xcode.
 8. **AI-assisted translation (2026) lowers the cost of changing *language*, not *invariants*.** Ladybird ported about 25,000 lines from C++ to Rust in roughly two weeks, checked against test262 [S8]. So invest in test oracles from the first milestone.
+9. **Couplings Round 4 found** (2026-10-22; [the review](review/README.md) §5.9, RV4-14):
+   - **P5 ↔ X1, X2:** the XML parser's milestone decides whether M1's CSS target can run at all, since most of `css/CSS2` is XHTML (RV4-01).
+   - **X4 ↔ I1, I4:** the dependency policy's bar decides whether the text stack (HarfRust, ICU4X, through `smallvec`) and the codecs (`encoding_rs`, JPEG) can be reused (RV4-02).
+   - **P1 ↔ F3:** the event loop's hang detection and the helpers' watchdogs bound synchronous requests and Web Locks across processes (RV4-03).
+   - **I2 ↔ X3:** memory one process maps and another allocated is charged to whichever CPU touches it, so the budgets' accounting follows the compositor's mappings (RV4-04).
 
 ## 3. Consequences of the Step 1 decisions
 
@@ -98,7 +103,7 @@ These are recorded in ADR-0001.
 ## 4. Consequences of the Step 3 proposal
 
 These follow from [ADR-0004](adr/0004-process-model-and-sandbox.md), accepted on 2026-10-17, and bind Step 4.
-1. **Every future process boundary is a message interface from the start** (process model PM6). It also works in-process, for tests and a single-process debugging mode.
+1. **Every future process boundary is a message interface from the start** (process model PM6). It also works in-process, for tests and a single-process debugging mode; **since Round 1** (RV1-07), single-process mode exists strictly for automated tests, fuzzing and Miri.
 2. **The browser owns the frame tree, from the first line of code.** Each frame produces its own display list, and the browser routes input (SI4). **Out-of-process iframes are mandatory before L3** (the owner's decision), and this structure lets them arrive without an architectural rewrite.
 3. **An agent cluster never spans processes** (SI7). A renderer may host several clusters of its own site. Step 4 clarified this wording, which earlier read "one agent cluster per process" ([ADR-0006](adr/0006-event-loop-and-threading.md)). This is an input to OQ-5.
 4. **The browser never decodes images or parses fonts.** The display list carries only validated primitives (Rule of 2).

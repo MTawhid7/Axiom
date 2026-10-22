@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | Complete (2026-10-18). **The owner's visual checks of S5-Q1 and S5-Q2 were made at Gate C** (2026-10-20): "I have visually inspected the S5 sheets and verified the Hebrew niqqud and Apple Color Emoji differences. CoreText is approved for system font rasterization under TX12." So S5-Q1 passes, and TX12 is settled; ADR-0011 is accepted. S5-Q5's recommendation, AVIF in the media utility process, was approved at the same gate |
+| **Status** | Complete (2026-10-18). **The owner's visual checks of S5-Q1 and S5-Q2 were made at Gate C** (2026-10-20): "I have visually inspected the S5 sheets and verified the Hebrew niqqud and Apple Color Emoji differences. CoreText is approved for system font rasterization under TX12." So S5-Q1 passes, and TX12 is settled; ADR-0011 is accepted. S5-Q5's recommendation, AVIF in the media utility process, was approved at the same gate. **Re-run on macOS 26B118** (2026-10-22, Round 4's RV4-13; §12): every result a rule rests on holds |
 | **Question** | Does HarfRust shape like CoreText on this Mac's system fonts (S5-Q1)? How do Rust rasterizers' glyphs compare with CoreText's, and at what cost (S5-Q2)? Do valid and malformed web fonts go through a Rust-only path inside S4's renderer profile, with no new rule (S5-Q3)? What does each text stack add to a sandboxed helper's footprint and executable, and how fast is shaping (S5-Q4)? Does ImageIO decode AVIF under the renderer profile, and how do the safe image decoders compare with ImageIO (S5-Q5)? |
 | **Feeds** | [ADR-0011](../adr/0011-text-fonts-and-unicode.md) (its acceptance conditions: S5-Q1, S5-Q3, and TX12 from S5-Q2); [ADR-0012](../adr/0012-graphics-images-and-media.md) (its S5-Q5 condition); [text and fonts](../architecture/text-and-fonts.md) TX6, TX10, TX12, TX13; [images and media](../architecture/images-and-media.md) IM2, IM3; the [dependency register](../technology/dependency-register.md); a refinement of the [process model](../security/process-model.md) §4.1 for the owner |
 | **Plan** | [Step 5 tracker](step-5-subsystems.md) §10.1, authorized at Gate B (2026-10-18) |
 | **Code** | `spikes/s5/rust-text` (`s5-rust-text`), `spikes/s5/text` (`s5-text`) and `spikes/s5/image` (`s5-image`), on branch `step-5`. Formal run at commit `bad07a8`, reproduced at `f20e7f4` (§2) |
-| **Last updated** | 2026-10-20: the owner's checks at Gate C, in the status above |
+| **Last updated** | 2026-10-22: the re-run on 26B118 (§12) |
 
 **Evidence labels** follow the [research conventions](README.md):
 - **Measured** facts come from S5's binaries and scripts, in the formal run named in §2 unless stated otherwise.
@@ -342,6 +342,22 @@ tools/s5-measure.sh --crash-checks                  # everything; target/s5-resu
 | Reproduction (commit `f20e7f4`, clean tree) | `target/s5-results/20261018-203606/` |
 
 `--crash-checks` runs what is expected to crash: ImageIO under S4's unchanged renderer profile and under each removal, and CoreText drawing emoji under S4's text profile. The script moves the resulting crash reports from `~/Library/Logs/DiagnosticReports` into the results.
+
+## 12. Re-run on macOS 26B118 (Round 4)
+
+Authorized by the owner for the architecture review's RV4-13 (2026-10-22, [the review](../review/README.md) §5.9): "Re-run S5, S6, and S7 once on the current macOS build (26B118) prior to Checkpoint 7." TS16 runs the checks that depend on the system again after a macOS update, and this spike's formal runs were on 26B5112a. **The run:** `tools/s5-measure.sh` with its defaults, 2026-10-22 18:27–18:35, started once the one-minute load had fallen to 2.62 (the build then raised it to 5.93 before the first measurement, which the 60 s cool-downs followed); AC power, Low Power Mode off; macOS 27.2 (26B118); without `--crash-checks`, which the comparison didn't need (`target/s5-results/20261022-182712/`, against `20261018-204642/`).
+
+| Check | 26B5112a (2026-10-18) | 26B118 (2026-10-22) |
+|---|---|---|
+| S5-Q1: HarfRust against CoreText over 432 runs | 365 same, 38 split, 15 advance, 14 positions, 0 glyphs | **The same** |
+| S5-Q1: CoreText under S5's text profile against unsandboxed | 0 of 432 runs differ (4 under S4's profile) | **The same** |
+| S5-Q2: the Rust rasterizers against CoreText | Every comparison row, identical under S5's profile | **Identical,** row by row |
+| S5-Q3: WPT's web fonts; malformed variants | 322 OK under both; 2,709 accepted, 1,291 rejected | **The same,** identical under the renderer profile |
+| S5-Q4: footprints of the text stacks | — | Within 3.6% of the earlier run's (the largest change, CoreText's Latin case, 3.23 → 3.34 million bytes) |
+| S5-Q5: the safe decoders' pixels | — | **Identical** |
+| S5-Q5: ImageIO's JPEG pixels | Varied between decodes | Deterministic in this run, and different from the earlier build's for `pattern.jpg` |
+
+**So every result a rule rests on holds on 26B118:** CoreText's rasterization of system fonts and its profile (TX12, TX13), the web-font path (TX21) and the safe decoders (IM2). ImageIO's JPEG output, which changed, decodes nothing for Axiom (IM3 uses ImageIO for AVIF only, in the media utility process). Timings, which the earlier run reported with their spread, are left out of the comparison (measured).
 
 ## Sources
 

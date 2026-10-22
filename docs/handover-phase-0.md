@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **The Phase Zero baseline,** as the owner approved it at Step 6's Gate C (2026-10-20), **as amended by the architecture review's Rounds 1 and 2** (2026-10-21; [the review](review/README.md)), on branch `architecture-review`. It is the starting point of the independent external review the owner commissions before that branch merges into `main`. Milestone 1 is on hold until the review is done (the owner's decision 8 at Gate C). Updated when a review round changes the baseline |
+| **Status** | **The Phase Zero baseline,** as the owner approved it at Step 6's Gate C (2026-10-20), **as amended by the architecture review's Rounds 1, 2 and 4** (2026-10-21 and 2026-10-22; [the review](review/README.md)), on branch `architecture-review`. It was the starting point of Round 3, the independent external review, which Round 4 tested claim by claim. **The review cycle ends with Round 4's checkpoints** (the owner, 2026-10-22: "After CP7 verifies all changes, the review cycle is officially complete (no Round 5)."). Milestone 1 waits for the owner's authorization (MA10). Updated when a review round changes the baseline |
 | **Question** | What did Phase Zero decide, on what evidence, with which trade-offs, assumptions and risks? What did the review change? What is still open, and what should an independent review challenge first? |
-| **Covers** | Steps 0–6, from 2026-10-16 to 2026-10-20, and the review's Rounds 1 and 2 (2026-10-21): ADRs 0001–0021 with their amendments, spikes S1–S10, S12 and S15, and the binding documents |
+| **Covers** | Steps 0–6, from 2026-10-16 to 2026-10-20, and the review's Rounds 1–4 (2026-10-21 and 2026-10-22): ADRs 0001–0021 with their amendments, spikes S1–S10, S12, S15 and S16, and the binding documents |
 | **Builds on** | Every document listed in §12. This one adds no rule |
-| **Last updated** | 2026-10-21 |
+| **Last updated** | 2026-10-22 |
 
 **How to read it.** Each section summarizes the documents it links to. Where this summary is shorter than its source, or seems to differ from it, the source governs: its rules, its numbers, its evidence labels and its dated sources. Every figure was measured on the owner's Mac (§2) between 2026-10-16 and 2026-10-21, as the linked results record. Statements marked **assessment** are this handover's own inference, written for the review. They are not decisions.
 
@@ -26,7 +26,9 @@
 - **The review so far** ([the review](review/README.md)):
   - **Round 1** (2026-10-21): 22 findings, 2 Critical, 6 High, 10 Medium and 4 Low, **all accepted by the owner** and made in checkpoints, with spikes S10, S12 and S15 run and their results approved.
   - **Round 2** (2026-10-21): verified Round 1's changes, and audited accessibility, storage and workers, style and layout, the embedder API and IPC. 15 findings, none Critical or High, so **the review's stopping rule is met** for the scope commissioned. **All accepted** and made in checkpoints (the review's §5.6).
-- **What comes next.** The owner commissions **one final, independent external review** before the review phase ends and `architecture-review` merges into `main`. Milestone 1 starts only when the owner then authorizes its list (MA10). The owner's words: "Implementation should begin only when the plan has been rigorously validated, no significant flaws or gaps remain, and further review yields no meaningful improvements."
+  - **Round 3** (2026-10-21): an independent external review by Gemini, kept verbatim; its verdict, "Blocked by Findings".
+  - **Round 4** (2026-10-22): Round 3's 18 claims tested (4 confirmed, 7 partly, 5 refuted, 1 already covered); the owner's themes of scope by value, reuse and efficiency; every area no round had reviewed; spike S16. 17 findings, 1 Critical (M1's CSS gate needed an XML parser staged at M4) and 1 High (the dependency policy ranked `ub-risk-3` Rust below C). **All accepted** and made in checkpoints CP1–CP7 (the review's §5.9–§5.11).
+- **What comes next.** The review cycle ends after Round 4's checkpoints; `architecture-review` merges into `main`, and `docs/milestone-1-plan.md` sets out Milestone 1's checkpoints (the owner, 2026-10-22). Milestone 1 starts only when the owner then authorizes its list (MA10). The owner's words: "Implementation should begin only when the plan has been rigorously validated, no significant flaws or gaps remain, and further review yields no meaningful improvements."
 - **The decisions that matter most:**
   1. **Its own JavaScript engine,** sharing one garbage-collected heap with the DOM ([ADR-0001](adr/0001-scope-and-target.md) R2; ADRs [0003](adr/0003-gc-handle-and-rooting-pattern.md), [0008](adr/0008-script-agents-and-heap.md), [0017](adr/0017-javascript-engine-and-bindings.md)).
   2. **Rust throughout,** with `unsafe` confined to listed `platform` modules and, later, a `jit` crate; the collector has none ([ADR-0002](adr/0002-implementation-language.md), ADR-0008). Every executable aborts on a panic (Round 1, RV1-16).
@@ -34,7 +36,8 @@
   4. **Out-of-process iframes and the checks V1–V9 before any sensitive use** (L3, at M6, certified on the final topology; the [threat model](security/threat-model.md) §8).
   5. **An interpreter first.** A JIT only on evidence, never before L2, and only in one executable (ADR-0004's J1–J7); whether to build one is decided at M5's gate (Round 1, RV1-13).
   6. **Budgets set on this Mac:** B1–B7, with B1 split between the browser (B1a) and the GPU process (B1b) (Round 1, RV1-02), and a memory ceiling for every corpus page at half of Chrome's measured cost, capped by tier; the content tier is gated by a slope and a plateau on a normalized workload (Round 1, RV1-05) ([ADR-0019](adr/0019-performance-methodology-and-budgets.md)).
-  7. **Standards first,** with each completed area targeting the median of Chrome, Firefox and Safari on its WPT directories ([ADR-0018](adr/0018-corpus-standards-and-testing.md)); Milestone 1's CSS target is interim, over the tests that need no script (Round 1, RV1-01).
+  7. **Standards first,** with each completed area targeting the median of Chrome, Firefox and Safari on its WPT directories ([ADR-0018](adr/0018-corpus-standards-and-testing.md)); Milestone 1's CSS target is interim, over the tests that need no script (Round 1, RV1-01): at least 90.0%, with per-directory floors, and the XML parser at M1 so the XHTML tests can run (Round 4, RV4-01, RV4-09).
+  8. **Reuse by default for supporting infrastructure,** with `ub-risk-3` crates admitted only in sandboxed helpers on DP10's conditions (Round 4, RV4-02); **efficiency validated at every commit, checkpoint and gate** (Round 4, RV4-06).
 - **The largest risks** (assessment; §9, §11):
   - the scope against one developer;
   - an interpreter alone on the app web;
@@ -70,7 +73,7 @@
 | 4 | Event loop, threads, pipeline, invalidation, embedder | 2026-10-18 | ADRs 0005–0009; the overview v0; spike S3 |
 | 5 | The subsystems | 2026-10-20 | ADRs 0010–0017; the dependency policy and eleven subsystem designs; the overview v1; spikes S5–S7 |
 | 6 | Standards, testing, budgets, the roadmap | 2026-10-21 (merged) | ADRs 0018–0021; the corpus, standards, testing, performance, roadmap, Milestone 1 and requirements documents; the overview v2; spikes S8 and S9 |
-| Review | Rounds 1 and 2 of the adversarial review | 2026-10-21 (on `architecture-review`) | The [review](review/README.md)'s rounds and disposition log; amendments to the ADRs and designs; spikes S10, S12 and S15; the [audit of `encoding_rs`](research/encoding-rs-audit.md) |
+| Review | Rounds 1–4 of the review: Round 3 external, Round 4 testing it | 2026-10-21 and 2026-10-22 (on `architecture-review`) | The [review](review/README.md)'s rounds and disposition log; amendments to the ADRs and designs; spikes S10, S12 and S15; the [audit of `encoding_rs`](research/encoding-rs-audit.md) |
 
 ## 3. How to review this repository
 
@@ -449,7 +452,7 @@ The proposed crates ([overview](architecture/overview.md) §2), each named and s
   - **security:** no script engine linked; no credentials by construction, with password forms refused below L2; the helpers apply their profiles before touching input, and every renderer profile denies `iokit-open`; every executable aborts on a panic; the network process killed and stalled, and a renderer that stops receiving, as tests (Round 2, RV2-04, RV2-13); every parser and decoder fuzzed at least an hour, with no open finding; the concurrency checks in TS11's order;
   - **starting it** needs the owner's authorization of MA10's list: the branch, the skeleton (signed by the stable local identity), the dependencies, the test data, the tools (a nightly whose ThreadSanitizer works, as S12 found), and the live loads. **On hold.**
 
-## 5. Empirical findings: spikes S1–S10, S12 and S15
+## 5. Empirical findings: spikes S1–S10, S12, S15 and S16
 
 | Spike | Step | Question | Result |
 |---|---|---|---|
@@ -465,6 +468,7 @@ The proposed crates ([overview](architecture/overview.md) §2), each named and s
 | [S10](research/s10-results.md) | Review | The GPU/compositor process's hop to the browser; zero-copy resources; display-list validation (RV1-02, RV1-09) | **Passes:** the layer commit reached the browser's CoreAnimation commit in **48.8 µs at the median** (118.7 µs at the 99th percentile), against PF13's 1 ms. A renderer's 4 MiB image registered from its memory entry in 18–62 µs, **without a copy**, under RV1-09's renderer profile; a blit would hold it twice. **Validation cost about 9.4 ns an item.** The GPU process's profile needs ten rules, each checked by removal, and its cache directory resolved before the profile applies. **Tiles are charged to the GPU process,** which creates them |
 | [S12](research/s12-results.md) | Review | Can ThreadSanitizer run on macOS 27 (RV1-11)? | **Both routes work:** the nightly of 2026-10-21 with its own runtime, and the April nightly with `-Z external-clangrt` and the Command Line Tools' runtime. Each reports S9's planted race and passes the clean test |
 | [S15](research/s15-results.md) | Review | Does a stable self-signed identity behave as ad-hoc signing, and keep the system's decisions across rebuilds (RV1-17)? | **Yes for the sandbox and the Keychain:** S4's probes, the JIT matrix, CoreText's profile, start-up and IPC behave exactly as under ad-hoc signing, and a rebuild keeps its Keychain item without a dialog. Privacy permissions (TCC) are checked by hand at M1, with the shell |
+| [S16](research/s16-results.md) | Review, Round 4 | What happens to shared memory and port rights when a process dies or a message is dropped; can rusage's counters check efficiency at every checkpoint? | **A dead renderer's memory isn't moved onto the compositor's bill but stays resident, charged to no process,** until unmapped (RV4-04); 1,000 dropped messages left 1,000 port entries, and a failed send returns its rights with an extra reference (RV4-05); **instructions retired varied 0.03–0.15% run to run** against 1.1–37% for wall time (RV4-06) |
 
 **Authorized, not yet run** (the review's §5.2): S11, the collector's pauses and the slot width, and S13, the build cost of generated bindings, before M3; S14, WebAssembly interpreted and compiled, before M3; the census addendum, by hand, before M4.
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP5. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): FT10 and §5, cross-site frames as separate agents from M1 (RV1-03; CP3). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): FT12's note for RV4-16 (CP6) |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP5. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): FT10 and §5, cross-site frames as separate agents from M1 (RV1-03; CP3). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): FT12's note for RV4-16 (CP6); §8 for RV4-14 (CP7) |
 | **Question** | What is the browser-owned frame tree? How do renderers represent frames held by other processes? How do cross-frame operations, navigation and resource loading work, with every decision taken from the browser's own records? |
 | **Answers** | Step 4 questions Q6 and Q7 ([tracker](../research/step-4-architecture-proposal.md) §3); the frame-tree part of SI4 |
 | **Feeds** | ADR-0007; CP6 (per-frame display lists), CP7 (frame scheduling), CP8 (input routing and focus), CP9 (embedder API), CP10 (agents and messaging) |
@@ -180,9 +180,9 @@ From source and documentation read on 2026-10-17 (Sources).
 | # | Question | Where it is settled |
 |---|---|---|
 | 1 | The exact fields of the skeleton replica, and how each synchronous `Window` property is answered | The implementation milestone for frames |
-| 2 | The back-forward cache, and how it fits the memory budgets | Step 6, then a later milestone |
-| 3 | Where shared and service workers run when no same-site renderer exists | Step 5 (workers); [script and heap](script-and-heap.md) §7 |
-| 4 | How `beforeunload` across many processes is bounded, and what the prompt shows | Step 6 |
+| 2 | The back-forward cache, and how it fits the memory budgets | **Answered** at Step 6 by PF22: 2 documents per tab, within B6, emptied first under pressure; measured at the navigation milestone (Round 4, RV4-14) |
+| 3 | Where shared and service workers run when no same-site renderer exists | **Answered:** in a renderer locked to their site, which the browser chooses ([event loop](event-loop-and-threading.md) §4.6; SW9) (Round 4, RV4-14) |
+| 4 | How `beforeunload` across many processes is bounded, and what the prompt shows | **Answered** at Step 6 by PF22: each frame's renderer has 1 s to answer (Round 4, RV4-14) |
 
 ## Sources
 

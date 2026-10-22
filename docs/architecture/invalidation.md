@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP7. IV1 and IV2 amended at Step 5's Gate C (2026-10-20; [style](style.md) ST25, ST31). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): IV13 for RV4-16 (CP6) |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP7. IV1 and IV2 amended at Step 5's Gate C (2026-10-20; [style](style.md) ST25, ST31). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): IV13 for RV4-16 (CP6); §8 for RV4-14 (CP7) |
 | **Question** | What is the rendering lifecycle? How does a change propagate from a DOM mutation through style, layout, paint and compositing, reusing work at each stage? How are synchronous queries such as `offsetWidth` bounded? Which updates bypass the renderer's main thread, and how does that work across processes? |
 | **Answers** | Step 4 questions Q3, Q11 and Q12 ([tracker](../research/step-4-architecture-proposal.md) §3): P3 |
 | **Feeds** | ADR-0007; CP8 (input routing for scrolling); Step 5 (style, layout and graphics algorithms); Step 6 (budgets) |
@@ -148,9 +148,9 @@ mutations ─▶ StyleDirty ─style─▶ StyleClean ─boxes─▶ BoxTreeClea
 
 | # | Question | Where it is settled |
 |---|---|---|
-| 1 | The deadline for listeners that may block scrolling, display-port margins, and starvation bounds | Step 6 |
-| 2 | Which animations may run on the compositor beyond `transform` and `opacity` (filters, scroll-driven animations) | Step 5 |
-| 3 | Damage tracking and partial presentation in the GPU backend | Step 5 (I2) |
+| 1 | The deadline for listeners that may block scrolling, display-port margins, and starvation bounds | **Answered** at Step 6: PF20 (400 ms; one row of tiles beyond the viewport) and PF19 (starvation bounds) (Round 4, RV4-14) |
+| 2 | Which animations may run on the compositor beyond `transform` and `opacity` (filters, scroll-driven animations) | Step 5, which didn't settle it: **now M4,** with CSS animations (Round 4, RV4-14) |
+| 3 | Damage tracking and partial presentation in the GPU backend | **Answered** at Step 5 (I2): damage-limited tiles in retained CoreAnimation layers (GR2–GR4) (Round 4, RV4-14) |
 
 ## Sources
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0008's acceptance (2026-10-18, Gate C). Written at Step 4, CP10; C1 settled by spike S3 and its addendum (CP16), which the owner chose `SliceStack` from ([S3 results](../research/s3-results.md)). SH10 amended at Step 5's Gate C (2026-10-20; [HTML and the DOM](html-and-dom.md) HD11). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): SH1 for RV1-03 (CP3); SH10 and SH13, the collector's end-state and the slot width (RV1-04, RV1-06; CP6) |
+| **Status** | **Binding** since ADR-0008's acceptance (2026-10-18, Gate C). Written at Step 4, CP10; C1 settled by spike S3 and its addendum (CP16), which the owner chose `SliceStack` from ([S3 results](../research/s3-results.md)). SH10 amended at Step 5's Gate C (2026-10-20; [HTML and the DOM](html-and-dom.md) HD11). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): SH1 for RV1-03 (CP3); SH10 and SH13, the collector's end-state and the slot width (RV1-04, RV1-06; CP6). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): §7 for RV4-14 (CP7) |
 | **Question** | How do agents, realms and heaps fit together; how do messages, transfers and `SharedArrayBuffer` cross between agents; how does script integrate with the event loop; and how does the engine meet ADR-0003's obligations C1–C5: cheaper rooting, heap layout, a write-barrier API, a plan for incremental or generational collection, and native interop? What must spike S3 measure? |
 | **Answers** | Step 4 questions Q4 (second half) and Q15 ([tracker](../research/step-4-architecture-proposal.md) §3); OQ-5, OQ-13, OQ-14 |
 | **Feeds** | ADR-0008; spike S3 ([tracker](../research/step-4-architecture-proposal.md) §10); Step 5 (the JavaScript engine and bindings, HTML and DOM) |
@@ -123,9 +123,9 @@ From sources read on 2026-10-17 (Sources).
 | # | Question | Where it is settled |
 |---|---|---|
 | 1 | C1: does the root stack without borrow tracking reach about 1 ns per root and per read? | **Settled at Gate C** (2026-10-18): reads yes (0.53 ns); pushes by S1's method no (about 2.1 ns on every stack). ADR-0008 is accepted with `SliceStack` (decision 5) |
-| 2 | Which bytecode dispatch technique the interpreter uses | S3-Q3 recommends a `match` loop on stable Rust; Step 5 decides |
-| 3 | The pause budget, and the order of incremental and generational collection | Step 6 (budget), then corpus measurements |
-| 4 | Where shared and service workers run when no same-site renderer exists | Step 5 (workers), as frame-tree open question 3 |
+| 2 | Which bytecode dispatch technique the interpreter uses | **Answered** at Step 5: a `match` loop (JE6) (Round 4, RV4-14) |
+| 3 | The pause budget, and the order of incremental and generational collection | **Answered:** the budget at Step 6 (PF15); the end-state fixed before M3, with spike S11 (RV1-04) (Round 4, RV4-14) |
+| 4 | Where shared and service workers run when no same-site renderer exists | **Answered:** in a renderer locked to their site ([event loop](event-loop-and-threading.md) §4.6; SW9) (Round 4, RV4-14) |
 
 ## Sources
 

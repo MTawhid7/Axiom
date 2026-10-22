@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0009's acceptance (2026-10-17, Gate B). Written at Step 4, CP9. Answers OQ-11, subject to the shell milestone's validation (EM11). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): EM9's diagnostics and reference-test path, for RV1-01 and RV1-15 (CP1) |
+| **Status** | **Binding** since ADR-0009's acceptance (2026-10-17, Gate B). Written at Step 4, CP9. Answers OQ-11, subject to the shell milestone's validation (EM11). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): EM9's diagnostics and reference-test path, for RV1-01 and RV1-15 (CP1). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): §8 for RV4-14 (CP7) |
 | **Question** | Where is the boundary between the engine and the browser's shell? What does the API offer in each direction? How does a headless embedder use it for tests and WPT? Is the shell pure Rust, or a thin Swift layer (OQ-11)? |
 | **Answers** | Step 4 question Q14 ([tracker](../research/step-4-architecture-proposal.md) §3): F4; OQ-11 |
 | **Feeds** | ADR-0009; CP11 (overview and crate structure); Step 5 (the shell's subsystems: menus, the accessibility bridge); Step 6 (the testing strategy and WPT) |
@@ -170,7 +170,7 @@ From documentation read on 2026-10-17 (Sources).
 | # | Question | Where it is settled |
 |---|---|---|
 | 1 | OQ-11: confirm the pure-Rust shell | **Confirmed at Gate B** (2026-10-17, ADR-0009 accepted); validated at the start of the shell milestone (EM11) |
-| 2 | The full list of settings, and how the sensitive-site list and the JIT switches are presented | Step 5, with the owner |
+| 2 | The full list of settings, and how the sensitive-site list and the JIT switches are presented | The settings list approved at Gate B (accessibility §6.1); the sensitive-site list and the JIT switches at M5's plan (Round 4, RV4-14) |
 | 3 | WPT's harness integration (`testharness.js`, `testdriver`) on the headless embedder | **Settled** at Step 6 ([testing](../testing.md) TS2), and amended in Round 1 (RV1-01): a script-free executor at M1 and M2, WebDriver from M3 |
 
 ## Sources

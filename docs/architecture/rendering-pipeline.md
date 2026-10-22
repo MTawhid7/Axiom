@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP6. PL10 updated for the amendment of AC5 (OQ-19). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): PL7–PL9, PL15, PL16 and §5 for the GPU/compositor process and renderers without IOKit (RV1-02, RV1-09; CP2); PL9 against pixel stealing (RV1-19; CP5). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): PL8 for RV4-04 (CP4) |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP6. PL10 updated for the amendment of AC5 (OQ-19). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): PL7–PL9, PL15, PL16 and §5 for the GPU/compositor process and renderers without IOKit (RV1-02, RV1-09; CP2); PL9 against pixel stealing (RV1-19; CP5). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): PL8 for RV4-04 (CP4); §8 for RV4-14 (CP7) |
 | **Question** | What data structures make up the pipeline, from the DOM through style, the box tree, the fragment tree and the per-frame display list to the browser's compositor? Who owns each one, on which thread, and what crosses a process boundary? How are strings and atoms represented? |
 | **Answers** | Step 4 questions Q2, Q8, Q9 and Q10 ([tracker](../research/step-4-architecture-proposal.md) §3): P2, and the representation part of P4 |
 | **Feeds** | ADR-0007; CP7 (invalidation), CP8 (hit testing and accessibility), CP10 (the heap's DOM arenas); Step 5 (text, graphics, style, layout) |
@@ -158,9 +158,9 @@ From documentation read on 2026-10-17 (Sources).
 | # | Question | Where it is settled |
 |---|---|---|
 | 1 | Amend AC5 and EL11 to allow read-only lending of DOM arenas during a frozen rendering stage, enabling parallel style and layout? | **Resolved at Gate B** (2026-10-17): amended. Parallel stages are built only when profiling justifies them (OQ-19) |
-| 2 | Where glyphs are rasterized long-term: the renderer, or a GPU process | Step 5 (I1, I2) |
-| 3 | The rasterizer and the GPU backend behind the compositor | Step 5 (I2) |
-| 4 | The layout unit, and the cascade's caches | Step 5 (layout, style) |
+| 2 | Where glyphs are rasterized long-term: the renderer, or a GPU process | **Answered** at Step 5 (I1): atlases in the renderer, with glyph runs for a GPU process as an option (PL8) (Round 4, RV4-14) |
+| 3 | The rasterizer and the GPU backend behind the compositor | **Answered** at Step 5 (I2): Metal through `platform`, with Axiom's own pipelines (GR1, GR3) (Round 4, RV4-14) |
+| 4 | The layout unit, and the cascade's caches | **Answered** at Step 5 (P6): a 1/64-pixel unit; shared computed styles with evictable caches (Round 4, RV4-14) |
 
 ## Sources
 

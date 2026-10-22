@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0017](../adr/0017-javascript-engine-and-bindings.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP17. No Step 4 interface changes (SC1). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): WB20 and §8, remote window proxies in the first script stage (RV1-03; CP3); WB22, the bindings split by interface group (RV1-18; CP5) |
+| **Status** | **Binding** since [ADR-0017](../adr/0017-javascript-engine-and-bindings.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP17. No Step 4 interface changes (SC1). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): WB20 and §8, remote window proxies in the first script stage (RV1-03; CP3); WB22, the bindings split by interface group (RV1-18; CP5). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): §10 for RV4-14 (CP7) |
 | **Question** | How are the WebIDL bindings generated: platform objects in the heap, argument conversion, rooting conventions, prototypes and realms, exceptions, cross-origin objects, and the hot path of event dispatch? |
 | **Answers** | Step 5 question Q13 ([tracker](../research/step-5-subsystems.md) §3); the bindings part of the handed-over question 18 (§2.2); closes [HTML and the DOM](html-and-dom.md)'s JavaScript facet (HD30) |
 | **Feeds** | Part 2's ADRs (CP18); every subsystem that exposes an interface to script |
@@ -162,7 +162,7 @@ No new dependency is proposed: the IDL is data, and the generator is Axiom's.
 
 | # | Question | Where it is settled |
 |---|---|---|
-| 1 | How the generated code's size and build time compare with T1–T4 and B2 (WB22) | Step 6 |
+| 1 | How the generated code's size and build time compare with T1–T4 and B2 (WB22) | M3's plan, measured as RV1-18 measured style's generated code (Round 4, RV4-14) |
 | 2 | Which interfaces the first script milestone implements (WB3) | That milestone's plan |
 
 ## Sources

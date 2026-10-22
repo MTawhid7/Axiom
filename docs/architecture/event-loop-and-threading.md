@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0006's acceptance (2026-10-17, Gate B). Written at Step 4, CP3. EL11 amended at Gate B (OQ-19). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): the browser's compositor thread and the GPU/compositor process's threads, §4.2 (RV1-02; CP2); EL11's second exception, parallel marking in pauses (RV1-04; CP6). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): §4.7 and EL17 for RV4-03 (CP3) |
+| **Status** | **Binding** since ADR-0006's acceptance (2026-10-17, Gate B). Written at Step 4, CP3. EL11 amended at Gate B (OQ-19). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): the browser's compositor thread and the GPU/compositor process's threads, §4.2 (RV1-02; CP2); EL11's second exception, parallel marking in pauses (RV1-04; CP6). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): §4.7 and EL17 for RV4-03 (CP3); §7 for RV4-14 (CP7) |
 | **Question** | How does each Axiom process run its work? Which threads exist, how does each one wait, how is the HTML event loop implemented and scheduled, what drives frame production, and how do agents and workers map onto threads and heaps? |
 | **Answers** | Step 4 questions Q1–Q3 and the first half of Q4 ([tracker](../research/step-4-architecture-proposal.md) §3); OQ-5 in part |
 | **Feeds** | ADR-0006; CP4 (IPC), CP5 (frame tree), CP6 (pipeline), CP7 (invalidation), CP8 (input), CP9 (embedder API), CP10 (script and heap) |
@@ -272,11 +272,11 @@ Storage runs on its own thread so that a slow network can't delay a synchronous 
 
 | # | Question | Where it is settled |
 |---|---|---|
-| 1 | Starvation bounds for EL16, timer leeway values, and hang deadlines | Step 6 (performance budgets) |
-| 2 | Does QoS travel with one-way Mach messages? (macOS runtime note §12, question 2) | CP4 |
-| 3 | Do style and layout run in parallel on the helper pool, and on what data? | CP6 |
-| 4 | Which thread first receives each kind of input, the compositor or the core? | CP8 |
-| 5 | Process choice for shared and service workers | CP5 |
+| 1 | Starvation bounds for EL16, timer leeway values, and hang deadlines | **Answered** at Step 6: PF19 (starvation bounds and deadlines, by task age since Round 4) and PF17 (hidden pages' timers) (Round 4, RV4-14) |
+| 2 | Does QoS travel with one-way Mach messages? (macOS runtime note §12, question 2) | OQ-20: measured at M1, the first milestone with Mach messages between processes (MA12; Round 4, RV4-14) |
+| 3 | Do style and layout run in parallel on the helper pool, and on what data? | **Answered** at Gate B (OQ-19): read-only lending of the DOM's arenas allowed; parallel stages built only when profiling shows the main thread over PF13's 8 ms (PL10) (Round 4, RV4-14) |
+| 4 | Which thread first receives each kind of input, the compositor or the core? | **Answered** at CP8: input enters at the compositor thread (IN1) (Round 4, RV4-14) |
+| 5 | Process choice for shared and service workers | **Answered:** a renderer locked to the worker's site, which the browser chooses (§4.6; SW9) (Round 4, RV4-14) |
 
 ## Sources
 

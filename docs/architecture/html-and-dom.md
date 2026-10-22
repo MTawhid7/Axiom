@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0015](../adr/0015-html-parsing-and-the-dom.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP13. The owner accepted the amendment to [ADR-0008](../adr/0008-script-agents-and-heap.md) that HD11 needs, and deferred XSLT ([OQ-22](../open-questions.md)). **Amended by the architecture review's Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): HD9 and §8, the XML parser for documents at the first document milestone (RV4-01); HD6, HD28 and §8 for RV4-08 (CP6) |
+| **Status** | **Binding** since [ADR-0015](../adr/0015-html-parsing-and-the-dom.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP13. The owner accepted the amendment to [ADR-0008](../adr/0008-script-agents-and-heap.md) that HD11 needs, and deferred XSLT ([OQ-22](../open-questions.md)). **Amended by the architecture review's Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): HD9 and §8, the XML parser for documents at the first document milestone (RV4-01); HD6, HD28 and §8 for RV4-08 (CP6); §10 for RV4-14 (CP7) |
 | **Question** | How is HTML parsed, from bytes to tree? How is the DOM represented in Pattern B arenas: nodes, links, attributes, text, events, mutation observers, Shadow DOM, custom elements, ranges and selection, forms and editing? |
 | **Answers** | Step 5 question Q9 ([tracker](../research/step-5-subsystems.md) §3); the handed-over question 18, on S3's listener snapshot (§2.2); HTML's encoding sniffing, which [text and fonts](text-and-fonts.md) TX3 left to CP13 |
 | **Feeds** | Part 2's ADRs (CP18); CP14 (selectors over the DOM, style's side tables, invalidation hooks); CP15 (boxes built from the DOM, hit tests back to nodes); CP16 (the value type for nodes, microtasks, script elements); CP17 (the DOM's JavaScript facet: prototypes, expando properties, `[CEReactions]`, event handler attributes) |
@@ -207,7 +207,7 @@ No new dependency is proposed.
 |---|---|---|
 | 1 | The amendment to ADR-0008: node arenas excluded from compaction (HD11) | **Decided** at Gate C (2026-10-20): accepted |
 | 2 | Whether to support XSLT (DOM §9). It needs an XSLT 1.0 processor of Axiom's own, for a feature little used on modern pages (inference) | **Decided** at Gate C (2026-10-20): deferred until a concrete use case arises ([OQ-22](../open-questions.md)) |
-| 3 | The parser's time budget and the read-ahead bound (HD2, HD5) | Step 6, on the corpus |
+| 3 | The parser's time budget and the read-ahead bound (HD2, HD5) | **Answered** at Step 6 by PF23: yields after 4 ms while interactive and 30 ms during the load; 64 KiB read ahead (Round 4, RV4-14) |
 | 4 | Statistical encoding detection, for legacy pages without a declared encoding (HD3) | A later milestone, with the corpus |
 | 5 | Whether DOM text needs ropes (HD13) | CP16, and measurement at the first document milestone |
 

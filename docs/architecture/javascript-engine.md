@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0017](../adr/0017-javascript-engine-and-bindings.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP16. No Step 4 interface changes (SC1). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): JE27 for RV1-15 (CP1); §4, JE13 and JE22 for RV1-08 (CP4); JE30 and JE31 for RV1-13 (CP5); JE9, JE10 and JE29 for RV1-04 and RV1-06 (CP6) |
+| **Status** | **Binding** since [ADR-0017](../adr/0017-javascript-engine-and-bindings.md)'s acceptance (2026-10-20, Step 5's Gate C). Written at Step 5, CP16. No Step 4 interface changes (SC1). **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): JE27 for RV1-15 (CP1); §4, JE13 and JE22 for RV1-08 (CP4); JE30 and JE31 for RV1-13 (CP5); JE9, JE10 and JE29 for RV1-04 and RV1-06 (CP6). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): §3's note on the encodings for RV4-02 (CP2); §10 for RV4-14 (CP7) |
 | **Question** | How is Axiom's own JavaScript engine built: the front end, the bytecode and its interpreter, the value type, objects and strings, execution of functions, generators and modules, the standard library with `RegExp`, `Intl` and dates, errors and interrupts, and room for a JIT? What would a WebAssembly engine need from it? |
 | **Answers** | Step 5 question Q12 ([tracker](../research/step-5-subsystems.md) §3); the handed-over questions 17 (dispatch), 18 (the value type, rooting, the benchmark) and 19 (ropes and slices), and evidence for 21 (OQ-3) (§2.2); [script and heap](script-and-heap.md) open question 2 |
 | **Feeds** | Part 2's ADRs (CP18); CP17 (bindings: the value type, conversions, platform objects); [OQ-3](../open-questions.md), as evidence |
@@ -202,8 +202,8 @@ No new dependency is proposed: ICU4X is already admitted (TX2), and the differen
 | # | Question | Where it is settled |
 |---|---|---|
 | 1 | The accumulator and the instruction set's encoding, measured against S3's register machine (JE5) | The first script milestone |
-| 2 | Explicit tail calls, once `become` is stable (JE6) | When the feature stabilizes |
-| 3 | The minimum lengths for ropes and slices, and when slices are copied out (JE12) | Step 6, on the corpus |
+| 2 | Explicit tail calls, once `become` is stable (JE6) | When the feature stabilizes; still incomplete on `nightly-2026-10-21` (checked in Round 4) |
+| 3 | The minimum lengths for ropes and slices, and when slices are copied out (JE12) | **Answered** at Step 6 by PF23: ropes and slices from length 13, as V8 (Round 4, RV4-14) |
 | 4 | The bytecode cache's design and validation (JE3) | A later milestone |
 | 5 | WebAssembly: our own engine or an embedded one (JE31) | OQ-3, before any Wasm milestone |
 

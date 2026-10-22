@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | Complete (2026-10-20), from two formal runs. **S6-Q1 and S6-Q3 pass at the median** in both, with their tails reported; S6-Q1's idle condition held in five of six windows. S6-Q2 and S6-Q4 are reported. **S6-Q5:** CoreAnimation honours the colour tags, as measured in the owner's screenshot; **its memory condition is not met as measured** (§7). The owner accepted [ADR-0012](../adr/0012-graphics-images-and-media.md) at Gate C (2026-10-20), then approved B1's revision, deferred GR5's amendment to the graphics milestone and adopted `vello_cpu` (§8) |
+| **Status** | Complete (2026-10-20), from two formal runs. **S6-Q1 and S6-Q3 pass at the median** in both, with their tails reported; S6-Q1's idle condition held in five of six windows. S6-Q2 and S6-Q4 are reported. **S6-Q5:** CoreAnimation honours the colour tags, as measured in the owner's screenshot; **its memory condition is not met as measured** (§7). The owner accepted [ADR-0012](../adr/0012-graphics-images-and-media.md) at Gate C (2026-10-20), then approved B1's revision, deferred GR5's amendment to the graphics milestone and adopted `vello_cpu` (§8). **Re-run on macOS 26B118** (2026-10-22, Round 4's RV4-13; §11): S6-Q1 and S6-Q3 pass at the median again, with no idle wakeups |
 | **Question** | Can the browser's compositor draw page-shaped display lists with Axiom's own Metal pipelines into tiled IOSurface layers of a 2,560 × 1,600 window, within a 60 Hz frame budget (S6-Q1)? What does damage-limited drawing save (S6-Q2)? Do scrolling and animation by layers stay within 1 ms a frame (S6-Q3)? How do CPU and GPU path filling compare (S6-Q4)? What do the device, the pipelines and the tiles cost in memory, and does CoreAnimation honour Display P3 tags (S6-Q5)? |
 | **Feeds** | [ADR-0012](../adr/0012-graphics-images-and-media.md) (its conditions: S6-Q1, S6-Q3 and S6-Q5); [graphics](../architecture/graphics.md) GR2, GR5, GR6, GR8, GR12 and its open questions; [text and fonts](../architecture/text-and-fonts.md) TX12's Rust rasterizer; the [process model](../security/process-model.md)'s B1; Step 6's budgets |
 | **Plan** | [Step 5 tracker](step-5-subsystems.md) §10.2, authorized at Gate B (2026-10-18), with its thresholds confirmed |
 | **Code** | `spikes/s6/compositor` (`s6-compositor`) and `tools/s6-measure.sh` (`c2c8ad5`); `tools/s6-tails.py` and `tools/png-region-stats.py` for the analysis. Formal runs at commits `45bff95` and `b4948ce` (§2) |
-| **Last updated** | 2026-10-20: the second formal run; the colour check from the owner's screenshot; the display's scaled mode; the owner's decisions on B1, GR5 and the rasterizer |
+| **Last updated** | 2026-10-22: the re-run on 26B118 (§11) |
 
 **Evidence labels** follow the [research conventions](README.md):
 - **Measured** facts come from S6's binary and script, in the two formal runs named in §2, or from the owner's screenshot, measured with `tools/png-region-stats.py`. Counts of frames over a threshold come from the runs' per-frame traces, counted with `tools/s6-tails.py` (§10).
@@ -266,6 +266,20 @@ The regions are those used for the screenshot of the second run; the squares' po
 | First formal run (commit `45bff95`, clean tree, run by the owner) | `target/s6-results/20261019-201443/`: `summary.txt`, `environment.txt`, `q1-run*`, `q2-*-run*` with their `.top.txt` samples, `q3-*-run*`, `q4-run*`, `q5-run*`, `q5-show.txt`, and each timed scenario's `.trace.tsv` |
 | Second formal run (commit `b4948ce`, clean tree, run by the owner) | `target/s6-results/20261020-074751/`: the same files, and `q5-show-screenshot.png`, the owner's screenshot |
 | Informal quick run (2026-10-18, on battery, the window occluded) | `target/s6-results/20261018-214604/` |
+
+## 11. Re-run on macOS 26B118 (Round 4)
+
+Authorized by the owner for the architecture review's RV4-13 (2026-10-22, [the review](../review/README.md) §5.9): "Re-run S5, S6, and S7 once on the current macOS build (26B118) prior to Checkpoint 7." TS16 runs the checks that depend on the system again after a macOS update, and this spike's formal runs were on 26B5112a. **The run:** `tools/s6-measure.sh` with its defaults, 2026-10-22 18:37–18:49, started at a load average of 2.77, three runs after 60 s cool-downs; AC power, Low Power Mode off; macOS 27.2 (26B118) (`target/s6-results/20261022-183751/`, against the second formal run, `20261020-074751/`). **The window was visible in 22 of 24 samples;** run 1's S6-Q1 and one S6-Q2 case weren't, and are left out below.
+
+| Check | 26B5112a (2026-10-20) | 26B118 (2026-10-22) |
+|---|---|---|
+| S6-Q1: a typical update, compositor CPU and GPU at the median | 0.58–1.93 ms; 0.12–0.28 ms | **1.01–1.82 ms; 0.15–0.26 ms,** within PF13's 2 ms and 4 ms |
+| S6-Q1: idle wakeups over 10 s | 0, 1 and 0 | **0 in both visible runs** |
+| S6-Q3: frames that only move layers, CPU at the median | Animation 0.19–0.27 ms; scrolling without new tiles 0.33–0.44 ms | **0.19–0.20 ms; 0.29–0.42 ms,** within 1 ms |
+| S6-Q5: the footprint at each stage | Window 16.0 MB; device 16.6; display lists 61.3; visible tiles 97.8 | **16.2; 16.6; 61.1; 97.6,** within 0.2 MB |
+| S6-Q5: colour tags | Display P3 and sRGB tagged, honoured | **Tagged as before;** the owner's visual check by eye wasn't repeated (`--show` stays 0) |
+
+**So S6's verdicts hold on 26B118:** S6-Q1 and S6-Q3 pass at the median, with no idle wakeups, and the memory and colour results behind B1 and GR6 are unchanged (measured).
 
 ## Sources
 

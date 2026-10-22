@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP8. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): IN1 for the GPU/compositor process (RV1-02; CP2). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): IN7 and §5 for RV4-08 (CP6) |
+| **Status** | **Binding** since ADR-0007's acceptance (2026-10-17, Gate B). Written at Step 4, CP8. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): IN1 for the GPU/compositor process (RV1-02; CP2). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): IN7 and §5 for RV4-08 (CP6); §8 for RV4-14 (CP7) |
 | **Question** | How does the browser route pointer, wheel, keyboard, IME and gesture input to frames that may live in different processes? How are focus, scrolling, user activation and accessibility handled, when AppKit asks synchronous questions and the browser may never block on a renderer? |
 | **Answers** | Step 4 question Q13 ([tracker](../research/step-4-architecture-proposal.md) §3); the input-routing part of SI4 |
 | **Feeds** | ADR-0007; CP9 (embedder API: input and accessibility at the shell boundary); Step 5 (the accessibility bridge, I5) |
@@ -124,9 +124,9 @@ NSEvent (main thread)
 
 | # | Question | Where it is settled |
 |---|---|---|
-| 1 | The deadlines for imprecise hit tests and for listeners that may block scrolling | Step 6 |
-| 2 | Which key equivalents a page may override | Step 5 (shell), with the owner |
-| 3 | The mapping from accessibility trees to `NSAccessibility` roles and actions | Step 5 (I5) |
+| 1 | The deadlines for imprecise hit tests and for listeners that may block scrolling | **Answered** at Step 6 by PF20: one frame for an imprecise hit test; 400 ms for a listener (Round 4, RV4-14) |
+| 2 | Which key equivalents a page may override | **Answered** at Step 5's Gate B: the reserved key equivalents, approved as written ([accessibility](accessibility.md) §6.2) (Round 4, RV4-14) |
+| 3 | The mapping from accessibility trees to `NSAccessibility` roles and actions | **Answered** at Step 5 (I5; [ADR-0014](../adr/0014-accessibility.md)) (Round 4, RV4-14) |
 | 4 | Dragging into and out of frames, and between processes | A later milestone |
 
 ## Sources

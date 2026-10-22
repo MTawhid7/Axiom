@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Complete** (2026-10-20). **In Chrome:** the five corpus pages whose sites' terms permit automated loads, three valid runs each (§3–§6), and the other eight signed in, by the owner's hand, three runs each (§7). **In Safari:** the ten pages that work logged out, by the owner's hand with the corrected tool, three runs each (§7.4), recorded at Step 6's Gate C. The first Safari session is superseded, since the tool's protocol kept earlier pages open. Not run: Chrome logged out by hand, and Safari signed in (§7.5) |
+| **Status** | **Complete** (2026-10-20). **In Chrome:** the five corpus pages whose sites' terms permit automated loads, three valid runs each (§3–§6), and the other eight signed in, by the owner's hand, three runs each (§7). **In Safari:** the ten pages that work logged out, by the owner's hand with the corrected tool, three runs each (§7.4), recorded at Step 6's Gate C. The first Safari session is superseded, since the tool's protocol kept earlier pages open. Not run: Chrome logged out by hand, and Safari signed in (§7.5). **The build** wasn't recorded (macOS 27.2) (Round 4, RV4-13) |
 | **Question** | What does each corpus page use and cost in shipping engines on this Mac? Its features (S8-Q1), size (S8-Q2), memory (S8-Q3), and load milestones and cost without input (S8-Q4) |
 | **Feeds** | The [corpus](../corpus.md)'s baselines; the [standards baseline](../standards.md)'s priorities (CP4); the [performance budgets](../performance.md) (CP6) |
 | **Plan** | [Step 6 tracker](step-6-standards-budgets-roadmap.md) §10.1, authorized at Gate A (2026-10-20), as refined at CP2 to the sites' terms ([corpus](../corpus.md) CO3–CO6) |

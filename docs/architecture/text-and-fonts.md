@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Binding** since [ADR-0011](../adr/0011-text-fonts-and-unicode.md)'s acceptance (2026-10-20, Step 5's Gate C), after the owner's visual check of S5's sheets. Written at Step 5, CP3. **Spike S5** ([results](../research/s5-results.md)) settled TX12: CoreText rasterizes system fonts. TX6, TX10, TX12 and TX13 carry its findings. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): TX3 and §4, the encodings behind Axiom's interface and `encoding_rs` 0.8.42 graded (RV1-08; CP4); TX13, TX21 and the new TX22–TX24, metrics, smoothing and optical sizing (RV1-10; CP5). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): TX3, §4, §6, §8–§10 for RV4-02 and RV4-08 (CP2) |
+| **Status** | **Binding** since [ADR-0011](../adr/0011-text-fonts-and-unicode.md)'s acceptance (2026-10-20, Step 5's Gate C), after the owner's visual check of S5's sheets. Written at Step 5, CP3. **Spike S5** ([results](../research/s5-results.md)) settled TX12: CoreText rasterizes system fonts. TX6, TX10, TX12 and TX13 carry its findings. **Amended by the architecture review's Round 1** (the owner's dispositions, 2026-10-21; [the review](../review/README.md) §5): TX3 and §4, the encodings behind Axiom's interface and `encoding_rs` 0.8.42 graded (RV1-08; CP4); TX13, TX21 and the new TX22–TX24, metrics, smoothing and optical sizing (RV1-10; CP5). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): TX3, §4, §6, §8–§10 for RV4-02 and RV4-08 (CP2); §10 for RV4-14 (CP7) |
 | **Question** | How does the engine handle Unicode: properties, segmentation, line breaking, bidi, normalization, encodings? How are fonts found, matched and fallen back to, how are web fonts loaded safely, how is text shaped, and where and how are glyphs rasterized? |
 | **Answers** | Step 5 questions Q2 and Q3 ([tracker](../research/step-5-subsystems.md) §3); decision-map item I1, and the text part of P4; the tracker's handed-over questions 2 and 3 (§2.2) |
 | **Feeds** | ADR-0011 (CP9); spike S5 (tracker §10); CP4 (the glyph atlas); CP6 (IDNA); CP13 (decoders, sniffing); CP14 (font properties, `@font-face`); CP15 (inline layout); CP16 (`Intl`, `RegExp`, identifiers) |
@@ -216,7 +216,7 @@ Added by the owner's disposition of RV1-10 (2026-10-21): "Establish explicit rul
 | 2 | The grade of the `smallvec` version adopted (§4) | M1's plan (MA12); a `ub-risk-3` grade admits it under DP8 as amended in Round 4 |
 | 3 | Whether to make macOS's on-demand font assets readable from renderers, and with which reviewed rule | The first text milestone, by S4's method |
 | 4 | The hyphenation backend (TX18) | The milestone that implements `hyphens: auto` |
-| 5 | How the browser processes IDNA within DP9 (§6) | CP6 |
+| 5 | How the browser processes IDNA within DP9 (§6) | **Answered** at CP6 by NW2's IDNA modes, which say so (Round 4, RV4-14) |
 | 6 | The size of ICU4X's compiled data, by component | S5-Q4. **Answered** (2026-10-18): stripped, the rule-based line breaker adds 65 KiB, the "auto" one with its dictionaries and LSTM models 389 KiB, and line, word, grapheme and sentence segmentation with the Script property 2.38 MiB; the data adds nothing measurable to the footprint |
 
 ## Sources

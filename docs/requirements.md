@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): RQ45 and RQ46 for RV1-01 (CP1); RQ12, RQ35 and RQ53 for RV1-02, RV1-07 and RV1-09 (CP2); §8's open items and RQ18 for RV1-11 and RV1-13 (CP5). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](review/README.md) §5.9): RQ40 for RV4-01 (CP1); RQ5 for RV4-06 (CP5) |
+| **Status** | **Approved** as complete for Phase Zero (2026-10-20, Step 6's Gate C), with the [overview](architecture/overview.md) v2: "The Architecture Overview v2 and Requirements Traceability matrix (docs/requirements.md, RQ1–RQ66) are approved as complete for Phase Zero." Written at Step 6, CP10; under the independent architecture review. **Amended by the review's Round 1** (the owner's dispositions, 2026-10-21; [the review](review/README.md) §5): RQ45 and RQ46 for RV1-01 (CP1); RQ12, RQ35 and RQ53 for RV1-02, RV1-07 and RV1-09 (CP2); §8's open items and RQ18 for RV1-11 and RV1-13 (CP5). **Amended by Round 4** (the owner's dispositions, 2026-10-22; [the review](review/README.md) §5.9): RQ40 for RV4-01 (CP1); RQ5 for RV4-06 (CP5); RQ30, RQ54, RQ56 and RQ61 for RV4-14 (CP7) |
 | **Question** | Does every requirement trace from its source to the milestone that verifies it, and to the check that does? |
 | **Answers** | Part of Step 6 question Q7 ([tracker](research/step-6-standards-budgets-roadmap.md) §3); the tracker's handed-over question 30 (§2.2). Planned since Step 1 |
 | **Builds on** | The [charter](charter.md); the accepted ADRs; the [threat model](security/threat-model.md) and [process model](security/process-model.md); the [corpus](corpus.md), [standards](standards.md), [testing](testing.md) and [performance](performance.md) documents; the [roadmap](roadmap.md) and [Milestone 1](milestone-1.md) |
@@ -53,7 +53,7 @@ Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone th
 | RQ27 | A deterministic, testable core (AC6) | EL24; EM9; IV14 | M1 | MA8: chunking and repetition independence; the virtual clock |
 | RQ28 | Memory is designed and budgeted (AC7) | Each design's memory section; ADR-0019 | Every gate | The budgets (MS7) |
 | RQ29 | IPC: Mach, endpoints as capabilities, generated safe decoders, `Untrusted<T>` | [ADR-0005](adr/0005-ipc-transport-and-interfaces.md) | M1 (Mach channels between processes, generated code: as amended in Round 1, RV1-07), M2 (audit-token pinning) | Decoders fuzzed (TS9); V2 |
-| RQ30 | One wait per thread; a browser core thread; one thread and heap per event loop | [ADR-0006](adr/0006-event-loop-and-threading.md) | M1 (threads), M3 (the HTML event loop) | Idle checks (PF16); ThreadSanitizer when its runtime works (S9-Q2) |
+| RQ30 | One wait per thread; a browser core thread; one thread and heap per event loop | [ADR-0006](adr/0006-event-loop-and-threading.md) | M1 (threads), M3 (the HTML event loop) | Idle checks (PF16); ThreadSanitizer by the route S12 found (RV1-11; MA7; Round 4, RV4-14) |
 | RQ31 | Five owned stages; a compiler-checked lifecycle; reuse at each stage | ADR-0007 | M1 | IV14's self-oracle (MA8) |
 | RQ32 | Pattern B's heap with `SliceStack`; the node arena never compacted | ADR-0003; ADR-0008 (with SH10's amendment) | M1 (the node arena), M3 (the JavaScript heap) | The collector's pause budget (PF15); stable identities (HD33) |
 | RQ33 | The shell as an embedder over a message API; a headless embedder; a pure-Rust shell | [ADR-0009](adr/0009-embedder-api-and-shell.md) | M1 | The objc2 classes validated (EM11); the headless embedder runs WPT (TS2) |
@@ -92,14 +92,14 @@ Each entry RQ1–RQ66 names a requirement, where it comes from, the milestone th
 |---|---|---|---|---|
 | RQ52 | One method for every measurement | [ADR-0019](adr/0019-performance-methodology-and-budgets.md) PF1–PF5 | Every measurement | PF1's conditions, recorded with each figure (MA9) |
 | RQ53 | B1: the core browser at most 60 MB, plus tiles at 6.2 bytes per window pixel; split in Round 1 (RV1-02) into B1a, the browser's 60 MB, and B1b, the GPU/compositor process's 15 MB (hypothesis) plus the tiles | PF6; process model §7 | M1 (the browser with its tiles: MA6), M2 (B1a and B1b apart) | `footprint` after 30 s idle |
-| RQ54 | B2: a ready renderer with an empty document at most 10 MB | PF7 | M2 | `footprint` |
+| RQ54 | B2: a ready renderer with an empty document at most 10 MB | PF7 | M1 (MA6), since renderers are processes from M1 (RV1-07; Round 4, RV4-14) | `footprint` |
 | RQ55 | B3: a 50 MB median over the documents and content pages, and every corpus page within its ceiling | PF8; performance §4.1 | M1 (Wikipedia, MDN), M4 (the median, with the content pages), M7–M9 (their pages) | `footprint` after 30 s without input, GPU memory charged (PF4) |
-| RQ56 | B4: the network process idle at most 25 MB | PF9 | M2 | `footprint` |
+| RQ56 | B4: the network process idle at most 25 MB | PF9 | M1 (MA6), since the network process is a process from M1 (RV1-07; Round 4, RV4-14) | `footprint` |
 | RQ57 | B5, B6 and B7: 16 renderers, a 1 GB session, a 2 GiB cap per renderer | PF10–PF12 | M2 (B5, B7), M4 (B6) | Process-manager tests; a 10-tab session benchmark |
 | RQ58 | Frames, long tasks and the collector's pauses | PF13–PF15 | M1 | MA6 |
 | RQ59 | No idle wakeups; hidden pages throttled; energy no higher than Safari's on animating pages | PF16, PF17 | M1 (idle), M2 (hidden pages), M7 (energy against Safari) | `top`'s counters (PF2) |
 | RQ60 | The build within T1–T4 | PF18; [ADR-0002](adr/0002-implementation-language.md) | Every gate | `/usr/bin/time -l` |
-| RQ61 | Limits and deadlines: hangs, scrolling, IPC, navigation, the parser, storage, images | PF19–PF24 | M1 (scrolling, the parser, images), M2 (hangs, IPC, navigation), M3 (storage quotas) | Each value's test, at its milestone |
+| RQ61 | Limits and deadlines: hangs, scrolling, IPC, navigation, the parser, storage, images | PF19–PF24 | M1 (scrolling, the parser, images; hangs and IPC's bounds for the renderer and network processes, RV2-04, RV2-13, RV4-03), M2 (the GPU process's hangs and IPC; navigation), M3 (storage quotas) (Round 4, RV4-14) | Each value's test, at its milestone |
 
 ## 7. How the work runs
 
