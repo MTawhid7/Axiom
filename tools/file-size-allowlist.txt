@@ -1,0 +1,16 @@
+# Rust files allowed past ES1's 1,000-line limit, checked by
+# tools/check-file-size.py. The engineering standards' ES1: typical exemptions
+# are a specification's data table, or a decoder that the specification's
+# structure makes one unit. Files under a crate's src/generated/ are exempt
+# without an entry (ES19).
+#
+# Entry format, one per file, paths relative to the repository root:
+#
+#   # <the justification, on the line directly above>
+#   <path> <ceiling>
+#
+# The ceiling is the line count the file may not reach, so an exemption can't
+# grow without a new review. An entry fails the check when its file is gone,
+# falls under 1,000 lines, or reaches its ceiling.
+#
+# None yet.
