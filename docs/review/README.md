@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are made in checkpoints (§5.3), and the three spikes authorized before Milestone 1, S10, S12 and S15, are done (§5.2). **The owner approved the results** and **commissioned Round 2** (2026-10-21, §5.4). **Round 2 delivered** (2026-10-21): Round 1's changes verified; 15 findings, no Critical or High, so **the stopping rule is met** for the scope commissioned (§6, §8). **Disposed by the owner the same day: all 15 accepted** (§5.5–§5.7), the changes made and verified in checkpoints CP1–CP6, and `architecture-review` pushed; **an independent external review follows,** which the owner commissions before the merge into `main` |
+| **Status** | **Living.** Round 1 delivered on 2026-10-21, and **disposed by the owner the same day: all 22 findings accepted** (§5). The accepted changes are made in checkpoints (§5.3), and the three spikes authorized before Milestone 1, S10, S12 and S15, are done (§5.2). **The owner approved the results** and **commissioned Round 2** (2026-10-21, §5.4). **Round 2 delivered** (2026-10-21): Round 1's changes verified; 15 findings, no Critical or High, so **the stopping rule is met** for the scope commissioned (§6, §8). **Disposed by the owner the same day: all 15 accepted** (§5.5–§5.7), the changes made and verified in checkpoints CP1–CP6, and `architecture-review` pushed; **an independent external review follows,** which the owner commissions before the merge into `main`. **Round 3,** that external review, by Gemini, delivered on 2026-10-21 ([its record](round-3/01-gemini-review.md)): "Blocked by Findings". **The owner commissioned Round 4** (2026-10-22, §5.8): Round 3's claims tested rather than taken, the owner's themes of scope by value, reuse and efficiency, and every area no round had reviewed, with spike S16. **Round 4 delivered** (2026-10-22): 17 findings, 1 Critical and 1 High, so **the stopping rule isn't met** (§6, §10); **awaiting the owner's dispositions** |
 | **Question** | How is the Phase Zero baseline reviewed before Milestone 1 starts: in what format, with which severities, how do findings become changes, and when does the review end? |
 | **Builds on** | The owner's decision 8 at Step 6's Gate C (2026-10-20): Milestone 1 waits "until the architecture and roadmap undergo independent, multi-round adversarial review"; the recommendation in [status](../status.md) for the review's brief; the findings format the [handover](../handover-phase-0.md) §3 suggests |
-| **Last updated** | 2026-10-21 |
+| **Last updated** | 2026-10-22 |
 
 ## 1. Purpose and scope
 
@@ -23,6 +23,8 @@
 |---|---|---|---|---|
 | 1 | 2026-10-21 | [Risk matrix](round-1/01-risk-matrix.md) · [Findings](round-1/02-findings.md) · [Challenged assumptions](round-1/03-challenged-assumptions.md) · [Actions before Round 2](round-1/04-round-2-actions.md) | 22: 2 Critical, 6 High, 10 Medium, 4 Low | All accepted (2026-10-21); changes made (§5.3); the spikes' results and the choices approved (§5.4) |
 | 2 | 2026-10-21 | [Risk matrix](round-2/01-risk-matrix.md) · [Verification of Round 1](round-2/02-verification.md) · [Findings](round-2/03-findings.md) · [Actions](round-2/04-actions.md) | 15: 0 Critical, 0 High, 10 Medium, 5 Low | All accepted (2026-10-21, §5.5); changes made and verified (§5.7). The stopping rule is met for the scope commissioned |
+| 3 | 2026-10-21 | [Gemini's review](round-3/01-gemini-review.md), kept verbatim | External, not in §3's format: six headline findings and five recommendations; Round 4 numbered its 18 claims RV3-01 to RV3-18 | Tested by Round 4 ([verification](round-4/02-verification.md)): 4 confirmed, 7 partly confirmed, 5 refuted, 1 already covered; its verdict, that the merge should wait, agreed with for other reasons |
+| 4 | 2026-10-22 | [Risk matrix](round-4/01-risk-matrix.md) · [Verification of Round 3](round-4/02-verification.md) · [Reuse and scope](round-4/03-reuse-and-scope.md) · [Efficiency](round-4/04-efficiency.md) · [Unreviewed areas](round-4/05-unreviewed-areas.md) · [Findings](round-4/06-findings.md) · [Actions](round-4/07-actions.md) | 17: 1 Critical, 1 High, 7 Medium, 8 Low | Delivered; awaiting the owner's dispositions. The stopping rule isn't met (§10) |
 
 ## 3. Findings and severities
 
@@ -192,6 +194,24 @@ Every finding: **Accepted** as proposed, 2026-10-21 (§5.5, item 1). Where a cou
 - **The round's final sweep** (§4's new step) searched every living document, the handover included, for each finding's old wording, Round 1's and Round 2's. It found and corrected what Round 2's own changes had left: the summaries of PF4's charge and of virtual time, IN9's enablement, and three ADR records that read as current (ADR-0004's option O1, ADR-0005's evidence on signing, ADR-0012's constraints). The remaining hits are records that are meant to stay: the owner's quoted words, session logs, research notes.
 - **The five checks** passed before every commit.
 
+### 5.8 Round 4's commission
+
+The owner, 2026-10-22, after Round 3: "We've completed three rounds of review". The commission, in the owner's words, with what records each part:
+
+| # | Theme | The owner's words | Recorded in |
+|---|---|---|---|
+| 1 | The round | "Perform one final round of review, as we should not take Gemini's verdict for granted without testing." | Round 4's [verification](round-4/02-verification.md) |
+| 2 | Scope by value | "we should carefully evaluate whether rebuilding components from scratch is justified when they serve only a small subset of use cases. Rather than attempting to cover every possible scenario from the beginning, I recommend prioritizing the core functionality, the most common use cases, and the features that deliver the greatest value. Less frequently used scenarios can be deferred to later phases, once the foundational architecture is stable and the primary use cases are well supported." | [Reuse and scope](round-4/03-reuse-and-scope.md) §5 |
+| 3 | Reuse | "We should also take full advantage of mature, battle-tested software wherever appropriate, provided it meets our security, compatibility, and architectural requirements." "However, we should evaluate each dependency carefully for known vulnerabilities, legacy constraints, maintenance risks, and long-term suitability rather than assuming that maturity alone guarantees quality." | [Reuse and scope](round-4/03-reuse-and-scope.md) §1–§4, §6 |
+| 4 | Efficiency | "should we make efficiency a first-class architectural requirement from the very first phase, rather than treating it as a later optimization exercise?" "My recommendation is to establish a clear efficiency-first engineering strategy from the outset." "This should not become a constrained DIY-style project that sacrifices usability, stability, premium user experience, or functionality in pursuit of minimal resource usage." Five headings: "Efficiency by design", "Advanced optimization", "Data-driven engineering", "Quality without compromise", "Continuous performance validation" | [Efficiency](round-4/04-efficiency.md) |
+| 5 | After the round | "Following that review, we can incorporate the findings, update the documentation, resolve any remaining architectural questions, and establish a clear implementation plan." | [Actions](round-4/07-actions.md) |
+
+**The owner's answers in plan mode** (2026-10-22), each chosen from options the review put:
+- **The spike:** "S16, all three questions (Recommended)": memory after a sharing process dies, port rights in dropped messages and failed sends, and rusage's counters ([S16 results](../research/s16-results.md)).
+- **The scope:** "Everything unreviewed": besides Round 3's claims and the three themes, every area Round 2 listed as not reviewed (§8) ([unreviewed areas](round-4/05-unreviewed-areas.md)).
+
+The plan, approved by the owner, took two defaults without asking: G1's core list and ADR-0001 R2 stand, so reuse inside them is flagged as an amendment; and S1–S4 aren't re-run.
+
 ## 6. The stopping rule
 
 **The cycle ends** when a round raises no Critical or High finding, after the previous round's accepted changes have been made and verified. The owner then decides whether to authorize Milestone 1 (MA10). The owner may end or extend the cycle at any time.
@@ -241,3 +261,29 @@ Every finding: **Accepted** as proposed, 2026-10-21 (§5.5, item 1). Where a cou
 - **SDK headers** are those of the Command Line Tools' `MacOSX27.0.sdk`, on this Mac.
 
 **Independence is limited,** as in Round 1: Round 2 was also written by Claude (Opus 5.5), which helped write the baseline and Round 1.
+
+## 9. Round 3's coverage and limits
+
+**The reviewer:** Gemini, from outside the Claude model family, commissioned by the owner after Round 2 (§5.5, item 5) and delivered on 2026-10-21. Its file is kept verbatim as the round's record ([Gemini's review](round-3/01-gemini-review.md)); its links point to the reviewer's local paths, so they don't resolve in the repository, and the link checker skips them.
+
+**Its scope,** in its words: the "Architecture baseline on branch `architecture-review` at Phase Zero completion, incorporating Round 1 and Round 2 review amendments", spikes S10, S12 and S15, and Milestone 1's criteria.
+
+**Its format** isn't §3's: findings without IDs, severities or labelled evidence. Round 4 numbered its claims and tested each ([verification](round-4/02-verification.md)), so that its dispositions can name them.
+
+## 10. Round 4's coverage and limits
+
+**The baseline:** `architecture-review` at `e71803b` (2026-10-21), with Round 3's file.
+
+**Read in full:** Round 3; the requirements (RQ1–RQ66); the decision map; invalidation (IV1–IV14); HTML and the DOM (HD1–HD33); networking (NW1–NW18); the JavaScript engine (JE1–JE32); the dependency policy (DP1–DP23); performance (PF1–PF24); Milestone 1 (MA1–MA12); S1–S4's results and S10's.
+
+**Read by rule, section or targeted search:** the bindings and script and heap; the dependency register; testing (TS1–TS3, TS8, TS13–TS17); graphics (GR8, GR10–GR14); the pipeline (PL7–PL9, PL16); the event loop (§4.7, EL16, EL17, EL23, EL24); IPC (IP1–IP22); the process model (IR10) and the threat model (§4); storage (SW1, SW10, SW13); text (TX3, §4); input (IN1, IN7, §5); every design's open questions; the roadmap; the charter.
+
+**Evidence:**
+- **Spike S16** ran, as the owner authorized, with a formal run of three runs under PF1's conditions and a replication ([S16 results](../research/s16-results.md)).
+- **Sources** were downloaded with `curl` on 2026-10-22 at named revisions: WebKit, Chromium and XNU (macOS 26's kernel, the latest published), WPT at `0f26972422`, RustSec's database and six `cargo-vet` audit sets; crates.io's API by `tools/crate-facts.py`. One source is secondary (W3Techs). Every quotation was checked against its downloaded copy.
+- **Counts** come from repository tools: `tools/wpt-script-deps.py`, fixed in this round to follow references; `tools/wpt-file-facts.py` and `tools/crate-facts.py`, added; and an independent count for the XML figures.
+- **SDK headers** are those of the Command Line Tools' `MacOSX27.0.sdk`, on this Mac.
+
+**Not done:** no crate was graded, built or benchmarked; S1–S4 weren't re-run (their methods were reviewed from their records); S5–S7's TS16 re-checks wait for the owner (RV4-13).
+
+**Independence is limited:** Round 4 was written by Claude (Opus 5.5), which wrote the baseline and Rounds 1 and 2. It tested Round 3, the one independent round, rather than adopting it; where the two disagree, the [verification](round-4/02-verification.md) gives the evidence for each claim, for the owner to weigh.
