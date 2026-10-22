@@ -16,10 +16,11 @@ fn work(iterations: u64) -> u64 {
 #[cfg_attr(miri, ignore = "Miri can't call proc_pid_rusage")]
 fn counts_the_work_steadily() {
     const ITERATIONS: u64 = 1_000_000;
-    let (_, first) = test_support::count_instructions(|| work(ITERATIONS))
-        .expect("proc_pid_rusage on this process");
-    let (_, second) = test_support::count_instructions(|| work(ITERATIONS))
-        .expect("proc_pid_rusage on this process");
+    let (_, first) =
+        test_support::count_cpu(|| work(ITERATIONS)).expect("proc_pid_rusage on this process");
+    let (_, second) =
+        test_support::count_cpu(|| work(ITERATIONS)).expect("proc_pid_rusage on this process");
+    let (first, second) = (first.instructions, second.instructions);
     assert!(
         first > ITERATIONS,
         "{first} instructions for {ITERATIONS} iterations"

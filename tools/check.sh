@@ -13,6 +13,7 @@
 #                            (ES1), each checker's self-test, the TODOs' form
 #                            (ES17), and generated code fresh (ES19) once
 #                            codegen exists
+#   first-tier costs run optimized: trace's recording (OB25, OB27)
 # Its time is budgeted, about 3 minutes for an incremental change (a
 # hypothesis, measured at M1-CP2); past it, slow suites move to the
 # checkpoint tier, never skipped.
@@ -156,6 +157,8 @@ step unsafe-policy tools/check-unsafe-policy.sh
 step doc-links python3 -I tools/check-doc-links.py
 step dependencies python3 -I tools/check-dependencies.py
 step file-size python3 -I tools/check-file-size.py
+# OB25, OB27: recording's cost, which is only meaningful optimized.
+step trace-cost cargo test --locked --release -p trace --test cost
 step todo-form todo_form
 step codegen codegen_check
 step self-tests sh -c 'tools/check-unsafe-policy.sh --self-test &&

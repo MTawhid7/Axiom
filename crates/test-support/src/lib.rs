@@ -5,8 +5,8 @@
 //! 1. **Purpose.** What every crate's tests share and no shipping crate may
 //!    link: golden files rewritten only on purpose (ES21), and the
 //!    deterministic counts that make PF5's first tier a unit test (ES23):
-//!    allocations on the current thread, and instructions retired by the
-//!    process. The loopback HTTP server (TS8) and fixtures join at M1-CP4.
+//!    allocations on the current thread, and the instructions and cycles of
+//!    the process. The loopback HTTP server (TS8) and fixtures join at M1-CP4.
 //! 2. **Rules.** ES21, ES23, PF5, TS8; ES13 for the files and the environment
 //!    it reads, which test crates may.
 //! 3. **Place** (`tools/crate-map.toml`): outside the layers, in the `test`
@@ -20,14 +20,14 @@
 //!    - [`count_allocations`] runs a closure and counts the allocations the
 //!      current thread made during it, once the test binary has declared
 //!      [`CountingAllocator`] as its global allocator.
-//!    - [`count_instructions`] runs a closure and counts the instructions the
-//!      process retired during it, from `proc_pid_rusage` (S16 found them
-//!      steady to 0.03–0.15% from run to run).
+//!    - [`count_cpu`] runs a closure and counts the instructions the process
+//!      retired and the cycles it ran during it, from `proc_pid_rusage` (S16
+//!      found instructions steady to 0.03–0.15% from run to run).
 //! 5. **Invariants.** The `SAFETY` invariants are [`sys`]'s, I1 and I2.
 //!    Counting never changes what is counted: the allocator forwards every
 //!    call to the system's unchanged.
 //! 6. **Threads.** Allocation counts are per thread, so tests running in
-//!    parallel don't disturb each other. Instruction counts are per process:
+//!    parallel don't disturb each other. CPU counts are per process:
 //!    a test that asserts them runs alone in its own test binary.
 //! 7. **Tests.** Each module's, and `tests/` for what needs its own binary:
 //!    the global allocator, and the instruction counter.
@@ -39,6 +39,6 @@ mod counts;
 mod golden;
 pub mod sys;
 
-pub use counts::{Allocations, count_allocations, count_instructions};
+pub use counts::{Allocations, Cpu, count_allocations, count_cpu};
 pub use golden::{Mismatch, Mode, check_golden};
 pub use sys::CountingAllocator;

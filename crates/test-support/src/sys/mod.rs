@@ -24,4 +24,4 @@ mod rusage;
 
 pub use alloc::CountingAllocator;
 pub(crate) use alloc::thread_counts;
-pub(crate) use rusage::instructions_retired;
+pub(crate) use rusage::cpu_counts;

@@ -28,6 +28,7 @@ license = "MIT OR Apache-2.0"
 # its register entry and grade first (DP6, DP8), and its justification beside
 # it. There is none yet; Axiom's crates join as the first edge to each lands.
 [workspace.dependencies]
+test-support = { path = "crates/test-support" }
 
 [workspace.lints.rust]
 # `unsafe_code` is set per crate root, with #![forbid] by default and #![deny] for

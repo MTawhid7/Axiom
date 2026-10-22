@@ -5,8 +5,10 @@ use std::io;
 
 /// `RUSAGE_INFO_V6`.
 const RUSAGE_INFO_V6: i32 = 6;
-/// `ri_instructions`'s index among the struct's counters, after the UUID.
+/// `ri_instructions`'s and `ri_cycles`' indices among the struct's counters,
+/// after the UUID.
 const INSTRUCTIONS: usize = 29;
+const CYCLES: usize = 30;
 
 /// `struct rusage_info_v6`: a 16-byte UUID, then 50 counters and six reserved
 /// words; 464 bytes, as S16 observed by compiling against the SDK.
@@ -22,8 +24,9 @@ unsafe extern "C" {
     fn proc_pid_rusage(pid: i32, flavor: i32, buffer: *mut RusageInfoV6) -> i32;
 }
 
-/// The instructions this process has retired, on every core, since it began.
-pub(crate) fn instructions_retired() -> io::Result<u64> {
+/// The instructions this process has retired, and the cycles it has run, on
+/// every core, since it began.
+pub(crate) fn cpu_counts() -> io::Result<(u64, u64)> {
     let pid = i32::try_from(std::process::id())
         .map_err(|_| io::Error::from(io::ErrorKind::InvalidInput))?;
     let mut info = RusageInfoV6 {
@@ -36,5 +39,6 @@ pub(crate) fn instructions_retired() -> io::Result<u64> {
     if result != 0 {
         return Err(io::Error::last_os_error());
     }
-    Ok(info.counters.get(INSTRUCTIONS).copied().unwrap_or(0))
+    let counter = |index: usize| info.counters.get(index).copied().unwrap_or(0);
+    Ok((counter(INSTRUCTIONS), counter(CYCLES)))
 }

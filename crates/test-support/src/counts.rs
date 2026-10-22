@@ -44,13 +44,28 @@ fn counting_allocator_installed() -> bool {
     after != before
 }
 
-/// Runs `f` and returns the instructions the whole process retired meanwhile.
+/// The instructions a process retired and the cycles it ran.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct Cpu {
+    /// Instructions retired, on every core.
+    pub instructions: u64,
+    /// Cycles run, on every core. Cycles over the core's frequency are a
+    /// time; instructions are steadier from run to run (S16).
+    pub cycles: u64,
+}
+
+/// Runs `f` and returns the instructions the whole process retired, and the
+/// cycles it ran, meanwhile.
 ///
-/// The count covers every thread, so a test that asserts it runs alone in
+/// The counts cover every thread, so a test that asserts them runs alone in
 /// its own test binary (`tests/<name>.rs` with one test).
-pub fn count_instructions<R>(f: impl FnOnce() -> R) -> io::Result<(R, u64)> {
-    let before = sys::instructions_retired()?;
+pub fn count_cpu<R>(f: impl FnOnce() -> R) -> io::Result<(R, Cpu)> {
+    let (instructions_before, cycles_before) = sys::cpu_counts()?;
     let result = f();
-    let after = sys::instructions_retired()?;
-    Ok((result, after.saturating_sub(before)))
+    let (instructions_after, cycles_after) = sys::cpu_counts()?;
+    let cpu = Cpu {
+        instructions: instructions_after.saturating_sub(instructions_before),
+        cycles: cycles_after.saturating_sub(cycles_before),
+    };
+    Ok((result, cpu))
 }
