@@ -1,3 +1,83 @@
+# Clippy's configuration for the engine's workspace (the engineering
+# standards' §15). The spikes keep theirs, spikes/clippy.toml, which Clippy
+# finds first for their crates.
+
 # Apple framework, font and format names appear in prose, not as code identifiers.
 # ".." keeps clippy's default list.
 doc-valid-idents = ["AArch64", "AppKit", "CoreAnimation", "CoreFoundation", "CoreGraphics", "CoreText", "HarfBuzz", "HarfRust", "ImageIO", "IOKit", "IOSurface", "LaunchServices", "OpenType", "PingFang", "QuartzCore", "TrueType", "WebKit", "WebP", ".."]
+
+# ES2: a function fails at 100 lines (Clippy's default, stated so it can't drift).
+too-many-lines-threshold = 100
+
+# ES9, ES10: tests may unwrap, index and panic; library code may not, and
+# panic-free crates deny all three.
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-indexing-slicing-in-tests = true
+allow-panic-in-tests = true
+# ES14: tests may print what a failure needs; `dbg!` is never committed.
+allow-print-in-tests = true
+
+# ES12, ES13: architecture rules as lints. Each reason names the rule; an
+# allowed use takes `#[expect(clippy::disallowed_methods, reason = "…")]` (or
+# `disallowed_types`) in a crate the rule names, on the smallest item.
+disallowed-methods = [
+    # The clock (EL24, TS8): time comes from the event loop's clock, so tests run on virtual time.
+    { path = "std::time::Instant::now", reason = "ES13: read the event loop's clock (EL24); only platform-event implements the host clock" },
+    { path = "std::time::SystemTime::now", reason = "ES13: read the event loop's clock (EL24); only platform-event implements the host clock" },
+    # The environment (TS8, the process model §8): settings are injected; helpers start with an empty environment.
+    { path = "std::env::var", reason = "ES13: settings are injected (TS8); allowed in executables' main, headless and test crates" },
+    { path = "std::env::var_os", reason = "ES13: settings are injected (TS8); allowed in executables' main, headless and test crates" },
+    { path = "std::env::vars", reason = "ES13: settings are injected (TS8); allowed in executables' main, headless and test crates" },
+    { path = "std::env::vars_os", reason = "ES13: settings are injected (TS8); allowed in executables' main, headless and test crates" },
+    # Threads and sleeping (ES12, EL1): thread roles come from event-loop; nothing sleeps.
+    { path = "std::thread::spawn", reason = "ES12: threads come only from event-loop's roles and pools" },
+    { path = "std::thread::Builder::spawn", reason = "ES12: threads come only from event-loop's roles and pools" },
+    { path = "std::thread::Builder::spawn_scoped", reason = "ES12: threads come only from event-loop's roles and pools" },
+    { path = "std::thread::scope", reason = "ES12: threads come only from event-loop's roles and pools" },
+    { path = "std::thread::sleep", reason = "ES13, ES22: wait on the thread's one wait source, or on EL24's virtual clock in tests" },
+    # Channels (ES12, TS11): state crosses threads through ipc's channels and rings only.
+    { path = "std::sync::mpsc::channel", reason = "ES12: channels are ipc's (TS11)" },
+    { path = "std::sync::mpsc::sync_channel", reason = "ES12: channels are ipc's (TS11)" },
+    # Files (ES13): renderers and the network process can't open files under their profiles.
+    { path = "std::fs::read", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::read_to_string", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::read_dir", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::read_link", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::write", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::copy", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::rename", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::remove_file", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::remove_dir", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::remove_dir_all", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::create_dir", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::create_dir_all", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::metadata", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::symlink_metadata", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::canonicalize", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::exists", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::hard_link", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::set_permissions", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+]
+disallowed-types = [
+    # Processes (IR9): only the browser launches processes, through posix_spawn in platform-process.
+    { path = "std::process::Command", reason = "ES13, IR9: only the browser launches processes, through platform-process; allowed in codegen and test crates" },
+    # Files (ES13).
+    { path = "std::fs::File", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    { path = "std::fs::OpenOptions", reason = "ES13: files only in diagnostics, browser, headless, codegen and test crates" },
+    # Sockets (ES13): only net, and test-support's loopback server.
+    { path = "std::net::TcpStream", reason = "ES13: sockets only in net and test-support's loopback server" },
+    { path = "std::net::TcpListener", reason = "ES13: sockets only in net and test-support's loopback server" },
+    { path = "std::net::UdpSocket", reason = "ES13: sockets only in net and test-support's loopback server" },
+    { path = "std::os::unix::net::UnixStream", reason = "ES13: sockets only in net and test-support's loopback server" },
+    { path = "std::os::unix::net::UnixListener", reason = "ES13: sockets only in net and test-support's loopback server" },
+    { path = "std::os::unix::net::UnixDatagram", reason = "ES13: sockets only in net and test-support's loopback server" },
+    # Locks (ES12, TS11): state crosses threads only through TS11's primitives.
+    { path = "std::sync::Mutex", reason = "ES12: TS11's primitives only; a new one is a decision for the owner" },
+    { path = "std::sync::RwLock", reason = "ES12: TS11's primitives only; a new one is a decision for the owner" },
+    { path = "std::sync::Condvar", reason = "ES12: TS11's primitives only; a new one is a decision for the owner" },
+    { path = "std::sync::Barrier", reason = "ES12: TS11's primitives only; a new one is a decision for the owner" },
+    # Randomly seeded hash maps (ES13, TS8): their iteration order changes from run to run.
+    { path = "std::collections::HashMap", reason = "ES13: use the strings crate's maps, whose hashers are fixed or keyed per process (TS8)" },
+    { path = "std::collections::HashSet", reason = "ES13: use the strings crate's maps, whose hashers are fixed or keyed per process (TS8)" },
+]
