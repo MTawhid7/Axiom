@@ -84,7 +84,7 @@ No new dependency is proposed: ICU4X is already admitted (TX2), and the differen
 - **What charter G1 loses:** writing two well-specified libraries, Temporal's calendar and time-zone arithmetic and BigInt's multiplication and division, which are mathematics behind builtins rather than engine mechanisms (DP1 (g) keeps the builtins, the parser, bytecode, interpreter, objects, `RegExp` and collector).
 - **What the schedule gains:** ADR-0001 rates the risk that the JavaScript engine dominates the schedule at High likelihood and High impact. Temporal alone is a specification that V8 chose to take from `temporal_rs`.
 - **What stays core:** `RegExp`, for JE20's reasons: interpreted fast enough without a JIT, with direct 8-bit and 16-bit matching.
-- **The encodings**, which the same disposition reclassified, already sat under DP2; Axiom's audit graded `encoding_rs` 0.8.42 `ub-risk-3`, so they stay Axiom's own ([text and fonts](text-and-fonts.md) TX3).
+- **The encodings**, which the same disposition reclassified, already sat under DP2; Axiom's audit graded `encoding_rs` 0.8.42 `ub-risk-3`, so they stayed Axiom's own until Round 4 admitted `encoding_rs` in the sandboxed helpers under DP8 as amended (RV4-02, RV4-08; [text and fonts](text-and-fonts.md) TX3).
 
 ## 5. Design
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Accepted** (2026-10-20), by the owner at Step 5's Gate C, after the visual check of S5's sheets that S5-Q1's and S5-Q2's criteria include. The owner had pre-approved it at Gate B, effective once S5-Q1 and S5-Q3 passed, with TX12 settled by S5-Q2 ([S5 results](../research/s5-results.md)). **TX12: CoreText rasterizes system fonts**. **TX3 amended by the architecture review's Round 1** (2026-10-21): the encodings behind Axiom's interface; `encoding_rs` 0.8.42 graded `ub-risk-3` by Axiom's audit, so they stay Axiom's own (RV1-08); TX13, TX21 and the new TX22–TX24 (RV1-10) |
+| **Status** | **Accepted** (2026-10-20), by the owner at Step 5's Gate C, after the visual check of S5's sheets that S5-Q1's and S5-Q2's criteria include. The owner had pre-approved it at Gate B, effective once S5-Q1 and S5-Q3 passed, with TX12 settled by S5-Q2 ([S5 results](../research/s5-results.md)). **TX12: CoreText rasterizes system fonts**. **TX3 amended by the architecture review's Round 1** (2026-10-21): the encodings behind Axiom's interface; `encoding_rs` 0.8.42 graded `ub-risk-3` by Axiom's audit, so they stay Axiom's own (RV1-08); TX13, TX21 and the new TX22–TX24 (RV1-10). **Amended by Round 4** (2026-10-22): decision 2, encodings through `encoding_rs` (RV4-02, RV4-08) |
 | **Date** | 2026-10-18 |
 | **Deciders** | Project owner (only the owner can move an ADR to Accepted) |
 | **Related** | [Text, fonts and Unicode](../architecture/text-and-fonts.md) (the full design, TX1–TX21); [rendering pipeline](../architecture/rendering-pipeline.md) PL7, PL8, PL11; [S4 results](../research/s4-results.md); [ADR-0010](0010-dependency-and-supply-chain-policy.md); [Step 5 tracker](../research/step-5-subsystems.md) §10.1 (spike S5); decision-map items I1 and P4 |
@@ -18,6 +18,7 @@
 | 2026-10-20 | **`vello_cpu` adopted** by the owner, after Gate C: "Renderer Rasterizer: Approved. Adopt vello_cpu as the primary Rust rasterizer for web fonts and paths, subject to crate dependency grading at the text milestone." TX12 and the [register](../technology/dependency-register.md) record it |
 | 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1), RV1-08: "Reclassify WHATWG text encodings, Temporal calendar arithmetic, and BigInt as replaceable details behind clean interfaces (DP2)." "Audit and grade modern encoding_rs (SIMD off) before Milestone 1, and temporal_rs before Milestone 3." [Axiom's audit](../research/encoding-rs-audit.md) graded `encoding_rs` 0.8.42 `ub-risk-3` as it builds here with SIMD off: safety comments on 22 of 143 compiled `unsafe` blocks, uninitialized pages behind an `asm!` barrier, and an ungraded NEON dependency (`simdutf8`) on aarch64. TX3 is amended in [text and fonts](../architecture/text-and-fonts.md): the encodings sit behind an interface Axiom owns, and stay Axiom's own until a release passes DP8. The owner approves the audit with the dependency (DP15) |
 | 2026-10-21 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 1 ([the review](../review/README.md) §5.1), RV1-10: "Establish explicit rules for CoreText emoji advance metrics and -webkit-font-smoothing. Retain the hybrid CoreText + HarfRust/skrifa architecture; reject the single-rasterizer alternative." [Text and fonts](../architecture/text-and-fonts.md) gains TX22 (metrics follow the rasterizer: CoreText's advances and bounds for `sbix` faces such as Apple Color Emoji), TX23 (`-webkit-font-smoothing` on both paths) and TX24 (optical sizing, one instance for metrics and raster); TX13 gains the smoothing calibration's acceptance metric, and TX21 counts atlases per renderer. The single-rasterizer alternative is recorded as rejected (§9, G). The hybrid model stands |
+| 2026-10-22 | **Amendment accepted** in the owner's dispositions of the architecture review's Round 4 ([the review](../review/README.md) §5.9): "All 17 findings (RV4-01 through RV4-17) are Accepted as proposed." RV4-08, the owner: "Adopt encoding_rs at Milestone 1 under the amended DP8." Decision 2 is amended below: the codecs come from `encoding_rs` behind TX3's interface, in the sandboxed helpers, under DP8's conditions; `smallvec` is admissible at a `ub-risk-3` grade on the same conditions (RV4-02) |
 
 ## Question
 
@@ -65,7 +66,7 @@ All sourced and dated in [text and fonts](../architecture/text-and-fonts.md) §3
 
 **Accepted: TX1–TX21** (2026-10-20), with S5-Q1 and S5-Q3 passed, and TX12 settled by S5-Q2: CoreText rasterizes system fonts. In summary:
 1. **ICU4X is the one Unicode source,** with compiled data, for text, CSS, URLs and JavaScript (TX1, TX2).
-2. **Encodings are Axiom's own, in safe Rust** (TX3). `encoding_rs` is graded `ub-risk-3`.
+2. **Encodings are Axiom's own, in safe Rust** (TX3). `encoding_rs` is graded `ub-risk-3`. **As amended in Round 4** (RV4-02, RV4-08, 2026-10-22): **the codecs come from `encoding_rs`,** behind TX3's interface, in the renderer and the network process, under DP8's conditions for `ub-risk-3` (Axiom's audit of each `unsafe` block and a fuzz target); the browser decodes only UTF-8.
 3. **Web content sees system fonts and web fonts,** never user-installed fonts (TX5).
 4. **CoreText's database and fallback cascades serve system fonts** (TX6).
 5. **Web fonts never reach CoreText.** Our own containers, `read-fonts`, HarfRust and a Rust rasterizer handle them (TX7, TX8).
@@ -96,7 +97,7 @@ All sourced and dated in [text and fonts](../architecture/text-and-fonts.md) §3
 ## Conditions for revisiting
 
 - HarfRust stops tracking HarfBuzz, or falls behind on a script the corpus needs.
-- A newer `encoding_rs` earns a published grade of `ub-risk-2` or better, and the encodings show measurable costs.
+- A newer `encoding_rs` earns a published grade of `ub-risk-2` or better, and the encodings show measurable costs. **Since Round 4:** `encoding_rs`'s audit or fuzzing finds a defect upstream doesn't fix (the register's revisit condition).
 
 ## Consequences
 

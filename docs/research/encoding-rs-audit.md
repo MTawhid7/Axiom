@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Complete** (2026-10-21), for the owner's approval with the dependency (DP15). Performed by Claude (Opus 5.5) at the owner's request, for the architecture review's RV1-08 |
+| **Status** | **Complete** (2026-10-21), for the owner's approval with the dependency (DP15). Performed by Claude (Opus 5.5) at the owner's request, for the architecture review's RV1-08. **Round 4** (the owner's dispositions, 2026-10-22; [the review](../review/README.md) §5.9): DP8 now admits `ub-risk-3` crates in sandboxed helpers on DP10's conditions, and `encoding_rs` is adopted at M1 behind TX3's interface (RV4-02, RV4-08). This grade stands; M1's plan adds the per-block audit of invariants and the fuzz target the amended DP8 asks for |
 | **Question** | Does the current release of `encoding_rs`, with its SIMD feature off, earn a soundness grade of `ub-risk-2` or better on Google's scale, so that DP8 admits it in place of Axiom's own encodings (TX3)? |
 | **Answers** | The owner's disposition of RV1-08 (2026-10-21): "Audit and grade modern encoding_rs (SIMD off) before Milestone 1, and temporal_rs before Milestone 3" ([the review](../review/README.md) §5.1) |
 | **Feeds** | [Text and fonts](../architecture/text-and-fonts.md) TX3 and §4; the [dependency register](../technology/dependency-register.md) §4; [ADR-0011](../adr/0011-text-fonts-and-unicode.md) |
