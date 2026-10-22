@@ -1,0 +1,12 @@
+# Cargo configuration for the repository's workspaces: the engine's at the
+# root, and the spikes' in spikes/ (ADR-0022 D12; the crate architecture's
+# CR15).
+#
+# Both build into the repository's one target/, so the spikes' scripts and
+# results keep their paths (target/release/s16 and the like) after their
+# workspace moved. A relative path here is relative to this directory's parent,
+# the repository root, whichever workspace runs. Cargo reads this file from the
+# current directory and its parents, so it applies to commands run anywhere in
+# the repository.
+[build]
+target-dir = "target"

@@ -76,7 +76,7 @@ run() { # route toolchain flags test-args...
   local route=$1 toolchain=$2 flags=$3; shift 3
   local name="$route-$([ "$1" = --ignored ] && echo planted || echo clean)"
   (cd "$ROOT" && RUSTFLAGS="$flags" RUSTDOCFLAGS="$flags" TSAN_OPTIONS="abort_on_error=0" \
-    cargo +"$toolchain" test -Zbuild-std --target aarch64-apple-darwin \
+    cargo +"$toolchain" test --manifest-path "$ROOT/spikes/Cargo.toml" -Zbuild-std --target aarch64-apple-darwin \
     --target-dir "$S12/$route-target" -p s9-race -- "$@") > "$OUT/$name.txt" 2>&1
   echo "exit $?" >> "$OUT/$name.txt"
   local binary

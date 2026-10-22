@@ -34,7 +34,7 @@ done
 [ -n "$cases" ] || cases="build traverse mutate dispatch collect-live scenario-pressure scenario-churn"
 
 command -v samply >/dev/null || { echo "samply is not installed (cargo install --locked samply)" >&2; exit 1; }
-cargo build --profile profiling -p s1-bench --bin s1-probe >/dev/null 2>&1 || {
+cargo build --manifest-path "$ROOT/spikes/Cargo.toml" --profile profiling -p s1-bench --bin s1-probe >/dev/null 2>&1 || {
   echo "build failed: cargo build --profile profiling -p s1-bench --bin s1-probe" >&2
   exit 1
 }

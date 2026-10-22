@@ -35,12 +35,13 @@ This directory holds validation experiments. The code is **throwaway and not pro
 - **The unsafe-code policy applies to spikes too** (evaluation §15.3; `tools/check-unsafe-policy.sh`).
   - Every crate root declares `#![forbid(unsafe_code)]`, except crates listed in `tools/unsafe-policy.txt`.
   - Listed crates declare `#![deny(unsafe_code)]`, and allow `unsafe` only in their listed modules.
-- **Verification before every commit:**
+- **The spikes are a workspace of their own** since Milestone 1's second checkpoint (2026-10-23; ADR-0022 D12): `spikes/Cargo.toml`, with the lock they were built with, `spikes/Cargo.lock`, and the lints and Clippy settings they were written under (`spikes/clippy.toml`). The engine's workspace is the repository's root. Run a spike's cargo commands from `spikes/`, or from the root with `--manifest-path spikes/Cargo.toml`; the commands below are written for the spikes' workspace. Both workspaces build into the repository's `target/` (`.cargo/config.toml`), so the paths below, such as `target/release/s3-probe`, are unchanged, and the measurement scripts pass the manifest themselves.
+- **Verification before every commit** covers both workspaces, through `tools/check.sh` from M1-CP2. For the spikes alone:
 
   ```sh
-  cargo fmt --all --check
-  cargo clippy --workspace --all-targets -- -D warnings
-  cargo test --workspace
+  cargo fmt --manifest-path spikes/Cargo.toml --all --check
+  cargo clippy --manifest-path spikes/Cargo.toml --workspace --all-targets -- -D warnings
+  cargo test --manifest-path spikes/Cargo.toml --workspace
   tools/check-unsafe-policy.sh
   tools/check-doc-links.py   # every relative Markdown link and anchor resolves
   ```

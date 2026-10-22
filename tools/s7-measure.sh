@@ -66,7 +66,7 @@ if [ -z "$battery" ] && { ! printf '%s' "$power" | grep -q "AC Power" || [ "${lp
   exit 3
 fi
 
-cargo build -q --release -p s7-net || { echo "the release build failed" >&2; exit 1; }
+cargo build --manifest-path "$ROOT/spikes/Cargo.toml" -q --release -p s7-net || { echo "the release build failed" >&2; exit 1; }
 bin=target/s7/bin
 mkdir -p "$bin"
 cp -f target/release/s7-net "$bin/s7-net"

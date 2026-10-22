@@ -62,7 +62,7 @@ if [ -z "$battery" ] && { ! printf '%s' "$power" | grep -q "AC Power" || [ "${lp
   exit 3
 fi
 
-cargo build -q --release -p s10-gpu || { echo "the release build failed" >&2; exit 1; }
+cargo build --manifest-path "$ROOT/spikes/Cargo.toml" -q --release -p s10-gpu || { echo "the release build failed" >&2; exit 1; }
 bin=target/s10/bin
 mkdir -p "$bin"
 cp -f target/release/s10 "$bin/s10"

@@ -35,7 +35,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-cargo build --release -p s2-window >/dev/null 2>&1 || {
+cargo build --manifest-path "$ROOT/spikes/Cargo.toml" --release -p s2-window >/dev/null 2>&1 || {
   echo "build failed: cargo build --release -p s2-window" >&2
   exit 1
 }

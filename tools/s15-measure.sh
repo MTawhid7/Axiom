@@ -128,7 +128,7 @@ step_s4() {
 }
 
 build_probe() { # tag destination
-  (cd "$ROOT" && S15_BUILD_TAG=$1 cargo build -q -p s15-probe) && cp -f "$ROOT/target/debug/s15-probe" "$2"
+  (cd "$ROOT" && S15_BUILD_TAG=$1 cargo build --manifest-path "$ROOT/spikes/Cargo.toml" -q -p s15-probe) && cp -f "$ROOT/target/debug/s15-probe" "$2"
 }
 
 sign_probe() { # signing path

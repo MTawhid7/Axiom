@@ -47,7 +47,7 @@ while [ $# -gt 0 ]; do
 done
 
 cd "$ROOT"
-cargo build -p s4-sandbox -p s4-text ${CARGO_FLAGS[@]+"${CARGO_FLAGS[@]}"} --bins
+cargo build --manifest-path "$ROOT/spikes/Cargo.toml" -p s4-sandbox -p s4-text ${CARGO_FLAGS[@]+"${CARGO_FLAGS[@]}"} --bins
 mkdir -p "$OUT"
 
 # sign <built-binary> <copy-name> <identifier> <runtime|plain> [entitlements-plist]

@@ -28,7 +28,7 @@ while [ $# -gt 0 ]; do
 done
 
 cd "$ROOT"
-cargo build -q --release -p s5-image
+cargo build --manifest-path "$ROOT/spikes/Cargo.toml" -q --release -p s5-image
 mkdir -p "$OUT/src"
 SRGB="/System/Library/ColorSync/Profiles/sRGB Profile.icc"
 

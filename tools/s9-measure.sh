@@ -92,7 +92,7 @@ step_fuzz() {
   local corpus="$S9/corpus" artifacts="$S9/artifacts"
   rm -rf "$corpus" "$artifacts"
   mkdir -p "$corpus/decode" "$corpus/planted" "$artifacts/planted" "$artifacts/decode"
-  (cd "$ROOT" && cargo run -q -p s9-decoder --bin s9-seeds -- "$corpus/decode") || return 1
+  (cd "$ROOT" && cargo run --manifest-path "$ROOT/spikes/Cargo.toml" -q -p s9-decoder --bin s9-seeds -- "$corpus/decode") || return 1
   cp "$corpus/decode/"* "$corpus/planted/"
   log "fuzz: building both targets (AddressSanitizer; std rebuilt with it)"
   /usr/bin/time -l bash -c "cd '$ROOT' && PATH='$PATH' cargo +nightly fuzz build --fuzz-dir '$FUZZ_DIR' --target-dir '$S9/fuzz-target'" \
@@ -163,13 +163,13 @@ collect_crash_reports() {
 step_tsan() {
   local flags="-Zsanitizer=thread"
   log "tsan: the clean test"
-  (cd "$ROOT" && RUSTFLAGS="$flags" RUSTDOCFLAGS="$flags" cargo +nightly test -Zbuild-std \
+  (cd "$ROOT" && RUSTFLAGS="$flags" RUSTDOCFLAGS="$flags" cargo +nightly test --manifest-path "$ROOT/spikes/Cargo.toml" -Zbuild-std \
     --target aarch64-apple-darwin --target-dir "$S9/tsan-target" -p s9-race -- the_atomic_count_is_exact) \
     > "$OUT/tsan-clean.txt" 2>&1
   echo "exit $?" >> "$OUT/tsan-clean.txt"
   log "tsan: clean: $(tsan_outcome "$OUT/tsan-clean.txt")"
   log "tsan: the planted race"
-  (cd "$ROOT" && RUSTFLAGS="$flags" RUSTDOCFLAGS="$flags" cargo +nightly test -Zbuild-std \
+  (cd "$ROOT" && RUSTFLAGS="$flags" RUSTDOCFLAGS="$flags" cargo +nightly test --manifest-path "$ROOT/spikes/Cargo.toml" -Zbuild-std \
     --target aarch64-apple-darwin --target-dir "$S9/tsan-target" -p s9-race -- --ignored the_planted_race) \
     > "$OUT/tsan-planted.txt" 2>&1
   echo "exit $?" >> "$OUT/tsan-planted.txt"

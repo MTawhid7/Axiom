@@ -8,6 +8,8 @@
 #                        src/lib.rs, or src/main.rs, of the first package)
 #   --runs N             repeat the clean/no-op/incremental cycle N times (default: 1)
 #   --label TEXT         free-form label saved with the results
+#   --spikes             measure the spikes' workspace (spikes/Cargo.toml)
+#                        instead of the engine's at the root (default)
 #   -h, --help
 #
 # For each phase it reports:
@@ -27,9 +29,12 @@ set -uo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cd "$ROOT" || exit 2
 
-usage() { sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'; }
 
 packages="" profile_flag="" touch_file="" runs=1 label="" extra=""
+# The workspace measured: the engine's at the root, or the spikes' (since
+# M1-CP2 a workspace of their own, ADR-0022 D12).
+workspace_dir=crates manifest_flag=""
 while [ $# -gt 0 ]; do
   case $1 in
     -p | --package) packages="$packages $2"; shift 2 ;;
@@ -37,6 +42,7 @@ while [ $# -gt 0 ]; do
     --touch) touch_file=$2; shift 2 ;;
     --runs) runs=$2; shift 2 ;;
     --label) label=$2; shift 2 ;;
+    --spikes) workspace_dir=spikes manifest_flag="--manifest-path $ROOT/spikes/Cargo.toml"; shift ;;
     -h | --help) usage; exit 0 ;;
     --) shift; extra="$*"; break ;;
     *) echo "unknown argument: $1 (see --help)" >&2; exit 2 ;;
@@ -46,7 +52,7 @@ done
 # Resolve a package name to its directory via the manifests (no jq dependency).
 package_dir() { # name
   local manifest
-  for manifest in $(find spikes crates -name Cargo.toml -not -path '*/target/*' 2>/dev/null | sort); do
+  for manifest in $(find "$workspace_dir" -mindepth 2 -name Cargo.toml -not -path '*/target/*' 2>/dev/null | sort); do
     if grep -Eq "^name[[:space:]]*=[[:space:]]*\"$1\"" "$manifest"; then
       dirname "$manifest"
       return 0
@@ -55,7 +61,7 @@ package_dir() { # name
   return 1
 }
 
-cargo_args="build $profile_flag"
+cargo_args="build $manifest_flag $profile_flag"
 if [ -n "$packages" ]; then
   for p in $packages; do cargo_args="$cargo_args -p $p"; done
   first_dir=$(package_dir $(echo $packages | awk '{print $1}')) || {
@@ -64,7 +70,7 @@ if [ -n "$packages" ]; then
   }
 else
   cargo_args="$cargo_args --workspace"
-  first_dir=$(dirname "$(find spikes crates -name Cargo.toml -not -path '*/target/*' 2>/dev/null | sort | head -1)")
+  first_dir=$(dirname "$(find "$workspace_dir" -mindepth 2 -name Cargo.toml -not -path '*/target/*' 2>/dev/null | sort | head -1)")
 fi
 cargo_args="$cargo_args $extra"
 if [ -z "$touch_file" ]; then

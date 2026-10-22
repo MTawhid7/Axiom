@@ -2,10 +2,10 @@
 
 A browser engine designed from first principles for personal use on macOS (Apple Silicon).
 
-The project is in **Phase Zero** (research, requirements and architecture). The only code is validation spikes in [`spikes/`](spikes/README.md). Production engine code is not yet authorized.
+Phase Zero (research, requirements and architecture) is complete, and **Milestone 1**, static documents, is under way: the owner authorized it on 2026-10-23 ([its plan](docs/milestone-1-plan.md)). The engine's crates live in `crates/`, in the workspace at the root; Phase Zero's validation spikes stay in [`spikes/`](spikes/README.md), a workspace of their own.
 
 - Start with [`docs/status.md`](docs/status.md) (current state and handoff log) and [`docs/README.md`](docs/README.md) (index).
-- Rules for using `unsafe`: [`docs/technology/language-evaluation.md` §15.3](docs/technology/language-evaluation.md#153-unsafe-code-policy-draft-finalized-with-the-architecture), enforced by `tools/check-unsafe-policy.sh`.
+- How the code is organized and written: the [crate architecture](docs/architecture/crates.md) and the [engineering standards](docs/technology/engineering-standards.md), whose ES11 is the `unsafe` policy, enforced by `tools/check-unsafe-policy.sh`.
 
 ## License
 

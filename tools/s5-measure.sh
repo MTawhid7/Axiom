@@ -78,7 +78,7 @@ if [ -z "$battery" ] && { ! printf '%s' "$power" | grep -q "AC Power" || [ "${lp
   exit 3
 fi
 
-cargo build -q --release -p s5-text -p s5-rust-text -p s5-image || {
+cargo build --manifest-path "$ROOT/spikes/Cargo.toml" -q --release -p s5-text -p s5-rust-text -p s5-image || {
   echo "the release build failed" >&2
   exit 1
 }

@@ -1,0 +1,149 @@
+# The spikes' workspace (Phase Zero's validation code, throwaway).
+#
+# S1 and S2 from Step 2b, S4 from Step 3, S3 from Step 4, S5 to S7 from Step 5,
+# S9 from Step 6, S10 and S15 from the architecture review's Round 1, and S16
+# from its Round 4. S8, Step 6's corpus census, is Python and outside the
+# workspace, as is S9's fuzz crate, which only cargo-fuzz builds.
+#
+# Since Milestone 1's second checkpoint (2026-10-23) the spikes are a workspace
+# of their own, with this lock, and the engine's workspace is the repository's
+# root (ADR-0022 D12; the crate architecture's CR15). They still build into the
+# repository's target/ (.cargo/config.toml), so their scripts' paths hold. Run
+# their cargo commands with `--manifest-path spikes/Cargo.toml`, or from here.
+# The lints, profiles and toolchain pin below are the ones they were written
+# under; the engine's stricter ones are in the root manifest.
+
+[workspace]
+resolver = "3"
+members = ["s1/*", "s2/*", "s3/*", "s4/*", "s5/*", "s6/*", "s7/*", "s9/decoder", "s9/race", "s10/gpu", "s15/probe", "s16/lifetime"]
+# S5's text corpus and font list are data, not a crate; S9's fuzz crate is its own workspace.
+exclude = ["s5/corpus", "s9/fuzz"]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.94"
+publish = false
+# Axiom's license, chosen by the owner at Step 5's Gate B (OQ-21): LICENSE-MIT,
+# LICENSE-APACHE.
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+s1-scenarios = { path = "s1/scenarios" }
+s1-a-gc = { path = "s1/a-gc" }
+s1-a-gc-derive = { path = "s1/a-gc-derive" }
+s1-a-dom = { path = "s1/a-dom" }
+s1-b-gc = { path = "s1/b-gc" }
+s1-b-dom = { path = "s1/b-dom" }
+s4-sandbox = { path = "s4/sandbox" }
+s3-gc = { path = "s3/gc" }
+s3-vm = { path = "s3/vm" }
+# External dependencies. Each needs a justification (charter §9.4):
+# - proc-macro2, quote, syn: required to implement #[derive(Trace)]. A derive is
+#   gc-arena's authentic design (Pattern A); hand-parsing token streams would be
+#   fragile. These are replaceable implementation details of a build-time macro
+#   and never linked into the product. Build cost is measured in CP3.
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "2", default-features = false, features = ["clone-impls", "derive", "parsing", "printing", "proc-macro"] }
+# - objc2 and its framework crates: the maintained Rust bindings to AppKit,
+#   Metal, QuartzCore, CoreText, CoreGraphics and CoreFoundation. Spike S2
+#   evaluates exactly these (evaluation §9, §13). Their default features
+#   compile every framework header, so defaults are off here and each member
+#   enables only the headers it uses. Build cost is measured in CP8.
+objc2 = "0.6.5"
+objc2-foundation = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-app-kit = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-quartz-core = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-metal = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-core-text = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-core-graphics = { version = "0.3.2", default-features = false, features = ["std"] }
+objc2-core-foundation = { version = "0.3.2", default-features = false, features = ["std"] }
+# - objc2-image-io: ImageIO, from the same objc2 family, for S5-Q5 (AVIF under the
+#   renderer's profile, IM3). Only the CGImageSource header is enabled.
+objc2-image-io = { version = "0.3.2", default-features = false, features = ["std"] }
+# - objc2-io-surface: IOSurface, from the same objc2 family (already in the register
+#   with it), for S6's tiles: IOSurfaces drawn by Metal and shown as CoreAnimation
+#   layer contents (GR2), and their colour tagging (GR6).
+objc2-io-surface = { version = "0.3.2", default-features = false, features = ["std"] }
+# Spike S7's candidates, authorized at Step 5's Gate B (2026-10-18) with "read-only
+# outbound network requests to public test hosts"; each is in the register (CP6).
+# - rustls: TLS 1.2 and 1.3 as a state machine (NW1, NW6), without its logging, on the
+#   aws-lc-rs provider (NW6), whose C and assembly the build compiles (S7 measures it).
+#   `prefer-post-quantum`, a default feature, offers X25519MLKEM768 first: without it,
+#   servers that prefer it answer with a HelloRetryRequest, a round trip more (S7).
+rustls = { version = "0.23.46", default-features = false, features = ["std", "tls12", "aws_lc_rs", "prefer-post-quantum"] }
+# - quinn-proto: QUIC as a state machine (NW5), over rustls and the same provider.
+quinn-proto = { version = "0.11.19", default-features = false, features = ["rustls-aws-lc-rs"] }
+# - objc2-security: Security's trust evaluation (NW6), from the objc2 family.
+objc2-security = { version = "0.3.2", default-features = false, features = ["std"] }
+# - block2, dispatch2: blocks and dispatch queues for Network framework's C API, the
+#   TLS stack S7-Q2 compares (no objc2 crate binds it); both from the objc2 family.
+block2 = "0.6.2"
+dispatch2 = { version = "0.3.1", default-features = false, features = ["std", "block2"] }
+# - bytes: already in the tree through quinn-proto, whose API takes and returns
+#   datagrams and close reasons as bytes's types.
+bytes = { version = "1.12.1", default-features = false, features = ["std"] }
+s5-rust-text = { path = "s5/rust-text" }
+# Spike S5's candidates, authorized at Step 5's Gate B (2026-10-18) "including the
+# listed candidate crates". Each is a candidate for the engine under the dependency
+# policy (ADR-0010), so the spike also records its tree, `unsafe` and published grade
+# in docs/technology/dependency-register.md; spikes themselves are exempt (DP23).
+# - harfrust: shaping (TX9), a Rust port of HarfBuzz that forbids `unsafe`; S5-Q1
+#   compares it with CoreText.
+harfrust = { version = "0.14.0", default-features = false, features = ["std"] }
+# - read-fonts, skrifa: font parsing and glyph outlines (TX8, TX12). Both forbid
+#   `unsafe`. skrifa's default "autohint_shaping" is left off: S5 compares unhinted
+#   outlines, and light-hinted ones only as a variant, for which the autohinter's
+#   nominal mode suffices.
+read-fonts = { version = "0.45.1", default-features = false, features = ["std"] }
+skrifa = { version = "0.48.0", default-features = false, features = ["std"] }
+# - brotli-decompressor: WOFF2's Brotli stream (TX7). Without its `unsafe` and `ffi-api`
+#   features it forbids `unsafe`, and so do its allocator crates.
+brotli-decompressor = { version = "6.1.0", default-features = false, features = ["std"] }
+# - miniz_oxide: WOFF 1.0's zlib streams (TX7). It forbids `unsafe`, and png's tree
+#   already contains it.
+miniz_oxide = "0.9.1"
+# - zeno, vello_cpu: the two Rust rasterizers S5-Q2 compares with CoreText (TX12).
+#   vello_cpu is also S6-Q4's CPU path candidate.
+zeno = { version = "0.3.3", default-features = false, features = ["std", "eval"] }
+vello_cpu = { version = "0.3.0", default-features = false, features = ["std", "u8_pipeline"] }
+# - png, jpeg-decoder, gif, image-webp: the safe image decoders S5-Q5 compares with
+#   ImageIO (IM2). jpeg-decoder's `platform_independent` mode forbids `unsafe` and drops
+#   rayon. png also decodes sbix colour glyphs on the Rust path, and writes S5's sheets.
+png = "0.18.1"
+jpeg-decoder = { version = "0.3.2", default-features = false, features = ["platform_independent"] }
+gif = { version = "0.14.2", default-features = false, features = ["std"] }
+image-webp = "0.2.4"
+# - icu_segmenter, icu_properties: ICU4X (TX1, TX16). S5-Q4 measures what their
+#   compiled data adds; the workload's font fallback also walks grapheme clusters.
+icu_segmenter = "2.3.0"
+icu_properties = "2.3.0"
+
+[workspace.lints.rust]
+# `unsafe_code` is set per crate root, with #![forbid] by default and #![deny] for
+# allowlisted crates (see tools/unsafe-policy.txt and evaluation §15.3).
+unsafe_op_in_unsafe_fn = "deny"
+missing_debug_implementations = "warn"
+unreachable_pub = "warn"
+unused_qualifications = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+# Unsafe hygiene (evaluation §15.3, rule 3).
+undocumented_unsafe_blocks = "deny"
+multiple_unsafe_ops_per_block = "deny"
+missing_safety_doc = "deny"
+unnecessary_safety_comment = "warn"
+unnecessary_safety_doc = "warn"
+# Pedantic lints that add noise without value for this codebase.
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+
+# Release with line tables, so `samply` can attribute inlined frames.
+[profile.profiling]
+inherits = "release"
+debug = "line-tables-only"

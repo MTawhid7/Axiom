@@ -44,7 +44,8 @@ done
 
 build() { # description, cargo arguments...
   local what=$1; shift
-  cargo "$@" >/dev/null 2>&1 || { echo "build failed ($what): cargo $*" >&2; exit 1; }
+  # The spikes are their own workspace since M1-CP2 (spikes/Cargo.toml).
+  cargo "$@" --manifest-path "$ROOT/spikes/Cargo.toml" >/dev/null 2>&1 || { echo "build failed ($what): cargo $*" >&2; exit 1; }
 }
 build stable build --release -p s3-bench --bin s3-probe
 build count build --release -p s3-bench --features count --bin s3-count

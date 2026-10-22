@@ -155,6 +155,6 @@ AccessKit was considered and not adopted, by design rather than grade: its macOS
 
 ## 5. Spikes only (exempt, DP23)
 
-The rest of `Cargo.lock`, justified in the workspace manifest:
+**The spikes' lock is `spikes/Cargo.lock`** since M1-CP2 (2026-10-23), when the spikes became a workspace of their own and the engine's lock, `Cargo.lock` at the root, began holding only the engine's dependencies (ADR-0022 D12; the crate architecture's CR15). The rest of the spikes' lock, justified in their workspace manifest (`spikes/Cargo.toml`):
 - `syn`, `quote`, `proc-macro2` and `unicode-ident`, for S1's `#[derive(Trace)]` in Pattern A. Pattern B, the pattern ADR-0003 chose, needs no procedural macro.
 - `libc` 0.2.191. It appears in the lock without being built on this platform: `cargo tree -i libc` finds no path to it (observed 2026-10-18).

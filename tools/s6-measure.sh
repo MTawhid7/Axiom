@@ -57,7 +57,7 @@ if [ -z "$battery" ] && { ! printf '%s' "$power" | grep -q "AC Power" || [ "${lp
   exit 3
 fi
 
-cargo build -q --release -p s6-compositor || { echo "the release build failed" >&2; exit 1; }
+cargo build --manifest-path "$ROOT/spikes/Cargo.toml" -q --release -p s6-compositor || { echo "the release build failed" >&2; exit 1; }
 app=target/release/s6-compositor
 
 out="target/s6-results/$(date +%Y%m%d-%H%M%S)"

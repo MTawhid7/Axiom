@@ -63,6 +63,8 @@ check_tree() {
 
   local inventory=""
   for manifest in $manifests; do
+    # A workspace's own manifest (spikes/Cargo.toml) declares no package.
+    grep -q '^\[package\]' "$manifest" || continue
     crate_dir=$(dirname "$manifest")
     rel=${crate_dir#"$root"/}
     allowed=$(allow_entry "$policy" "$rel")
@@ -149,6 +151,8 @@ self_test_in() { # empty-scratch-dir
   mk spikes/good tests/it.rs '#![forbid(unsafe_code)]'
   mk spikes/allowed src/lib.rs '#![deny(unsafe_code)]'
   mk spikes/allowed src/raw/mod.rs '#![allow(unsafe_code)]'
+  # A workspace manifest above the crates is not a crate (M1-CP2's split).
+  printf '[workspace]\nmembers = ["good", "allowed"]\n' >"$tmp/spikes/Cargo.toml"
   cat >"$tmp/policy.txt" <<'EOF'
 allow spikes/allowed src/raw/
 allow spikes/nodeny src/raw/

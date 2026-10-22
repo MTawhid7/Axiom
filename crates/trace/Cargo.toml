@@ -1,0 +1,11 @@
+[package]
+name = "trace"
+description = "Axiom's recorder: spans, events, metrics and logs in per-thread single-writer buffers, and the record format (docs/architecture/observability.md, OB5-OB9). Foundation layer, every process, no unsafe."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true

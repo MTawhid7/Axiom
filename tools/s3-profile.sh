@@ -48,7 +48,7 @@ if [ -z "$cases" ]; then
 fi
 
 command -v samply >/dev/null || { echo "samply is not installed (cargo install --locked samply)" >&2; exit 1; }
-cargo build --profile profiling -p s3-bench --bin s3-probe >/dev/null 2>&1 || {
+cargo build --manifest-path "$ROOT/spikes/Cargo.toml" --profile profiling -p s3-bench --bin s3-probe >/dev/null 2>&1 || {
   echo "build failed: cargo build --profile profiling -p s3-bench --bin s3-probe" >&2
   exit 1
 }
