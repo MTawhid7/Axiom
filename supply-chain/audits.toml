@@ -27,11 +27,46 @@ implies = "ub-risk-4"
 [criteria.ub-risk-4]
 description-url = "https://github.com/google/rust-crate-audits/blob/main/auditing_standards.md#ub-risk-4"
 
+[[audits.arrayvec]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-2", "does-not-implement-crypto"]
+delta = "0.7.6 -> 0.7.8"
+notes = """
+Axiom's M1-CP2 audit, docs/research/vello-cpu-audit.md §4.2: the 125-line diff read
+with its context. A safe spare_capacity_mut, lifetime elision, a 16-bit LenUint, and a
+mem::forget in extend's zero-sized branch that removes a double drop. Carries Google's
+ub-risk-2 at 0.7.6 forward.
+"""
+
+[[audits.bytemuck]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-2", "does-not-implement-crypto"]
+delta = "1.22.0 -> 1.25.2"
+notes = """
+Axiom's M1-CP2 audit, docs/research/vello-cpu-audit.md §4.2: the diff read ignoring
+whitespace (344 lines; 1.22.0's CRLF endings inflate it to 8,216). New unsafe impls:
+NoUninit for arrays of char, bool and NonZero integers; AnyBitPattern for
+[MaybeUninit<T>; N]; ZeroableInOption for function pointers of every ABI; the nightly
+Simd impls without LaneCount, whose packed layout was checked on nightly-2026-10-21.
+All hold. Carries Google's ub-risk-2 chain through 1.22.0 forward.
+"""
+
 [[audits.cfg-if]]
 who = "Claude (Opus 5.5), for Axiom's owner"
 criteria = ["ub-risk-0", "does-not-implement-crypto"]
 version = "1.0.5"
 notes = "No unsafe code: a macro_rules! crate (docs/research/encoding-rs-audit.md §6.4, finding 9)."
+
+[[audits.color]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-1", "does-not-implement-crypto"]
+version = "0.3.3"
+notes = """
+Axiom's M1-CP2 audit, docs/research/vello-cpu-audit.md §4.4: the crate's only unsafe is
+22 bytemuck impls, each commented and checked against its type: repr(transparent) color
+wrappers, repr(C) Rgba8 types, and repr(u8) enums whose discriminants run from 0
+without a gap.
+"""
 
 [[audits.encoding_rs]]
 who = "Claude (Opus 5.5), for Axiom's owner"
@@ -46,11 +81,108 @@ asm! barrier in minimally_init, reached only from six String and Vec convenience
 which Axiom's TX3 interface doesn't call. The owner approves with the dependency.
 """
 
+[[audits.euclid]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = "does-not-implement-crypto"
+version = "0.22.14"
+notes = "A geometry library: points, vectors, sizes, rectangles and transforms; no cryptography."
+
+[[audits.euclid]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = "ub-risk-1"
+delta = "0.22.11 -> 0.22.14"
+notes = """
+Axiom's M1-CP2 audit, docs/research/vello-cpu-audit.md §4.2: the diff's only new unsafe
+is Zeroable and Pod for the repr(C) ScaleOffset2D (four T fields and a PhantomData),
+under the bytemuck feature, the pattern Google reviewed at 0.22.11. Holds.
+"""
+
+[[audits.fearless_simd]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-2", "does-not-implement-crypto"]
+version = "0.7.0"
+notes = """
+Axiom's M1-CP2 audit, docs/research/vello-cpu-audit.md §4.5: the aarch64 NEON build
+with feature std read in full (27 blocks, the SimdPod trait and its 42 impls). The x86
+and WebAssembly backends were not read. The hand-written transmute machinery is
+documented; the generated NEON blocks are uncommented but load and store exactly the
+fixed-size arrays they are given.
+"""
+
+[[audits.foldhash]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-2", "does-not-implement-crypto"]
+version = "0.2.0"
+notes = """
+Axiom's M1-CP2 audit, docs/research/vello-cpu-audit.md §4.3: all ten sites. The global
+seed's spin lock is unchanged from the 0.1.x that Google graded ub-risk-2; the new
+unaligned loads in hash_bytes_long are each bounded by a length check. Not
+cryptographic, as its README says.
+"""
+
+[[audits.guillotiere]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-0", "does-not-implement-crypto"]
+version = "0.7.0"
+notes = "No unsafe anywhere in its sources (docs/research/vello-cpu-audit.md §4.1); a texture-atlas allocator."
+
+[[audits.hashbrown]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-2", "does-not-implement-crypto"]
+version = "0.17.1"
+notes = """
+Axiom's M1-CP2 audit, docs/research/vello-cpu-audit.md §4.6: every site compiled on
+aarch64 with feature default-hasher (224 blocks, 102 other sites), read with its
+invariants; no defect found. Six probes of the paths vello_cpu reaches and of the
+panic paths pass Miri under Stacked Borrows and Tree Borrows, and AddressSanitizer on
+the NEON group that Miri can't reach. Internal safe functions with unstated
+preconditions (ctrl_slice, Bucket::as_ptr) keep it from ub-risk-1.
+"""
+
+[[audits.kurbo]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-0", "does-not-implement-crypto"]
+version = "0.13.1"
+notes = "No unsafe anywhere in its sources (docs/research/vello-cpu-audit.md §4.1); 2D curve geometry."
+
+[[audits.linebender_resource_handle]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-0", "does-not-implement-crypto"]
+version = "0.1.1"
+notes = "No unsafe in its sources but a doc comment (docs/research/vello-cpu-audit.md §4.1); shared resource handles."
+
+[[audits.log]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-2", "does-not-implement-crypto"]
+version = "0.4.34"
+notes = """
+Axiom's M1-CP2 audit, docs/research/vello-cpu-audit.md §4.3: all five sites, with no
+features. The racy setters document their contracts; the level transmute and the
+logger read are explained; the logger write is sound under its compare-and-exchange
+but uncommented.
+"""
+
 [[audits.multiversion_no_op]]
 who = "Claude (Opus 5.5), for Axiom's owner"
 criteria = ["ub-risk-0", "does-not-implement-crypto"]
 version = "1.0.0"
 notes = "A 43-line attribute macro that returns the annotated function unchanged; no unsafe in it or in what it emits."
+
+[[audits.peniko]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-1", "does-not-implement-crypto"]
+version = "0.6.1"
+notes = """
+Axiom's M1-CP2 audit, docs/research/vello-cpu-audit.md §4.4: the crate's only unsafe is
+28 bytemuck impls on seven repr(u8) fieldless enums, each commented; every enum's
+discriminants run from 0 to its last variant without a gap.
+"""
+
+[[audits.polycool]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-0", "does-not-implement-crypto"]
+version = "0.4.0"
+notes = "No unsafe anywhere in its sources (docs/research/vello-cpu-audit.md §4.1); polynomial root finding."
 
 [[audits.simdutf8]]
 who = "Claude (Opus 5.5), for Axiom's owner"
@@ -77,3 +209,25 @@ on an inline vector drops items through a pointer that an &mut self call invalid
 safe-to-deploy is decided with the crate's adoption at M1-CP4, with DP8's fuzz target.
 The owner approves this audit with the dependency (DP15).
 """
+
+[[audits.thiserror]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-0", "does-not-implement-crypto"]
+version = "2.0.21"
+notes = """
+No unsafe anywhere in its sources (docs/research/vello-cpu-audit.md §4.1). Its build
+script, which compiles a probe with rustc, is audited for safe-to-run under DP12 when
+the crate enters the lock.
+"""
+
+[[audits.vello_common]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-0", "does-not-implement-crypto"]
+version = "0.3.0"
+notes = "forbid(unsafe_code), and no unsafe anywhere in its sources (docs/research/vello-cpu-audit.md §4.1)."
+
+[[audits.vello_cpu]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-0", "does-not-implement-crypto"]
+version = "0.3.0"
+notes = "forbid(unsafe_code), and no unsafe anywhere in its sources (docs/research/vello-cpu-audit.md §4.1)."
