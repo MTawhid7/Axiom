@@ -41,13 +41,14 @@
 
 ## Next steps: M1-CP3, the platform, the processes and IPC
 
-**M1-CP2 is done** (2026-10-23; [the plan](milestone-1-plan.md) §9; Session 24 below). **Next: M1-CP3** (the plan's §4). Its interface notes come first, for the owner's approval before any of its code (ES27):
+**M1-CP2 is done** (2026-10-23; [the plan](milestone-1-plan.md) §9; Session 24 below). **M1-CP3 has begun** (the plan's §4): its four interface notes are written and **proposed,** for the owner's approval before any of its code (ES27; [the notes](architecture/interfaces/README.md)):
 - the IDL's syntax and generated API;
 - `ipc` and `Untrusted<T>`;
 - the event loop's tasks and task ages;
 - `trace`'s API, with the diagnostics region's format and protocol.
 
-**Due from the owner at the next report:**
+**Due from the owner at this gate:**
+- approving the four interface notes, and two choices inside them: the new foundation crate `ring`, which keeps ES12's "implemented once" for the ring `trace` and `ipc` share, with a change to ES12's wording; and `platform-mach` mapping the browser's recorder file, with `diagnostics` allowed to depend on it;
 - approving the three audits' grades (DP15);
 - confirming the reading of PF19's "active session";
 - an upstream report of `smallvec`'s defect, which is public;
@@ -100,6 +101,13 @@ Then: "Please proceed immediately with Checkpoint M1-CP2: the engineering founda
   - A commit went in with the unsafe-policy check failing, its status hidden by a pipe. It was fixed and amended before any push.
   - The first census used `-W unsafe_code`, which a crate's own `allow` lowers. `--force-warn` found `peniko`'s and `color`'s 50 impls, and left the earlier counts unchanged.
 - **Outside the repository:** the audits' scratch builds read crates from cargo's registry cache, and their probes and downloads stayed in the session's scratchpad. No crash reports were left.
+
+**M1-CP3 begun: its interface notes,** proposed for the owner's gate ([the notes](architecture/interfaces/README.md); commit `docs(m1-cp3)`):
+- **[The IDL and the generated API](architecture/interfaces/protocol-idl.md):** the Axiom IDL's files, types, declarations and static rules; the wire format beyond IP9 (the interface and message in `msgh_id`, handle slots by a depth-first walk, bodies of a page or more out of line); the generated modules, dispatch traits and fuzzing entry points; IP18's build identifier (the IDL's hash, the bundle's revision, the flavor); the draft of launch and control.
+- **[`ipc`'s channels and `Untrusted<T>`](architecture/interfaces/ipc-channels.md):** ends as capabilities; received messages that own every handle; zero-timeout sends with PF21's backlog and the returned message kept whole; the rendezvous with one hello per child; `Untrusted<T>`, validators and typed checks; memory channels that model Mach; memory entries, with read-only mappings limited to relaxed loads, as Rust's documentation requires of read-only memory.
+- **[`event-loop`'s tasks and task ages](architecture/interfaces/event-loop-tasks.md):** the clock and wait source; thread loops with one `Handler`; an HTML event loop generic over each assembly's task enum; task ages, one store per task; the watchdog resting when every watched thread is idle and restarting on work or on one `wake`, with the fences that stop a notice being lost; the interrupt flag.
+- **[`trace`'s API and the diagnostics region](architecture/interfaces/trace-and-diagnostics-region.md):** names and metrics in one generated table; typed call sites whose logs take static text, so no content reaches a record; per-thread metric blocks instead of metric records; the region as two memory entries; the protocol from `welcome` to death; the browser's file-backed recorder.
+- **Two choices for the owner:** a foundation crate `ring`, so `trace` and `ipc` share the one ring ES12 allows; and `platform-mach` mapping the recorder's file, for `diagnostics`.
 
 ### 2026-10-22 — Session 23 (Milestone 1's first checkpoint: code architecture, engineering standards, observability; the plan revised)
 
