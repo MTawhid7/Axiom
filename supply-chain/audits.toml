@@ -27,6 +27,43 @@ implies = "ub-risk-4"
 [criteria.ub-risk-4]
 description-url = "https://github.com/google/rust-crate-audits/blob/main/auditing_standards.md#ub-risk-4"
 
+[[audits.cfg-if]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-0", "does-not-implement-crypto"]
+version = "1.0.5"
+notes = "No unsafe code: a macro_rules! crate (docs/research/encoding-rs-audit.md §6.4, finding 9)."
+
+[[audits.encoding_rs]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-3", "does-not-implement-crypto"]
+version = "0.8.42"
+notes = """
+Axiom's audits, docs/research/encoding-rs-audit.md: the grade at Round 1 (2026-10-21),
+and at M1-CP2 (2026-10-23) every compiled unsafe block, with feature alloc on
+aarch64-apple-darwin, named with its invariant (all hold); a differential test of
+four million buffers against std. ub-risk-3 for sparse safety documentation and the
+asm! barrier in minimally_init, reached only from six String and Vec conveniences,
+which Axiom's TX3 interface doesn't call. The owner approves with the dependency.
+"""
+
+[[audits.multiversion_no_op]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-0", "does-not-implement-crypto"]
+version = "1.0.0"
+notes = "A 43-line attribute macro that returns the annotated function unchanged; no unsafe in it or in what it emits."
+
+[[audits.simdutf8]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-2", "does-not-implement-crypto"]
+version = "0.1.5"
+notes = """
+Axiom's M1-CP2 audit, docs/research/encoding-rs-audit.md §6: the aarch64 NEON path
+read in full, features aarch64_neon and public_imp. The public unsafe functions
+document their one precondition, the CPU feature; internal preconditions (64-byte
+chunks) are informal and upheld by every caller; a differential test of four
+million buffers agrees with std::str::from_utf8.
+"""
+
 [[audits.smallvec]]
 who = "Claude (Opus 5.5), for Axiom's owner"
 criteria = ["ub-risk-3", "does-not-implement-crypto"]
