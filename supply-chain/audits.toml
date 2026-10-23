@@ -27,4 +27,16 @@ implies = "ub-risk-4"
 [criteria.ub-risk-4]
 description-url = "https://github.com/google/rust-crate-audits/blob/main/auditing_standards.md#ub-risk-4"
 
-[audits]
+[[audits.smallvec]]
+who = "Claude (Opus 5.5), for Axiom's owner"
+criteria = ["ub-risk-3", "does-not-implement-crypto"]
+version = "1.16.3"
+notes = """
+Axiom's M1-CP2 audit, docs/research/smallvec-audit.md: every compiled unsafe site
+read, with features const_generics and const_new on aarch64-apple-darwin, and Miri
+probes under Stacked Borrows and Tree Borrows. insert_many with a panicking iterator
+on an inline vector drops items through a pointer that an &mut self call invalidated
+(lib.rs line 1598), which Miri reports under both models; a one-line fix passes.
+safe-to-deploy is decided with the crate's adoption at M1-CP4, with DP8's fuzz target.
+The owner approves this audit with the dependency (DP15).
+"""

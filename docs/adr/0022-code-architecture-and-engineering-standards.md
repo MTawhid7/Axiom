@@ -16,6 +16,7 @@
 | 2026-10-22 | **Proposed** at M1-CP1, with the crate architecture and the engineering standards |
 | 2026-10-23 | **Accepted** by the owner: "ADR-0022 (Code Architecture and Engineering Standards): Accepted as proposed (Decisions D1 through D15). The 7-layer architecture, facility-split platform layer, separate spikes workspace, and check-dependencies script are approved." On D9's limits: "File & Function Size Limits (ES1): Approved. Enforce 600-line warning / 1,000-line failure for files, and 100-line failure for functions. We will review empirical distribution at M1-CP15." |
 | 2026-10-23 | **The owner's conditional approval** on the crate architecture's open question 1: "smallvec & IDNA: If smallvec is graded ub-risk-3 during CP2, approve moving the IDNA domain lookup into the network process as an amendment to NW2." It takes effect only if M1-CP2's grade is `ub-risk-3` (CLAUDE.md: a conditional approval counts once its condition is met), and the evidence is recorded with it |
+| 2026-10-23 | **The condition is met** at M1-CP2: the [audit of `smallvec` 1.16.3](../research/smallvec-audit.md) grades it `ub-risk-3`, with undefined behaviour in `insert_many` that Miri reports under Stacked Borrows and Tree Borrows. NW2 is amended as the owner approved ([ADR-0013](0013-networking-storage-and-workers.md)'s history); the crate architecture gains `url-idna`, `sandboxed`, which `axiom`'s closure excludes (CR4) |
 
 ## Question
 

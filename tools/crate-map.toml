@@ -86,6 +86,18 @@ unsafe = false
 panic = "panic-free"
 milestone = "M1"
 
+# NW2, as amended at M1-CP2: full UTS #46 processing needs ICU4X's normalizer,
+# which depends on smallvec, graded ub-risk-3 (docs/research/smallvec-audit.md),
+# so it runs only in the helpers; the browser parses every URL as canonical ASCII.
+[crate.url-idna]
+layer = 0
+processes = ["renderer", "network"]
+group = "sandboxed"
+deps = ["url", "trace"]
+unsafe = false
+panic = "checked-arithmetic"
+milestone = "M1"
+
 # TX3: encoding_rs is `ub-risk-3`, so this crate, and everything that depends
 # on it, runs only in sandboxed helpers (DP8).
 [crate.encoding]
@@ -455,9 +467,10 @@ unsafe = false
 panic = "ordinary"
 milestone = "M1"
 # AC4, SC2: no parser or decoder of web content; TX3: UTF-8 only, no encodings;
-# DP10: no TLS stack; and no renderer or network assembly.
-forbid = ["html", "xml", "css", "style", "text", "image", "layout", "paint", "document", "gc", "encoding", "http",
-          "net", "platform-text", "platform-net", "renderer", "network"]
+# DP8: no ub-risk-3 code, so no url-idna (NW2 as amended); DP10: no TLS stack;
+# and no renderer or network assembly.
+forbid = ["html", "xml", "css", "style", "text", "image", "layout", "paint", "document", "gc", "encoding", "url-idna",
+          "http", "net", "platform-text", "platform-net", "renderer", "network"]
 
 [crate.axiom-renderer]
 layer = 6

@@ -103,7 +103,7 @@ Grades are Google's published audits, unless stated otherwise (google/supply-cha
 | **Rasterization** | **CoreText** (Chromium, Firefox); **a Rust rasterizer** over `skrifa`'s outlines: candidates such as `zeno`, `vello_cpu` and `tiny-skia` [A2] | **Spike S5 decides** for system fonts (TX12). Web fonts use the Rust path (TX7) |
 | **Hyphenation** | CoreFoundation's dictionaries (WebKit [W2]); Liang's patterns in Rust, as Firefox's `mapped_hyph` does | **Open,** staged (TX18) |
 
-**A dependency risk: `smallvec`.** HarfRust and ICU4X's segmenter both require it [A2]. Google graded `smallvec` 1.11.0 at `ub-risk-3`. Later versions carry only `safe-to-deploy` audits, from Google, Mozilla and the Bytecode Alliance, with no soundness grade [A1]. The newest version is 1.16.3, and 2.0 is in beta [A2]. So Axiom grades the version it adopts, at the milestone that adds these crates. If that version is still `ub-risk-3`, DP8 bars it, and the fix is upstream: a better-graded `smallvec`, or none. **As amended in Round 4** (RV4-02): a `ub-risk-3` grade admits it in the renderer under DP8's conditions, Axiom's audit of each block and a fuzz target, so the text stack no longer waits on upstream. 1.16.3 compiles 43 `unsafe` blocks, 11 with a safety comment, with the features the workspace enables (observed, `tools/unsafe-census.py`, 2026-10-22).
+**A dependency risk: `smallvec`.** HarfRust and ICU4X's segmenter both require it [A2]. Google graded `smallvec` 1.11.0 at `ub-risk-3`. Later versions carry only `safe-to-deploy` audits, from Google, Mozilla and the Bytecode Alliance, with no soundness grade [A1]. The newest version is 1.16.3, and 2.0 is in beta [A2]. So Axiom grades the version it adopts, at the milestone that adds these crates. If that version is still `ub-risk-3`, DP8 bars it, and the fix is upstream: a better-graded `smallvec`, or none. **As amended in Round 4** (RV4-02): a `ub-risk-3` grade admits it in the renderer under DP8's conditions, Axiom's audit of each block and a fuzz target, so the text stack no longer waits on upstream. 1.16.3 compiles 43 `unsafe` blocks, 11 with a safety comment, with the features the workspace enables (observed, `tools/unsafe-census.py`, 2026-10-22). **Graded at M1-CP2** (2026-10-23; [audit](../research/smallvec-audit.md)): `ub-risk-3`, admitted in the renderer under DP8's conditions, so HarfRust and ICU4X's segmenter are `sandboxed` with it; the text stack's crates are renderer crates already.
 
 ## 5. Design
 
@@ -182,7 +182,7 @@ Added by the owner's disposition of RV1-10 (2026-10-21): "Establish explicit rul
 ## 7. Security
 
 - **Rule of 2.** Untrusted text and web fonts are processed only in the renderer, a sandboxed process, and only by safe Rust (TX7–TX9). CoreText, which is C, sees Apple's own system fonts only (TX6, TX12). The browser never parses a font (AC4, TX14–TX15).
-- **`unsafe`.** Axiom's own text code has none: encodings, WOFF containers and validation are parsers under rule 5. CoreText's calls live in `platform-text`, linked only by renderers (DP21; (the crate architecture's CR6, ADR-0022)). The reused crates are graded under DP8–DP10. Every tree named here is `ub-risk-2` or better, except `smallvec`'s grade (§4) and `encoding_rs`, which is `ub-risk-3` and admitted in the sandboxed helpers under DP8's conditions (Round 4, RV4-02).
+- **`unsafe`.** Axiom's own text code has none: encodings, WOFF containers and validation are parsers under rule 5. CoreText's calls live in `platform-text`, linked only by renderers (DP21; (the crate architecture's CR6, ADR-0022)). The reused crates are graded under DP8–DP10. Every tree named here is `ub-risk-2` or better, except `smallvec` (§4) and `encoding_rs`, each `ub-risk-3` and admitted in the sandboxed helpers under DP8's conditions (Round 4, RV4-02; `smallvec`'s grade from M1-CP2's audit).
 - **Resource exhaustion.** Web fonts are bounded in size, glyph count and table sizes (TX7). Shaping and rasterization time count against the renderer's hang deadlines (EL §4.7).
 
 ## 8. Staging and the complete model
@@ -213,7 +213,7 @@ Added by the owner's disposition of RV1-10 (2026-10-21): "Establish explicit rul
 | # | Question | Where it is settled |
 |---|---|---|
 | 1 | CoreText or a Rust rasterizer for system fonts; whether to emulate font smoothing | Spike S5 (TX12, TX13). **Settled** at Gate C (2026-10-20): CoreText for system fonts, after the owner compared S5's sheets; smoothing is emulated for web fonts at the text milestone (TX13) |
-| 2 | The grade of the `smallvec` version adopted (§4) | M1's plan (MA12); a `ub-risk-3` grade admits it under DP8 as amended in Round 4 |
+| 2 | The grade of the `smallvec` version adopted (§4) | **Answered at M1-CP2** (2026-10-23): 1.16.3 is `ub-risk-3` ([audit](../research/smallvec-audit.md)), admitted under DP8's conditions |
 | 3 | Whether to make macOS's on-demand font assets readable from renderers, and with which reviewed rule | The first text milestone, by S4's method |
 | 4 | The hyphenation backend (TX18) | The milestone that implements `hyphens: auto` |
 | 5 | How the browser processes IDNA within DP9 (§6) | **Answered** at CP6 by NW2's IDNA modes, which say so (Round 4, RV4-14) |
