@@ -19,7 +19,10 @@ site. Files under src/ only, one level deep, which suits most crates; check
 the crate's module tree before trusting the totals.
 
 A census guides a review; it doesn't replace one. The dependency policy's DP8
-grades are Google's, and grading needs each unsafe line read.
+grades are Google's, and grading needs each unsafe line read. For an audit's
+counts, prefer the compiler's census, tools/unsafe-sites.py, which follows
+every cfg and macro; this tool needs no build. A cfg it can't evaluate is
+reported and counted as compiled.
 
 Used for the architecture review's RV1-08 (`encoding_rs`, 2026-10-21). Crate
 sources are untrusted data: run with -I, and unpack each crate into its own
@@ -103,7 +106,12 @@ class Config:
         }
 
     def evaluate(self, expr):
-        value, _ = self._parse(expr + " ", 0)
+        try:
+            value, _ = self._parse(expr + " ", 0)
+        except (AttributeError, IndexError):
+            # Such as `cfg($($meta:meta),*)` inside a macro's definition: count it.
+            print(f"unsafe-census: can't evaluate cfg({expr.strip()}); counted as compiled", file=sys.stderr)
+            return True
         return value
 
     def _parse(self, s, i):

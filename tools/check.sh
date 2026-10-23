@@ -10,7 +10,8 @@
 #   the spikes' workspace:   the same three, while the spikes are kept
 #   the repository's tools:  check-unsafe-policy.sh, check-doc-links.py,
 #                            check-dependencies.py (CR16), check-file-size.py
-#                            (ES1), each checker's self-test, the TODOs' form
+#                            (ES1), each checker's self-test and the audit
+#                            census's (unsafe-sites.py), the TODOs' form
 #                            (ES17), and generated code fresh (ES19) once
 #                            codegen exists
 #   first-tier costs run optimized: trace's recording (OB25, OB27)
@@ -162,7 +163,8 @@ step trace-cost cargo test --locked --release -p trace --test cost
 step todo-form todo_form
 step codegen codegen_check
 step self-tests sh -c 'tools/check-unsafe-policy.sh --self-test &&
-  python3 -I tools/check-dependencies.py --self-test && python3 -I tools/check-file-size.py --self-test'
+  python3 -I tools/check-dependencies.py --self-test && python3 -I tools/check-file-size.py --self-test &&
+  python3 -I tools/unsafe-sites.py --self-test'
 
 if [ "$tier" = checkpoint ]; then
   step doc env RUSTDOCFLAGS="-D warnings" cargo doc --locked --workspace --no-deps
